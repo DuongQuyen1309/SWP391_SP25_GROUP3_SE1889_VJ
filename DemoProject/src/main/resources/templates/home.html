@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Homepage</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <!-- JavaScript -->
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const content = document.getElementById('content');
+
+            if (sidebar.classList.contains('hide')) {
+                sidebar.classList.remove('hide');
+                content.classList.remove('full-width');
+                content.classList.add('shift');
+                localStorage.setItem('sidebarState', 'open');
+            } else {
+                sidebar.classList.add('hide');
+                content.classList.remove('shift');
+                content.classList.add('full-width');
+                localStorage.setItem('sidebarState', 'closed');
+            }
+        }
+
+        function toggleSubmenu(menuId) {
+            const menu = document.getElementById(menuId);
+            const isVisible = menu.style.display === 'block';
+
+            menu.style.display = isVisible ? 'none' : 'block';
+
+            // Lưu trạng thái submenu vào Local Storage
+            localStorage.setItem(menuId, isVisible ? 'hidden' : 'visible');
+        }
+
+        // ✅ Giữ trạng thái sidebar & submenu khi tải lại trang
+        document.addEventListener("DOMContentLoaded", function () {
+            // Giữ trạng thái sidebar
+            if (localStorage.getItem('sidebarState') === 'closed') {
+                document.getElementById('sidebar').classList.add('hide');
+                document.getElementById('content').classList.add('full-width');
+            }
+
+            // Giữ trạng thái submenu
+            ['registerMenu', 'listMenu'].forEach(menuId => {
+                if (localStorage.getItem(menuId) === 'visible') {
+                    document.getElementById(menuId).style.display = 'block';
+                }
+            });
+        });
+    </script>
+
+</head>
+<body>
+<!-- Header -->
+<div class="header">
+    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+    <h2><a href="/home">RSMS</a></h2>
+    <a href="/login" class="login">Login</a>
+</div>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+
+    <h2>Feature</h2>
+    <a href="javascript:void(0);" onclick="toggleSubmenu('registerMenu')">Rice Management</a>
+    <div id="registerMenu" class="submenu" style="display: none;">
+        <a href="/form">Register Rice</a>
+    </div>
+    <a href="javascript:void(0);" onclick="toggleSubmenu('listMenu')">Inventory Management</a>
+    <div id="listMenu" class="submenu" style="display: none;">
+        <a href="/list">List of Rice</a>
+
+
+    </div>
+
+</div>
+
+<!-- Content -->
+<div class="content shift" id="content"> <!-- Mặc định đẩy nội dung sang phải -->
+    <h1>Simple Sidebar</h1>
+    <p>Make sure to keep all page content within the <strong>.content</strong> div.</p>
+</div>
+
+
+</body>
+</html>
