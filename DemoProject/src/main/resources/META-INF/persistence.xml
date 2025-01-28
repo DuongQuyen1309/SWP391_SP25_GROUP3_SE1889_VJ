@@ -7,7 +7,7 @@
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
         <class>com.demoproject.entity.Student</class>
         <properties>
-            <property name="jakarta.persistence.jdbc.url" value="jdbc:sqlserver://localhost\\SQLEXPRESS:1433;databaseName=TestDB;trustServerCertificate=true;"/>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:sqlserver://localhost\\SQLEXPRESS:1433;databaseName=DemoSwpData;trustServerCertificate=true;"/>
             <property name="jakarta.persistence.jdbc.user" value="binhlthe"/>
             <property name="jakarta.persistence.jdbc.password" value="123"/>
             <property name="jakarta.persistence.jdbc.driver" value="com.microsoft.sqlserver.jdbc.SQLServerDriver"/>

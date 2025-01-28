@@ -17,7 +17,7 @@
 
     <!-- Login Form -->
     <div class="login-container">
-        <h2>Login</h2>
+        <h2>Register</h2>
         <form action="/login" method="post">
             <div class="input-group">
                 <label for="username">Username</label>
@@ -27,8 +27,12 @@
                 <label for="password">Password</label>
                 <input type="password" id="password" name="password" required>
             </div>
-            <button type="submit" class="btn">Login</button>
-            <p class="register-link">Don't have an account? <a href="/register">Register</a></p>
+            <div class="input-group">
+                <label for="displayname">Displayname</label>
+                <input type="text" id="displayname" name="displayname" required>
+            </div>
+            <button type="submit" class="btn">Create</button>
+            
         </form>
     </div>
 </section>

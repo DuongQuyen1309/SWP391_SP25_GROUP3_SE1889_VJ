@@ -3,75 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <title>List of Students</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/list.css">
 </head>
 <!-- JavaScript -->
-<script>
-    function toggleSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const content = document.getElementById('content');
-
-        if (sidebar.classList.contains('hide')) {
-            sidebar.classList.remove('hide');
-            content.classList.remove('full-width');
-            content.classList.add('shift');
-            localStorage.setItem('sidebarState', 'open');
-        } else {
-            sidebar.classList.add('hide');
-            content.classList.remove('shift');
-            content.classList.add('full-width');
-            localStorage.setItem('sidebarState', 'closed');
-        }
-    }
-
-    function toggleSubmenu(menuId) {
-        const menu = document.getElementById(menuId);
-        const isVisible = menu.style.display === 'block';
-
-        menu.style.display = isVisible ? 'none' : 'block';
-
-        // Lưu trạng thái submenu vào Local Storage
-        localStorage.setItem(menuId, isVisible ? 'hidden' : 'visible');
-    }
-
-    // ✅ Giữ trạng thái sidebar & submenu khi tải lại trang
-    document.addEventListener("DOMContentLoaded", function () {
-        // Giữ trạng thái sidebar
-        if (localStorage.getItem('sidebarState') === 'closed') {
-            document.getElementById('sidebar').classList.add('hide');
-            document.getElementById('content').classList.add('full-width');
-        }
-
-        // Giữ trạng thái submenu
-        ['registerMenu', 'listMenu'].forEach(menuId => {
-            if (localStorage.getItem(menuId) === 'visible') {
-                document.getElementById(menuId).style.display = 'block';
-            }
-        });
-    });
-</script>
+<script src="/js/home.js"></script>
 <body>
 <!-- Header -->
 <div class="header">
     <button class="menu-btn" onclick="toggleSidebar()">☰</button>
     <h2><a href="/home">RSMS</a></h2>
-    <a href="/login" class="login">Login</a>
+    <a href="/login" class="login">Logout</a>
 </div>
 
 <!-- Sidebar -->
 <div class="sidebar" id="sidebar"> <!-- Mặc định hiển thị -->
     <h2>Feature</h2>
-    <a href="javascript:void(0);" onclick="toggleSubmenu('registerMenu')">Rice Management</a>
+    <a href="javascript:void(0);" onclick="toggleSubmenu('registerMenu')">Rice Management
+        <span class="arrow">  ▶</span></a>
     <div id="registerMenu" class="submenu" style="display: none;">
-        <a href="/">Register Rice</a>
+        <a href="/form">🍚 Rice Cooking</a>
+        <a href="/form">🍘 Sticky Rice Cooking</a>
+        <a href="/form">🥣 Porridge Cooking</a>
+        <a href="/form">🍰 Cakes and Flour Making</a>
+        <a href="/form">🍶 Rice Wine or Wine Making</a>
+        <a href="/form">🥗 Special Nutrition</a>
+        <a href="/form">🍙 Foreign Dishes </a>
     </div>
-    <a href="javascript:void(0);" onclick="toggleSubmenu('listMenu')">Inventory Management</a>
+    <a href="javascript:void(0);" onclick="toggleSubmenu('listMenu')">Inventory Management
+        <span class="arrow">  ▶</span></a>
     <div id="listMenu" class="submenu" style="display: none;">
-        <a href="/list">List of Rice</a>
+        <a href="/list">Import Rice</a>
 
     </div>
 </div>
-<div class="content shift" id="content">
+<div class="content" id="content">
     <h1>List of Students</h1>
     <table class="styled-table">
         <thead>

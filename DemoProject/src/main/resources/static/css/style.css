@@ -1,13 +1,14 @@
 /* styles.css */
 
 /* Reset mặc định */
-body {
+
+html,body {
     margin: 0;
     padding: 0;
     font-family: 'Arial', sans-serif;
     display: flex; /* Bố cục ngang để hiển thị cả sidebar và content */
     height: 100vh; /* Chiều cao toàn màn hình */
-    overflow: hidden; /* Loại bỏ thanh cuộn không cần thiết */
+    overflow: hidden;
 }
 
 /* Header */
@@ -38,19 +39,25 @@ body {
 }
 
 .header .login {
-    margin-right: 30px;
+    display: flex;
+    gap: 10px;
     text-decoration: none;
-    color: #ecf0f1;
-    font-size: 16px;
-    padding: 8px 12px;
+    color: #2c3e50;
+    background-color: white;
+    padding: 8px 15px;
+    border: 1px solid white;
     border-radius: 5px;
-    background-color: #ff9800;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s, color 0.3s;
+    cursor: pointer;
+    margin-right: 40px;
 }
 
 .header .login:hover {
-    background-color: #e67e22;
+    background-color: #1a252f;
+    color: white;
 }
+
+
 
 /* Sidebar */
 .sidebar {
@@ -61,24 +68,18 @@ body {
     width: 250px;
     background-color: #2c3e50;
     color: white;
-    height: 100%; /* Chiều cao full màn hình */
+    height: 90%; /* Chiều cao full màn hình */
     padding: 60px 20px 20px;
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
     overflow-y: auto; /* Cuộn nếu nội dung dài */
-    margin-top: 50px; /* Đẩy xuống dưới header */
-
+    margin-top: 20px; /* Đẩy xuống dưới header */
+    scrollbar-width: thin; /* Điều chỉnh độ dày thanh cuộn (đối với Firefox) */
+    scrollbar-color: #ccc #2c3e50; /* Màu thanh cuộn: thanh trượt và nền */
     transition: transform 0.3s ease-in-out;
-}
-.sidebar.show {
-    transform: translateX(0); /* Hiện sidebar */
-}
-/* Khi sidebar ẩn, trượt sang trái */
-.sidebar.hide {
-    transform: translateX(-300px);
 }
 
 .sidebar h2 {
-    margin: 0 0 20px;
+    margin: 0 0 10px;
     font-size: 24px;
     font-weight: bold;
     text-align: center;
@@ -103,27 +104,38 @@ body {
     background-color: #34495e;
 }
 
+.sidebar.show {
+    transform: translateX(0); /* Hiện sidebar */
+}
+/* Khi sidebar ẩn, trượt sang trái */
+.sidebar.hide {
+    transform: translateX(-300px);
+}
+.sidebar.hide + .content {
+    left: 0; /* Khi sidebar bị thu gọn, bảng kéo dài sang trái */
+}
+
+.arrow {
+    display: inline-block;
+    transition: transform 0.3s;
+    margin-left: 5px;
+}
+
 /* Content */
 .content {
-    transition: margin-left 0.3s ease-in-out;
-    margin-left: 0;
-    padding: 20px;
-    overflow-y: auto; /* Cho phép cuộn nội dung nếu dài */
-    margin-top: 50px; /* Đẩy xuống dưới header */
+    position: absolute; /* Để cố định vị trí */
+    top: 60px; /* Tránh che bởi header */
+    right: 0; /* Mép phải cố định */
+    bottom: 0;
+    left: 295px; /* Vị trí mép trái khi sidebar mở */
+    background-color: #f8f9fa; /* Màu nền nhạt */
+    overflow-y: auto; /* Cho phép cuộn nội dung */
+    transition: left 0.3s ease; /* Hiệu ứng co giãn mượt */
+    padding: 20px; /* Khoảng cách bên trong content */
 }
 
-/* Khi sidebar mở, nội dung dịch sang phải */
-.content.shift {
-    margin-left: 300px;
-}
 
-/* Khi sidebar bị ẩn, nội dung mở rộng */
-.content.full-width {
-    margin-left: 0;
-}
-.sidebar.show + .content {
-    margin-left: 300px; /* Đẩy nội dung khi sidebar mở */
-}
+
 
 /* Menu button styles */
 .menu-btn {
@@ -136,7 +148,7 @@ body {
 }
 .submenu {
     margin-left: 20px;
-    list-style: circle; /* Hiển thị chấm tròn */
+
     padding-left: 20px;
 }
 
@@ -151,3 +163,13 @@ body {
 .submenu a:hover {
     text-decoration: underline;
 }
+footer {
+    text-align: center;
+    padding: 10px;
+    background-color: #2c3e50;
+    color: white;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+

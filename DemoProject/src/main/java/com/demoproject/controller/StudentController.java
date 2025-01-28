@@ -60,4 +60,14 @@ public class StudentController {
         studentService.deleteStudent(student.getId());
         return "redirect:/list";
     }
+
+    @GetMapping("/login")
+    public String showLogin(Model model) {
+        return "homepage";
+    }
+
+    @GetMapping("/register")
+    public String showRegister(Model model) {
+        return "register";
+    }
 }
