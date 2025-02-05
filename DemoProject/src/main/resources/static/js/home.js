@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById('content').classList.add('full-width');
     }
 
-    ['registerMenu', 'listMenu'].forEach(menuId => {
+    ['riceMenu', 'inventoryMenu'].forEach(menuId => {
         const menu = document.getElementById(menuId);
         const arrow = document.querySelector(`[onclick="toggleSubmenu('${menuId}')"] .arrow`);
 
@@ -42,3 +42,23 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 });
+
+function showSuccessAlert() {
+    alert("You are successfully registered!");
+}
+
+function openForm() {
+    document.getElementById("studentFormModal").style.display = "block";
+}
+
+function closeForm() {
+    document.getElementById("studentFormModal").style.display = "none";
+}
+
+// Đóng modal khi nhấn ra ngoài
+window.onclick = function(event) {
+    const modal = document.getElementById("studentFormModal");
+    if (event.target === modal) {
+        modal.style.display = "none";
+    }
+};

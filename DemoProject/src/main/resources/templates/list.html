@@ -1,62 +1,102 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
-    <title>List of Students</title>
+    <title></title>
     <link rel="stylesheet" href="/css/list.css">
+
+    <script src="/js/home.js"></script>
+
 </head>
-<!-- JavaScript -->
-<script src="/js/home.js"></script>
 <body>
+
 <!-- Header -->
 <div class="header">
     <button class="menu-btn" onclick="toggleSidebar()">☰</button>
     <h2><a href="/home">RSMS</a></h2>
-    <a href="/login" class="login">Logout</a>
+    <a href="/login" class="login">Login</a>
 </div>
 
 <!-- Sidebar -->
-<div class="sidebar" id="sidebar"> <!-- Mặc định hiển thị -->
+<div class="sidebar" id="sidebar">
+
     <h2>Feature</h2>
-    <a href="javascript:void(0);" onclick="toggleSubmenu('registerMenu')">Rice Management
-        <span class="arrow">  ▶</span></a>
-    <div id="registerMenu" class="submenu" style="display: none;">
-        <a href="/form">🍚 Rice Cooking</a>
-        <a href="/form">🍘 Sticky Rice Cooking</a>
-        <a href="/form">🥣 Porridge Cooking</a>
-        <a href="/form">🍰 Cakes and Flour Making</a>
-        <a href="/form">🍶 Rice Wine or Wine Making</a>
-        <a href="/form">🥗 Special Nutrition</a>
-        <a href="/form">🍙 Foreign Dishes </a>
-    </div>
-    <a href="javascript:void(0);" onclick="toggleSubmenu('listMenu')">Inventory Management
-        <span class="arrow">  ▶</span></a>
-    <div id="listMenu" class="submenu" style="display: none;">
-        <a href="/list">Import Rice</a>
+    <a href="/list" >Account Management
+
+    <div id="accountMenu" class="submenu" style="display: none;">
 
     </div>
+    <a href="javascript:void(0);" onclick="toggleSubmenu('riceMenu')">Rice Management
+        <span class="arrow">  ▶</span></a>
+    <div id="riceMenu" class="submenu" style="display: none;">
+        <a href="/list">🍚 Rice Cooking</a>
+        <a href="/list">🍘 Sticky Rice Cooking</a>
+        <a href="/list">🥣 Porridge Cooking</a>
+        <a href="/list">🍰 Cakes and Flour Making</a>
+        <a href="/list">🍶 Rice Wine or Wine Making</a>
+        <a href="/list">🥗 Special Nutrition</a>
+        <a href="/list">🍙 Foreign Dishes </a>
+    </div>
+    <a href="javascript:void(0);" onclick="toggleSubmenu('inventoryMenu')">Inventory Management
+        <span class="arrow">  ▶</span></a>
+    <div id="inventoryMenu" class="submenu" style="display: none;">
+        <a href="/list">Import Rice</a>
+        <a href="/list">Import Rice</a>
+        <a href="/list">Import Rice</a>
+        <a href="/list">Import Rice</a>
+        <a href="/list">Import Rice</a>
+        <a href="/list">Import Rice</a>
+    </div>
 </div>
+
+
+<!-- Content -->
 <div class="content" id="content">
-    <h1>List of Students</h1>
+
+    <!-- Modal Form -->
+    <button class="add-btn" onclick="openForm()">+</button>
+    <div id="studentFormModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeForm()">&times;</span>
+            <h2>Add new account</h2>
+            <form th:action="@{/form}" method="post" onsubmit="showSuccessAlert()" >
+
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+
+                <label for="password">Password:</label>
+                <input type="text" id="password" name="password" required>
+
+                <label for="displayname">Displayname:</label>
+                <input type="text" id="displayname" name="displayname" required>
+
+                <button type="submit" class="submit-button">Create</button>
+            </form>
+        </div>
+    </div>
+
+<!-- List -->
+    <h1>List of Accounts</h1>
     <table class="styled-table">
         <thead>
         <tr>
             <td>ID</td>
-            <td>First Name</td>
-            <td>Last Name</td>
-            <td>Mark</td>
+            <td>Username</td>
+            <td>Password</td>
+            <td>Displayname</td>
             <td>Action</td>
         </tr>
         </thead>
         <tbody>
-        <tr th:each="student : ${students}">
-            <td th:text="${student.id}"></td>
-            <td th:text="${student.firstName}"></td>
-            <td th:text="${student.lastName}"></td>
-            <td th:text="${student.marks}"></td>
+        <tr th:each="account : ${accounts}">
+            <td th:text="${account.id}"></td>
+            <td th:text="${account.username}"></td>
+            <td th:text="${account.password}"></td>
+            <td th:text="${account.displayName}"></td>
             <td>
                 <form th:action="@{/delete}" method="post">
-                    <input type="hidden" name="id" th:value="${student.id}">
+                    <input type="hidden" name="id" th:value="${account.id}">
                     <button type="submit">Delete</button>
                 </form>
             </td>
@@ -65,5 +105,9 @@
     </table>
 
 </div>
+<footer>
+    &copy; 2025 Rice Sales Management. All Rights Reserved.
+</footer>
+
 </body>
 </html>

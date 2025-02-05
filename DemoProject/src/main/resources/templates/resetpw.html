@@ -2,8 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Reset Password</title>
     <link rel="stylesheet" href="/css/login.css">
 </head>
 <body>
@@ -17,22 +16,22 @@
 
     <!-- Login Form -->
     <div class="login-container">
-        <h2>Register</h2>
+        <h2>Reset Password</h2>
         <form action="/login" method="post">
             <div class="input-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" required>
+                <label >Username</label>
+                <input type="text" name="username" th:value="${username}" readonly>
             </div>
             <div class="input-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required>
+                <label for="newPassword">New Password</label>
+                <input type="password" id="newPassword" name="newPassword" required>
             </div>
             <div class="input-group">
-                <label for="displayname">Displayname</label>
-                <input type="text" id="displayname" name="displayname" required>
+                <label for="confirmPassword">Confirm Password</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required>
             </div>
-            <button type="submit" class="btn">Create</button>
-            
+            <button type="submit" class="btn">Change Password</button>
+
         </form>
     </div>
 </section>
@@ -40,5 +39,4 @@
     &copy; 2025 Rice Sales Management. All Rights Reserved.
 </footer>
 </body>
-
 </html>
