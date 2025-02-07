@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Homepage</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <!-- JavaScript -->
+    <script src="/js/home.js"></script>
+
+
+</head>
+<body>
+<!-- Header -->
+<div class="header">
+    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+    <h2><a href="/home">RSMS</a></h2>
+    <a href="/login" class="login">Logout</a>
+</div>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+
+    <h2>Feature</h2>
+    <a href="/list" >Account Management
+
+    <a href="javascript:void(0);" onclick="toggleSubmenu('riceMenu')">Rice Management
+        <span class="arrow">  ▶</span></a>
+    <div id="riceMenu" class="submenu" style="display: none;">
+        <a href="/list">🍚 Rice Cooking</a>
+        <a href="/list">🍘 Sticky Rice Cooking</a>
+        <a href="/list">🥣 Porridge Cooking</a>
+        <a href="/list">🍰 Cakes and Flour Making</a>
+        <a href="/list">🍶 Rice Wine or Wine Making</a>
+        <a href="/list">🥗 Special Nutrition</a>
+        <a href="/list">🍙 Foreign Dishes </a>
+    </div>
+    <a href="javascript:void(0);" onclick="toggleSubmenu('inventoryMenu')">Inventory Management
+    <span class="arrow">  ▶</span></a>
+    <div id="inventoryMenu" class="submenu" style="display: none;">
+        <a href="/list">Import Rice</a>
+        <a href="/list">Import Rice</a>
+        <a href="/list">Import Rice</a>
+        <a href="/list">Import Rice</a>
+        <a href="/list">Import Rice</a>
+        <a href="/list">Import Rice</a>
+
+    </div>
+
+
+
+</div>
+
+<!-- Content -->
+<div class="content" id="content"> <!-- Mặc định đẩy nội dung sang phải -->
+    <h1>Simple Sidebar</h1>
+    <p>Make sure to keep all page content within the <strong>.content</strong> div.</p>
+</div>
+
+
+<footer>
+    &copy; 2025 Rice Sales Management. All Rights Reserved.
+</footer>
+</body>
+</html>

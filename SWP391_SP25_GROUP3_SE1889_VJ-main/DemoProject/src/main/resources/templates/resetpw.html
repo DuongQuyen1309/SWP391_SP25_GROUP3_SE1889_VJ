@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Reset Password</title>
+    <link rel="stylesheet" href="/css/login.css">
+</head>
+<body>
+<!-- Header -->
+<div class="header">
+    <h2><a href="/homepage">RSMS</a></h2>
+</div>
+<section class="bottom">
+    <!-- Background Image -->
+    <img th:src="@{/images/account.jpg}" alt="Logo" class="background-img">
+
+    <!-- Login Form -->
+    <div class="login-container">
+        <h2>Reset Password</h2>
+        <form action="/login" method="post">
+            <div class="input-group">
+                <label >Username</label>
+                <input type="text" name="username" th:value="${username}" readonly>
+            </div>
+            <div class="input-group">
+                <label for="newPassword">New Password</label>
+                <input type="password" id="newPassword" name="newPassword" required>
+            </div>
+            <div class="input-group">
+                <label for="confirmPassword">Confirm Password</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required>
+            </div>
+            <button type="submit" class="btn">Change Password</button>
+
+        </form>
+    </div>
+</section>
+<footer>
+    &copy; 2025 Rice Sales Management. All Rights Reserved.
+</footer>
+</body>
+</html>
