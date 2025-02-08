@@ -2,8 +2,8 @@ package com.demoproject.controller;
 
 
 import com.demoproject.entity.Account;
-import com.demoproject.entity.Student;
 import com.demoproject.service.AccountService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +15,7 @@ import java.util.List;
 
 @Controller
 public class AccountController {
+    @Autowired
     private final AccountService accountService;
 
     public AccountController(AccountService accountService) {
@@ -26,8 +27,7 @@ public class AccountController {
         model.addAttribute("username", new String()); // Khởi tạo đối tượng Student
         model.addAttribute("password", new String());
         model.addAttribute("displayname" , new String());
-        List<Account> accounts= new ArrayList<Account>();
-        accounts= accountService.getAllAccounts();
+        List<Account> accounts= accountService.listOwnerAccount();
         model.addAttribute("accounts", accounts);
         return "list"; // Tên file view: form.html
     }

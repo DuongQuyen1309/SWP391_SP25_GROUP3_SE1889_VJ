@@ -3,11 +3,11 @@ package com.demoproject.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "Account")
+@Table(name = "account")
 public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "account_gen")
-    @SequenceGenerator(name = "account_gen",sequenceName = "account_id", allocationSize = 1)
+    @SequenceGenerator(name = "account_gen",sequenceName = "id", allocationSize = 1)
     @Column(name = "ID", nullable = false, columnDefinition = "Numeric(18)")
     private Long id;
     @Column(name = "USERNAME", length = 50, nullable = false)
@@ -16,6 +16,8 @@ public class Account {
     private String password;
     @Column(name = "DISPLAYNAME", length = 50, nullable = false)
     private String displayName;
+    @Column(name = "USER_ID")
+    private Long userId;
 
     public Account() {
     }
@@ -57,6 +59,14 @@ public class Account {
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 }
 

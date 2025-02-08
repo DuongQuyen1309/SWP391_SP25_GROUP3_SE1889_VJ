@@ -60,10 +60,17 @@ header .buttons a:hover {
     font-size: 36px;
     margin-bottom: 20px;
     color: #f3c464;
+    padding: 10px 20px;
+    border: 3px solid #f3c464;
+    display: inline-block;
+    border-radius: 8px;
+    background: rgba(35, 35, 35, 0.6); /* Thêm nền đen mờ */
+    text-shadow: none; /* Loại bỏ bóng chữ */
 }
 .bottom h3 {
 
     margin-bottom: 30px;
+    color: #ffffff;
 
 }
 .bottom .cta-buttons {
