@@ -11,6 +11,8 @@ public class HomeController {
         return "login";
     }
 
+
+
     @GetMapping("/register")
     public String register() {
         return "register";
@@ -26,8 +28,5 @@ public class HomeController {
         return "home";
     }
 
-    @GetMapping("/homepage")
-    public String homepage() {
-        return "homepage";
-    }
+
 }

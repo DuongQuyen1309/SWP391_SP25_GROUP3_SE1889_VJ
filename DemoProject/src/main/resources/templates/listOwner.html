@@ -5,9 +5,41 @@
     <meta charset="UTF-8">
     <title>Rice Sales Management</title>
     <link rel="stylesheet" href="/css/list.css">
+<style>
+    .pagination {
+        text-align: center;
+        margin-top: 20px;
+    }
 
+    .pagination a {
+        display: inline-block;
+        padding: 8px 16px;
+        margin: 4px;
+        text-decoration: none;
+        background-color: #2c3e50;
+        color: white;
+        border-radius: 5px;
+    }
+
+    .pagination a:hover {
+        background-color: #1a252f;
+    }
+
+    .pagination span {
+        font-size: 18px;
+        margin: 0 10px;
+    }
+
+</style>
     <script src="/js/home.js"></script>
-
+    <script>
+        function confirmDelete(event, form) {
+            event.preventDefault(); // Ngăn form submit ngay lập tức
+            if (confirm("Bạn có chắc muốn xóa tài khoản này không?")) {
+                form.submit(); // Nếu người dùng xác nhận, tiếp tục submit form
+            }
+        }
+    </script>
 </head>
 <body>
 
@@ -15,7 +47,7 @@
 <div class="header">
     <button class="menu-btn" onclick="toggleSidebar()">☰</button>
     <h2><a href="/home">RSMS</a></h2>
-    <a href="/login" class="login">Login</a>
+    <button id="logout" class="logout">Logout</button>
 </div>
 
 <!-- Sidebar -->
@@ -23,22 +55,27 @@
 
     <h2>Feature</h2>
     <a href="/userprofile" >Profile</a>
-    <a href="/list" >Account Management</a>
+    <a href="/listOwner" >Account Management</a>
 
     <div id="accountMenu" class="submenu" style="display: none;">
 
     </div>
-    <a href="/list" >Rice Management</a>
+    <a href="/listOwner" >Rice Management</a>
+
+    <a href="listOwner" >Customer Management</a>
+
+    <a href="listOwner" >Warehouse Management</a>
+
 
     <a href="javascript:void(0);" onclick="toggleSubmenu('inventoryMenu')">Inventory Management
         <span class="arrow">  ▶</span></a>
     <div id="inventoryMenu" class="submenu" style="display: none;">
-        <a href="/list">Import Rice</a>
-        <a href="/list">Import Rice</a>
-        <a href="/list">Import Rice</a>
-        <a href="/list">Import Rice</a>
-        <a href="/list">Import Rice</a>
-        <a href="/list">Import Rice</a>
+        <a href="/listOwner">Import Rice</a>
+        <a href="/listOwner">Import Rice</a>
+        <a href="/listOwner">Import Rice</a>
+        <a href="/listOwner">Import Rice</a>
+        <a href="/listOwner">Import Rice</a>
+        <a href="/listOwner">Import Rice</a>
     </div>
 </div>
 
@@ -52,7 +89,7 @@
         <div class="modal-content">
             <span class="close" onclick="closeForm()">&times;</span>
             <h2>Add new account</h2>
-            <form th:action="@{/form}" method="post" onsubmit="showSuccessAlert()" >
+            <form th:action="@{/createOwner}" method="post" onsubmit="showSuccessAlert()" >
 
                 <label for="username">Username:</label>
                 <input type="text" id="username" name="username" required>
@@ -87,14 +124,25 @@
             <td th:text="${account.password}"></td>
             <td th:text="${account.displayName}"></td>
             <td>
-                <form th:action="@{/delete}" method="post">
+                <form th:action="@{/deleteOwner}" method="post" onsubmit="return confirmDelete(event, this)">
                     <input type="hidden" name="id" th:value="${account.id}">
                     <button type="submit">Delete</button>
                 </form>
             </td>
         </tr>
         </tbody>
+
     </table>
+    <!-- Phân trang -->
+    <div class="pagination">
+        <a th:if="${currentPage > 0}" th:href="@{/listOwner(page=${currentPage - 1}, size=5)}">Previous</a>
+
+        <span>Page <span th:text="${currentPage + 1}"></span> of <span th:text="${totalPages}"></span></span>
+
+        <a th:if="${currentPage + 1 < totalPages}" th:href="@{/listOwner(page=${currentPage + 1}, size=5)}">Next</a>
+    </div>
+
+
 
 </div>
 <footer>

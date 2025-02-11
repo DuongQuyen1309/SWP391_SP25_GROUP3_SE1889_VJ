@@ -5,11 +5,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rice Sales Management</title>
     <link rel="stylesheet" href="/css/login.css">
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let form = document.getElementById("loginForm");
+            if (!form) {
+                console.error("❌ Lỗi: Không tìm thấy phần tử `loginForm`!");
+                return;
+            }
+
+            form.addEventListener("submit", function (event) {
+                event.preventDefault();
+
+                let username = document.getElementById("username").value;
+                let password = document.getElementById("password").value;
+
+                fetch("http://localhost:8081/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username: username, password: password })
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(err => { throw new Error(err.error || "Lỗi đăng nhập!"); });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log("✅ Đăng nhập thành công!");
+
+                            window.location.href = "/userprofile";
+
+                    })
+                    .catch(error => {
+                        console.error("❌ Lỗi đăng nhập:", error);
+                        alert(error.message);
+                    });
+            });
+        });
+
+    </script>
 </head>
 <body>
 <!-- Header -->
 <div class="header">
-    <h2><a href="/homepage">RSMS</a></h2>
+    <h2><a href="/login">RSMS</a></h2>
 </div>
 <section class="bottom">
     <!-- Background Image -->
@@ -18,7 +57,7 @@
     <!-- Login Form -->
     <div class="login-container">
         <h2>Login</h2>
-        <form action="/login" method="post">
+        <form id="loginForm">
             <div class="input-group">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username" required>

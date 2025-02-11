@@ -2,22 +2,40 @@ package com.demoproject.entity;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "account")
 public class Account {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "account_gen")
-    @SequenceGenerator(name = "account_gen",sequenceName = "id", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID", nullable = false, columnDefinition = "Numeric(18)")
     private Long id;
     @Column(name = "USERNAME", length = 50, nullable = false)
     private String username;
-    @Column(name = "PASSWORD", length = 50, nullable = false)
+    @Column(name = "PASSWORD", length = 255, nullable = false)
     private String password;
     @Column(name = "DISPLAYNAME", length = 50, nullable = false)
     private String displayName;
-    @Column(name = "USER_ID")
-    private Long userId;
+    @Column(name = "createdBy")
+    private Integer createdBy;
+
+    @Column(name = "createdAt")
+    private LocalDate createdAt;
+
+    @Column(name = "updatedAt")
+    private LocalDate updatedAt;
+
+    @Column(name = "deletedAt")
+    private LocalDate deletedAt;
+
+    @Column(name = "isDelete")
+    private Boolean isDelete = false;
+
+    @Column(name = "user_id")
+    private Long userId; // ✅ Thêm trường liên kết với User
+
 
     public Account() {
     }
@@ -67,6 +85,46 @@ public class Account {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    public Integer getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(Integer createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public LocalDate getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDate createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDate getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDate updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public LocalDate getDeletedAt() {
+        return deletedAt;
+    }
+
+    public void setDeletedAt(LocalDate deletedAt) {
+        this.deletedAt = deletedAt;
+    }
+
+    public Boolean getDelete() {
+        return isDelete;
+    }
+
+    public void setDelete(Boolean delete) {
+        isDelete = delete;
     }
 }
 

@@ -3,10 +3,11 @@ package com.demoproject.entity;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
-public class User {
+public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID", nullable = false)
@@ -21,13 +22,32 @@ public class User {
     private LocalDate dateOfBirth;
     @Column(name = "GENDER")
     private Boolean gender;
-    @Column(name = "CREATEDBY")
+    @Column(name = "createdBy")
     private Integer createdBy;
     @Column(name = "ROLE" ,length = 50)
     private String role;
+    @Column(name = "createdAt")
+    private LocalDate createdAt;
+
+    @Column(name = "updatedAt")
+    private LocalDate updatedAt;
+
+    @Column(name = "deletedAt")
+    private LocalDate deletedAt;
+
+    @Column(name = "isDelete")
+    private Boolean isDelete = false;
+
+    @Column(name = "warehouse_id")
+    private Integer warehouseId;
+
+    @Column(name = "permission_data", columnDefinition = "NVARCHAR(MAX)")
+    private String permissionData;
 
 
-    public User() {
+
+
+    public Users() {
     }
 
     public Long getId() {
@@ -92,5 +112,57 @@ public class User {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public Boolean getGender() {
+        return gender;
+    }
+
+    public LocalDate getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDate updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public LocalDate getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDate createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDate getDeletedAt() {
+        return deletedAt;
+    }
+
+    public void setDeletedAt(LocalDate deletedAt) {
+        this.deletedAt = deletedAt;
+    }
+
+    public Boolean getDelete() {
+        return isDelete;
+    }
+
+    public void setDelete(Boolean delete) {
+        isDelete = delete;
+    }
+
+    public Integer getWarehouseId() {
+        return warehouseId;
+    }
+
+    public void setWarehouseId(Integer warehouseId) {
+        this.warehouseId = warehouseId;
+    }
+
+    public String getPermissionData() {
+        return permissionData;
+    }
+
+    public void setPermissionData(String permissionData) {
+        this.permissionData = permissionData;
     }
 }

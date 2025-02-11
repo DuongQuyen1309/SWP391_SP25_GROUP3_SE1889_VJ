@@ -62,3 +62,17 @@ window.onclick = function(event) {
         modal.style.display = "none";
     }
 };
+
+document.addEventListener("DOMContentLoaded", function() {
+    document.getElementById("logout").addEventListener("click", function() {
+        fetch("/api/logout", {
+            method: "POST",
+            credentials: "include"
+        }).then(response => {
+            if (response.ok) {
+                alert("Đã đăng xuất!");
+                window.location.href = "/login";
+            }
+        });
+    });
+});

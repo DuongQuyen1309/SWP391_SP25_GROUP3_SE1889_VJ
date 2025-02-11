@@ -4,11 +4,26 @@
     <meta charset="UTF-8">
     <title>Rice Sales Management</title>
     <link rel="stylesheet" href="/css/login.css">
+    <script>
+        function validatePassword() {
+            let newPassword = document.getElementById("newPassword").value;
+            let confirmPassword = document.getElementById("confirmPassword").value;
+            let errorMessage = document.getElementById("passwordError");
+
+            if (newPassword !== confirmPassword) {
+                errorMessage.innerText = "❌ Mật khẩu nhập lại không khớp!";
+                return false; // Ngăn form submit
+            } else {
+                errorMessage.innerText = ""; // Xóa thông báo lỗi nếu mật khẩu khớp
+                return true;
+            }
+        }
+    </script>
 </head>
 <body>
 <!-- Header -->
 <div class="header">
-    <h2><a href="/homepage">RSMS</a></h2>
+    <h2><a href="/login">RSMS</a></h2>
 </div>
 <section class="bottom">
     <!-- Background Image -->
@@ -17,10 +32,10 @@
     <!-- Login Form -->
     <div class="login-container">
         <h2>Reset Password</h2>
-        <form action="/login" method="post">
+        <form action="/resetpw" method="post" onsubmit="return validatePassword()">
             <div class="input-group">
-                <label >Username</label>
-                <input type="text" name="username" th:value="${username}" readonly>
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
             </div>
             <div class="input-group">
                 <label for="newPassword">New Password</label>
@@ -30,6 +45,7 @@
                 <label for="confirmPassword">Confirm Password</label>
                 <input type="password" id="confirmPassword" name="confirmPassword" required>
             </div>
+            <p id="passwordError" style="color: red; font-size: 14px;"></p>
             <button type="submit" class="btn">Change Password</button>
 
         </form>

@@ -1,11 +1,8 @@
 package com.demoproject.service;
 
-import com.demoproject.entity.User;
-import com.demoproject.repository.AccountRepository;
+import com.demoproject.entity.Users;
 import com.demoproject.repository.UserRepository;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class UserService {
@@ -15,12 +12,12 @@ public class UserService {
     }
 
 
-    public User getUserProfile(Long id) {
+    public Users getUserProfile(Long id) {
         return userRepository.findById(id);
 
     }
 
-    public void saveUserProfile(User user) {
+    public void saveUserProfile(Users user) {
         userRepository.save(user);
     }
 
