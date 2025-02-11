@@ -19,9 +19,9 @@ import java.time.LocalDateTime;
 public class Product {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    String id;
+    int id;
 
     @Column(name = "name", nullable = false)
     String name;
@@ -32,27 +32,26 @@ public class Product {
     @Column(name = "description", nullable = false)
     String description;
 
-    @Column(name = "image", nullable = false)
-    String image;
+//    @Column(name = "image", nullable = false)
+//    String image;
 
-    @Column(name = "createdBy", nullable = false)
+    @Column(name = "createdBy", nullable = true)
     String createdBy;
 
-    @Column(name = "createdAt", nullable = false)
-    LocalDateTime createdAt;
+//    @Column(name = "createdAt")  // Đổi tên cho đúng với DB
+//    LocalDateTime createdAt;
+//    @Column(name = "updatedBy", nullable = false)
+//    String updatedBy;
 
-    @Column(name = "updatedBy", nullable = false)
-    String updatedBy;
-
-    @Column(name = "updatedAt", nullable = false)
+    @Column(name = "updatedAt", nullable = true)
     LocalDateTime updatedAt;
 
-    @Column(name = "deletedBy", nullable = false)
-    String deletedBy;
+//    @Column(name = "deletedBy", nullable = false)
+//    String deletedBy;
 
-    @Column(name = "deletedAt", nullable = false)
+    @Column(name = "deleteAt", nullable = true)
     LocalDateTime deletedAt;
 
-    @Column(name = "isDeleted", nullable = false)
+    @Column(name = "isDelete", nullable = true)
     String isDeleted;
 }

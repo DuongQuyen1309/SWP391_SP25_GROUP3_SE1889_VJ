@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel="stylesheet" href="/css/list.css">
+
+    <script src="/js/home.js"></script>
+
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+    <h2><a href="/home">RSMS</a></h2>
+    <a href="/login" class="login">Login</a>
+</div>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+
+    <h2>Feature</h2>
+    <a href="/list">Account Management</a>
+
+    <div id="accountMenu" class="submenu" style="display: none;">
+
+    </div>
+    <a href="javascript:void(0);" onclick="toggleSubmenu('riceMenu')">Rice Management
+        <span class="arrow">  ▶</span></a>
+    <div id="riceMenu" class="submenu" style="display: none;">
+        <a href="/list">🍚 Rice Cooking</a>
+        <a href="/list">🍘 Sticky Rice Cooking</a>
+        <a href="/list">🥣 Porridge Cooking</a>
+        <a href="/list">🍰 Cakes and Flour Making</a>
+        <a href="/list">🍶 Rice Wine or Wine Making</a>
+        <a href="/list">🥗 Special Nutrition</a>
+        <a href="/list">🍙 Foreign Dishes </a>
+    </div>
+    <a href="javascript:void(0);" onclick="toggleSubmenu('inventoryMenu')">Inventory Management
+        <span class="arrow">  ▶</span></a>
+    <div id="inventoryMenu" class="submenu" style="display: none;">
+        <a href="/list">Import Rice</a>
+        <a href="/list">Import Rice</a>
+        <a href="/list">Import Rice</a>
+        <a href="/list">Import Rice</a>
+        <a href="/list">Import Rice</a>
+        <a href="/list">Import Rice</a>
+    </div>
+</div>
+
+
+
+<!-- Content -->
+<div class="content" id="content">
+
+    <!-- Modal Form -->
+    <button class="add-btn" onclick="openForm()">+</button>
+    <div id="studentFormModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeForm()">x</span>
+            <h2>Add new rice</h2>
+            <form th:action="@{/form}" method="post" enctype="multipart/form-data"
+                  onsubmit="showSuccessAlert()" >
+
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+
+                <label for="price">Price:</label>
+                <input type="text" id="price" name="price" required>
+
+                <label for="description">Description:</label>
+                <input type="text" id="description" name="description" required>
+
+                <label for="image">Image:</label>
+                <input type="file" id = image accept="image/*">
+
+                <button type="submit" class="submit-button">Create</button>
+            </form>
+        </div>
+    </div>
+
+<!-- List -->
+    <h1>List of Products</h1>
+    <table class="styled-table">
+        <thead>
+        <tr>
+            <td>Image</td>
+            <td>Name</td>
+            <td>Price</td>
+            <td>Description</td>
+            <td>Action</td>
+        </tr>
+        </thead>
+        <tbody>
+            <tr th:each="product : ${listproduct} " th:if="${product.isDeleted == '0'}">
+<!--                <td th:text="${product.name}"></td>-->
+                <td><img src="https://tvfood.com.vn/vnt_upload/news/09_2023/gao_nep_la_gi.jpg" width="100px"></td>
+                <td th:text="${product.name}"></td>
+                <td th:text="${product.price}"></td>
+                <td th:text="${product.description}"></td>
+                <td>
+                    <form th:action="@{/delete}" method="post">
+                        <input type="hidden" name="id" th:value="${product.id}">
+                        <button type="submit">Delete</button>
+                    </form>
+                    <button onclick="openUpdateForm(this)" th:data-id="${product.id}">Update</button>
+                    <div id="updateForm" class="modal">
+                        <div class="modal-content">
+                            <span class="close" onclick="closeUpdateForm()">x</span>
+                            <h2>Update rice information</h2>
+                            <form th:action="@{/update}" method="post" enctype="multipart/form-data">
+                                <input type="hidden" name="id" th:value="${product.id}">
+
+                                <label for="newName">New Name:</label>
+                                <input type="text" id="newName" name="newName" required>
+
+                                <label for="newPrice">New Price:</label>
+                                <input type="text" id="newPrice" name="newPrice" required>
+
+                                <label for="newDescription">New Description:</label>
+                                <input type="text" id="newDescription" name="newDescription" required>
+
+                                <label for="newImage">New Image:</label>
+                                <input type="file" id = "newImage" name="newImage" accept="image/*">
+
+                                <button type="submit" class="submit-button">Update</button>
+                            </form>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+
+
+
+
+</div>
+<footer>
+    &copy; 2025 Rice Sales Management. All Rights Reserved.
+</footer>
+
+</body>
+</html>

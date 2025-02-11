@@ -55,6 +55,15 @@ function closeForm() {
     document.getElementById("studentFormModal").style.display = "none";
 }
 
+function openUpdateForm(button) {
+    document.getElementById("updateForm").style.display = "block";
+
+}
+
+function closeUpdateForm() {
+    document.getElementById("updateForm").style.display = "none";
+}
+
 // Đóng modal khi nhấn ra ngoài
 window.onclick = function(event) {
     const modal = document.getElementById("studentFormModal");
