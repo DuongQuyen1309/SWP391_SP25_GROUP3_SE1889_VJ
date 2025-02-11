@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Staff Accounts</title>
+    <link rel="stylesheet" href="/css/list.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+    <h2><a href="/home">RSMS</a></h2>
+    <a href="/login" class="login">Login</a>
+</div>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <h2>Feature</h2>
+    <a href="/userprofile">Profile</a>
+    <a href="/list">Account Management</a>
+    <a href="/staff-list">Staff List</a>
+</div>
+
+<!-- Content -->
+<div class="content" id="content">
+    <h1>List of Staff Accounts</h1>
+    <table class="styled-table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Name</th>
+            <th>Address</th>
+            <th>Phone</th>
+            <th>Role</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="account : ${accounts}">
+            <td th:text="${account.user.id}"></td>
+            <td th:text="${account.username}"></td>
+            <td th:text="${account.user.name}"></td>
+            <td th:text="${account.user.address}"></td>
+            <td th:text="${account.user.phone}"></td>
+            <td th:text="${account.user.role}"></td>
+            <td>
+                <button class="edit-btn"
+                        th:attr="data-id=${account.user.id},
+                                 data-username=${account.username},
+                                 data-name=${account.user.name},
+                                 data-address=${account.user.address},
+                                 data-phone=${account.user.phone},
+                                 data-role=${account.user.role}"
+                        onclick="openEditPopup(this)">Edit</button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Popup Edit Form -->
+<div id="editPopup" class="popup">
+    <div class="popup-content">
+        <span class="close-btn" onclick="closeEditPopup()">&times;</span>
+        <h2>Edit Staff Account</h2>
+        <form id="editForm">
+            <input type="hidden" id="editId">
+
+            <label>Username:</label>
+            <input type="text" id="editUsername" required>
+
+            <label>Name:</label>
+            <input type="text" id="editName" required>
+
+            <label>Address:</label>
+            <input type="text" id="editAddress" required>
+
+            <label>Phone:</label>
+            <input type="text" id="editPhone" required>
+
+            <label>Role:</label>
+            <select id="editRole">
+                <option value="staff">Staff</option>
+                <option value="admin">Admin</option>
+            </select>
+
+            <button type="button" onclick="saveChanges()">Save</button>
+        </form>
+    </div>
+</div>
+
+<footer>
+    &copy; 2025 Rice Sales Management. All Rights Reserved.
+</footer>
+
+<style>
+    /* Popup styles */
+    .popup {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 20px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+        z-index: 1000;
+    }
+    .popup-content {
+        text-align: center;
+    }
+    .close-btn {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        cursor: pointer;
+        font-size: 20px;
+    }
+    input, select {
+        width: 100%;
+        margin: 5px 0;
+        padding: 8px;
+    }
+    button {
+        background: blue;
+        color: white;
+        padding: 10px;
+        border: none;
+        cursor: pointer;
+    }
+</style>
+
+<script>
+    function openEditPopup(button) {
+        document.getElementById("editId").value = button.getAttribute("data-id");
+        document.getElementById("editUsername").value = button.getAttribute("data-username");
+        document.getElementById("editName").value = button.getAttribute("data-name");
+        document.getElementById("editAddress").value = button.getAttribute("data-address");
+        document.getElementById("editPhone").value = button.getAttribute("data-phone");
+        document.getElementById("editRole").value = button.getAttribute("data-role");
+
+        document.getElementById("editPopup").style.display = "block";
+    }
+
+    function closeEditPopup() {
+        document.getElementById("editPopup").style.display = "none";
+    }
+
+    function saveChanges() {
+        let id = document.getElementById("editId").value;
+        let username = document.getElementById("editUsername").value;
+        let name = document.getElementById("editName").value;
+        let address = document.getElementById("editAddress").value;
+        let phone = document.getElementById("editPhone").value;
+        let role = document.getElementById("editRole").value;
+
+        $.ajax({
+            url: "/staff-accounts/update",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({
+                id: id,
+                username: username,
+                name: name,
+                address: address,
+                phone: phone,
+                role: role
+            }),
+            success: function(response) {
+                alert("Updated successfully!");
+                closeEditPopup();
+                location.reload();
+            },
+            error: function() {
+                alert("Failed to update account.");
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

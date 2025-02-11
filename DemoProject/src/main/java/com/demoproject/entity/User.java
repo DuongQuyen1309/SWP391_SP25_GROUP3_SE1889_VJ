@@ -1,7 +1,6 @@
 package com.demoproject.entity;
 
 import jakarta.persistence.*;
-
 import java.time.LocalDate;
 
 @Entity
@@ -11,86 +10,52 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID", nullable = false)
     private Long id;
+
     @Column(name = "NAME", length = 50)
     private String name;
+
     @Column(name = "ADDRESS", length = 50)
     private String address;
+
     @Column(name = "PHONE", length = 11)
     private String phone;
+
     @Column(name = "DOB")
     private LocalDate dateOfBirth;
+
     @Column(name = "GENDER")
     private Boolean gender;
+
     @Column(name = "CREATEDBY")
     private Integer createdBy;
-    @Column(name = "ROLE" ,length = 50)
+
+    @Column(name = "ROLE", length = 50)
     private String role;
 
+    public User() {}
 
-    public User() {
-    }
+    // Getters và Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public Long getId() {
-        return id;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
 
-    public String getAddress() {
-        return address;
-    }
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
 
-    public void setAddress(String address) {
-        this.address = address;
-    }
+    public LocalDate getDateOfBirth() { return dateOfBirth; }
+    public void setDateOfBirth(LocalDate dateOfBirth) { this.dateOfBirth = dateOfBirth; }
 
-    public String getName() {
-        return name;
-    }
+    public Boolean getGender() { return gender; }
+    public void setGender(Boolean gender) { this.gender = gender; }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public Integer getCreatedBy() { return createdBy; }
+    public void setCreatedBy(Integer createdBy) { this.createdBy = createdBy; }
 
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public LocalDate getDateOfBirth() {
-        return dateOfBirth;
-    }
-
-    public void setDateOfBirth(LocalDate dateOfBirth) {
-        this.dateOfBirth = dateOfBirth;
-    }
-
-    public Boolean isGender() {
-        return gender;
-    }
-
-    public void setGender(Boolean gender) {
-        this.gender = gender;
-    }
-
-    public Integer getCreatedBy() {
-        return createdBy;
-    }
-
-    public void setCreatedBy(Integer createdBy) {
-        this.createdBy = createdBy;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
 }

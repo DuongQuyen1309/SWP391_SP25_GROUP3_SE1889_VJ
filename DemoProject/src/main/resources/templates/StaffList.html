@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Staff Accounts</title>
+    <link rel="stylesheet" href="/css/list.css">
+    <script src="/js/home.js"></script>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+    <h2><a href="/home">RSMS</a></h2>
+    <a href="/login" class="login">Login</a>
+</div>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <h2>Feature</h2>
+    <a href="/userprofile">Profile</a>
+    <a href="/list">Account Management</a>
+    <a href="/staff-list">Staff List</a>
+</div>
+
+<!-- Content -->
+<div class="content" id="content">
+    <h1>List of Staff Accounts</h1>
+    <table class="styled-table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Display Name</th>
+            <th>Name</th>
+            <th>Role</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="account : ${accounts}">
+            <td th:text="${account.id}"></td>
+            <td th:text="${account.username}"></td>
+            <td th:text="${account.displayName}"></td>
+            <td th:text="${account.user.name}"></td>
+            <td th:text="${account.user.role}"></td>
+            <td>
+                <a th:href="@{/edit/{id}(id=${account.user.id})}">Edit</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<footer>
+    &copy; 2025 Rice Sales Management. All Rights Reserved.
+</footer>
+
+</body>
+</html>

@@ -6,68 +6,38 @@ import jakarta.persistence.*;
 @Table(name = "account")
 public class Account {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "account_gen")
-    @SequenceGenerator(name = "account_gen",sequenceName = "id", allocationSize = 1)
-    @Column(name = "ID", nullable = false, columnDefinition = "Numeric(18)")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID", nullable = false)
     private Long id;
+
     @Column(name = "USERNAME", length = 50, nullable = false)
     private String username;
+
     @Column(name = "PASSWORD", length = 50, nullable = false)
     private String password;
+
     @Column(name = "DISPLAYNAME", length = 50, nullable = false)
     private String displayName;
-    @Column(name = "USER_ID")
-    private Long userId;
 
-    public Account() {
-    }
+    @ManyToOne
+    @JoinColumn(name = "USER_ID", nullable = false)
+    private User user;
 
-    public Account(String username, Long id, String password, String displayName) {
-        this.username = username;
-        this.id = id;
-        this.password = password;
-        this.displayName = displayName;
-    }
+    public Account() {}
 
-    public Long getId() {
-        return id;
-    }
+    // Getters và Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
 
-    public String getUsername() {
-        return username;
-    }
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+    public String getDisplayName() { return displayName; }
+    public void setDisplayName(String displayName) { this.displayName = displayName; }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
 }
-
-
