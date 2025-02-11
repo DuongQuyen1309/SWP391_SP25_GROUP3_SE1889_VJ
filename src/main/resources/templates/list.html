@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>List of Students</title>
+    <link rel="stylesheet" href="/css/list.css">
+</head>
+<!-- JavaScript -->
+<script src="/js/home.js"></script>
+<body>
+<!-- Header -->
+<div class="header">
+    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+    <h2><a href="/home">RSMS</a></h2>
+    <a href="/login" class="login">Logout</a>
+</div>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar"> <!-- Mặc định hiển thị -->
+    <h2>Feature</h2>
+    <a href="javascript:void(0);" onclick="toggleSubmenu('registerMenu')">Rice Management
+        <span class="arrow">  ▶</span></a>
+    <div id="registerMenu" class="submenu" style="display: none;">
+        <a href="/form">🍚 Rice Cooking</a>
+        <a href="/form">🍘 Sticky Rice Cooking</a>
+        <a href="/form">🥣 Porridge Cooking</a>
+        <a href="/form">🍰 Cakes and Flour Making</a>
+        <a href="/form">🍶 Rice Wine or Wine Making</a>
+        <a href="/form">🥗 Special Nutrition</a>
+        <a href="/form">🍙 Foreign Dishes </a>
+    </div>
+    <a href="javascript:void(0);" onclick="toggleSubmenu('listMenu')">Inventory Management
+        <span class="arrow">  ▶</span></a>
+    <div id="listMenu" class="submenu" style="display: none;">
+        <a href="/list">Import Rice</a>
+
+    </div>
+</div>
+<div class="content" id="content">
+    <h1>List of Students</h1>
+    <table class="styled-table">
+        <thead>
+        <tr>
+            <td>ID</td>
+            <td>First Name</td>
+            <td>Last Name</td>
+            <td>Mark</td>
+            <td>Action</td>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="student : ${students}">
+            <td th:text="${student.id}"></td>
+            <td th:text="${student.firstName}"></td>
+            <td th:text="${student.lastName}"></td>
+            <td th:text="${student.marks}"></td>
+            <td>
+                <form th:action="@{/delete}" method="post">
+                    <input type="hidden" name="id" th:value="${student.id}">
+                    <button type="submit">Delete</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+</body>
+</html>

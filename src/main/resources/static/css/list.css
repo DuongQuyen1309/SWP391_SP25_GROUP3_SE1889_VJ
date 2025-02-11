@@ -1,0 +1,227 @@
+/* styles.css */
+
+/* Reset mặc định */
+
+html,body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    display: flex; /* Bố cục ngang để hiển thị cả sidebar và content */
+    height: 100vh; /* Chiều cao toàn màn hình */
+    overflow: hidden;
+}
+
+/* Header */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #2c3e50;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    color: white;
+}
+.header h2 a {
+    text-decoration: none;
+    color: white;
+}
+
+.header h2 {
+    margin: 0;
+    text-decoration: none;
+    color: white;
+}
+
+.header .login {
+    display: flex;
+    gap: 10px;
+    text-decoration: none;
+    color: #2c3e50;
+    background-color: white;
+    padding: 8px 15px;
+    border: 1px solid white;
+    border-radius: 5px;
+    transition: background-color 0.3s, color 0.3s;
+    cursor: pointer;
+    margin-right: 40px;
+}
+
+.header .login:hover {
+    background-color: #1a252f;
+    color: white;
+}
+
+
+
+/* Sidebar */
+.sidebar {
+
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 250px;
+    background-color: #2c3e50;
+    color: white;
+    height: 90%; /* Chiều cao full màn hình */
+    padding: 60px 20px 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
+    overflow-y: auto; /* Cuộn nếu nội dung dài */
+    margin-top: 20px; /* Đẩy xuống dưới header */
+    scrollbar-width: thin; /* Điều chỉnh độ dày thanh cuộn (đối với Firefox) */
+    scrollbar-color: #ccc #2c3e50; /* Màu thanh cuộn: thanh trượt và nền */
+    transition: transform 0.3s ease-in-out;
+}
+
+.sidebar h2 {
+    margin: 0 0 10px;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    width: 100%;
+    border-bottom: 1px solid #7f8c8d;
+    padding-bottom: 10px;
+}
+
+.sidebar a {
+    text-decoration: none;
+    color: #ecf0f1;
+    font-size: 18px;
+    padding: 10px 15px;
+    margin: 5px 0 20px;
+    border-bottom: 1px solid #7f8c8d;
+    border-radius: 5px;
+    display: block; /* Đảm bảo các liên kết chiếm toàn bộ chiều rộng */
+    transition: background-color 0.3s ease;
+}
+
+.sidebar a:hover {
+    background-color: #34495e;
+}
+
+.sidebar.show {
+    transform: translateX(0); /* Hiện sidebar */
+}
+/* Khi sidebar ẩn, trượt sang trái */
+.sidebar.hide {
+    transform: translateX(-300px);
+}
+.sidebar.hide + .content {
+    left: 0; /* Khi sidebar bị thu gọn, bảng kéo dài sang trái */
+}
+
+.arrow {
+    display: inline-block;
+    transition: transform 0.3s;
+    margin-left: 5px;
+}
+
+/* Content */
+.content {
+    position: absolute; /* Để cố định vị trí */
+    top: 60px; /* Tránh che bởi header */
+    right: 0; /* Mép phải cố định */
+    bottom: 0;
+    left: 295px; /* Vị trí mép trái khi sidebar mở */
+    background-color: #f8f9fa; /* Màu nền nhạt */
+    overflow-y: auto; /* Cho phép cuộn nội dung */
+    transition: left 0.3s ease; /* Hiệu ứng co giãn mượt */
+    padding: 20px; /* Khoảng cách bên trong content */
+}
+
+
+.styled-table {
+    width: 100%; /* Chiếm toàn bộ chiều rộng khung nội dung */
+    border-collapse: collapse; /* Loại bỏ khoảng cách giữa các ô */
+    font-size: 16px; /* Kích thước chữ dễ đọc */
+    font-family: Arial, sans-serif; /* Font chữ đẹp */
+    color: #f2f2f2; /* Màu chữ sáng để nổi bật */
+    background-color: #34495e; /* Màu nền bảng */
+    margin: 20px 0; /* Khoảng cách trên dưới */
+    border: 1px solid #2c3e50; /* Viền ngoài bảng */
+    border-radius: 8px; /* Bo góc nhẹ cho bảng */
+    overflow: hidden; /* Đảm bảo bo góc cũng áp dụng với nội dung bảng */
+}
+
+.styled-table thead {
+    background-color: #2c3e50; /* Màu nền của header bảng */
+    color: #fff; /* Màu chữ header */
+    text-align: left; /* Căn chữ sang trái */
+    font-weight: bold; /* Chữ header đậm hơn */
+}
+
+.styled-table th,
+.styled-table td {
+    padding: 12px 15px; /* Khoảng cách bên trong các ô */
+    text-align: center; /* Căn giữa nội dung */
+    border-bottom: 1px solid #2c3e50; /* Viền dưới giữa các hàng */
+}
+
+.styled-table tbody tr {
+    transition: background-color 0.2s; /* Hiệu ứng hover */
+}
+
+.styled-table tbody tr:nth-of-type(even) {
+    background-color: #3c566e; /* Màu nền khác cho các hàng chẵn */
+}
+
+.styled-table tbody tr:hover {
+    background-color: #1abc9c; /* Màu nền khi hover */
+}
+
+.styled-table button {
+    background-color: #e74c3c; /* Màu đỏ cho nút xóa */
+    color: #fff; /* Chữ trắng */
+    border: none; /* Loại bỏ viền nút */
+    border-radius: 4px; /* Bo góc nhẹ cho nút */
+    padding: 6px 12px; /* Khoảng cách bên trong nút */
+    cursor: pointer; /* Thêm hiệu ứng con trỏ */
+    font-size: 14px; /* Chữ vừa phải */
+    transition: background-color 0.2s; /* Hiệu ứng chuyển màu */
+}
+
+.styled-table button:hover {
+    background-color: #c0392b; /* Màu đỏ đậm hơn khi hover */
+}
+
+/* Menu button styles */
+.menu-btn {
+    cursor: pointer;
+    font-size: 24px;
+    background: none;
+    border: none;
+    color: white;
+    outline: none;
+}
+.submenu {
+    margin-left: 20px;
+
+    padding-left: 20px;
+}
+
+.submenu a {
+    display: block;
+    color: #ecf0f1;
+    text-decoration: none;
+    margin-bottom: 15px; /* Tăng khoảng cách giữa các mục con */
+    padding: 5px 0;
+}
+
+.submenu a:hover {
+    text-decoration: underline;
+}
+footer {
+    text-align: center;
+    padding: 10px;
+    background-color: #2c3e50;
+    color: white;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="/css/login.css">
+</head>
+<body>
+<!-- Header -->
+<div class="header">
+    <h2><a href="/homepage">RSMS</a></h2>
+</div>
+<section class="bottom">
+    <!-- Background Image -->
+    <img th:src="@{/images/account.jpg}" alt="Logo" class="background-img">
+
+    <!-- Login Form -->
+    <div class="login-container">
+        <h2>Register</h2>
+        <form action="/login" method="post">
+            <div class="input-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div class="input-group">
+                <label for="displayname">Displayname</label>
+                <input type="text" id="displayname" name="displayname" required>
+            </div>
+            <button type="submit" class="btn">Create</button>
+            
+        </form>
+    </div>
+</section>
+</body>
+
+</html>
