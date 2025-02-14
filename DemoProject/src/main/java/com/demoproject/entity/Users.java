@@ -38,8 +38,8 @@ public class Users {
     @Column(name = "isDelete")
     private Boolean isDelete = false;
 
-    @Column(name = "warehouse_id")
-    private Integer warehouseId;
+    @Column(name = "warehouseName")
+    private String warehouseName;
 
     @Column(name = "permission_data", columnDefinition = "NVARCHAR(MAX)")
     private String permissionData;
@@ -150,12 +150,12 @@ public class Users {
         isDelete = delete;
     }
 
-    public Integer getWarehouseId() {
-        return warehouseId;
+    public String getWarehouseName() {
+        return warehouseName;
     }
 
-    public void setWarehouseId(Integer warehouseId) {
-        this.warehouseId = warehouseId;
+    public void setWarehouseName(String warehouseName) {
+        this.warehouseName = warehouseName;
     }
 
     public String getPermissionData() {
