@@ -47,6 +47,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/register","/login","/resetpw","/api/logout","api/user/**","/api/auth/**","/api/**", "/css/**", "/js/**", "/images/**").permitAll() // Cho phép truy cập trang đăng ký
                         .requestMatchers("/listOwner").hasAuthority("ADMIN")
+                        .requestMatchers("/listCustomer").hasAuthority("ADMIN")
+                        .requestMatchers("/createCustomer").hasAuthority("ADMIN")
+                        .requestMatchers("/updateCustomer/**").hasAuthority("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .logout(logout -> logout

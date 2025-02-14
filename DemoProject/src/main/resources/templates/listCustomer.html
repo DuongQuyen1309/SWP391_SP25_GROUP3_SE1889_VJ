@@ -1,10 +1,187 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <title>Rice Sales Management</title>
+    <link rel="stylesheet" href="/css/list.css">
+    <style>
+        .pagination {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .pagination a {
+            display: inline-block;
+            padding: 8px 16px;
+            margin: 4px;
+            text-decoration: none;
+            background-color: #2c3e50;
+            color: white;
+            border-radius: 5px;
+        }
+
+        .pagination a:hover {
+            background-color: #1a252f;
+        }
+
+        .pagination span {
+            font-size: 18px;
+            margin: 0 10px;
+        }
+
+    </style>
+    <script src="/js/home.js"></script>
+    <script>
+        function confirmUpdate(event, form) {
+            event.preventDefault(); // Ngăn form submit ngay lập tức
+            if (confirm("Are you sure to update customer?")) {
+                form.submit(); // Nếu người dùng xác nhận, tiếp tục submit form
+            }
+        }
+    </script>
+    <script>
+        function callPage() {
+            window.location.href ="/createCustomer";
+        }
+        function showCreatedSuccess() {
+            alert("You are successfully created!");
+        }
+    </script>
+    <script type="text/javascript">
+        function showMessage(messageType, message) {
+            if (message && messageType) {
+                alert(message);
+                // Điều hướng về trang listCustomer sau 3 giây
+                setTimeout(function () {
+                    window.location.href = "/listCustomer";
+                });
+                // Hiển thị thông báo bằng alert
+            }
+        }
+    </script>
 </head>
 <body>
-$END$
+
+<!-- Header -->
+<div class="header">
+    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+    <h2><a href="/home">RSMS</a></h2>
+    <button id="logout" class="logout">Logout</button>
+</div>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+
+    <h2>Feature</h2>
+    <a href="/userprofile" >Profile</a>
+    <a href="/listOwner" >Account Management</a>
+
+    <div id="accountMenu" class="submenu" style="display: none;">
+
+    </div>
+    <a href="/listOwner" >Rice Management</a>
+
+    <a href="/listCustomer" >Customer Management</a>
+
+    <a href="listOwner" >Warehouse Management</a>
+
+
+    <a href="javascript:void(0);" onclick="toggleSubmenu('inventoryMenu')">Inventory Management
+        <span class="arrow">  ▶</span></a>
+    <div id="inventoryMenu" class="submenu" style="display: none;">
+        <a href="/listOwner">Import Rice</a>
+        <a href="/listOwner">Import Rice</a>
+        <a href="/listOwner">Import Rice</a>
+        <a href="/listOwner">Import Rice</a>
+        <a href="/listOwner">Import Rice</a>
+        <a href="/listOwner">Import Rice</a>
+    </div>
+</div>
+
+
+<!-- Content -->
+<div class="content" id="content">
+
+    <!-- Modal Form -->
+    <button class="add-btn" onclick="callPage()">+</button>
+    <div id="studentFormModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeForm()">&times;</span>
+            <h2>Add new account</h2>
+            <form th:action="@{/createOwner}" method="post" onsubmit="showSuccessAlert()" >
+
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+
+                <label for="password">Password:</label>
+                <input type="text" id="password" name="password" required>
+
+                <label for="displayname">Displayname:</label>
+                <input type="text" id="displayname" name="displayname" required>
+
+                <button type="submit" class="submit-button">Create</button>
+            </form>
+        </div>
+    </div>
+    <div id="messageBox">
+        <script type="text/javascript">
+            // Gọi hàm showMessage với messageType và message từ flash attributes
+            /* Thymeleaf sẽ thay thế các giá trị này */
+            let messageType = '[[${messageType}]]';
+            let message = '[[${message}]]';
+
+            if (message && message.trim() !== '') {
+                showMessage(messageType, message);
+            }
+        </script>
+    </div>
+    <!-- List -->
+    <h1>List of Customer Information</h1>
+    <table class="styled-table">
+        <thead>
+        <tr>
+            <td>Id</td>
+            <td>Name</td>
+            <td>Date of Birth</td>
+            <td>Address</td>
+            <td>Phone</td>
+            <td>MoneyState</td>
+            <td>Action</td>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="customer : ${customers}">
+            <td th:if="${customer != null}" th:text="${customer.id}"></td>
+            <td th:if="${customer != null}" th:text="${customer.name}"></td>
+            <td th:if="${customer != null}" th:text="${customer.dob}"></td>
+            <td th:if="${customer != null}" th:text="${customer.address}"></td>
+            <td th:if="${customer != null}" th:text="${customer.phone}"></td>
+            <td th:if="${customer != null}" th:text="${customer.moneyState}"></td>
+            <td>
+                <form th:action="@{/updateCustomer/{id}(id=${customer.id})}" method="get">
+                    <button type="submit">Update</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+
+    </table>
+    <!-- Phân trang -->
+    <div class="pagination">
+        <a th:if="${currentPage > 0}" th:href="@{/listCustomer(page=${currentPage - 1}, size=5)}">Previous</a>
+
+        <span>Page <span th:text="${currentPage + 1}"></span> of <span th:text="${totalPages}"></span></span>
+
+        <a th:if="${currentPage + 1 < totalPages}" th:href="@{/listCustomer(page=${currentPage + 1}, size=5)}">Next</a>
+    </div>
+
+
+
+</div>
+<footer>
+    &copy; 2025 Rice Sales Management. All Rights Reserved.
+</footer>
+
 </body>
 </html>
