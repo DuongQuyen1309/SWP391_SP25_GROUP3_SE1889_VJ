@@ -3,6 +3,7 @@ package com.demoproject.service;
 import com.demoproject.dto.ProductDTO;
 import com.demoproject.entity.Product;
 import com.demoproject.repository.ProductRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,10 +16,10 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class ProductService {
 
-    @Autowired
-    private ProductRepository productRepository;
+    private final ProductRepository productRepository;
 
     public void createProduct(ProductDTO productDTO) {
         Product product = new Product();
@@ -28,7 +29,7 @@ public class ProductService {
         product.setCreatedBy(productDTO.getCreatedBy());
 //        product.setCreatedAt(LocalDateTime.now());
         product.setUpdatedAt(LocalDateTime.now());
-        product.setIsDeleted("0");
+        product.setIsDeleted(0);
 
         productRepository.save(product);
     }
@@ -46,7 +47,7 @@ public class ProductService {
 
         if (optionalProduct.isPresent()) {
             Product product = optionalProduct.get();
-            product.setIsDeleted("1"); // Soft delete
+            product.setIsDeleted(1); // Soft delete
             product.setDeletedAt(LocalDateTime.now());
 //            product.setDeletedBy(deletedBy);
 
@@ -73,30 +74,17 @@ public class ProductService {
         }
     }
 
-    public void saveProduct(ProductDTO productDTO) {
-        Product product = new Product();
-        product.setName(productDTO.getName());
-        product.setDescription(productDTO.getDescription());
-        product.setPrice(productDTO.getPrice());
-        product.setCreatedBy(productDTO.getCreatedBy());
-//        product.setCreatedAt(LocalDateTime.now());
-        product.setUpdatedAt(LocalDateTime.now());
-        product.setIsDeleted("0");
 
-        productRepository.save(product);
+    public List<Product> getAllProductIsDeleted() {
+        return productRepository.getProductByIsDeleted(0);
     }
 
-    public Page<Product> getProductsWithPaginationAndSorting(int page, int size, String sortBy, String direction) {
-        // Xác định Sort (ASC/DESC)
-        Sort sort = direction.equalsIgnoreCase(Sort.Direction.ASC.name())
-                ? Sort.by(sortBy).ascending()
-                : Sort.by(sortBy).descending();
-
-        // Tạo Pageable object
+    public Page<Product> getAllProductByPage(int page, int size, String sortFiled, String sortDirection){
+        Sort sort = sortDirection.equalsIgnoreCase("asc")
+                ? Sort.by(sortFiled).ascending() :
+                Sort.by(sortFiled).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
-
-        // Lấy danh sách phân trang từ Repository
-        return productRepository.findAllByIsDeleted("0",pageable);
+        return productRepository.findAll(pageable);
     }
 
 

@@ -5,11 +5,13 @@ import com.demoproject.entity.Product;
 import com.demoproject.repository.ProductRepository;
 import com.demoproject.service.ProductService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -22,41 +24,46 @@ public class ProductController {
             @RequestParam("name") String name,
             @RequestParam("price") double price,
             @RequestParam("description") String description
-//            @RequestParam("image") MultipartFile image
+
     ) {
-        // Tạo object Product
+
         Product product = new Product();
         product.setName(name);
         product.setPrice(price);
         product.setDescription(description);
-        product.setIsDeleted("0");
+        product.setIsDeleted(0);
 
-        // Xử lý và lưu đường dẫn hình ảnh
-//        String filePath = "uploads/" + image.getOriginalFilename();
-//        product.setImage(filePath);
-
-        // Lưu vào database
         productRepository.save(product);
 
         return "redirect:/listproduct";
     }
 
     @GetMapping("/listproduct")
-    public String listProducts(Model model) {
-        // Lấy danh sách sản phẩm từ ProductService
-        model.addAttribute("listproduct", productService.getAllProducts());
+    public String showListProducts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "id") String sortField,
+            @RequestParam(defaultValue = "asc") String sortDirection,
+            Model model) {
+        Page<Product> productPage = productService.getAllProductByPage(page, size, sortField, sortDirection);
+
+        model.addAttribute("products", productPage);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", productPage.getTotalPages());
+        model.addAttribute("sortField", sortField);
+        model.addAttribute("sortDirection", sortDirection);
+        model.addAttribute("reverseSortDirection", sortDirection.equals("asc") ? "desc" : "asc");
+
+//        List<Product> products = productService.getAllProductIsDeleted();
+//        model.addAttribute("products", products);
         return "listproduct";
     }
 
     @PostMapping("/delete")
     public String deleteProduct(@RequestParam int id) {
-//        try {
-//            productService.deleteProduct(productId, "admin");
-//        } catch (Exception e) {
-//            return "error";
-//        }
+
         Product product = productService.getProductById(id);
-        product.setIsDeleted("1");
+        product.setIsDeleted(1);
         productRepository.save(product);
         return "redirect:/listproduct";
     }
@@ -68,11 +75,7 @@ public class ProductController {
             @RequestParam("newPrice") double price,
             @RequestParam("newDescription") String description
     ) {
-//        try {
-//            productService.deleteProduct(productId, "admin");
-//        } catch (Exception e) {
-//            return "error";
-//        }
+
         Product product = productService.getProductById(id);
         product.setName(name);
         product.setPrice(price);

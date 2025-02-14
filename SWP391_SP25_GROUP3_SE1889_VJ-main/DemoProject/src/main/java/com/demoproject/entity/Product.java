@@ -53,5 +53,5 @@ public class Product {
     LocalDateTime deletedAt;
 
     @Column(name = "isDelete", nullable = true)
-    String isDeleted;
+    int isDeleted;
 }

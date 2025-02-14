@@ -24,30 +24,12 @@
     <h2>Feature</h2>
     <a href="/list">Account Management</a>
 
-    <div id="accountMenu" class="submenu" style="display: none;">
 
-    </div>
-    <a href="javascript:void(0);" onclick="toggleSubmenu('riceMenu')">Rice Management
-        <span class="arrow">  ▶</span></a>
-    <div id="riceMenu" class="submenu" style="display: none;">
-        <a href="/list">🍚 Rice Cooking</a>
-        <a href="/list">🍘 Sticky Rice Cooking</a>
-        <a href="/list">🥣 Porridge Cooking</a>
-        <a href="/list">🍰 Cakes and Flour Making</a>
-        <a href="/list">🍶 Rice Wine or Wine Making</a>
-        <a href="/list">🥗 Special Nutrition</a>
-        <a href="/list">🍙 Foreign Dishes </a>
-    </div>
-    <a href="javascript:void(0);" onclick="toggleSubmenu('inventoryMenu')">Inventory Management
-        <span class="arrow">  ▶</span></a>
-    <div id="inventoryMenu" class="submenu" style="display: none;">
-        <a href="/list">Import Rice</a>
-        <a href="/list">Import Rice</a>
-        <a href="/list">Import Rice</a>
-        <a href="/list">Import Rice</a>
-        <a href="/list">Import Rice</a>
-        <a href="/list">Import Rice</a>
-    </div>
+    <a href="/listproduct" onclick="toggleSubmenu('riceMenu')">Rice Management</a>
+
+
+    <a href="javascript:void(0);" onclick="toggleSubmenu('inventoryMenu')">Inventory Management</a>
+
 </div>
 
 
@@ -87,20 +69,28 @@
         <thead>
         <tr>
             <td>Image</td>
-            <td>Name</td>
-            <td>Price</td>
+            <th>
+                <a style="text-decoration: none; color: inherit"
+                   th:href="@{/listproduct(page=${currentPage}, sortField='name', sortDirection=${reverseSortDirection})}">Name
+                </a>
+            </th>
+            <td>
+                <a style="text-decoration: none; color: inherit"
+                   th:href="@{/listproduct(page=${currentPage}, sortField='price', sortDirection=${reverseSortDirection})}">Price
+                </a>
+            </td>
             <td>Description</td>
             <td>Action</td>
         </tr>
         </thead>
         <tbody>
-            <tr th:each="product : ${listproduct} " th:if="${product.isDeleted == '0'}">
+            <tr th:each="product : ${products.content} " th:if="${product.isDeleted == 0}">
 <!--                <td th:text="${product.name}"></td>-->
-                <td><img src="https://tvfood.com.vn/vnt_upload/news/09_2023/gao_nep_la_gi.jpg" width="100px"></td>
+                <td><img src="https://tvfood.com.vn/vnt_upload/news/09_2023/gao_nep_la_gi.jpg" width="100px" alt=""></td>
                 <td th:text="${product.name}"></td>
                 <td th:text="${product.price}"></td>
                 <td th:text="${product.description}"></td>
-                <td>
+                <td >
                     <form th:action="@{/delete}" method="post">
                         <input type="hidden" name="id" th:value="${product.id}">
                         <button type="submit">Delete</button>
@@ -134,7 +124,11 @@
         </tbody>
     </table>
 
-
+    <div>
+        <span th:text="'Trang ' + ${currentPage + 1} + ' / ' + ${totalPages}"></span>
+        <a style="text-decoration: none; color: inherit" th:if="${currentPage > 0}" th:href="@{/listproduct(page=${currentPage - 1}, sortField=${sortField}, sortDirection=${sortDirection})}">Trước</a>
+        <a style="text-decoration: none; color: inherit" th:if="${currentPage + 1 < totalPages}" th:href="@{/listproduct(page=${currentPage + 1}, sortField=${sortField}, sortDirection=${sortDirection})}">Sau</a>
+    </div>
 
 
 
