@@ -6,23 +6,20 @@ import com.demoproject.jwt.JwtUtils;
 import com.demoproject.repository.AccountRepository;
 import com.demoproject.service.AccountService;
 import com.demoproject.service.UserService;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
 import org.springframework.ui.Model;
 
 import java.time.LocalDate;
-import java.util.Map;
 
 
-import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 @Controller
 public class UserController {
     @Autowired
@@ -50,13 +47,26 @@ public class UserController {
 
         String username = jwtUtils.extractUsername(token);
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        String role= jwtUtils.extractRole(token);
+        List<String> listHiddenPage = new ArrayList<>();
+        if(role.equals("OWNER")||role.equals("STAFF")){
+            listHiddenPage.add("listOwner");
+        }
+        if(role.equals("ADMIN")){
+            listHiddenPage.add("listStaff");
+            listHiddenPage.add("listCustomer");
+            listHiddenPage.add("listRice");
+            listHiddenPage.add("listWarehouse");
+            listHiddenPage.add("listInvoice");
+        }
+        model.addAttribute("listHiddenPage",listHiddenPage);
 
         if (!jwtUtils.validateToken(token, userDetails)) {
             return "redirect:/login";
         }
-        Account account= accountService.findByUsername(username);
-        Users user= userService.getUserProfile(account.getUserId());
-
+        Optional<Account> account= accountService.findByUsername(username);
+        Optional<Users> userOpt= userService.getUserProfile(account.get().getUserId());
+        Users user = userOpt.orElse(new Users());
         model.addAttribute("user", user);
         return "userprofile";
     }
@@ -70,14 +80,14 @@ public class UserController {
     ) {
         String username = jwtUtils.extractUsername(token);
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-        Account account= accountService.findByUsername(username);
-        Users user= userService.getUserProfile(account.getUserId());
-        user.setName(name);
-        user.setPhone(phone);
-        user.setAddress(address);
-        user.setDateOfBirth(LocalDate.parse(dob));
-        user.setGender(Boolean.parseBoolean(gender));
-        userService.saveUserProfile(user);
+        Optional<Account> account= accountService.findByUsername(username);
+        Optional<Users> user= userService.getUserProfile(account.get().getUserId());
+        user.get().setName(name);
+        user.get().setPhone(phone);
+        user.get().setAddress(address);
+        user.get().setDateOfBirth(LocalDate.parse(dob));
+        user.get().setGender(Boolean.parseBoolean(gender));
+        userService.saveUserProfile(user.orElse(null));
 
 
         return "redirect:/userprofile";

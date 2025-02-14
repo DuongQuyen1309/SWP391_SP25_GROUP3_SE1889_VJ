@@ -65,7 +65,12 @@
     <script src="/js/home.js"></script>
     <script>
 
-
+        window.onload = function() {
+            let alertMessage = "[[${alertMessage}]]";
+            if (alertMessage && alertMessage !== "null") {
+                alert(alertMessage);
+            }
+        };
 
 
 
@@ -131,15 +136,17 @@
 <div class="sidebar" id="sidebar">
     <h2>Feature</h2>
     <a href="/userprofile" >Profile</a>
-    <a href="/listOwner" >Account Management</a>
+    <a href="/listOwner" th:style="${#lists.contains(listHiddenPage, 'listOwner')} ? 'display: none;' : ''" >Owner Account Management</a>
 
-    <a href="listOwner" >Rice Management</a>
+    <a href="/listStaff" th:style="${#lists.contains(listHiddenPage, 'listStaff')} ? 'display: none;' : ''">Staff Account Management</a>
 
-    <a href="listOwner" >Customer Management</a>
+    <a href="/listRice" th:style="${#lists.contains(listHiddenPage, 'listRice')} ? 'display: none;' : ''" >Rice Management</a>
 
-    <a href="listOwner" >Warehouse Management</a>
+    <a href="/listCustomer" th:style="${#lists.contains(listHiddenPage, 'listCustomer')} ? 'display: none;' : ''">Customer Management</a>
 
-    <a href="javascript:void(0);" onclick="toggleSubmenu('inventoryMenu')">Inventory Management
+    <a href="/listWarehouse" th:style="${#lists.contains(listHiddenPage, 'listWarehouse')} ? 'display: none;' : ''" >Warehouse Management</a>
+
+    <a href="javascript:void(0);" onclick="toggleSubmenu('inventoryMenu')" th:style="${#lists.contains(listHiddenPage, 'listInvoice')} ? 'display: none;' : ''" >Invoice Management
         <span class="arrow">  ▶</span></a>
     <div id="inventoryMenu" class="submenu" style="display: none;">
         <a href="/listOwner">Import Rice</a>

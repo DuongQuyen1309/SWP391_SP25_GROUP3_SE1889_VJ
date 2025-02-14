@@ -4,6 +4,8 @@ import com.demoproject.entity.Users;
 import com.demoproject.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class UserService {
     private final UserRepository userRepository;
@@ -12,7 +14,7 @@ public class UserService {
     }
 
 
-    public Users getUserProfile(Long id) {
+    public Optional<Users> getUserProfile(Long id) {
         return userRepository.findById(id);
 
     }

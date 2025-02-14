@@ -12,14 +12,14 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID", nullable = false, columnDefinition = "Numeric(18)")
     private Long id;
-    @Column(name = "USERNAME", length = 50, nullable = false)
+    @Column(name = "USERNAME", length = 50, nullable = false, unique = true)
     private String username;
     @Column(name = "PASSWORD", length = 255, nullable = false)
     private String password;
     @Column(name = "DISPLAYNAME", length = 50, nullable = false)
     private String displayName;
     @Column(name = "createdBy")
-    private Integer createdBy;
+    private Long createdBy;
 
     @Column(name = "createdAt")
     private LocalDate createdAt;
@@ -87,11 +87,11 @@ public class Account {
         this.userId = userId;
     }
 
-    public Integer getCreatedBy() {
+    public Long getCreatedBy() {
         return createdBy;
     }
 
-    public void setCreatedBy(Integer createdBy) {
+    public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
     }
 

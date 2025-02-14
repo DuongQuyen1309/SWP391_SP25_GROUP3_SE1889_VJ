@@ -31,8 +31,10 @@
                 <label for="displayname">Displayname</label>
                 <input type="text" id="displayname" name="displayname" required>
             </div>
+
+            <p style="color: red;" th:if="${error}" th:text="${error}"></p>
             <button type="submit" class="btn">Create</button>
-            
+
         </form>
     </div>
 </section>

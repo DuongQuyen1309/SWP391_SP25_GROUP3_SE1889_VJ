@@ -10,6 +10,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
@@ -22,18 +24,18 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Account accountOpt = accountRepository.findByUsername(username);
+        Optional<Account> accountOpt = accountRepository.findByUsername(username);
 
-        if (accountOpt==null) {
+        if (accountOpt.isEmpty()) {
             throw new UsernameNotFoundException("User not found: " + username);
         }
 
-        Account account = accountOpt;
+        Optional<Account> account = accountOpt;
 
         // ✅ Tạo `UserDetails` để Spring Security sử dụng
         return User.builder()
-                .username(account.getUsername())
-                .password(account.getPassword()) // Mật khẩu đã mã hóa
+                .username(account.get().getUsername())
+                .password(account.get().getPassword()) // Mật khẩu đã mã hóa
                 .roles("USER") // Gán quyền mặc định "USER"
                 .build();
     }

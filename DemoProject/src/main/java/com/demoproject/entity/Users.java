@@ -23,7 +23,7 @@ public class Users {
     @Column(name = "GENDER")
     private Boolean gender;
     @Column(name = "createdBy")
-    private Integer createdBy;
+    private Long createdBy;
     @Column(name = "ROLE" ,length = 50)
     private String role;
     @Column(name = "createdAt")
@@ -38,11 +38,10 @@ public class Users {
     @Column(name = "isDelete")
     private Boolean isDelete = false;
 
-    @Column(name = "warehouse_id")
-    private Integer warehouseId;
+    @Column(name = "warehouse_name")
+    private String warehouseName;
 
-    @Column(name = "permission_data", columnDefinition = "NVARCHAR(MAX)")
-    private String permissionData;
+
 
 
 
@@ -98,11 +97,11 @@ public class Users {
         this.gender = gender;
     }
 
-    public Integer getCreatedBy() {
+    public Long getCreatedBy() {
         return createdBy;
     }
 
-    public void setCreatedBy(Integer createdBy) {
+    public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
     }
 
@@ -150,19 +149,11 @@ public class Users {
         isDelete = delete;
     }
 
-    public Integer getWarehouseId() {
-        return warehouseId;
+    public String getWarehouseName() {
+        return warehouseName;
     }
 
-    public void setWarehouseId(Integer warehouseId) {
-        this.warehouseId = warehouseId;
-    }
-
-    public String getPermissionData() {
-        return permissionData;
-    }
-
-    public void setPermissionData(String permissionData) {
-        this.permissionData = permissionData;
+    public void setWarehouseName(String warehouseName) {
+        this.warehouseName = warehouseName;
     }
 }

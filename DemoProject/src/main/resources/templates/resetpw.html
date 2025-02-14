@@ -46,6 +46,7 @@
                 <input type="password" id="confirmPassword" name="confirmPassword" required>
             </div>
             <p id="passwordError" style="color: red; font-size: 14px;"></p>
+            <p style="color: red;font-size: 14px" th:if="${error}" th:text="${error}"></p>
             <button type="submit" class="btn">Change Password</button>
 
         </form>

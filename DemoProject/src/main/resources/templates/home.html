@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Rice Sales Management</title>
@@ -24,15 +24,18 @@
 
     <h2>Feature</h2>
     <a href="/userprofile" >Profile</a>
-    <a href="/listOwner" >Account Management</a>
+    <a href="/listOwner" th:style="${#lists.contains(listHiddenPage, 'listOwner')} ? 'display: none;' : ''" >Account Management</a>
 
-    <a href="listOwner" >Rice Management</a>
+    <a href="" th:style="${#lists.contains(listHiddenPage, 'listStaff')} ? 'display: none;' : ''">Staff Management</a>
 
-    <a href="listOwner" >Customer Management</a>
+    <a href="/listOwner" >Rice Management</a>
 
-    <a href="listOwner" >Warehouse Management</a>
+    <a href="/listOwner" >Customer Management</a>
 
-    <a href="javascript:void(0);" onclick="toggleSubmenu('inventoryMenu')">Inventory Management
+    <a href="/listOwner" >Warehouse Management</a>
+
+
+    <a href="javascript:void(0);" onclick="toggleSubmenu('inventoryMenu')">Invoice Management
     <span class="arrow">  ▶</span></a>
     <div id="inventoryMenu" class="submenu" style="display: none;">
         <a href="/listOwner">Import Rice</a>
@@ -46,8 +49,29 @@
 
 <!-- Content -->
 <div class="content" id="content"> <!-- Mặc định đẩy nội dung sang phải -->
-    <h1>Simple Sidebar</h1>
-    <p>Make sure to keep all page content within the <strong>.content</strong> div.</p>
+    <div class="intro-container">
+        <h1>Welcome to <span class="highlight">RSMS</span></h1>
+        <p class="intro-text">
+            Your trusted solution for effortless rice business management.
+        </p>
+        <div class="intro-features">
+            <div class="feature-item">
+                <h3>📦 Inventory Tracking</h3>
+                <p>Monitor stock levels and ensure efficient supply management</p>
+            </div>
+            <div class="feature-item">
+                <h3>🛠 Sales Assistance</h3>
+                <p>Empower sales staff with easy access to product information and customer details</p>
+            </div>
+            <div class="feature-item">
+                <h3>👥 Customer Management</h3>
+                <p>Engage with customers and streamline service processes</p>
+            </div>
+        </div>
+        <p class="intro-text">
+            <strong>Start today</strong> and enhance your rice business effortlessly!
+        </p>
+    </div>
 </div>
 
 

@@ -15,13 +15,11 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 public class AuthController {
@@ -46,10 +44,10 @@ public class AuthController {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(username, password));
 
-            Account account= accountRepository.findByUsername(username);
-            Users user= userService.getUserProfile(account.getUserId());
+            Optional<Account> account= accountRepository.findByUsername(username);
+            Optional<Users> user= userService.getUserProfile(account.get().getUserId());
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            String token = jwtUtils.generateToken(username,user.getRole());
+            String token = jwtUtils.generateToken(username, user.get().getRole());
 
             // ✅ Lưu token vào Cookie
             Cookie cookie = new Cookie("token", token);
