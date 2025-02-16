@@ -29,6 +29,57 @@
             font-size: 18px;
             margin: 0 10px;
         }
+        .add-customer {
+            position: absolute; /* Giữ vị trí cố định so với content */
+            right: 20px; /* Sát mép phải của content */
+            top: 50px; /* Đẩy xuống dưới một chút */
+            background-color: #d35400; /* Cam */
+            color: white;
+            font-size: 13px;
+            border: none;
+            width: 160px;
+            height: 40px;
+            border-radius: 20%;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .search-form {
+            display: flex;
+            justify-content: right;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 250px;
+            outline: none;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .search-input:focus {
+            border-color: #2980b9;
+            box-shadow: 0 0 5px rgba(41, 128, 185, 0.5);
+        }
+
+        .search-button {
+            padding: 10px 15px;
+            margin-left: 10px;
+            font-size: 16px;
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .search-button:hover {
+            background-color: #1a252f;
+        }
 
     </style>
     <script src="/js/home.js"></script>
@@ -104,26 +155,8 @@
 <div class="content" id="content">
 
     <!-- Modal Form -->
-    <button class="add-btn" onclick="callPage()">+</button>
-    <div id="studentFormModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeForm()">&times;</span>
-            <h2>Add new account</h2>
-            <form th:action="@{/createOwner}" method="post" onsubmit="showSuccessAlert()" >
+    <button class="add-customer" onclick="callPage()">Create New Customer</button>
 
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username" required>
-
-                <label for="password">Password:</label>
-                <input type="text" id="password" name="password" required>
-
-                <label for="displayname">Displayname:</label>
-                <input type="text" id="displayname" name="displayname" required>
-
-                <button type="submit" class="submit-button">Create</button>
-            </form>
-        </div>
-    </div>
     <div id="messageBox">
         <script type="text/javascript">
             // Gọi hàm showMessage với messageType và message từ flash attributes
@@ -138,6 +171,16 @@
     </div>
     <!-- List -->
     <h1>List of Customer Information</h1>
+    <form th:action="@{/listCustomer}" method="get" class="search-form">
+        <input type="text" name="search" th:value="${search}" placeholder="Search by name..." class="search-input">
+
+        <select name="ctype" class="search-input">
+            <option value="">-- Select Customer Type --</option>
+            <option th:each="type : ${customerTypes}" th:value="${type}" th:text="${type}" th:selected="${type == ctype}"></option>
+        </select>
+
+        <button type="submit" class="search-button">Search</button>
+    </form>
     <table class="styled-table">
         <thead>
         <tr>
@@ -147,6 +190,7 @@
             <td>Address</td>
             <td>Phone</td>
             <td>MoneyState</td>
+            <td>Customer Type</td>
             <td>Action</td>
         </tr>
         </thead>
@@ -158,9 +202,13 @@
             <td th:if="${customer != null}" th:text="${customer.address}"></td>
             <td th:if="${customer != null}" th:text="${customer.phone}"></td>
             <td th:if="${customer != null}" th:text="${customer.moneyState}"></td>
+            <td th:if="${customer != null}" th:text="${customer.ctype}"></td>
             <td>
                 <form th:action="@{/updateCustomer/{id}(id=${customer.id})}" method="get">
                     <button type="submit">Update</button>
+                </form>
+                <form th:action="@{/listCustomer}" method="get">
+                    <button type="submit">Note Detail</button>
                 </form>
             </td>
         </tr>
@@ -169,11 +217,17 @@
     </table>
     <!-- Phân trang -->
     <div class="pagination">
-        <a th:if="${currentPage > 0}" th:href="@{/listCustomer(page=${currentPage - 1}, size=5)}">Previous</a>
+        <a th:if="${currentPage > 0}"
+           th:href="@{/listCustomer(page=${currentPage - 1}, size=5, search=${search}, ctype=${ctype})}">
+            Previous
+        </a>
 
         <span>Page <span th:text="${currentPage + 1}"></span> of <span th:text="${totalPages}"></span></span>
 
-        <a th:if="${currentPage + 1 < totalPages}" th:href="@{/listCustomer(page=${currentPage + 1}, size=5)}">Next</a>
+        <a th:if="${currentPage + 1 < totalPages}"
+           th:href="@{/listCustomer(page=${currentPage + 1}, size=5, search=${search}, ctype=${ctype})}">
+            Next
+        </a>
     </div>
 
 

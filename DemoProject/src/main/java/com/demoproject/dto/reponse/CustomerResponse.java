@@ -18,4 +18,6 @@ public class CustomerResponse {
     private LocalDate dob;
     private String phone;
     private Integer moneyState ;
+    private String ctype;
+
 }

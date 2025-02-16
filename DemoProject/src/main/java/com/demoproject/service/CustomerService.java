@@ -38,6 +38,17 @@ public class CustomerService {
         }
         return null;
     }
+    public Page<Customer> searchCustomersByNameAndType(String name, String ctype, Pageable pageable) {
+        List<Long> ids = customerRepository.findAllActiveCustomerIds();
+        if (ids.isEmpty()) {
+            return Page.empty();
+        }
+        return customerRepository.findByIdInAndIsDeleteFalseAndNameAndCtype(ids, name, ctype, pageable);
+    }
+
+    public List<String> getAllCustomerTypes() {
+        return customerRepository.findDistinctCtypes();
+    }
 
     public Page<Customer> getAllCustomersAndIsDeleteFalse(Pageable pageable) {
 
@@ -59,6 +70,8 @@ public class CustomerService {
         updatedCustomer.get().setPhone(customer.getPhone());
         updatedCustomer.get().setGender(customer.getGender());
         updatedCustomer.get().setDob(customer.getDob());
+        updatedCustomer.get().setCtype(customer.getCtype());
+        updatedCustomer.get().setUpdatedAt(customer.getUpdatedAt());
         customerRepository.save(updatedCustomer.get());
 
     }

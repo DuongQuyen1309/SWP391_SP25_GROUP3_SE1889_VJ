@@ -23,7 +23,7 @@ public class Customer {
     @Column(name = "phone", length = 11)
     private String phone;
     @Column(name = "createdBy")
-    private Integer createdBy;
+    private Long createdBy;
     @Column(name = "createdAt")
     private LocalDate createdAt;
     @Column(name = "updatedAt")
@@ -34,17 +34,20 @@ public class Customer {
     private Boolean isDelete = false;
     @Column(name = "moneyState")
     private Integer moneyState ;
+    @Column(name = "ctype")
+    private String ctype;
 
     public Customer() {
     }
 
-    public Customer(String name, Boolean gender, LocalDate dob, String address, String phone, Integer moneyState) {
+    public Customer(String name, Boolean gender, LocalDate dob, String address, String phone, Integer moneyState, String ctype) {
         this.name = name;
         this.gender = gender;
         this.dob = dob;
         this.address = address;
         this.phone = phone;
         this.moneyState = moneyState;
+        this.ctype = ctype;
     }
 
     public Customer(Long id, String name, Boolean gender, LocalDate dob, String address, String phone, Integer moneyState) {
@@ -56,6 +59,7 @@ public class Customer {
         this.phone = phone;
         this.moneyState = moneyState;
     }
+
 
     public Long getId() {
         return id;
@@ -113,11 +117,11 @@ public class Customer {
         this.createdAt = createdAt;
     }
 
-    public Integer getCreatedBy() {
+    public Long getCreatedBy() {
         return createdBy;
     }
 
-    public void setCreatedBy(Integer createdBy) {
+    public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
     }
 
@@ -151,5 +155,13 @@ public class Customer {
 
     public void setMoneyState(Integer moneyState) {
         this.moneyState = moneyState;
+    }
+
+    public String getCtype() {
+        return ctype;
+    }
+
+    public void setCtype(String ctype) {
+        this.ctype = ctype;
     }
 }
