@@ -47,6 +47,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/register","/login","/resetpw","/api/logout","api/user/**","/api/auth/**","/api/**", "/css/**", "/js/**", "/images/**").permitAll() // Cho phép truy cập trang đăng ký
                         .requestMatchers("/listOwner").hasAuthority("ADMIN")
+//                        -------- ngoc
+                        .requestMatchers("/account/listStaff", "/account/createStaff", "/account/updateStaff", "/account/deleteStaff").hasAuthority("ADMIN") // ✅ Cấp quyền ADMIN cho chức năng quản lý Staff
+                        .requestMatchers("/account/updateStaff").hasAuthority("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .logout(logout -> logout
@@ -67,6 +70,7 @@ public class SecurityConfig {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder);
+
 
         AuthenticationManager authManager = new ProviderManager(List.of(authProvider));
 

@@ -175,4 +175,129 @@ return "redirect:/account/updateOwner?id=" + account.getId();
 
         return "redirect:/account/updateOwner?id=" + optAccount.get().getId();
     }
+
+
+//    List staff
+@GetMapping("/listStaff")
+public String showStaffList(
+        Model model,
+        @CookieValue(value = "token", required = false) String token,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "8") int size,
+        @RequestParam(required = false, name = "search") String search,
+        RedirectAttributes redirectAttributes) {
+
+    // Lấy thông tin người dùng từ token
+    String username = jwtUtils.extractUsername(token);
+    Optional<Account> account = accountService.findByUsernameAndIsDeleteFalse(username);
+    Optional<Users> user = userService.getUserProfile(account.get().getUserId());
+
+    // Kiểm tra thông tin cá nhân
+    if (user.isPresent() && (user.get().getName() == null || user.get().getPhone() == null ||
+            user.get().getGender() == null || user.get().getAddress() == null ||
+            user.get().getDateOfBirth() == null)) {
+        redirectAttributes.addFlashAttribute("alertMessage", "Bạn phải nhập thông tin cá nhân đã");
+        return "redirect:/user/userprofile";
+    }
+
+    // Tìm kiếm hoặc lấy danh sách Staff
+    Page<Map<String, Object>> staffPage;
+    if (search != null && !search.isEmpty()) {
+        staffPage = accountService.searchStaffAccounts(search, page, size);
+    } else {
+        staffPage = accountService.getStaffAccounts(page, size);
+    }
+
+    // Đưa dữ liệu vào model
+    model.addAttribute("accounts", staffPage.getContent());
+    model.addAttribute("currentPage", page);
+    model.addAttribute("totalPages", staffPage.getTotalPages());
+    model.addAttribute("search", search);
+
+    return "listStaff";
+}
+
+    @PostMapping("/deleteStaff")
+    public String deleteStaff(@RequestParam("id") Long id) {
+        Optional<Account> optAccount = accountRepository.findById(id);
+
+        if (optAccount.isPresent()) {
+            accountService.deleteAccount(optAccount.orElse(null));
+        }
+
+        return "redirect:/account/listStaff";
+    }
+
+    @PostMapping("/createStaff")
+    public String createStaff(@RequestParam String username,
+                              @RequestParam String password,
+                              @RequestParam String displayname,
+                              @CookieValue(value = "token", required = false) String token,
+                              Model model) {
+        String usernameAdmin = jwtUtils.extractUsername(token);
+        Optional<Account> adAccount = accountRepository.findByUsernameAndIsDeleteFalse(usernameAdmin);
+        Account account = new Account();
+        account.setUsername(username);
+        account.setPassword(passwordEncoder.encode(password));
+        account.setDisplayName(displayname);
+        account.setCreatedBy(adAccount.get().getId());
+//        account.setRole("STAFF"); // Đặt role là STAFF
+
+        accountService.createAccount(account);
+        return "redirect:/account/listStaff";
+    }
+
+    @GetMapping("/updateStaff")
+    public String updateStaff(Model model, @RequestParam String id) {
+        Optional<Account> account = accountService.findById(Long.parseLong(id));
+        Optional<Users> userOpt = userService.getUserProfile(account.get().getUserId());
+        Users user = userOpt.orElse(new Users());
+        model.addAttribute("account", account.get());
+        model.addAttribute("user", user);
+        return "updateStaff";
+    }
+
+    @PostMapping("/updateStaff")
+    public String updateStaff(@RequestParam String username,
+                              @RequestParam String displayname,
+                              @RequestParam String name,
+                              @RequestParam String phone,
+                              @RequestParam String address,
+                              @RequestParam String gender,
+                              @RequestParam String dob) {
+        Optional<Account> optAccount = accountRepository.findByUsernameAndIsDeleteFalse(username);
+        Account account = optAccount.orElse(null);
+        Optional<Users> user = userService.getUserProfile(account.getUserId());
+        account.setDisplayName(displayname);
+        user.get().setName(name);
+        user.get().setPhone(phone);
+        user.get().setAddress(address);
+        user.get().setDateOfBirth(LocalDate.parse(dob));
+        user.get().setGender(Boolean.parseBoolean(gender));
+        accountRepository.save(account);
+        userService.saveUserProfile(user.orElse(null));
+
+        return "redirect:/account/updateStaff?id=" + account.getId();
+    }
+
+    @GetMapping("/resetpwStaff")
+    public String resetPasswordStaff(Model model, @RequestParam String id) {
+        Optional<Account> account = accountService.findById(Long.parseLong(id));
+        model.addAttribute("account", account.get());
+        return "resetpwStaff";
+    }
+
+    @PostMapping("/resetpwStaff")
+    public String resetPasswordStaff(@RequestParam String username,
+                                     @RequestParam String newPassword,
+                                     @RequestParam String confirmPassword,
+                                     Model model) {
+        Optional<Account> optAccount = accountRepository.findByUsernameAndIsDeleteFalse(username);
+
+        optAccount.get().setPassword(passwordEncoder.encode(newPassword));
+        accountRepository.save(optAccount.get());
+
+        return "redirect:/account/updateStaff?id=" + optAccount.get().getId();
+    }
+
 }
