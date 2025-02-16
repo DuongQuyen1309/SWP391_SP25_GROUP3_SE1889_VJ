@@ -47,10 +47,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/register","/login","/resetpw","/api/logout","api/user/**","/api/auth/**","/api/**", "/css/**", "/js/**", "/images/**").permitAll() // Cho phép truy cập trang đăng ký
                         .requestMatchers("/listOwner").hasAuthority("ADMIN")
+                                .requestMatchers("/account/**").hasAnyAuthority("ADMIN", "OWNER")
+
 //                        -------- ngoc
-                        .requestMatchers("/account/listStaff", "/account/createStaff", "/account/updateStaff", "/account/deleteStaff").hasAuthority("ADMIN") // ✅ Cấp quyền ADMIN cho chức năng quản lý Staff
-                        .requestMatchers("/account/updateStaff").hasAuthority("ADMIN")
-                        .anyRequest().authenticated()
+                                .anyRequest().authenticated()
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
