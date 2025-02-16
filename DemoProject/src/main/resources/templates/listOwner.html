@@ -55,8 +55,8 @@
 <div class="sidebar" id="sidebar">
 
     <h2>Feature</h2>
-    <a href="/userprofile" >Profile</a>
-    <a href="/listOwner" >Account Management</a>
+    <a href="/user/userprofile" >Profile</a>
+    <a href="/account/listOwner" >Owner Account Management</a>
 
     <div id="accountMenu" class="submenu" style="display: none;">
 
@@ -74,7 +74,7 @@
         <div class="modal-content">
             <span class="close" onclick="closeForm()">&times;</span>
             <h2>Add new account</h2>
-            <form th:action="@{/createOwner}" method="post" onsubmit="showSuccessAlert()" >
+            <form th:action="@{/account/createOwner}" method="post" onsubmit="showSuccessAlert()" >
 
                 <label for="username">Username:</label>
                 <input type="text" id="username" name="username" required>
@@ -94,7 +94,7 @@
 
 <!-- List -->
 
-    <form action="/listOwner" method="get" style="margin-bottom: 20px;">
+    <form action="/account/listOwner" method="get" style="margin-bottom: 20px;">
         <input type="text" name="search" placeholder="Search by username or display name..."
                th:value="${search}" style="width: 80%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
         <button type="submit" style="padding: 10px; background-color: #2c3e50; color: white; border: none; border-radius: 5px;">Search</button>
@@ -125,11 +125,11 @@
             <td>
                 <div style="display: flex; gap: 5px;">
 
-                <form th:action="@{/updateOwner}" method="get" >
+                <form th:action="@{/account/updateOwner}" method="get" >
                     <input type="hidden" name="id" th:value="${account.id}">
                     <button type="submit" style="background-color: #06999c">Edit</button>
                 </form>
-                    <form th:action="@{/deleteOwner}" method="post" onsubmit="return confirmDelete(event, this)">
+                    <form th:action="@{/account/deleteOwner}" method="post" onsubmit="return confirmDelete(event, this)">
                         <input type="hidden" name="id" th:value="${account.id}">
                         <button type="submit">Delete</button>
                     </form>
@@ -141,11 +141,11 @@
     </table>
     <!-- Phân trang -->
     <div class="pagination">
-        <a th:if="${currentPage > 0}" th:href="@{/listOwner(page=${currentPage - 1}, size=8)}">Previous</a>
+        <a th:if="${currentPage > 0}" th:href="@{/account/listOwner(page=${currentPage - 1}, size=8)}">Previous</a>
 
         <span>Page <span th:text="${totalPages==0? currentPage:  currentPage + 1}"></span> of <span th:text="${totalPages }  "></span></span>
 
-        <a th:if="${currentPage + 1 < totalPages}" th:href="@{/listOwner(page=${currentPage + 1}, size=8)}">Next</a>
+        <a th:if="${currentPage + 1 < totalPages}" th:href="@{/account/listOwner(page=${currentPage + 1}, size=8)}">Next</a>
     </div>
 
 

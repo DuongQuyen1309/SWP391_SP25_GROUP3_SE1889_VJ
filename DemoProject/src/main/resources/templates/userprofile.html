@@ -135,12 +135,12 @@
 <!-- Sidebar -->
 <div class="sidebar" id="sidebar">
     <h2>Feature</h2>
-    <a href="/userprofile" >Profile</a>
-    <a href="/listOwner" th:style="${#lists.contains(listHiddenPage, 'listOwner')} ? 'display: none;' : ''" >Owner Account Management</a>
+    <a href="/user/userprofile" >Profile</a>
+    <a href="/account/listOwner" th:style="${#lists.contains(listHiddenPage, 'listOwner')} ? 'display: none;' : ''" >Owner Account Management</a>
 
-    <a href="/listStaff" th:style="${#lists.contains(listHiddenPage, 'listStaff')} ? 'display: none;' : ''">Staff Account Management</a>
+    <a href="/account/listStaff" th:style="${#lists.contains(listHiddenPage, 'listStaff')} ? 'display: none;' : ''">Staff Account Management</a>
 
-    <a href="/listRice" th:style="${#lists.contains(listHiddenPage, 'listRice')} ? 'display: none;' : ''" >Rice Management</a>
+    <a href="/listproduct" th:style="${#lists.contains(listHiddenPage, 'listproduct')} ? 'display: none;' : ''" >Rice Management</a>
 
     <a href="/listCustomer" th:style="${#lists.contains(listHiddenPage, 'listCustomer')} ? 'display: none;' : ''">Customer Management</a>
 
@@ -162,9 +162,10 @@
 <!-- Content -->
 <div class="content">
     <h1>User Profile</h1>
-    <form class="profile-form" action="/userprofile" method="POST">
+    <form class="profile-form" action="/user/userprofile" method="POST">
         <label for="name">Full Name:</label>
         <input type="text" id="name" name="name" th:value="${user.name}" disabled>
+
 
         <label for="phone">Phone:</label>
         <input type="text" id="phone" name="phone" th:value="${user.phone}" disabled>

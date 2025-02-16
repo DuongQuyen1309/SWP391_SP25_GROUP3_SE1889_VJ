@@ -32,10 +32,14 @@
     <!-- Login Form -->
     <div class="login-container">
         <h2>Reset Password</h2>
-        <form action="/resetpw" method="post" onsubmit="return validatePassword()">
+        <form action="/resetpw" method="post" >
             <div class="input-group">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username" required>
+            </div>
+            <div class="input-group">
+                <label for="oldPassword">Old Password</label>
+                <input type="password" id="oldPassword" name="oldPassword" required>
             </div>
             <div class="input-group">
                 <label for="newPassword">New Password</label>

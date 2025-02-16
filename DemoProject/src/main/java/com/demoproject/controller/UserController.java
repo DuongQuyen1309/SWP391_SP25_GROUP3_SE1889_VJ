@@ -1,15 +1,18 @@
 package com.demoproject.controller;
 
+import com.demoproject.dto.UsersDTO;
 import com.demoproject.entity.Account;
 import com.demoproject.entity.Users;
 import com.demoproject.jwt.JwtUtils;
 import com.demoproject.repository.AccountRepository;
 import com.demoproject.service.AccountService;
 import com.demoproject.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.ui.Model;
 
@@ -21,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Controller
+@RequestMapping("/user")
 public class UserController {
     @Autowired
     private final UserService userService;
@@ -53,18 +57,21 @@ public class UserController {
             listHiddenPage.add("listOwner");
         }
         if(role.equals("ADMIN")){
-            listHiddenPage.add("listStaff");
+
             listHiddenPage.add("listCustomer");
-            listHiddenPage.add("listRice");
+            listHiddenPage.add("listproduct");
             listHiddenPage.add("listWarehouse");
             listHiddenPage.add("listInvoice");
+        }
+        if(role.equals("ADMIN")||role.equals("STAFF")){
+            listHiddenPage.add("listStaff");
         }
         model.addAttribute("listHiddenPage",listHiddenPage);
 
         if (!jwtUtils.validateToken(token, userDetails)) {
             return "redirect:/login";
         }
-        Optional<Account> account= accountService.findByUsername(username);
+        Optional<Account> account= accountService.findByUsernameAndIsDeleteFalse(username);
         Optional<Users> userOpt= userService.getUserProfile(account.get().getUserId());
         Users user = userOpt.orElse(new Users());
         model.addAttribute("user", user);
@@ -72,15 +79,18 @@ public class UserController {
     }
 
     @PostMapping("/userprofile")
-    public String updateProfile(@RequestParam String name,
+    public String updateProfile(@Valid @ModelAttribute UsersDTO userDTO,
+                                BindingResult result
+            ,@RequestParam String name,
                                 @RequestParam String phone,
                                 @RequestParam String address,
                                 @RequestParam String dob,
                                 @RequestParam String gender,@CookieValue(value = "token", required = false) String token
     ) {
+
         String username = jwtUtils.extractUsername(token);
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-        Optional<Account> account= accountService.findByUsername(username);
+        Optional<Account> account= accountService.findByUsernameAndIsDeleteFalse(username);
         Optional<Users> user= userService.getUserProfile(account.get().getUserId());
         user.get().setName(name);
         user.get().setPhone(phone);
@@ -90,7 +100,7 @@ public class UserController {
         userService.saveUserProfile(user.orElse(null));
 
 
-        return "redirect:/userprofile";
+        return "redirect:/user/userprofile";
     }
 
 

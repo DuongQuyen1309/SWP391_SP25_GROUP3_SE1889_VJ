@@ -14,9 +14,13 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface AccountRepository extends JpaRepository<Account, Long> {
-    Optional<Account> findByUsername(String username);
+    Optional<Account> findByUsernameAndIsDeleteFalse(String username);
+
+
 
     boolean existsByUsername(String username);
+
+    boolean existsByUsernameAndIsDeleteFalse(String username);
     List<Account> findByUserIdIn(Collection<Long> userIds);
 
     Optional<Account> findById(Long id);

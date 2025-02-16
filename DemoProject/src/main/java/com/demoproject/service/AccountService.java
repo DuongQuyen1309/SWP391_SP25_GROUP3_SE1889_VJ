@@ -47,11 +47,10 @@ public class AccountService {
         if (!account.getPassword().startsWith("$2a$")) { // ✅ Chỉ mã hóa nếu chưa mã hóa
             account.setPassword(passwordEncoder.encode(account.getPassword()));
         }
-        Optional<Account> existingAccount=accountRepository.findByUsername(account.getUsername());
-        if(existingAccount.isPresent()){
-            if(account.getUsername().equals(existingAccount.get().getUsername()) ){
-                return;
-            }
+
+
+        if(accountRepository.existsByUsernameAndIsDeleteFalse(account.getUsername())){
+            return;
         }
 
         // ✅ Tạo User mới với role = "OWNER" và createdAt = thời điểm hiện tại
@@ -72,8 +71,12 @@ public class AccountService {
         accountRepository.save(account);
     }
 
-    public Optional<Account> findByUsername(String username) {
-        return accountRepository.findByUsername(username);
+    public Optional<Account> findByUsernameAndIsDeleteFalse(String username) {
+        return accountRepository.findByUsernameAndIsDeleteFalse(username);
+    }
+
+    public Optional<Account> findById(Long id) {
+        return accountRepository.findById(id);
     }
 
     public Page<Account> findByUserIdInAndIsDeleteFalse(Pageable pageable){
@@ -178,6 +181,15 @@ public class AccountService {
 
         // ✅ 5. Trả về kết quả tìm kiếm dưới dạng `Page<Map<String, Object>>`
         return new PageImpl<>(accountsWithUsers, pageable, accountPage.getTotalElements());
+    }
+
+    public boolean checkPassword(String username,String password) {
+        Optional<Account> optAccount= accountRepository.findByUsernameAndIsDeleteFalse(username);
+        if (!optAccount.isPresent()) {
+            return false;
+        }
+        String hashedPassword= optAccount.get().getPassword();
+        return passwordEncoder.matches(password,hashedPassword);
     }
 
 
