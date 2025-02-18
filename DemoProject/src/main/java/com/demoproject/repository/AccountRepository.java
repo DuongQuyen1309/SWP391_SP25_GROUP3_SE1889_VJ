@@ -31,5 +31,9 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
             "AND a.userId IN :userIds AND a.isDelete = false")
     Page<Account> searchOwnerAccounts(@Param("keyword") String keyword, @Param("userIds") List<Long> userIds, Pageable pageable);
 
+    @Query("SELECT a FROM Account a WHERE (LOWER(a.username) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(a.displayName) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+            "AND a.userId IN :userIds AND a.isDelete = false")
+    Page<Account> searchStaffAccounts(@Param("keyword") String keyword, @Param("userIds") List<Long> userIds, Pageable pageable);
 
 }

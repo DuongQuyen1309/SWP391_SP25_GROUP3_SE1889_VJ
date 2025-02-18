@@ -47,7 +47,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/register","/login","/resetpw","/api/logout","api/user/**","/api/auth/**","/api/**", "/css/**", "/js/**", "/images/**").permitAll() // Cho phép truy cập trang đăng ký
                         .requestMatchers("/listOwner").hasAuthority("ADMIN")
-                        .anyRequest().authenticated()
+                                .requestMatchers("/account/**").hasAnyAuthority("ADMIN", "OWNER")
+
+//                        -------- ngoc
+                                .anyRequest().authenticated()
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
@@ -67,6 +70,7 @@ public class SecurityConfig {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder);
+
 
         AuthenticationManager authManager = new ProviderManager(List.of(authProvider));
 

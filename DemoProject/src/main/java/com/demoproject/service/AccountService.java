@@ -192,5 +192,127 @@ public class AccountService {
         return passwordEncoder.matches(password,hashedPassword);
     }
 
+//them listStaff
+    public List<Account> listStaffAccount() {
+        List<Long> ids = userRepository.findIdByRole("STAFF");
+        List<Account> accounts = accountRepository.findByUserIdIn(ids);
+        List<Account> staffs = new ArrayList<>();
+        for(Account account : accounts) {
+            if(!account.getDelete()) {
+                staffs.add(account);
+            }
+        }
+        return staffs;
+    }
 
+    public void createStaffAccount(Account account) {
+        if (!account.getPassword().startsWith("$2a$")) {
+            account.setPassword(passwordEncoder.encode(account.getPassword()));
+        }
+
+        if(accountRepository.existsByUsernameAndIsDeleteFalse(account.getUsername())) {
+            return;
+        }
+
+        // Tạo User mới với role = "STAFF" và createdAt = thời điểm hiện tại
+        Users newUser = new Users();
+        newUser.setCreatedAt(LocalDate.now());
+        newUser.setRole("STAFF"); // Gán role là "STAFF"
+        userRepository.save(newUser);
+
+        // Gán userId vào Account
+        account.setUserId(newUser.getId());
+        account.setCreatedAt(LocalDate.now());
+        accountRepository.save(account);
+    }
+
+    public Page<Map<String, Object>> getStaffAccounts(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        // Lấy danh sách userId của các User có role STAFF
+        List<Long> staffUserIds = userRepository.findIdByRole("STAFF");
+
+        // Tìm danh sách Account của các User có role STAFF
+        Page<Account> accountPage = accountRepository.findByUserIdInAndIsDeleteFalse(staffUserIds, pageable);
+
+        Map<Long, Users> userMap = userRepository.findAllById(staffUserIds)
+                .stream()
+                .collect(Collectors.toMap(Users::getId, user -> user));
+
+        // Chuyển dữ liệu thành Map chứa Account + User Info
+        List<Map<String, Object>> accountsWithUsers = accountPage.getContent().stream()
+                .map(account -> {
+                    Map<String, Object> accountData = new HashMap<>();
+                    accountData.put("id", account.getId());
+                    accountData.put("username", account.getUsername());
+                    accountData.put("password", account.getPassword());
+                    accountData.put("displayName", account.getDisplayName());
+
+                    // Lấy thông tin User từ userMap
+                    Users user = userMap.get(account.getUserId());
+                    if (user != null) {
+                        accountData.put("name", user.getName());
+                        accountData.put("phone", user.getPhone());
+                        accountData.put("dateOfBirth", user.getDateOfBirth());
+                        accountData.put("address", user.getAddress());
+                        accountData.put("gender", user.getGender());
+                    } else {
+                        accountData.put("name", "Unknown");
+                        accountData.put("dateOfBirth", null);
+                        accountData.put("address", "Unknown");
+                        accountData.put("gender", "Unknown");
+                        accountData.put("phone", "Unknown");
+                    }
+                    return accountData;
+                })
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(accountsWithUsers, pageable, accountPage.getTotalElements());
+    }
+
+    public Page<Map<String, Object>> searchStaffAccounts(String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        // 1. Lấy danh sách userId của các User có role STAFF
+        List<Long> staffUserIds = userRepository.findIdByRole("STAFF");
+        if (staffUserIds.isEmpty()) {
+            return Page.empty();
+        }
+
+        // 2. Tìm kiếm danh sách Account của các User có role STAFF
+        Page<Account> accountPage = accountRepository.searchStaffAccounts(keyword, staffUserIds, pageable);
+
+        // 3. Lấy thông tin Users từ danh sách ID đã tìm được
+        Map<Long, Users> userMap = userRepository.findAllById(staffUserIds)
+                .stream()
+                .collect(Collectors.toMap(Users::getId, user -> user));
+
+        // 4. Chuyển đổi kết quả thành danh sách Map
+        List<Map<String, Object>> accountsWithUsers = accountPage.getContent().stream()
+                .map(account -> {
+                    Map<String, Object> accountData = new HashMap<>();
+                    accountData.put("id", account.getId());
+                    accountData.put("username", account.getUsername());
+                    accountData.put("displayName", account.getDisplayName());
+
+                    Users user = userMap.get(account.getUserId());
+                    if (user != null) {
+                        accountData.put("name", user.getName());
+                        accountData.put("phone", user.getPhone());
+                        accountData.put("dateOfBirth", user.getDateOfBirth());
+                        accountData.put("address", user.getAddress());
+                        accountData.put("gender", user.getGender());
+                    } else {
+                        accountData.put("name", "Unknown");
+                        accountData.put("phone", "N/A");
+                        accountData.put("dateOfBirth", null);
+                        accountData.put("address", "N/A");
+                        accountData.put("gender", "N/A");
+                    }
+                    return accountData;
+                })
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(accountsWithUsers, pageable, accountPage.getTotalElements());
+    }
 }
