@@ -74,12 +74,12 @@ public class HomeController {
         return "redirect:/login";
     }
 
-    @GetMapping("/resetpw")
-    public String resetpw() {
-        return "resetpw";
+    @GetMapping("/changepw")
+    public String changepw() {
+        return "changepw";
     }
 
-    @PostMapping("/resetpw")
+    @PostMapping("/changepw")
     public String resetPassword(
             @RequestParam("username") String username,
             @RequestParam("oldPassword") String oldPassword,
@@ -91,15 +91,15 @@ public class HomeController {
         boolean isMatch= accountService.checkPassword(username, oldPassword);
         if(!isMatch){
             model.addAttribute("error", "❌ Sai tài khoản hoặc mật khẩu cũ!");
-            return "resetpw";
+            return "changepw";
         }
         if(oldPassword.equals(newPassword)){
             model.addAttribute("error", "❌ Mật khẩu mới trùng với mật khẩu cũ");
-            return "resetpw";
+            return "changepw";
         }
         if(!newPassword.equals(confirmPassword)){
             model.addAttribute("error", "❌ Mật khẩu nhập lai không khớp");
-            return "resetpw";
+            return "changepw";
         }
 
 
@@ -117,7 +117,6 @@ public class HomeController {
                        Model model) {
         String username = jwtUtils.extractUsername(token);
         String role= jwtUtils.extractRole(token);
-        System.out.println("role"+role);
         List<String> listHiddenPage = new ArrayList<>();
         if(role.equals("OWNER")||role.equals("STAFF")){
             listHiddenPage.add("listOwner");
@@ -125,7 +124,7 @@ public class HomeController {
         if(role.equals("ADMIN")){
 
             listHiddenPage.add("listCustomer");
-            listHiddenPage.add("listproduct");
+            listHiddenPage.add("listProduct");
             listHiddenPage.add("listWarehouse");
             listHiddenPage.add("listInvoice");
         }
@@ -134,12 +133,14 @@ public class HomeController {
         }
         model.addAttribute("listHiddenPage",listHiddenPage);
 
-        Optional<Account> account= accountService.findByUsernameAndIsDeleteFalse(username);
-        Optional<Users> user= userService.getUserProfile(account.get().getUserId());
+        Optional<Account> optAccount= accountService.findByUsernameAndIsDeleteFalse(username);
+        Optional<Users> user= userService.getUserProfile(optAccount.get().getUserId());
         if(user.get().getName()==null|| user.get().getPhone()==null|| user.get().getGender()==null|| user.get().getAddress()==null|| user.get().getDateOfBirth()==null){
             redirectAttributes.addFlashAttribute("alertMessage", "Bạn phải nhập thông tin cá nhân đã");
             return "redirect:/user/userprofile";
         }
+        Account account= optAccount.orElse(null);
+        model.addAttribute("account", account);
         return "home";
     }
 

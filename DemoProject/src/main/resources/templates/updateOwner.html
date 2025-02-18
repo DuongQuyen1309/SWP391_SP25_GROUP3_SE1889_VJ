@@ -130,7 +130,16 @@
 <div class="header">
   <button class="menu-btn" onclick="toggleSidebar()">☰</button>
   <h2><a href="/home">RSMS</a></h2>
-  <button class="logout" id="logout">Logout</button>
+  <div class="user-info">
+    <img src="/images/account.jpg" alt="User Avatar" class="user-avatar"/>
+    <div class="dropdown">
+      <span th:text="${account.displayName}" class="user-name" onclick="toggleDropdown()"> ▼</span>
+      <div id="dropdown-menu" class="dropdown-content">
+        <a href="/user/userprofile">👤 View Profile</a>
+        <a href="/#" id="logout">🚪 Logout</a>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Sidebar -->
@@ -141,18 +150,18 @@
 
 
   </div>
-</div>
+
 
 <!-- Content -->
 <div class="content">
   <h1>Account of <span th:text="${user.name}"></span></h1>
   <form class="profile-form" action="/account/updateOwner" method="POST">
     <label for="username">Username:</label>
-    <input type="text" id="username" name="username" th:value="${account.username}" disabled>
-    <input type="hidden" id="hiddenUsername" name="username" th:value="${account.username}">
+    <input type="text" id="username" name="username" th:value="${accountOwner.username}" disabled>
+    <input type="hidden" id="hiddenUsername" name="username" th:value="${accountOwner.username}">
 
     <label for="displayname">Displayname:</label>
-    <input type="text" id="displayname" name="displayname" th:value="${account.displayName}" disabled>
+    <input type="text" id="displayname" name="displayname" th:value="${accountOwner.displayName}" disabled>
 
     <label for="name">Full Name:</label>
     <input type="text" id="name" name="name" th:value="${user.name}" disabled>
@@ -180,6 +189,12 @@
       <button type="submit" id="applyBtn" style="display:none;">Apply</button>
       <input type="hidden" name="id" th:value="${account.id}">
       <button type="button" onclick="resetPassword()">Reset password</button>
+
+    </div>
+    <div th:if="${error != null and not #lists.isEmpty(error)}">
+      <ul style="color: red; font-size: 14px;">
+        <li th:each="err : ${error}" th:text="${err}"></li>
+      </ul>
     </div>
 
   </form>

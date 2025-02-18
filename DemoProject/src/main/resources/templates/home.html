@@ -14,7 +14,16 @@
 <div class="header">
     <button class="menu-btn" onclick="toggleSidebar()">☰</button>
     <h2><a href="/home">RSMS</a></h2>
-    <button id="logout" class="logout">Logout</button>
+    <div class="user-info">
+        <img src="/images/account.jpg" alt="User Avatar" class="user-avatar"/>
+        <div class="dropdown">
+            <span th:text="${account.displayName}" class="user-name" onclick="toggleDropdown()"> ▼</span>
+            <div id="dropdown-menu" class="dropdown-content">
+                <a href="/user/userprofile">👤 View Profile</a>
+                <a href="/#" id="logout">🚪 Logout</a>
+            </div>
+        </div>
+    </div>
 
 
 </div>
@@ -28,23 +37,15 @@
 
     <a href="/account/listStaff" th:style="${#lists.contains(listHiddenPage, 'listStaff')} ? 'display: none;' : ''">Staff Account Management</a>
 
-    <a href="/listproduct" th:style="${#lists.contains(listHiddenPage, 'listproduct')} ? 'display: none;' : ''">Rice Management</a>
+    <a href="/product/listProduct" th:style="${#lists.contains(listHiddenPage, 'listProduct')} ? 'display: none;' : ''">Rice Management</a>
 
-    <a href="/listCustomer" th:style="${#lists.contains(listHiddenPage, 'listCustomer')} ? 'display: none;' : ''">Customer Management</a>
+    <a href="/customer/listCustomer" th:style="${#lists.contains(listHiddenPage, 'listCustomer')} ? 'display: none;' : ''">Customer Management</a>
 
     <a href="/listWarehouse" th:style="${#lists.contains(listHiddenPage, 'listWarehouse')} ? 'display: none;' : ''">Warehouse Management</a>
 
 
-    <a href="javascript:void(0);" onclick="toggleSubmenu('inventoryMenu')" th:style="${#lists.contains(listHiddenPage, 'listInvoice')} ? 'display: none;' : ''">Invoice Management
-    <span class="arrow">  ▶</span></a>
-    <div id="inventoryMenu" class="submenu" style="display: none;">
-        <a href="/listOwner">Import Rice</a>
-        <a href="/listOwner">Import Rice</a>
-        <a href="/listOwner">Import Rice</a>
-        <a href="/listOwner">Import Rice</a>
-        <a href="/listOwner">Import Rice</a>
-        <a href="/listOwner">Import Rice</a>
-    </div>
+    <a href="/listInvoice" th:style="${#lists.contains(listHiddenPage, 'listInvoice')} ? 'display: none;' : ''">Invoice Management</a>
+
 </div>
 
 <!-- Content -->

@@ -65,6 +65,7 @@ window.onclick = function(event) {
 
 document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("logout").addEventListener("click", function() {
+        event.preventDefault();
         fetch("/api/logout", {
             method: "POST",
             credentials: "include"
@@ -76,3 +77,20 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 });
+
+function toggleDropdown() {
+    document.getElementById("dropdown-menu").classList.toggle("show");
+}
+
+// Ẩn dropdown khi nhấn ra ngoài
+window.onclick = function(event) {
+    if (!event.target.matches('.user-name')) {
+        let dropdowns = document.getElementsByClassName("dropdown-content");
+        for (let i = 0; i < dropdowns.length; i++) {
+            let openDropdown = dropdowns[i];
+            if (openDropdown.classList.contains('show')) {
+                openDropdown.classList.remove('show');
+            }
+        }
+    }
+}

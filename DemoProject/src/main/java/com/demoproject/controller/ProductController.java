@@ -1,23 +1,33 @@
 package com.demoproject.controller;
 
 
+import com.demoproject.entity.Account;
 import com.demoproject.entity.Product;
+import com.demoproject.jwt.JwtUtils;
 import com.demoproject.repository.ProductRepository;
+import com.demoproject.service.AccountService;
 import com.demoproject.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Optional;
+@RequestMapping("/product")
 @Controller
 @RequiredArgsConstructor
 public class ProductController {
     private final ProductService productService;
     private  final ProductRepository productRepository;
+
+    @Autowired
+    private JwtUtils jwtUtils;
+    private final AccountService accountService;
+
 
     @PostMapping("/form")
     public String handleFormSubmit(
@@ -35,18 +45,28 @@ public class ProductController {
 
         productRepository.save(product);
 
-        return "redirect:/listproduct";
+        return "redirect:/product/listProduct";
     }
 
-    @GetMapping("/listproduct")
+    @GetMapping("/listProduct")
     public String showListProducts(
+            @CookieValue(value = "token", required = false) String token,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
             @RequestParam(defaultValue = "id") String sortField,
             @RequestParam(defaultValue = "asc") String sortDirection,
             Model model) {
+        String username = jwtUtils.extractUsername(token);
+        Optional<Account> optAccount = accountService.findByUsernameAndIsDeleteFalse(username);
+        Account account = optAccount.orElse(null);
+        String role= jwtUtils.extractRole(token);
+        List<String> listHiddenPage = new ArrayList<>();
+        if(role.equals("STAFF")){
+            listHiddenPage.add("listStaff");
+        }
+        model.addAttribute("listHiddenPage", listHiddenPage);
         Page<Product> productPage = productService.getAllProductByPage(page, size, sortField, sortDirection);
-
+        model.addAttribute("account", account);
         model.addAttribute("products", productPage);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", productPage.getTotalPages());
@@ -56,7 +76,7 @@ public class ProductController {
 
 //        List<Product> products = productService.getAllProductIsDeleted();
 //        model.addAttribute("products", products);
-        return "listproduct";
+        return "listProduct";
     }
 
     @PostMapping("/delete")
@@ -65,7 +85,7 @@ public class ProductController {
         Product product = productService.getProductById(id);
         product.setIsDeleted(1);
         productRepository.save(product);
-        return "redirect:/listproduct";
+        return "redirect:/product/listProduct";
     }
 
     @PostMapping("/update")
@@ -81,7 +101,7 @@ public class ProductController {
         product.setPrice(price);
         product.setDescription(description);
         productRepository.save(product);
-        return "redirect:/listproduct";
+        return "redirect:/product/listProduct";
     }
 
 
