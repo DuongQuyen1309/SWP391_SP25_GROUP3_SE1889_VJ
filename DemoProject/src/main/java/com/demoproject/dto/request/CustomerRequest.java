@@ -15,7 +15,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class CustomerRequest {
     @NotBlank(message = "Name cannot be empty.")
-    @Pattern(regexp = "^[a-zA-Z\\s]+$", message = "Name must not contain numbers or special characters.")
+    @Pattern(regexp = "^[a-zA-ZÀ-Ỹà-ỹ\\s]+$", message = "Name must not contain numbers, special characters.")
     private String name;
 
     private Boolean gender;

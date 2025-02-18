@@ -152,8 +152,7 @@ public class CustomerController {
             }
         }
 
-
-        if (result.hasErrors() || check!=0 || lastname.isBlank()) {
+        if (result.hasErrors() || !lastname.matches("^[a-zA-ZÀ-Ỹà-ỹ\\s]+$") || lastname.trim().isEmpty()) {
             model.addAttribute("customerRequest", customerRequest);
             model.addAttribute("lastnamemessage","Not be empty, not contain number and special characters");
             return "createCustomer"; // Quay lại form nếu có lỗi
@@ -164,8 +163,10 @@ public class CustomerController {
         Users user = userService.getUserProfile(account.getUserId());
         Long id = user.getId();
 
-        String fullname = customerRequest.getName() +" "+ lastname;
+        String fullname = customerRequest.getName().trim() + " " + lastname.trim();
         customerRequest.setName(fullname);
+        String phone = customerRequest.getPhone().trim();
+        customerRequest.setPhone(phone);
         customerRequest.setMoneyState(0);
         customerRequest.setCreatedBy(id);
         customerRequest.setCreatedAt(LocalDate.now());
@@ -191,33 +192,6 @@ public class CustomerController {
         return "updateCustomer";
     }
 
-//    @PostMapping("/updateCustomer")
-//    public String updateCustomer(@RequestParam String id,
-//                                 @RequestParam String name,
-//                                 @RequestParam String address,
-//                                 @RequestParam String dob,
-//                                 @RequestParam String phone,
-//                                 @RequestParam String gender,
-//                                 @RequestParam String ctype,
-//                                 @CookieValue(value = "token", required = false) String token) {
-//        String username = jwtUtils.extractUsername(token);
-//        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-//        Account account = accountService.findByUsername(username);
-//        Users user = userService.getUserProfile(account.getUserId());
-//        Long userId = user.getId();
-//
-//        Customer customer = new Customer();
-//        customer.setId(Long.parseLong(id));
-//        customer.setName(name);
-//        customer.setAddress(address);
-//        customer.setPhone(phone);
-//        customer.setDob(LocalDate.parse(dob));
-//        customer.setGender(Boolean.parseBoolean(gender));
-//        customer.setCtype(ctype);
-//        customer.setUpdatedAt(LocalDate.now());
-//        customerService.updateCustomer(Long.parseLong(id), customer); // Call service to update customer
-//        return "redirect:/listCustomer"; // Redirect to listCustomer after update
-//    }
 @PostMapping("/updateCustomer")
 public String updateCustomer(
         @RequestParam String id,
@@ -229,12 +203,8 @@ public String updateCustomer(
         @RequestParam String ctype,
         RedirectAttributes redirectAttributes) {
 
-    // Kiểm tra Name
-    if (!name.matches("^[a-zA-Z\\s]+$")) {
-        redirectAttributes.addFlashAttribute("messageType", "fail");
-        redirectAttributes.addFlashAttribute("message", "Name must not contain numbers or special characters.");
-        return "redirect:/updateCustomer/" + id;
-    }
+
+
     if (name.trim().isEmpty()) {
         redirectAttributes.addFlashAttribute("messageType", "fail");
         redirectAttributes.addFlashAttribute("message", "Name cannot be empty.");
@@ -276,7 +246,7 @@ public String updateCustomer(
     customer.setId(Long.parseLong(id));
     customer.setName(name);
     customer.setAddress(address);
-    customer.setPhone(phone);
+    customer.setPhone(phone.trim());
     customer.setGender(gender);
     customer.setDob(dateOfBirth);
     customer.setCtype(ctype);

@@ -28,6 +28,7 @@ public class CustomerService {
     public void createCustomer(CustomerRequest customerRequest) {
         Customer customer = new Customer();
         customer = customerMapper.toCustomer(customerRequest);
+        customer.setPhone(customer.getPhone().trim());
         customerRepository.save(customer);
     }
 
