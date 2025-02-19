@@ -85,7 +85,16 @@
 <div class="header">
   <button class="menu-btn" onclick="toggleSidebar()">☰</button>
   <h2><a href="/home">RSMS</a></h2>
-  <button class="logout" id="logout">Logout</button>
+  <div class="user-info">
+    <img src="/images/account.jpg" alt="User Avatar" class="user-avatar"/>
+    <div class="dropdown">
+      <span th:text="${account.displayName}" class="user-name" onclick="toggleDropdown()"> ▼</span>
+      <div id="dropdown-menu" class="dropdown-content">
+        <a href="/user/userprofile">👤 View Profile</a>
+        <a href="/#" id="logout">🚪 Logout</a>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Sidebar -->
@@ -103,8 +112,8 @@
   <h1>Reset password</h1>
   <form class="reset-form" action="/account/resetpwOwner" method="POST" onsubmit="return validatePassword()">
     <label for="username">Username:</label>
-    <input type="text" id="username" name="username" th:value="${account.username}" disabled>
-    <input type="hidden" id="hiddenUsername" name="username" th:value="${account.username}">
+    <input type="text" id="username" name="username" th:value="${accountOwner.username}" disabled>
+    <input type="hidden" id="hiddenUsername" name="username" th:value="${accountOwner.username}">
 
     <label for="newPassword">New password:</label>
     <input type="password" id="newPassword" name="newPassword" >

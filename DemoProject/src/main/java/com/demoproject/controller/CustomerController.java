@@ -54,13 +54,16 @@ public class CustomerController {
                                @RequestParam(defaultValue = "0") int page,
                                @RequestParam(defaultValue = "5") int size,
                                @RequestParam(required = false) String search,
-                               @RequestParam(required = false) String ctype) {
+                               @RequestParam(required = false) String ctype,
+                               RedirectAttributes redirectAttributes) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
         Page<Customer> customerPage;
         String username = jwtUtils.extractUsername(token);
         Optional<Account> optAccount = accountService.findByUsernameAndIsDeleteFalse(username);
         Account account = optAccount.orElse(null);
         model.addAttribute("account", account);
+
+
 
         String role= jwtUtils.extractRole(token);
         List<String> listHiddenPage = new ArrayList<>();
@@ -177,25 +180,20 @@ public class CustomerController {
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
 
-        int check = 0;
-        for(int i=0;i<lastname.length();i++){
-            if(Character.isDigit(lastname.charAt(i)) || !Character.isLetterOrDigit(lastname.charAt(i))){
-                check++;
-            }
-        }
 
 
-        if (result.hasErrors() || check!=0 || lastname.isBlank()) {
+        if (result.hasErrors() || !lastname.matches("^[a-zA-ZÀ-Ỹà-ỹ\\s]+$") || lastname.trim().isEmpty()) {
             model.addAttribute("customerRequest", customerRequest);
             model.addAttribute("lastnamemessage","Not be empty, not contain number and special characters");
             return "createCustomer"; // Quay lại form nếu có lỗi
         }
 
-
-
         Long id = user.get().getId();
 
-        String fullname = customerRequest.getName() +" "+ lastname;
+
+        String fullname = customerRequest.getName().trim() + " " + lastname.trim();
+        String phone = customerRequest.getPhone().trim();
+        customerRequest.setPhone(phone.trim());
         customerRequest.setName(fullname);
         customerRequest.setMoneyState(0);
         customerRequest.setCreatedBy(id);
@@ -279,11 +277,7 @@ public class CustomerController {
         Account account = optAccount.orElse(null);
         model.addAttribute("account", account);
         // Kiểm tra Name
-        if (!name.matches("^[a-zA-Z\\s]+$")) {
-            redirectAttributes.addFlashAttribute("messageType", "fail");
-            redirectAttributes.addFlashAttribute("message", "Name must not contain numbers or special characters.");
-            return "redirect:/customer/updateCustomer/" + id;
-        }
+
         if (name.trim().isEmpty()) {
             redirectAttributes.addFlashAttribute("messageType", "fail");
             redirectAttributes.addFlashAttribute("message", "Name cannot be empty.");

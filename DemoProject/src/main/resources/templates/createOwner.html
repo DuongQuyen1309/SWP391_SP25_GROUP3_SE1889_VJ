@@ -57,7 +57,51 @@
             }
         }
 
+
+            document.addEventListener("DOMContentLoaded", function () {
+            const form = document.querySelector(".create-form");
+            const username = document.getElementById("username");
+            const password = document.getElementById("password");
+            const displayname = document.getElementById("displayname");
+            const errorMessage = document.createElement("p");
+            errorMessage.style.color = "red";
+            errorMessage.style.fontWeight = "bold";
+
+            form.addEventListener("submit", function (event) {
+            let errors = [];
+
+            // Kiểm tra Username
+            if (username.value.trim() === "") {
+            errors.push("Username không được để trống.");
+        } else if (username.value.length < 5) {
+            errors.push("Username phải có ít nhất 5 ký tự.");
+        }
+
+            // Kiểm tra Password
+            if (password.value.trim() === "") {
+            errors.push("Password không được để trống.");
+        } else if (!/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/.test(password.value)) {
+            errors.push("Password phải có ít nhất 6 ký tự, chứa ít nhất 1 chữ cái và 1 số.");
+        }
+
+            // Kiểm tra Display Name
+            if (displayname.value.trim() === "") {
+            errors.push("Display Name không được để trống.");
+        } else if (displayname.value.length < 3) {
+            errors.push("Display Name phải có ít nhất 3 ký tự.");
+        }
+
+            // Nếu có lỗi, ngăn submit và hiển thị thông báo
+            if (errors.length > 0) {
+            event.preventDefault();
+            errorMessage.innerHTML = errors.join("<br>");
+            form.insertBefore(errorMessage, form.querySelector("button"));
+        }
+        });
+        });
     </script>
+
+
 </head>
 <body>
 
@@ -81,8 +125,8 @@
 <div class="sidebar" id="sidebar">
 
     <h2>Feature</h2>
-    <a href="/user/userprofile" >Profile</a>
-    <a href="/account/listOwner" >Owner Account Management</a>
+    <a href="/user/userprofile">Profile</a>
+    <a href="/account/listOwner">Owner Account Management</a>
 
     <div id="accountMenu" class="submenu" style="display: none;">
 
@@ -97,14 +141,14 @@
     <form class="create-form" action="/account/createOwner" method="POST">
 
         <label for="username">Username:</label>
-        <input type="text" id="username" name="username"  required>
+        <input type="text" id="username" name="username" required>
 
         <label for="password">Password:</label>
         <input type="password" id="password" name="password" required>
 
 
         <label for="displayname">Display Name:</label>
-        <input type="text" id="displayname" name="displayname"  required>
+        <input type="text" id="displayname" name="displayname" required>
 
         <p style="color: red;" th:if="${error}" th:text="${error}"></p>
         <button type="submit" id="applyBtn">Create Owner</button>

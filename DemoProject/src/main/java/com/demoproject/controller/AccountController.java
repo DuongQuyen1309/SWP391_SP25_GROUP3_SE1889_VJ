@@ -52,15 +52,12 @@ public class AccountController {
             RedirectAttributes redirectAttributes) {
 
         // ✅ Lấy thông tin người dùng từ token
-        String username = jwtUtils.extractUsername(token);
-        Optional<Account> optAccount = accountService.findByUsernameAndIsDeleteFalse(username);
-        Account account = optAccount.orElse(null);
-        Optional<Users> user = userService.getUserProfile(optAccount.get().getUserId());
+
+        Account account = accountService.getAccountFromToken(token).orElse(null);
+        Optional<Users> user = userService.getUserProfile(account.getUserId());
 
         // ✅ Nếu thiếu thông tin cá nhân, chuyển về `/userprofile`
-        if (user.isPresent() && (user.get().getName() == null || user.get().getPhone() == null ||
-                user.get().getGender() == null || user.get().getAddress() == null ||
-                user.get().getDateOfBirth() == null)) {
+        if (!userService.isUserProfileComplete(user.get())) {
             redirectAttributes.addFlashAttribute("alertMessage", "Bạn phải nhập thông tin cá nhân đã");
             return "redirect:/user/userprofile";
         }
@@ -103,9 +100,8 @@ public class AccountController {
     @GetMapping("/createOwner")
     public String createOwner(@CookieValue(value = "token", required = false) String token,
                               Model model) {
-        String username = jwtUtils.extractUsername(token);
-        Optional<Account> optAccount = accountService.findByUsernameAndIsDeleteFalse(username);
-        Account account = optAccount.orElse(null);
+
+        Account account = accountService.getAccountFromToken(token).orElse(null);
         model.addAttribute("account", account);
         return "createOwner";
     }
@@ -116,8 +112,7 @@ public class AccountController {
                               @RequestParam String displayname,
                               @CookieValue(value = "token", required = false) String token,
                               Model model) {
-        String usernameAdmin = jwtUtils.extractUsername(token);
-        Optional<Account> adAccount= accountRepository.findByUsernameAndIsDeleteFalse(usernameAdmin);
+        Optional<Account> adAccount= accountService.getAccountFromToken(token);
         model.addAttribute("account", adAccount.get());
         if(accountRepository.existsByUsernameAndIsDeleteFalse(username)) {
             model.addAttribute("error", "Tên đăng nhập đã tồn tại!");
@@ -140,9 +135,7 @@ public class AccountController {
                                @RequestParam String id,
                                @CookieValue(value = "token", required = false) String token){
         // ✅ Lấy thông tin người dùng từ token
-        String username = jwtUtils.extractUsername(token);
-        Optional<Account> optAccount = accountService.findByUsernameAndIsDeleteFalse(username);
-        Account account = optAccount.orElse(null);
+        Account account = accountService.getAccountFromToken(token).orElse(null);
         Optional<Account> accountOwner= accountService.findById(Long.parseLong(id));
         Optional<Users> userOpt= userService.getUserProfile(accountOwner.get().getUserId());
         Users user = userOpt.orElse(new Users());
@@ -162,9 +155,8 @@ public class AccountController {
                               @RequestParam String dob,
                               Model model,
                               @CookieValue(value = "token", required = false) String token){
-        String usernameAccount = jwtUtils.extractUsername(token);
-        Optional<Account> optAccount = accountService.findByUsernameAndIsDeleteFalse(usernameAccount);
-        Account account = optAccount.orElse(null);
+
+        Account account = accountService.getAccountFromToken(token).orElse(null);
         Optional<Account> optAccountOwner = accountRepository.findByUsernameAndIsDeleteFalse(username);
         Account accountOwner = optAccountOwner.orElse(null);
         Optional<Users> userOpt= userService.getUserProfile(accountOwner.getUserId());
@@ -172,30 +164,7 @@ public class AccountController {
         model.addAttribute("account", account);
         model.addAttribute("accountOwner", accountOwner);
         model.addAttribute("user", user);
-        List<String> error = new ArrayList<>();
-        boolean isError = false;
 
-        if(!isValidDisplayName(displayname)){
-            error.add("Tên hiển thị không được để trống");
-            isError = true;
-        }
-        if(!isValidName(name)){
-            error.add("Tên không được để trống");
-            isError = true;
-        }
-        if(!isValidPhone(phone)){
-            error.add("Số điện thoại phải đủ 10 số và bắt đầu bằng số 0");
-            isError = true;
-        }
-        if (!isValidAge(LocalDate.parse(dob))) {
-            error.add("Người dùng phải đủ 18 tuổi trở lên");
-            isError = true;
-        }
-
-        if(isError){
-            model.addAttribute("error", error);
-            return "updateOwner";
-        }
         accountOwner.setDisplayName(displayname);
         user.setName(name);
         user.setPhone(phone);
@@ -211,9 +180,15 @@ return "redirect:/account/updateOwner?id=" + accountOwner.getId();
 
 
     @GetMapping("/resetpwOwner")
-    public String resetPasswordOwner(Model model,@RequestParam String id ){
-        Optional<Account> account= accountService.findById(Long.parseLong(id));
-        model.addAttribute("account", account.get());
+    public String resetPasswordOwner(Model model,@RequestParam String id,
+                                     @CookieValue(value = "token", required = false) String token){
+        Optional<Account> accountOwner= accountService.findById(Long.parseLong(id));
+        String usernameAccount = jwtUtils.extractUsername(token);
+        Optional<Account> optAccount = accountService.findByUsernameAndIsDeleteFalse(usernameAccount);
+        Account account = optAccount.orElse(null);
+        model.addAttribute("account", account);
+
+        model.addAttribute("accountOwner", accountOwner.get());
         return "resetpwOwner";
     }
 
@@ -221,13 +196,17 @@ return "redirect:/account/updateOwner?id=" + accountOwner.getId();
     public String resetPasswordOwner(@RequestParam String username,
                                      @RequestParam String newPassword,
                                      @RequestParam String confirmPassword,
-                                     Model model) {
-        Optional<Account> optAccount = accountRepository.findByUsernameAndIsDeleteFalse(username);
+                                     Model model,
+                                     @CookieValue(value = "token", required = false) String token) {
+        Optional<Account> optAccountOwner = accountRepository.findByUsernameAndIsDeleteFalse(username);
+        String usernameAccount = jwtUtils.extractUsername(token);
+        Optional<Account> optAccount = accountService.findByUsernameAndIsDeleteFalse(usernameAccount);
+        Account account = optAccount.orElse(null);
+        model.addAttribute("account", account);
+        optAccountOwner.get().setPassword(passwordEncoder.encode(newPassword));
+        accountRepository.save(optAccountOwner.get());
 
-        optAccount.get().setPassword(passwordEncoder.encode(newPassword));
-        accountRepository.save(optAccount.get());
-
-        return "redirect:/account/updateOwner?id=" + optAccount.get().getId();
+        return "redirect:/account/updateOwner?id=" + optAccountOwner.get().getId();
     }
 
 
@@ -248,13 +227,6 @@ return "redirect:/account/updateOwner?id=" + accountOwner.getId();
         Optional<Account> account = accountService.findByUsernameAndIsDeleteFalse(username);
         Optional<Users> user = userService.getUserProfile(account.get().getUserId());
 
-        // Kiểm tra thông tin cá nhân
-        if (user.isPresent() && (user.get().getName() == null || user.get().getPhone() == null ||
-                user.get().getGender() == null || user.get().getAddress() == null ||
-                user.get().getDateOfBirth() == null)) {
-            redirectAttributes.addFlashAttribute("alertMessage", "Bạn phải nhập thông tin cá nhân đã");
-            return "redirect:/user/userprofile";
-        }
 
         model.addAttribute("account", account.get());
 
@@ -364,31 +336,5 @@ return "redirect:/account/updateOwner?id=" + accountOwner.getId();
     }
 
 
-    private boolean isValidAge(LocalDate dateOfBirth) {
-        if (dateOfBirth == null) {
-            return false;
-        }
-        return Period.between(dateOfBirth, LocalDate.now()).getYears() >= 18;
-    }
 
-    private boolean isValidName(String name) {
-        if (name.isEmpty()) {
-            return false;
-        }
-        return true;
-    }
-
-    private boolean isValidDisplayName(String displayname) {
-        if (displayname.isEmpty()) {
-            return false;
-        }
-        return true;
-    }
-
-    private boolean isValidPhone(String phone) {
-        if (!phone.matches("^0\\d{9}$")) {
-            return false;
-        }
-        return true;
-    }
 }

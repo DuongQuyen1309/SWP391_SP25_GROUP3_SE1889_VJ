@@ -7,6 +7,7 @@ import com.demoproject.jwt.JwtUtils;
 import com.demoproject.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -76,5 +77,12 @@ public class AuthController {
         response.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString());
 
         return ResponseEntity.ok("Logged out successfully!");
+    }
+
+    @PostMapping("/clear-alert-message")
+    @ResponseBody
+    public ResponseEntity<Void> clearAlertMessage(HttpSession session) {
+        session.removeAttribute("alertMessage");
+        return ResponseEntity.ok().build();
     }
 }

@@ -64,7 +64,7 @@
 
   <a href="/customer/listCustomer">Customer Management</a>
 
-  <a href="/listOwner" >Warehouse Management</a>
+  <a href="/warehouse/listWarehouseZone" >WarehouseZone Management</a>
 
 
   <a href="/listInvoice"  >Invoice Management</a>
@@ -104,6 +104,20 @@
 
   <!-- List -->
   <h1>List of Products</h1>
+  <form th:action="@{/product/search}" method="get">
+    <label for="search"></label>
+    <input
+            style="height: 30px; width: 750px"
+            type="text" id="search" name="searchKeyWord"
+            placeholder="Search by product name or description..." required
+    >
+    <select name="searchBy">
+      <option value="name" th:selected="${sortField == 'name'}">Name</option>
+      <option value="description" th:selected="${sortField == 'description'}">Description</option>
+    </select>
+
+    <button type="submit" class="submit-button">Search</button>
+  </form>
   <table class="styled-table">
     <thead>
     <tr>

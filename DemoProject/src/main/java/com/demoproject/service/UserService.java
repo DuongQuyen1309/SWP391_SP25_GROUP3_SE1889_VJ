@@ -23,5 +23,11 @@ public class UserService {
         userRepository.save(user);
     }
 
+    public boolean isUserProfileComplete(Users user) {
+        return user.getName() != null &&
+                user.getPhone() != null &&
+                user.getGender() != null &&
+                user.getDateOfBirth() != null;
+    }
 
 }

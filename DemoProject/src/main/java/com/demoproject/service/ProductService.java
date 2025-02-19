@@ -87,5 +87,21 @@ public class ProductService {
         return productRepository.findAll(pageable);
     }
 
+    public Page<Product> getProductByKeyWordName(int page, int size, String sortFiled, String sortDirection, String keyword){
+        Sort sort = sortDirection.equalsIgnoreCase("asc")
+                ? Sort.by(sortFiled).ascending() :
+                Sort.by(sortFiled).descending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        return productRepository.findByNameContaining(keyword,pageable);
+    }
+
+    public Page<Product> getProductByKeyWordDescription(int page, int size, String sortFiled, String sortDirection, String keyword){
+        Sort sort = sortDirection.equalsIgnoreCase("asc")
+                ? Sort.by(sortFiled).ascending() :
+                Sort.by(sortFiled).descending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        return productRepository.findByDescriptionContaining(keyword,pageable);
+    }
+
 
 }

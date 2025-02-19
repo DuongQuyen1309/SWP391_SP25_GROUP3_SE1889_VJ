@@ -2,8 +2,10 @@ package com.demoproject.service;
 
 import com.demoproject.entity.Account;
 import com.demoproject.entity.Users;
+import com.demoproject.jwt.JwtUtils;
 import com.demoproject.repository.AccountRepository;
 import com.demoproject.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +22,9 @@ public class AccountService {
     private final AccountRepository accountRepository;
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JwtUtils jwtUtils;
     public AccountService(AccountRepository accountRepository,UserRepository userRepository) {
 
         this.accountRepository = accountRepository;
@@ -317,4 +322,8 @@ public class AccountService {
     }
 
 
+    public Optional<Account> getAccountFromToken(String token) {
+        String username = jwtUtils.extractUsername(token);
+        return findByUsernameAndIsDeleteFalse(username);
+    }
 }

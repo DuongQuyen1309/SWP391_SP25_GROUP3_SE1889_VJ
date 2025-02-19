@@ -7,6 +7,7 @@ import com.demoproject.jwt.JwtUtils;
 import com.demoproject.repository.AccountRepository;
 import com.demoproject.service.AccountService;
 import com.demoproject.service.UserService;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cglib.core.Local;
@@ -46,13 +47,16 @@ public class UserController {
 
 
     @GetMapping("/userprofile")
-    public String getUserProfile(@CookieValue(value = "token", required = false) String token, Model model) {
+    public String getUserProfile(@CookieValue(value = "token", required = false) String token,
+                                 HttpSession session,
+                                 Model model) {
         if (token == null) {
             return "redirect:/login";
         }
 
         String username = jwtUtils.extractUsername(token);
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
         String role= jwtUtils.extractRole(token);
         List<String> listHiddenPage = new ArrayList<>();
         if(role.equals("OWNER")||role.equals("STAFF")){

@@ -74,7 +74,7 @@ public class Customer {
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.name = name.trim();
     }
 
     public Boolean getGender() {
@@ -106,7 +106,7 @@ public class Customer {
     }
 
     public void setPhone(String phone) {
-        this.phone = phone;
+        this.phone = phone.trim();
     }
 
     public LocalDate getCreatedAt() {

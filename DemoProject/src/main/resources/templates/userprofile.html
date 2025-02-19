@@ -64,14 +64,27 @@
     </style>
     <script src="/js/home.js"></script>
     <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let alertMessage = "[[${session.alertMessage}]]"; // Lấy giá trị từ session
 
-
-        window.onload = function() {
-            let alertMessage = "[[${alertMessage}]]";
-            if (alertMessage && alertMessage !== "null") {
+            if (alertMessage && alertMessage !== "null" && alertMessage.trim() !== "") {
+                // Hiển thị alert
                 alert(alertMessage);
+
+                // Gửi request đến server để xóa session
+                fetch('/clear-alert-message', { method: 'POST' })
+                    .then(response => console.log("Alert message cleared from session"))
+                    .catch(error => console.error("Error clearing session alert:", error));
             }
-        };
+        });
+
+
+        // window.onload = function() {
+        //     let alertMessage = "[[${alertMessage}]]";
+        //     if (alertMessage && alertMessage !== "null") {
+        //         alert(alertMessage);
+        //     }
+        // };
 
 
 
@@ -122,6 +135,8 @@
             document.getElementById('cancelBtn').style.display = 'none';
             document.getElementById('applyBtn').style.display = 'none';
         });
+
+
     </script>
 </head>
 <body>
@@ -155,7 +170,7 @@
 
     <a href="/customer/listCustomer" th:style="${#lists.contains(listHiddenPage, 'listCustomer')} ? 'display: none;' : ''">Customer Management</a>
 
-    <a href="/listWarehouse" th:style="${#lists.contains(listHiddenPage, 'listWarehouse')} ? 'display: none;' : ''" >Warehouse Management</a>
+    <a href="/warehouse/listWarehouseZone" th:style="${#lists.contains(listHiddenPage, 'listWarehouse')} ? 'display: none;' : ''" >WarehouseZone Management</a>
 
     <a href="/listInvoice" th:style="${#lists.contains(listHiddenPage, 'listInvoice')} ? 'display: none;' : ''" >Invoice Management </a>
 
@@ -163,6 +178,7 @@
 
 <!-- Content -->
 <div class="content">
+
     <h1>User Profile</h1>
     <form class="profile-form" action="/user/userprofile" method="POST">
         <label for="name">Full Name:</label>
