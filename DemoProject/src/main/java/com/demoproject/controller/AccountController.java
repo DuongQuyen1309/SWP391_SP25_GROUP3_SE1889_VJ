@@ -254,6 +254,14 @@ return "redirect:/account/updateOwner?id=" + accountOwner.getId();
 
         return "redirect:/account/listStaff";
     }
+    @GetMapping("/createStaff")
+    public String createStaff(@CookieValue(value = "token", required = false) String token,
+                              Model model) {
+        Account account = accountService.getAccountFromToken(token).orElse(null);
+        model.addAttribute("account", account);
+        return "createStaff"; // Hiển thị trang createStaff.html
+    }
+
 
     @PostMapping("/createStaff")
     public String createStaff(@RequestParam String username,
@@ -261,18 +269,37 @@ return "redirect:/account/updateOwner?id=" + accountOwner.getId();
                               @RequestParam String displayname,
                               @CookieValue(value = "token", required = false) String token,
                               Model model) {
+        if (token == null || token.isEmpty()) {
+            model.addAttribute("error", "Unauthorized: Missing authentication token.");
+            return "createStaff"; // Quay lại trang createStaff nếu có lỗi
+        }
+
         String usernameAdmin = jwtUtils.extractUsername(token);
         Optional<Account> adAccount = accountRepository.findByUsernameAndIsDeleteFalse(usernameAdmin);
+
+        if (adAccount.isEmpty()) {
+            model.addAttribute("error", "Unauthorized: Admin account not found.");
+            return "createStaff"; // Quay lại trang createStaff nếu có lỗi
+        }
+
+        // Kiểm tra username có bị trùng không
+        Optional<Account> existingAccount = accountRepository.findByUsernameAndIsDeleteFalse(username);
+        if (existingAccount.isPresent()) {
+            model.addAttribute("error", "Username already exists.");
+            return "createStaff"; // Quay lại trang createStaff nếu có lỗi
+        }
+
         Account account = new Account();
         account.setUsername(username);
         account.setPassword(passwordEncoder.encode(password));
         account.setDisplayName(displayname);
         account.setCreatedBy(adAccount.get().getId());
-//        account.setRole("STAFF"); // Đặt role là STAFF
+
 
         accountService.createStaffAccount(account);
-        return "redirect:/account/listStaff";
+        return "redirect:/account/listStaff"; // Quay lại danh sách nhân viên sau khi tạo
     }
+
 
     @GetMapping("/updateStaff")
     public String updateStaff(Model model, @RequestParam String id,
