@@ -122,11 +122,11 @@
     <form class="profile-form" action="/customer/createCustomer" method="POST" th:object="${customerRequest}">
 
         <label for="firstname">First Name:</label>
-        <input type="text" id="firstname" name="firstname" th:field="*{name}" required>
+        <input type="text" id="firstname" name="firstname" th:field="*{name}" >
         <p style="color: red;" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></p>
 
         <label for="lastname">Last Name:</label>
-        <input type="text" id="lastname" name="lastname" required>
+        <input type="text" id="lastname" name="lastname" th:value="${lastname}">
         <p style="color:red;" th:if="${lastnamemessage != null and lastnamemessage != ''}" th:text="${lastnamemessage}"></p>
 
 
@@ -135,7 +135,7 @@
         <p style="color: red;" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></p>
 
         <label for="dob">Date of Birth:</label>
-        <input type="date" id="dob" name="dob" th:field="*{dob}" required>
+        <input type="date" id="dob" name="dob" th:value="${customerRequest.dob}" required>
         <p style="color: red;" th:if="${#fields.hasErrors('dob')}" th:errors="*{dob}"></p>
 
         <label for="phone">Phone:</label>
@@ -171,3 +171,4 @@
 
 </body>
 </html>
+
