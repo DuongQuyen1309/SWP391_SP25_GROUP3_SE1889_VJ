@@ -313,9 +313,17 @@ return "redirect:/account/updateOwner?id=" + accountOwner.getId();
     }
 
     @GetMapping("/resetpwStaff")
-    public String resetPasswordStaff(Model model, @RequestParam String id) {
-        Optional<Account> account = accountService.findById(Long.parseLong(id));
-        model.addAttribute("account", account.get());
+    public String resetPasswordStaff(Model model,
+                                     @RequestParam String id,
+                                     @CookieValue(value = "token", required = false) String token) {
+        Optional<Account> accountStaff = accountService.findById(Long.parseLong(id));
+        String usernameAccount = jwtUtils.extractUsername(token);
+        Optional<Account> optAccount = accountService.findByUsernameAndIsDeleteFalse(usernameAccount);
+        Account account = optAccount.orElse(null);
+
+        model.addAttribute("account", account);
+        model.addAttribute("accountStaff", accountStaff.get());
+
         return "resetpwStaff";
     }
 
@@ -323,14 +331,21 @@ return "redirect:/account/updateOwner?id=" + accountOwner.getId();
     public String resetPasswordStaff(@RequestParam String username,
                                      @RequestParam String newPassword,
                                      @RequestParam String confirmPassword,
-                                     Model model) {
-        Optional<Account> optAccount = accountRepository.findByUsernameAndIsDeleteFalse(username);
+                                     Model model,
+                                     @CookieValue(value = "token", required = false) String token) {
+        Optional<Account> optAccountStaff = accountRepository.findByUsernameAndIsDeleteFalse(username);
+        String usernameAccount = jwtUtils.extractUsername(token);
+        Optional<Account> optAccount = accountService.findByUsernameAndIsDeleteFalse(usernameAccount);
+        Account account = optAccount.orElse(null);
 
-        optAccount.get().setPassword(passwordEncoder.encode(newPassword));
-        accountRepository.save(optAccount.get());
+        model.addAttribute("account", account);
 
-        return "redirect:/account/updateStaff?id=" + optAccount.get().getId();
+        optAccountStaff.get().setPassword(passwordEncoder.encode(newPassword));
+        accountRepository.save(optAccountStaff.get());
+
+        return "redirect:/account/updateStaff?id=" + optAccountStaff.get().getId();
     }
+
 
 
 
