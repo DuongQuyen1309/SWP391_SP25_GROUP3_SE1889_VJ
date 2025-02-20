@@ -270,7 +270,7 @@ return "redirect:/account/updateOwner?id=" + accountOwner.getId();
         account.setCreatedBy(adAccount.get().getId());
 //        account.setRole("STAFF"); // Đặt role là STAFF
 
-        accountService.createAccount(account);
+        accountService.createStaffAccount(account);
         return "redirect:/account/listStaff";
     }
 
