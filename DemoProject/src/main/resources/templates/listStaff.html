@@ -93,12 +93,14 @@
     <table class="styled-table">
         <thead>
         <tr>
-            <th>ID</th>
-            <th>Username</th>
-            <th>Display Name</th>
-            <th>Phone</th>
-            <th>Address</th>
-            <th>Action</th>
+            <td>ID</td>
+            <td>Username</td>
+            <td>Display Name</td>
+            <td>Full Name</td>
+            <td>Phone</td>
+            <td>Gender</td>
+            <td>Address</td>
+            <td>Action</td>
         </tr>
         </thead>
         <tbody>
@@ -106,7 +108,9 @@
             <td th:text="${account.id}"></td>
             <td th:text="${account.username}"></td>
             <td th:text="${account.displayName}"></td>
+            <td th:text="${account.name}"></td>
             <td th:text="${account.phone}"></td>
+            <td th:text="${account.gender == null} ? '' : (account.gender ? 'Male' : 'Female')"></td>
             <td th:text="${account.address}"></td>
             <td>
                 <div style="display: flex; gap: 5px;">
