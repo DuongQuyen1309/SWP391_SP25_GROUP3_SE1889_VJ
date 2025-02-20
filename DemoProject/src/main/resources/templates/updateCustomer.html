@@ -143,11 +143,7 @@
   <!--    }-->
   <!--  </script>-->
   <script th:inline="javascript">
-      // Tham số phoneList từ model được truyền vào JavaScript
-  </script>
-
-
-  <script>
+    var existingPhones = /*[[${phoneList}]]*/ [];
   var nameRegex = /^[a-zA-ZÀ-Ỹà-ỹ\s]+$/;
     var phoneRegex = /^[0-9]{10,11}$/;
     var today = new Date().toISOString().split("T")[0];
@@ -187,7 +183,10 @@
           errors.push("Phone is not empty");
         } else if (!phone.value.match(phoneRegex)) {
           errors.push("Phone number must be between 10 and 11 digits and contain only numbers.");
+        } else if(existingPhones.includes(phone.value)){
+          errors.push("Phone is not duplicated");
         }
+
 
         // Nếu có lỗi, ngăn submit và hiển thị thông báo
         if (errors.length > 0) {
