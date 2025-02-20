@@ -58,46 +58,72 @@
         }
 
 
-            document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener("DOMContentLoaded", function () {
             const form = document.querySelector(".create-form");
-            const username = document.getElementById("username");
-            const password = document.getElementById("password");
-            const displayname = document.getElementById("displayname");
-            const errorMessage = document.createElement("p");
-            errorMessage.style.color = "red";
-            errorMessage.style.fontWeight = "bold";
+            const usernameInput = document.getElementById("username");
+            const passwordInput = document.getElementById("password");
+            const displaynameInput = document.getElementById("displayname");
+            const errorContainer = document.createElement("div");
+            errorContainer.style.color = "red";
+            errorContainer.style.fontWeight = "bold";
 
-            form.addEventListener("submit", function (event) {
-            let errors = [];
+            // ✅ Hàm gửi request AJAX kiểm tra username có tồn tại không
+            async function checkUsernameExists(username) {
+                try {
+                    let response = await fetch(`/api/check-username?username=${username}`);
+                    let data = await response.json();
+                    return data.exists;
+                } catch (error) {
+                    console.error("Lỗi khi kiểm tra username:", error);
+                    return false;
+                }
+            }
+            form.addEventListener("submit", async function (event) {
+               event.preventDefault();
+                let errors = [];
 
-            // Kiểm tra Username
-            if (username.value.trim() === "") {
-            errors.push("Username không được để trống.");
-        } else if (username.value.length < 5) {
-            errors.push("Username phải có ít nhất 5 ký tự.");
-        }
 
-            // Kiểm tra Password
-            if (password.value.trim() === "") {
-            errors.push("Password không được để trống.");
-        } else if (!/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/.test(password.value)) {
-            errors.push("Password phải có ít nhất 6 ký tự, chứa ít nhất 1 chữ cái và 1 số.");
-        }
 
-            // Kiểm tra Display Name
-            if (displayname.value.trim() === "") {
-            errors.push("Display Name không được để trống.");
-        } else if (displayname.value.length < 3) {
-            errors.push("Display Name phải có ít nhất 3 ký tự.");
-        }
+                // ✅ Kiểm tra username không rỗng
+                if (usernameInput.value.trim() === "") {
+                    errors.push("Username không được để trống.");
+                } else if (!/^[A-Za-z0-9]+$/.test(usernameInput.value)) {
+                    errors.push("Username chỉ được chứa chữ cái (A-Z, a-z) và số, không chứa ký tự đặc biệt.");
+                } else {
+                    // 🔍 Gửi AJAX kiểm tra username có tồn tại không
+                    let isUsernameExists = await checkUsernameExists(usernameInput.value);
+                    console.log(isUsernameExists);
+                    if (isUsernameExists) {
+                        errors.push("Username đã tồn tại, vui lòng chọn username khác.");
+                    }
+                }
 
-            // Nếu có lỗi, ngăn submit và hiển thị thông báo
-            if (errors.length > 0) {
-            event.preventDefault();
-            errorMessage.innerHTML = errors.join("<br>");
-            form.insertBefore(errorMessage, form.querySelector("button"));
-        }
-        });
+                // ✅ Kiểm tra password không rỗng và có đủ điều kiện
+                if (passwordInput.value.trim() === "") {
+                    errors.push("Mật khẩu không được để trống.");
+                }
+
+                // ✅ Kiểm tra display name không rỗng
+                if (displaynameInput.value.trim() === "") {
+                    errors.push("Display Name không được để trống.");
+                }
+
+                // ✅ Nếu có lỗi, hiển thị lỗi và ngăn form submit
+                if (errors.length > 0) {
+                    event.preventDefault();
+                    errorContainer.innerHTML = errors.join("<br>");
+                    form.insertBefore(errorContainer, form.querySelector("button"));
+                }
+                else {
+
+                    // ✅ Đợi 500ms để alert hiển thị, sau đó gửi form
+                    setTimeout(() => {
+                        form.submit();
+                    }, 500);
+                }
+            });
+
+
         });
     </script>
 
@@ -141,14 +167,14 @@
     <form class="create-form" action="/account/createOwner" method="POST">
 
         <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required>
+        <input type="text" id="username" name="username" >
 
         <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required>
+        <input type="password" id="password" name="password" >
 
 
         <label for="displayname">Display Name:</label>
-        <input type="text" id="displayname" name="displayname" required>
+        <input type="text" id="displayname" name="displayname" >
 
         <p style="color: red;" th:if="${error}" th:text="${error}"></p>
         <button type="submit" id="applyBtn">Create Owner</button>

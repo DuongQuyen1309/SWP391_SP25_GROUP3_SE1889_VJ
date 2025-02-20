@@ -1,6 +1,5 @@
 package com.demoproject.service;
 
-import com.demoproject.dto.reponse.CustomerResponse;
 import com.demoproject.dto.request.CustomerRequest;
 import com.demoproject.entity.Customer;
 import com.demoproject.mapper.CustomerMapper;

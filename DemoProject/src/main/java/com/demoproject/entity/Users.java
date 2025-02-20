@@ -16,7 +16,7 @@ public class Users {
     private String name;
     @Column(name = "ADDRESS", length = 50)
     private String address;
-    @Column(name = "PHONE", length = 10)
+    @Column(name = "PHONE", length = 10, unique = true)
     private String phone;
     @Column(name = "DOB")
     private LocalDate dateOfBirth;

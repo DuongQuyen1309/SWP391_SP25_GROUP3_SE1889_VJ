@@ -30,4 +30,11 @@ public class UserService {
                 user.getDateOfBirth() != null;
     }
 
+    public boolean existsByPhoneExcludingUser(String phone, Long userId) {
+        return userRepository.existsByPhoneAndIdNot(phone, userId);
+    }
+
+    public Optional<Users> getUserProfileByPhone(String phone) {
+        return userRepository.findByPhone(phone);
+    }
 }

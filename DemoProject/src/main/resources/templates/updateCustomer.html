@@ -85,7 +85,7 @@
 
       // Điều hướng đến trang listcustomer sau khi hiển thị thông báo
       setTimeout(function() {
-        window.location.href = "/listcustomer";  // Điều hướng sau 3 giây
+        window.location.href = "/customer/listCustomer";  // Điều hướng sau 3 giây
       }, 3000);  // Thời gian chờ 3 giây
     }
   </script>
@@ -182,7 +182,7 @@
   <div th:if="${message != null}">
     <p th:text="${message}" th:class="${messageType == 'success' ? 'success' : 'error'}"></p>
   </div>
-  <form class="profile-form" action="/updateCustomer" method="POST" accept-charset="UTF-8" onsubmit="return validateForm(event)">
+  <form class="profile-form" action="/customer/updateCustomer" method="POST" accept-charset="UTF-8" onsubmit="return validateForm(event)">
     <!--        <form class="profile-form" action="/updateCustomer/{id}" method="POST" th:object="${customer}" onsubmit="return confirmUpdate(event, this)">-->
     <!-- Name Field -->
     <input type="hidden" id="id" name="id" th:value="${customer.id}" required>

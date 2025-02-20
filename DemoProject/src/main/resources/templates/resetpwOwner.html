@@ -64,19 +64,56 @@
   </style>
   <script src="/js/home.js"></script>
   <script>
-    function validatePassword() {
-      let newPassword = document.getElementById("newPassword").value;
-      let confirmPassword = document.getElementById("confirmPassword").value;
-      let errorMessage = document.getElementById("passwordError");
+    document.addEventListener("DOMContentLoaded", function () {
+      const form = document.querySelector(".reset-form");
+      const newPassword = document.getElementById("newPassword");
+      const confirmPassword = document.getElementById("confirmPassword");
+      const errorMessage = document.createElement("div");
 
-      if (newPassword !== confirmPassword) {
-        errorMessage.innerText = "❌ Mật khẩu nhập lại không khớp!";
-        return false; // Ngăn form submit
-      } else {
-        errorMessage.innerText = ""; // Xóa thông báo lỗi nếu mật khẩu khớp
-        return true;
-      }
-    }
+      errorMessage.id = "error-message";
+      errorMessage.style.color = "red";
+      errorMessage.style.fontWeight = "bold";
+
+
+      form.addEventListener("submit",  function (event) {
+        event.preventDefault();
+        let errors = [];
+
+
+        console.log(newPassword.value);
+        if (!newPassword.value || newPassword.value.length <= 0) {
+
+          errors.push("New password không được để trống.");
+        }
+
+        if (!confirmPassword.value || confirmPassword.value.length <= 0) {
+          console.log(confirmPassword.value);
+          errors.push("Confirm password không được để trống.");
+        }
+
+        console.log(errors);
+        if ((newPassword.value !== confirmPassword.value) && ((newPassword.value.length > 0)&&(confirmPassword.value.length > 0))) {
+          errors.push("❌ Mật khẩu nhập lại không khớp!");
+
+        }
+
+
+        // Nếu có lỗi, ngăn submit và hiển thị thông báo
+        if (errors.length > 0) {
+          event.preventDefault();
+          errorMessage.innerHTML = errors.join("<br>");
+          form.insertBefore(errorMessage, form.querySelector(".button"));
+        } else {
+          alert("Reset password successfully!");
+
+          // ✅ Đợi 500ms để alert hiển thị, sau đó gửi form
+          setTimeout(() => {
+            form.submit();
+          }, 500);
+        }
+      });
+    });
+
   </script>
 </head>
 <body>
@@ -110,7 +147,7 @@
 <!-- Content -->
 <div class="content">
   <h1>Reset password</h1>
-  <form class="reset-form" action="/account/resetpwOwner" method="POST" onsubmit="return validatePassword()">
+  <form class="reset-form" action="/account/resetpwOwner" method="POST" >
     <label for="username">Username:</label>
     <input type="text" id="username" name="username" th:value="${accountOwner.username}" disabled>
     <input type="hidden" id="hiddenUsername" name="username" th:value="${accountOwner.username}">
@@ -120,8 +157,6 @@
 
     <label for="confirmPassword">Confirm password:</label>
     <input type="password" id="confirmPassword" name="confirmPassword"  >
-
-    <p id="passwordError" style="color: red; font-size: 14px;"></p>
 
     <button type="submit" id="applyBtn" >Change password</button>
   </form>

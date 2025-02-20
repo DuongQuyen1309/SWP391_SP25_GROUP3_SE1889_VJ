@@ -326,4 +326,6 @@ public class AccountService {
         String username = jwtUtils.extractUsername(token);
         return findByUsernameAndIsDeleteFalse(username);
     }
+
+    public void deleteAccountFromToken(String token) {}
 }

@@ -114,10 +114,7 @@ public class AccountController {
                               Model model) {
         Optional<Account> adAccount= accountService.getAccountFromToken(token);
         model.addAttribute("account", adAccount.get());
-        if(accountRepository.existsByUsernameAndIsDeleteFalse(username)) {
-            model.addAttribute("error", "Tên đăng nhập đã tồn tại!");
-            return "createOwner"; // Quay lại trang đăng ký với thông báo lỗi
-        }
+
         Account accountOwner = new Account();
         accountOwner.setUsername(username);
         accountOwner.setPassword(passwordEncoder.encode(password));

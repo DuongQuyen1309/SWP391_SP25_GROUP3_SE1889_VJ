@@ -57,11 +57,7 @@ public class HomeController {
                            @RequestParam String password,
                            @RequestParam String displayname,
                            Model model) {
-        // Kiểm tra xem username đã tồn tại chưa
-        if(accountRepository.existsByUsernameAndIsDeleteFalse(username)) {
-            model.addAttribute("error", "Tên đăng nhập đã tồn tại!");
-            return "register"; // Quay lại trang đăng ký với thông báo lỗi
-        }
+
         Account account = new Account();
         account.setUsername(username);
         account.setPassword(passwordEncoder.encode(password));

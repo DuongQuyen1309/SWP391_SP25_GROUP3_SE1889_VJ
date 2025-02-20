@@ -64,6 +64,7 @@
     </style>
     <script src="/js/home.js"></script>
     <script>
+
         document.addEventListener("DOMContentLoaded", function () {
             let alertMessage = "[[${session.alertMessage}]]"; // Lấy giá trị từ session
 
@@ -78,6 +79,74 @@
             }
         });
 
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.querySelector(".profile-form");
+            const name = document.getElementById("name");
+            const phone = document.getElementById("phone");
+            const dob= document.getElementById("dob");
+            const address = document.getElementById("address");
+
+
+            const errorMessage = document.createElement("p");
+            errorMessage.id = "error-message";
+            errorMessage.style.color = "red";
+            errorMessage.style.fontWeight = "bold";
+
+            async function checkPhoneExists(phone) {
+                try {
+                    let response = await fetch(`/api/check-phone-account?phone=${phone}`);
+                    if (!response.ok) throw new Error("Lỗi kiểm tra số điện thoại");
+                    let data = await response.json();
+                    return data.exists;
+                } catch (error) {
+                    console.error("Lỗi khi kiểm tra phone:", error);
+                    return false;
+                }
+            }
+
+            form.addEventListener("submit", async function (event) {
+                let errors = [];
+                event.preventDefault();
+                if (!name.value || name.value.length <= 0) {
+                    errors.push("Full Name không được để trống.");
+                } else if (!/^[A-Za-zÀ-ỹ\s]+$/.test(name.value)) {
+                    errors.push("Full Name chỉ được chứa chữ cái và khoảng trắng (có dấu hoặc không dấu).");
+                }
+
+                if (!phone.value || phone.value.length <= 0) {
+                    errors.push("Phone không được để trống.");
+                } else if (!/^0\d{9}$/.test(phone.value)) {
+                    errors.push("Phone phải bắt đầu bằng số 0 và có đúng 10 chữ số.");
+                } else {
+                    let isPhoneExists = await checkPhoneExists(phone.value);
+                    if (isPhoneExists) {
+                        errors.push("Số điện thoại này đã tồn tại, vui lòng nhập số khác.");
+                    }
+                }
+
+                if (!dob.value || dob.value.length <= 0) {
+                    errors.push("Date of Birth không được để trống.");
+                } else {
+                    const dobDate = new Date(dob.value);
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    if (dobDate >= today) {
+                        errors.push("Date of Birth phải là ngày trong quá khứ.");
+                    }
+                }
+
+                if (errors.length > 0) {
+                    event.preventDefault();
+                    errorMessage.innerHTML = errors.join("<br>");
+                    form.insertBefore(errorMessage, form.querySelector(".button-group"));
+                } else {
+                    alert("Profile updated successfully!");
+                    setTimeout(() => {
+                        form.submit();
+                    }, 500);
+                }
+            });
+        });
 
         // window.onload = function() {
         //     let alertMessage = "[[${alertMessage}]]";
@@ -120,6 +189,7 @@
             document.getElementById('editBtn').style.display = 'inline-block';
             document.getElementById('cancelBtn').style.display = 'none';
             document.getElementById('applyBtn').style.display = 'none';
+            document.getElementById('error-message')?.remove();
         }
 
         document.getElementById('profileForm').addEventListener('submit', function(event) {
@@ -206,11 +276,7 @@
             <button type="button" id="editBtn" onclick="enableEditing()">Edit</button>
             <button type="button" id="cancelBtn" onclick="cancelEditing()" style="display:none;">Cancel</button>
             <button type="submit" id="applyBtn" style="display:none;">Apply</button>
-            <div th:if="${error != null and not #lists.isEmpty(error)}">
-                <ul style="color: red; font-size: 14px;">
-                    <li th:each="err : ${error}" th:text="${err}"></li>
-                </ul>
-            </div>
+
 
         </div>
     </form>

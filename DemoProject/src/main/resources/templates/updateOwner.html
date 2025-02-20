@@ -67,6 +67,8 @@
 
     document.addEventListener("DOMContentLoaded", function () {
       const form = document.querySelector(".profile-form");
+      const username = document.getElementById("username");
+      console.log(username.value);
       const displayname = document.getElementById("displayname");
       const name = document.getElementById("name");
       const phone = document.getElementById("phone");
@@ -78,9 +80,20 @@
       errorMessage.id = "error-message";
       errorMessage.style.color = "red";
       errorMessage.style.fontWeight = "bold";
+      async function checkOwnerPhoneExists(phone,username) {
+        try {
+          let response = await fetch(`/api/check-phone-owneraccount?phone=${phone}&username=${username}`);
+          if (!response.ok) throw new Error("Lỗi kiểm tra số điện thoại");
+          let data = await response.json();
+          return data.exists;
+        } catch (error) {
+          console.error("Lỗi khi kiểm tra phone:", error);
+          return false;
+        }
+      }
 
-      form.addEventListener("submit", function (event) {
-
+      form.addEventListener("submit", async function (event) {
+        event.preventDefault();
         let errors = [];
 
         if (!displayname.value) {
@@ -88,20 +101,25 @@
         }
 
         // ✅ Kiểm tra Full Name (Không được để trống & không chứa số/ký tự đặc biệt, nhưng cho phép dấu)
-        if (!name.value||name.value.length <= 0) {
+        if (!name.value || name.value.length <= 0) {
           errors.push("Full Name không được để trống.");
         } else if (!/^[A-Za-zÀ-ỹ\s]+$/.test(name.value)) {
           errors.push("Full Name chỉ được chứa chữ cái và khoảng trắng (có dấu hoặc không dấu).");
         }
 
-        if (!phone.value||phone.value.length <= 0) {
+        if (!phone.value || phone.value.length <= 0) {
           errors.push("Phone không được để trống.");
         } else if (!/^0\d{9}$/.test(phone.value)) {
           errors.push("Phone phải bắt đầu bằng số 0 và có đúng 10 chữ số.");
+        } else {
+          let isPhoneExists = await checkOwnerPhoneExists(phone.value,username.value);
+          if (isPhoneExists) {
+            errors.push("Số điện thoại này đã tồn tại, vui lòng nhập số khác.");
+          }
         }
 
         // ✅ Kiểm tra Date of Birth (Không được null, phải trong quá khứ)
-        if (!dob.value||dob.value.length <= 0) {
+        if (!dob.value || dob.value.length <= 0) {
           errors.push("Date of Birth không được để trống.");
         } else {
           const dobDate = new Date(dob.value);
@@ -118,8 +136,7 @@
           event.preventDefault();
           errorMessage.innerHTML = errors.join("<br>");
           form.insertBefore(errorMessage, form.querySelector(".button-group"));
-        }
-        else{
+        } else {
           alert("Profile updated successfully!");
 
           // ✅ Đợi 500ms để alert hiển thị, sau đó gửi form
@@ -255,11 +272,7 @@
       <button type="button" onclick="resetPassword()">Reset password</button>
 
     </div>
-    <div th:if="${error != null and not #lists.isEmpty(error)}">
-      <ul style="color: red; font-size: 14px;">
-        <li th:each="err : ${error}" th:text="${err}"></li>
-      </ul>
-    </div>
+
 
   </form>
 

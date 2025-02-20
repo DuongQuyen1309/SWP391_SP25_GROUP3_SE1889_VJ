@@ -1,6 +1,6 @@
 package com.demoproject.mapper;
 
-import com.demoproject.dto.reponse.CustomerResponse;
+import com.demoproject.dto.response.CustomerResponse;
 import com.demoproject.dto.request.CustomerRequest;
 import com.demoproject.entity.Customer;
 import org.mapstruct.Mapper;

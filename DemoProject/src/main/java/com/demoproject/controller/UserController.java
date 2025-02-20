@@ -119,25 +119,7 @@ public class UserController {
         }
         model.addAttribute("listHiddenPage",listHiddenPage);
         model.addAttribute("user", user);
-        List<String> error = new ArrayList<>();
-        boolean isError = false;
-        if(!isValidName(name)){
-            error.add("Tên không được để trống");
-            isError = true;
-        }
-        if(!isValidPhone(phone)){
-            error.add("Số điện thoại phải đủ 10 số và bắt đầu bằng số 0");
-            isError = true;
-        }
-        if (!isValidAge(LocalDate.parse(dob))) {
-            error.add("Người dùng phải đủ 18 tuổi trở lên");
-            isError = true;
-        }
 
-        if(isError){
-            model.addAttribute("error", error);
-            return "userprofile";
-        }
         user.setName(name);
         user.setPhone(phone);
         user.setAddress(address);
