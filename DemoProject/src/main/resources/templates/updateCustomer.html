@@ -142,9 +142,13 @@
   <!--      return true;-->
   <!--    }-->
   <!--  </script>-->
+  <script th:inline="javascript">
+      // Tham số phoneList từ model được truyền vào JavaScript
+  </script>
+
 
   <script>
-    var nameRegex = /^[a-zA-ZÀ-Ỹà-ỹ\s]+$/;
+  var nameRegex = /^[a-zA-ZÀ-Ỹà-ỹ\s]+$/;
     var phoneRegex = /^[0-9]{10,11}$/;
     var today = new Date().toISOString().split("T")[0];
     document.addEventListener("DOMContentLoaded", function () {

@@ -4,6 +4,7 @@ import com.demoproject.entity.Users;
 import com.demoproject.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -36,5 +37,12 @@ public class UserService {
 
     public Optional<Users> getUserProfileByPhone(String phone) {
         return userRepository.findByPhone(phone);
+    }
+
+    public List<Long> getStaffID(Long ownerID){
+        return userRepository.getStaffID(ownerID);
+    }
+    public Long getOwnerID(Long staffID){
+        return userRepository.getOwnerID(staffID);
     }
 }

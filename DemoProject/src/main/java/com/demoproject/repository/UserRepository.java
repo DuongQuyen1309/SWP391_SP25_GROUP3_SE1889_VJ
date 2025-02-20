@@ -22,4 +22,10 @@ public interface UserRepository extends JpaRepository<Users, Long> {
     boolean existsByPhoneAndIdNot(String phone, Long id);
 
     Optional<Users> findByPhone(String phone);
+
+    @Query("SELECT u.id FROM Users u WHERE u.createdBy = :ownerID")
+    List<Long> getStaffID(Long ownerID);
+
+    @Query("SELECT u.createdBy FROM Users u WHERE u.createdBy = :staffID")
+    Long getOwnerID(Long staffID);
 }

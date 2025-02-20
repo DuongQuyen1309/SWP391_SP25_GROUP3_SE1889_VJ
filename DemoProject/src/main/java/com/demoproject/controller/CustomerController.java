@@ -9,6 +9,7 @@ import com.demoproject.mapper.CustomerMapper;
 import com.demoproject.service.AccountService;
 import com.demoproject.service.CustomerService;
 import com.demoproject.service.UserService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -63,8 +64,31 @@ public class CustomerController {
         Account account = optAccount.orElse(null);
         model.addAttribute("account", account);
 
+        List<String> phoneList =  customerService.getAllPhoneNumbers();
+        model.addAttribute("phoneList", phoneList);
+        System.out.println("phonne: ");
+        for(String phone : phoneList) {
+            System.out.println(phone);
+        }
+        //lấy id của người đang đăng nhập
+        Optional<Users> user = userService.getUserProfile(optAccount.get().getId());
+        System.out.println("user nguoi dang nhap: "+ user.get().getId());
 
         String role= jwtUtils.extractRole(token);
+        System.out.println("role la "+ role);
+        List<Long> relatedUserList = new ArrayList<>();
+        if(role.equalsIgnoreCase("OWNER")){
+            relatedUserList = userService.getStaffID(user.get().getId());
+            relatedUserList.add(user.get().getId());
+            System.out.println("cac id cau user "+user.get().getId()+" la:");
+            for(Long id:relatedUserList){
+                System.out.println(id);
+            }
+        }else if(role.equalsIgnoreCase("STAFF")){
+            Long ownerId = userService.getOwnerID(user.get().getId());
+            relatedUserList = userService.getStaffID(ownerId);
+            relatedUserList.add(ownerId);
+        }
         List<String> listHiddenPage = new ArrayList<>();
         if(role.equals("STAFF")){
             listHiddenPage.add("listStaff");
@@ -72,9 +96,9 @@ public class CustomerController {
         model.addAttribute("listHiddenPage", listHiddenPage);
 
         if ((search != null && !search.isEmpty()) || (ctype != null && !ctype.isEmpty())) {
-            customerPage = customerService.searchCustomersByNameAndType(search, ctype, pageable);
+            customerPage = customerService.searchCustomersByNameAndType(relatedUserList,search, ctype, pageable);
         } else {
-            customerPage = customerService.getAllCustomersAndIsDeleteFalse(pageable);
+            customerPage = customerService.getAllCustomersAndIsDeleteFalse(relatedUserList,pageable);
         }
 
         List<String> customerTypes = customerService.getAllCustomerTypes();
@@ -145,12 +169,18 @@ public class CustomerController {
             model.addAttribute("lastnamemessage","Not be empty, not contain number and special characters");
             return "createCustomer"; // Quay lại form nếu có lỗi
         }
+        if (customerService.isPhoneNumberExist(customerRequest.getPhone())) {
+            model.addAttribute("lastname", lastname);
+            model.addAttribute("customerRequest", customerRequest);
+            model.addAttribute("phoneError","Phone is not duplicatied in system");
+            return "createCustomer"; // Quay lại form nếu có lỗi
+        }
 
 
         Long id = user.get().getId();
 
 
-        String fullname = customerRequest.getName().trim() + " " + lastname.trim();
+        String fullname = lastname.trim()+ " " +customerRequest.getName().trim();
         String phone = customerRequest.getPhone().trim();
         customerRequest.setPhone(phone.trim());
         customerRequest.setName(fullname);
@@ -187,8 +217,11 @@ public class CustomerController {
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
         model.addAttribute("account", account);
-        model.addAttribute("customer", customer);  // Truyền customer vào model
+        model.addAttribute("customer", customer);
+        List<String> phoneList =  customerService.getAllPhoneNumbers();
+        model.addAttribute("phoneList", phoneList);
         return "updateCustomer";
+
     }
 
 
@@ -209,6 +242,8 @@ public class CustomerController {
         Optional<Account> optAccount = accountService.findByUsernameAndIsDeleteFalse(username);
         Account account = optAccount.orElse(null);
         model.addAttribute("account", account);
+
+
         // Kiểm tra Name
         if (name.trim().isEmpty()) {
             redirectAttributes.addFlashAttribute("messageType", "fail");

@@ -139,7 +139,7 @@ public class AuthController {
     public ResponseEntity<Map<String, Boolean>> checkOwnerPhoneExists(@RequestParam String phone,@RequestParam String username) {
         Map<String, Boolean> response = new HashMap<>();
 
-        Account account= accountService.findByUsernameAndIsDeleteFalse(username).orElse(null);
+        Account account = accountService.findByUsernameAndIsDeleteFalse(username).orElse(null);
 
         Users currentUser = userService.getUserProfile(account.getUserId()).orElse(null);
 
