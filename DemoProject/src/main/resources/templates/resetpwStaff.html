@@ -74,35 +74,20 @@
             });
         });
     </script>
-    <script src="/js/home.js"></script>
+
 </head>
 <body>
 <div class="header">
     <button class="menu-btn" onclick="toggleSidebar()">☰</button>
     <h2><a href="/home">RSMS</a></h2>
-    <div class="user-info">
-        <img src="/images/account.jpg" alt="User Avatar" class="user-avatar"/>
-        <div class="dropdown">
-            <span th:text="${account.displayName}" class="user-name" onclick="toggleDropdown()"> ▼</span>
-            <div id="dropdown-menu" class="dropdown-content">
-                <a href="/user/userprofile">👤 View Profile</a>
-                <a href="/#" id="logout">🚪 Logout</a>
-            </div>
-        </div>
-    </div>
+
 </div>
 
 <div class="sidebar" id="sidebar">
     <h2>Feature</h2>
     <a href="/user/userprofile">Profile</a>
     <a href="/account/listStaff">Staff Account Management</a>
-    <a href="/product/listProduct" >Rice Management</a>
 
-    <a href="/customer/listCustomer" >Customer Management</a>
-
-    <a href="/warehouse/listWarehouseZone" >WarehouseZone Management</a>
-
-    <a href="/listInvoice">Invoice Management</a>
 </div>
 
 <div class="content">
