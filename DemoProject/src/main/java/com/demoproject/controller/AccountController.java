@@ -56,11 +56,7 @@ public class AccountController {
         Account account = accountService.getAccountFromToken(token).orElse(null);
         Optional<Users> user = userService.getUserProfile(account.getUserId());
 
-        // ✅ Nếu thiếu thông tin cá nhân, chuyển về `/userprofile`
-        if (!userService.isUserProfileComplete(user.get())) {
-            redirectAttributes.addFlashAttribute("alertMessage", "Bạn phải nhập thông tin cá nhân đã");
-            return "redirect:/user/userprofile";
-        }
+
 
         // ✅ Gọi phương thức tìm kiếm nếu có từ khóa, ngược lại lấy toàn bộ danh sách Owner
         Page<Map<String, Object>> accountPage;
@@ -127,52 +123,66 @@ public class AccountController {
 
     }
 
-    @GetMapping("/updateOwner")
-    public String updateOwner( Model model,
-                               @RequestParam String id,
-                               @CookieValue(value = "token", required = false) String token){
-        // ✅ Lấy thông tin người dùng từ token
+    @GetMapping("/viewOwner")
+    public String viewOwner(Model model,
+                            @RequestParam String id,
+                            @CookieValue(value = "token", required = false) String token){
         Account account = accountService.getAccountFromToken(token).orElse(null);
         Optional<Account> accountOwner= accountService.findById(Long.parseLong(id));
         Optional<Users> userOpt= userService.getUserProfile(accountOwner.get().getUserId());
-        Users user = userOpt.orElse(new Users());
+        Users user=userOpt.orElse(null);
         model.addAttribute("accountOwner", accountOwner.get());
         model.addAttribute("account", account);
         model.addAttribute("user", user);
-        return "updateOwner";
+        return "viewOwner";
     }
 
-    @PostMapping("/updateOwner")
-    public String updateOwner(@RequestParam String username,
-                              @RequestParam String displayname,
-                              @RequestParam String name,
-                              @RequestParam String phone,
-                              @RequestParam String address,
-                              @RequestParam String gender,
-                              @RequestParam String dob,
-                              Model model,
-                              @CookieValue(value = "token", required = false) String token){
-
-        Account account = accountService.getAccountFromToken(token).orElse(null);
-        Optional<Account> optAccountOwner = accountRepository.findByUsernameAndIsDeleteFalse(username);
-        Account accountOwner = optAccountOwner.orElse(null);
-        Optional<Users> userOpt= userService.getUserProfile(accountOwner.getUserId());
-        Users user = userOpt.orElse(new Users());
-        model.addAttribute("account", account);
-        model.addAttribute("accountOwner", accountOwner);
-        model.addAttribute("user", user);
-
-        accountOwner.setDisplayName(displayname);
-        user.setName(name);
-        user.setPhone(phone);
-        user.setAddress(address);
-        user.setDateOfBirth(LocalDate.parse(dob));
-        user.setGender(Boolean.parseBoolean(gender));
-        accountRepository.save(accountOwner);
-        userService.saveUserProfile(user);
-
-return "redirect:/account/updateOwner?id=" + accountOwner.getId();
-    }
+//    @GetMapping("/updateOwner")
+//    public String updateOwner( Model model,
+//                               @RequestParam String id,
+//                               @CookieValue(value = "token", required = false) String token){
+//        // ✅ Lấy thông tin người dùng từ token
+//        Account account = accountService.getAccountFromToken(token).orElse(null);
+//        Optional<Account> accountOwner= accountService.findById(Long.parseLong(id));
+//        Optional<Users> userOpt= userService.getUserProfile(accountOwner.get().getUserId());
+//        Users user = userOpt.orElse(new Users());
+//        model.addAttribute("accountOwner", accountOwner.get());
+//        model.addAttribute("account", account);
+//        model.addAttribute("user", user);
+//        return "updateOwner";
+//    }
+//
+//    @PostMapping("/updateOwner")
+//    public String updateOwner(@RequestParam String username,
+//                              @RequestParam String displayname,
+//                              @RequestParam String name,
+//                              @RequestParam String phone,
+//                              @RequestParam String address,
+//                              @RequestParam String gender,
+//                              @RequestParam String dob,
+//                              Model model,
+//                              @CookieValue(value = "token", required = false) String token){
+//
+//        Account account = accountService.getAccountFromToken(token).orElse(null);
+//        Optional<Account> optAccountOwner = accountRepository.findByUsernameAndIsDeleteFalse(username);
+//        Account accountOwner = optAccountOwner.orElse(null);
+//        Optional<Users> userOpt= userService.getUserProfile(accountOwner.getUserId());
+//        Users user = userOpt.orElse(new Users());
+//        model.addAttribute("account", account);
+//        model.addAttribute("accountOwner", accountOwner);
+//        model.addAttribute("user", user);
+//
+//        accountOwner.setDisplayName(displayname);
+//        user.setName(name);
+//        user.setPhone(phone);
+//        user.setAddress(address);
+//        user.setDateOfBirth(LocalDate.parse(dob));
+//        user.setGender(Boolean.parseBoolean(gender));
+//        accountRepository.save(accountOwner);
+//        userService.saveUserProfile(user);
+//
+//return "redirect:/account/updateOwner?id=" + accountOwner.getId();
+//    }
 
 
 
@@ -220,12 +230,10 @@ return "redirect:/account/updateOwner?id=" + accountOwner.getId();
             RedirectAttributes redirectAttributes) {
 
         // Lấy thông tin người dùng từ token
-        String username = jwtUtils.extractUsername(token);
-        Optional<Account> account = accountService.findByUsernameAndIsDeleteFalse(username);
-        Optional<Users> user = userService.getUserProfile(account.get().getUserId());
+        Account account = accountService.getAccountFromToken(token).orElse(null);
 
 
-        model.addAttribute("account", account.get());
+        model.addAttribute("account", account);
 
         // Tìm kiếm hoặc lấy danh sách Staff
         Page<Map<String, Object>> staffPage;
@@ -254,6 +262,14 @@ return "redirect:/account/updateOwner?id=" + accountOwner.getId();
 
         return "redirect:/account/listStaff";
     }
+    @GetMapping("/createStaff")
+    public String createStaff(@CookieValue(value = "token", required = false) String token,
+                              Model model) {
+        Account account = accountService.getAccountFromToken(token).orElse(null);
+        model.addAttribute("account", account);
+        return "createStaff"; // Hiển thị trang createStaff.html
+    }
+
 
     @PostMapping("/createStaff")
     public String createStaff(@RequestParam String username,
@@ -261,18 +277,37 @@ return "redirect:/account/updateOwner?id=" + accountOwner.getId();
                               @RequestParam String displayname,
                               @CookieValue(value = "token", required = false) String token,
                               Model model) {
+        if (token == null || token.isEmpty()) {
+            model.addAttribute("error", "Unauthorized: Missing authentication token.");
+            return "createStaff"; // Quay lại trang createStaff nếu có lỗi
+        }
+
         String usernameAdmin = jwtUtils.extractUsername(token);
         Optional<Account> adAccount = accountRepository.findByUsernameAndIsDeleteFalse(usernameAdmin);
+
+        if (adAccount.isEmpty()) {
+            model.addAttribute("error", "Unauthorized: Admin account not found.");
+            return "createStaff"; // Quay lại trang createStaff nếu có lỗi
+        }
+
+        // Kiểm tra username có bị trùng không
+        Optional<Account> existingAccount = accountRepository.findByUsernameAndIsDeleteFalse(username);
+        if (existingAccount.isPresent()) {
+            model.addAttribute("error", "Username already exists.");
+            return "createStaff"; // Quay lại trang createStaff nếu có lỗi
+        }
+
         Account account = new Account();
         account.setUsername(username);
         account.setPassword(passwordEncoder.encode(password));
         account.setDisplayName(displayname);
         account.setCreatedBy(adAccount.get().getId());
-//        account.setRole("STAFF"); // Đặt role là STAFF
 
-        accountService.createAccount(account);
-        return "redirect:/account/listStaff";
+
+        accountService.createStaffAccount(account);
+        return "redirect:/account/listStaff"; // Quay lại danh sách nhân viên sau khi tạo
     }
+
 
     @GetMapping("/updateStaff")
     public String updateStaff(Model model, @RequestParam String id,
@@ -313,9 +348,17 @@ return "redirect:/account/updateOwner?id=" + accountOwner.getId();
     }
 
     @GetMapping("/resetpwStaff")
-    public String resetPasswordStaff(Model model, @RequestParam String id) {
-        Optional<Account> account = accountService.findById(Long.parseLong(id));
-        model.addAttribute("account", account.get());
+    public String resetPasswordStaff(Model model,
+                                     @RequestParam String id,
+                                     @CookieValue(value = "token", required = false) String token) {
+        Optional<Account> accountStaff = accountService.findById(Long.parseLong(id));
+        String usernameAccount = jwtUtils.extractUsername(token);
+        Optional<Account> optAccount = accountService.findByUsernameAndIsDeleteFalse(usernameAccount);
+        Account account = optAccount.orElse(null);
+
+        model.addAttribute("account", account);
+        model.addAttribute("accountStaff", accountStaff.get());
+
         return "resetpwStaff";
     }
 
@@ -323,14 +366,21 @@ return "redirect:/account/updateOwner?id=" + accountOwner.getId();
     public String resetPasswordStaff(@RequestParam String username,
                                      @RequestParam String newPassword,
                                      @RequestParam String confirmPassword,
-                                     Model model) {
-        Optional<Account> optAccount = accountRepository.findByUsernameAndIsDeleteFalse(username);
+                                     Model model,
+                                     @CookieValue(value = "token", required = false) String token) {
+        Optional<Account> optAccountStaff = accountRepository.findByUsernameAndIsDeleteFalse(username);
+        String usernameAccount = jwtUtils.extractUsername(token);
+        Optional<Account> optAccount = accountService.findByUsernameAndIsDeleteFalse(usernameAccount);
+        Account account = optAccount.orElse(null);
 
-        optAccount.get().setPassword(passwordEncoder.encode(newPassword));
-        accountRepository.save(optAccount.get());
+        model.addAttribute("account", account);
 
-        return "redirect:/account/updateStaff?id=" + optAccount.get().getId();
+        optAccountStaff.get().setPassword(passwordEncoder.encode(newPassword));
+        accountRepository.save(optAccountStaff.get());
+
+        return "redirect:/account/updateStaff?id=" + optAccountStaff.get().getId();
     }
+
 
 
 

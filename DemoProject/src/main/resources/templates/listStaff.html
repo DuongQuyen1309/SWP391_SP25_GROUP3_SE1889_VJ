@@ -23,6 +23,11 @@
             background-color: #1a252f;
         }
     </style>
+    <script>
+        function callPage() {
+            window.location.href ="/account/createStaff";
+        }
+    </script>
 </head>
 <body>
 
@@ -31,15 +36,15 @@
     <button class="menu-btn" onclick="toggleSidebar()">☰</button>
     <h2><a href="/home">RSMS</a></h2>
     <div class="user-info">
-    <img src="/images/account.jpg" alt="User Avatar" class="user-avatar"/>
-    <div class="dropdown">
-        <span th:text="${account.displayName}" class="user-name" onclick="toggleDropdown()"> ▼</span>
-        <div id="dropdown-menu" class="dropdown-content">
-            <a href="/user/userprofile">👤 View Profile</a>
-            <a href="/#" id="logout">🚪 Logout</a>
+        <img src="/images/account.jpg" alt="User Avatar" class="user-avatar"/>
+        <div class="dropdown">
+            <span th:text="${account.displayName}" class="user-name" onclick="toggleDropdown()"> ▼</span>
+            <div id="dropdown-menu" class="dropdown-content">
+                <a href="/user/userprofile">👤 View Profile</a>
+                <a href="/#" id="logout">🚪 Logout</a>
+            </div>
         </div>
     </div>
-</div>
 </div>
 
 <!-- Sidebar -->
@@ -61,9 +66,10 @@
 
 </div>
 
+
 <!-- Content -->
-<div class="content">
-    <button class="add-btn" onclick="openForm()">+</button>
+<div class="content" id="content">
+    <button class="add-btn" onclick="callPage()">+</button>
     <div id="staffFormModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeForm()">&times;</span>
@@ -93,12 +99,14 @@
     <table class="styled-table">
         <thead>
         <tr>
-            <th>ID</th>
-            <th>Username</th>
-            <th>Display Name</th>
-            <th>Phone</th>
-            <th>Address</th>
-            <th>Action</th>
+            <td>ID</td>
+            <td>Username</td>
+            <td>Display Name</td>
+            <td>Full Name</td>
+            <td>Phone</td>
+            <td>Gender</td>
+            <td>Address</td>
+            <td>Action</td>
         </tr>
         </thead>
         <tbody>
@@ -106,7 +114,9 @@
             <td th:text="${account.id}"></td>
             <td th:text="${account.username}"></td>
             <td th:text="${account.displayName}"></td>
+            <td th:text="${account.name}"></td>
             <td th:text="${account.phone}"></td>
+            <td th:text="${account.gender == null} ? '' : (account.gender ? 'Male' : 'Female')"></td>
             <td th:text="${account.address}"></td>
             <td>
                 <div style="display: flex; gap: 5px;">

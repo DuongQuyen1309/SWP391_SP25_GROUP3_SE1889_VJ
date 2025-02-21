@@ -1,6 +1,5 @@
 package com.demoproject.controller;
 
-
 import com.demoproject.entity.Account;
 import com.demoproject.entity.Product;
 import com.demoproject.entity.Users;
@@ -10,57 +9,76 @@ import com.demoproject.service.AccountService;
 import com.demoproject.service.ProductService;
 import com.demoproject.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
 @RequestMapping("/product")
 @Controller
 @RequiredArgsConstructor
 public class ProductController {
     private final ProductService productService;
-    private  final ProductRepository productRepository;
+    private final ProductRepository productRepository;
     private final UserService userService;
-    @Autowired
-    private JwtUtils jwtUtils;
+    private final JwtUtils jwtUtils;
     private final AccountService accountService;
 
+    @GetMapping("/create")
+    public String createProductForm(
+            @CookieValue(value = "token", required = false) String token,
+            Model model){
+        String username = jwtUtils.extractUsername(token);
+        Optional<Account> account = accountService.findByUsernameAndIsDeleteFalse(username);
+        Optional<Users> user = userService.getUserProfile(account.get().getUserId());
+        model.addAttribute("account", account.get());
+        String role= jwtUtils.extractRole(token);
+        List<String> listHiddenPage = new ArrayList<>();
+        if(role.equals("STAFF")){
+            listHiddenPage.add("listStaff");
+        }
+        model.addAttribute("listHiddenPage", listHiddenPage);
+        return "createproduct";
+    }
 
 
-    @PostMapping("/form")
+    @PostMapping("/create")
     public String handleFormSubmit(
             @RequestParam("name") String name,
             @RequestParam("price") double price,
-            @RequestParam("description") String description
-
+            @RequestParam("description") String description,
+            @CookieValue(value = "token", required = false) String token,
+            Model model
     ) {
-
+        String username = jwtUtils.extractUsername(token);
+        Optional<Account> account = accountService.findByUsernameAndIsDeleteFalse(username);
+        Optional<Users> user = userService.getUserProfile(account.get().getUserId());
+        model.addAttribute("account", account.get());
+        String role= jwtUtils.extractRole(token);
+        List<String> listHiddenPage = new ArrayList<>();
+        if(role.equals("STAFF")){
+            listHiddenPage.add("listStaff");
+        }
+        model.addAttribute("listHiddenPage", listHiddenPage);
         Product product = new Product();
         product.setName(name);
         product.setPrice(price);
         product.setDescription(description);
         product.setIsDeleted(0);
-
         productRepository.save(product);
-
         return "redirect:/product/listProduct";
     }
 
     @GetMapping("/listProduct")
     public String showListProducts(
-            @CookieValue(value = "token", required = false) String token,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
             @RequestParam(defaultValue = "id") String sortField,
             @RequestParam(defaultValue = "asc") String sortDirection,
-            RedirectAttributes redirectAttributes,
+            @CookieValue(value = "token", required = false) String token,
             Model model) {
         String username = jwtUtils.extractUsername(token);
         Optional<Account> optAccount = accountService.findByUsernameAndIsDeleteFalse(username);
@@ -88,7 +106,10 @@ public class ProductController {
     }
 
     @PostMapping("/delete")
-    public String deleteProduct(@RequestParam int id) {
+    public String deleteProduct(
+            @RequestParam int id,
+            @CookieValue(value = "token", required = false) String token
+    ) {
 
         Product product = productService.getProductById(id);
         product.setIsDeleted(1);
@@ -96,15 +117,48 @@ public class ProductController {
         return "redirect:/product/listProduct";
     }
 
+    @GetMapping("/update")
+    public String updateProductForm(
+            @RequestParam int id, Model model,
+            @CookieValue(value = "token", required = false) String token
+    ) {
+        String username = jwtUtils.extractUsername(token);
+        Optional<Account> account = accountService.findByUsernameAndIsDeleteFalse(username);
+        Optional<Users> user = userService.getUserProfile(account.get().getUserId());
+        model.addAttribute("account", account.get());
+        String role= jwtUtils.extractRole(token);
+        List<String> listHiddenPage = new ArrayList<>();
+        if(role.equals("STAFF")){
+            listHiddenPage.add("listStaff");
+        }
+        model.addAttribute("listHiddenPage", listHiddenPage);
+        Product product = productService.getProductById(id);
+        model.addAttribute("products", product);
+        return "updateproduct";
+    }
+
     @PostMapping("/update")
     public String updateProduct(
-            @RequestParam("id") int id,
-            @RequestParam("newName") String name,
-            @RequestParam("newPrice") double price,
-            @RequestParam("newDescription") String description
+            @RequestParam("id") String id,
+            @RequestParam("name") String name,
+            @RequestParam("price") double price,
+            @RequestParam("description") String description,
+            @CookieValue(value = "token", required = false) String token,
+            Model model
     ) {
+        String username = jwtUtils.extractUsername(token);
+        Optional<Account> account = accountService.findByUsernameAndIsDeleteFalse(username);
+        Optional<Users> user = userService.getUserProfile(account.get().getUserId());
+        model.addAttribute("account", account.get());
+        String role= jwtUtils.extractRole(token);
+        List<String> listHiddenPage = new ArrayList<>();
+        if(role.equals("STAFF")){
+            listHiddenPage.add("listStaff");
+        }
+        model.addAttribute("listHiddenPage", listHiddenPage);
+        int idProduct = Integer.parseInt(id);
 
-        Product product = productService.getProductById(id);
+        Product product = productService.getProductById(idProduct);
         product.setName(name);
         product.setPrice(price);
         product.setDescription(description);

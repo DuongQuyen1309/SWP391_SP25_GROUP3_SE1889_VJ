@@ -38,25 +38,25 @@ public class CustomerService {
         }
         return null;
     }
-    public Page<Customer> searchCustomersByNameAndType(String name, String ctype, Pageable pageable) {
-        List<Long> ids = customerRepository.findAllActiveCustomerIds();
-        if (ids.isEmpty()) {
-            return Page.empty();
-        }
-        return customerRepository.findByIdInAndIsDeleteFalseAndNameAndCtype(ids, name, ctype, pageable);
+    public Page<Customer> searchCustomersByNameAndType(List<Long> relatedUserList,String name, String ctype, Pageable pageable) {
+//        List<Long> ids = customerRepository.findAllActiveCustomerIds();
+//        if (ids.isEmpty()) {
+//            return Page.empty();
+//        }
+        return customerRepository.findByIdInAndIsDeleteFalseAndNameAndCtype(relatedUserList, name, ctype, pageable);
     }
 
     public List<String> getAllCustomerTypes() {
         return customerRepository.findDistinctCtypes();
     }
 
-    public Page<Customer> getAllCustomersAndIsDeleteFalse(Pageable pageable) {
+    public Page<Customer> getAllCustomersAndIsDeleteFalse(List<Long> relatedUserList, Pageable pageable) {
 
-        List<Long> ids = customerRepository.findAllActiveCustomerIds();
-        if (ids.isEmpty()) {
-            return Page.empty();
-        }
-        Page<Customer> customers = customerRepository.findByIdInAndIsDeleteFalse(ids, pageable);
+//        List<Long> ids = customerRepository.findAllActiveCustomerIds();
+//        if (ids.isEmpty()) {
+//            return Page.empty();
+//        }
+        Page<Customer> customers = customerRepository.findByIdInAndIsDeleteFalse(relatedUserList, pageable);
         return customers;
     }
 
@@ -73,6 +73,15 @@ public class CustomerService {
         updatedCustomer.get().setCtype(customer.getCtype());
         updatedCustomer.get().setUpdatedAt(customer.getUpdatedAt());
         customerRepository.save(updatedCustomer.get());
+    }
 
+    public List<String> getAllPhoneNumbers(){
+        return customerRepository.getAllPhoneNumbers();
+    }
+
+
+    public boolean isPhoneNumberExist(String phone) {
+        List<String> allPhoneNumbers = customerRepository.getAllPhoneNumbers();
+        return allPhoneNumbers.contains(phone);
     }
 }

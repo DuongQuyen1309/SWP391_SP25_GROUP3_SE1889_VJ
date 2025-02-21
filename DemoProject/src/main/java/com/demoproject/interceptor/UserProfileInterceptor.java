@@ -51,7 +51,7 @@ public class UserProfileInterceptor implements HandlerInterceptor {
 
                 // Lưu thông báo vào session để hiển thị trên trang userprofile
                 HttpSession session = request.getSession();
-                session.setAttribute("alertMessage", "Bạn phải nhập đủ thông tin đã");
+                session.setAttribute("alertMessage", "You have to enter profile first");
 
                 // Chuyển hướng về trang user profile
                 response.sendRedirect(request.getContextPath() + "/user/userprofile");

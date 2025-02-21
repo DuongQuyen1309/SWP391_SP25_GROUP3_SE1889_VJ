@@ -25,6 +25,7 @@
       background-color: #1a252f;
       color: white;
     }
+
     .search-input {
       width: 300px;
       padding: 10px;
@@ -110,31 +111,31 @@
 
 <div class="sidebar" id="sidebar">
   <h2>Feature</h2>
-  <a href="/user/userprofile" >Profile</a>
+  <a href="/user/userprofile">Profile</a>
 
 
-  <a href="/account/listStaff" >Staff Account Management</a>
+  <a href="/account/listStaff" th:style="${#lists.contains(listHiddenPage, 'listStaff')} ? 'display: none;' : ''">Staff Account Management</a>
 
-  <a href="/product/listProduct" >Rice Management</a>
+  <a href="/product/listProduct">Rice Management</a>
 
-  <a href="/customer/listCustomer" >Customer Management</a>
+  <a href="/customer/listCustomer">Customer Management</a>
 
   <a href="/warehouse/listWarehouseZone">WarehouseZone Management</a>
 
 
-  <a href="/listInvoice" >Invoice Management</a>
+  <a href="/listInvoice">Invoice Management</a>
 </div>
 
 <!-- Content -->
 <div class="content" id="content">
   <h2 class="mb-4" style="margin-top: 100px;">Warehouse Zones</h2>
   <div style="display:flex; justify-content: space-between;">
-    <form class="d-flex mb-3 search-form" action="/listWarehouseZone" method="get">
+    <form class="d-flex mb-3 search-form" action="/warehouse/listWarehouseZone" method="get">
       <input class="form-control me-2 search-input" type="search" name="search" placeholder="Search by name"
              aria-label="Search">
       <button class="btn btn-outline-success search-button" type="submit">Search</button>
     </form>
-    <a href="/createWarehouseZone" class="btn btn-success create-button">Create New Zone</a>
+    <a href="/warehouse/createWarehouseZone" class="btn btn-success create-button">Create New Zone</a>
   </div>
   <table class=" styled-table">
     <thead>
@@ -149,21 +150,21 @@
       <td th:text="${zone.id}"></td>
       <td th:text="${zone.name}"></td>
       <td>
-        <a th:href="@{/zone/{id}(id=${zone.id})}" class="btn btn-success action-button">View</a>
-        <a th:href="@{/zone/update/{id}(id=${zone.id})}"
-           class="btn btn-warning action-button">Update</a>
-        <a th:href="@{/zone/delete/{id}(id=${zone.id})}" class="btn btn-danger action-button">Delete</a>
+        <a th:href="@{/warehouse/zone/{id}(id=${zone.id})}" class="btn btn-success action-button">View</a>
+        <a th:href="@{/warehouse/zone/update/{id}(id=${zone.id})}" class="btn btn-warning action-button">Update</a>
+        <a th:href="@{/warehouse/zone/delete/{id}(id=${zone.id})}" class="btn btn-danger action-button">Delete</a>
       </td>
     </tr>
     </tbody>
   </table>
-  <div >
+  <div>
     <span th:text="'Page ' + ${zonePage.number + 1} + ' of ' + ${zonePage.totalPages}"></span>
     <div>
       <a th:if="${zonePage.hasPrevious()}"
-         th:href="@{/zone(page=${zonePage.number - 1}, size=${zonePage.size})}"
+         th:href="@{/warehouse/listWarehouseZone(page=${zonePage.number - 1}, size=${zonePage.size})}"
          class="pagination-button">Previous</a>
-      <a th:if="${zonePage.hasNext()}" th:href="@{/zone(page=${zonePage.number + 1}, size=${zonePage.size})}"
+      <a th:if="${zonePage.hasNext()}"
+         th:href="@{/warehouse/listWarehouseZone(page=${zonePage.number + 1}, size=${zonePage.size})}"
          class="pagination-button">Next</a>
     </div>
   </div>

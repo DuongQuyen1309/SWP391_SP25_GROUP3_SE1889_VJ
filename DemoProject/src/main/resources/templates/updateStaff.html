@@ -160,6 +160,7 @@
             });
         });
     </script>
+    <script src="/js/home.js"></script>
 </head>
 <body>
 <!-- Header -->
@@ -232,11 +233,153 @@
             <button type="button" id="editBtn" onclick="enableEditing()">Edit</button>
             <button type="button" id="cancelBtn" onclick="cancelEditing()" style="display:none;">Cancel</button>
             <button type="submit" id="applyBtn" style="display:none;">Apply</button>
-            <input type="hidden" name="id" th:value="${account.id}">
+            <input type="hidden" name="id" th:value="${accountStaff.id}">
+
             <button type="button" onclick="resetPassword()">Reset Password</button>
         </div>
     </form>
 </div>
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.querySelector(".profile-form");
+        const username = document.getElementById("username");
+        console.log(username.value);
+        const displayname = document.getElementById("displayname");
+        const name = document.getElementById("name");
+        const phone = document.getElementById("phone");
+        const dob= document.getElementById("dob");
+        const address = document.getElementById("address");
+
+
+        const errorMessage = document.createElement("p");
+        errorMessage.id = "error-message";
+        errorMessage.style.color = "red";
+        errorMessage.style.fontWeight = "bold";
+        async function checkOwnerPhoneExists(phone,username) {
+            try {
+                let response = await fetch(`/api/check-phone-owneraccount?phone=${phone}&username=${username}`);
+                if (!response.ok) throw new Error("Lỗi kiểm tra số điện thoại");
+                let data = await response.json();
+                return data.exists;
+            } catch (error) {
+                console.error("Lỗi khi kiểm tra phone:", error);
+                return false;
+            }
+        }
+
+        form.addEventListener("submit", async function (event) {
+            event.preventDefault();
+            let errors = [];
+
+            if (!displayname.value) {
+                errors.push("Display Name không được để trống.");
+            }
+
+            // ✅ Kiểm tra Full Name (Không được để trống & không chứa số/ký tự đặc biệt, nhưng cho phép dấu)
+            if (!name.value || name.value.length <= 0) {
+                errors.push("Full Name không được để trống.");
+            } else if (!/^[A-Za-zÀ-ỹ\s]+$/.test(name.value)) {
+                errors.push("Full Name chỉ được chứa chữ cái và khoảng trắng (có dấu hoặc không dấu).");
+            }
+
+            if (!phone.value || phone.value.length <= 0) {
+                errors.push("Phone không được để trống.");
+            } else if (!/^0\d{9}$/.test(phone.value)) {
+                errors.push("Phone phải bắt đầu bằng số 0 và có đúng 10 chữ số.");
+            } else {
+                let isPhoneExists = await checkOwnerPhoneExists(phone.value,username.value);
+                if (isPhoneExists) {
+                    errors.push("Số điện thoại này đã tồn tại, vui lòng nhập số khác.");
+                }
+            }
+
+            // ✅ Kiểm tra Date of Birth (Không được null, phải trong quá khứ)
+            if (!dob.value || dob.value.length <= 0) {
+                errors.push("Date of Birth không được để trống.");
+            } else {
+                const dobDate = new Date(dob.value);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0); // Xóa giờ, phút, giây để so sánh chỉ ngày
+                if (dobDate >= today) {
+                    errors.push("Date of Birth phải là ngày trong quá khứ.");
+                }
+            }
+
+
+            // Nếu có lỗi, ngăn submit và hiển thị thông báo
+            if (errors.length > 0) {
+                event.preventDefault();
+                errorMessage.innerHTML = errors.join("<br>");
+                form.insertBefore(errorMessage, form.querySelector(".button-group"));
+            } else {
+                alert("Profile updated successfully!");
+
+                // ✅ Đợi 500ms để alert hiển thị, sau đó gửi form
+                setTimeout(() => {
+                    form.submit();
+                }, 500);
+            }
+        });
+    });
+
+    function enableEditing() {
+        document.querySelectorAll('.profile-form input, .profile-form select').forEach(element => {
+            if (element.id !== 'username') { // Bỏ qua input có id là "name"
+                element.disabled = false;
+            }
+        });
+
+        document.getElementById('editBtn').style.display = 'none';
+        document.getElementById('cancelBtn').style.display = 'inline-block';
+        document.getElementById('applyBtn').style.display = 'inline-block';
+
+        // Lưu giá trị gốc để có thể hoàn tác nếu bấm Cancel
+        sessionStorage.setItem('originalData', JSON.stringify({
+            displayname: document.getElementById('displayname').value,
+            name: document.getElementById('name').value,
+            phone: document.getElementById('phone').value,
+            address: document.getElementById('address').value,
+            dob: document.getElementById('dob').value,
+            gender: document.getElementById('gender').value
+        }));
+    }
+
+    function cancelEditing() {
+        let originalData = JSON.parse(sessionStorage.getItem('originalData'));
+        document.getElementById('displayname').value = originalData.displayname;
+        document.getElementById('name').value = originalData.name;
+        document.getElementById('phone').value = originalData.phone;
+        document.getElementById('address').value = originalData.address;
+        document.getElementById('dob').value = originalData.dob;
+        document.getElementById('gender').value = originalData.gender;
+
+        document.querySelectorAll('.profile-form input, .profile-form select').forEach(element => element.disabled = true);
+
+
+        document.getElementById('editBtn').style.display = 'inline-block';
+        document.getElementById('cancelBtn').style.display = 'none';
+        document.getElementById('applyBtn').style.display = 'none';
+        document.getElementById('error-message')?.remove();
+    }
+
+    document.getElementById('profileForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+
+        document.querySelectorAll('.profile-form input, .profile-form select').forEach(element => element.disabled = true);
+
+
+        document.getElementById('editBtn').style.display = 'inline-block';
+        document.getElementById('cancelBtn').style.display = 'none';
+        document.getElementById('applyBtn').style.display = 'none';
+    });
+
+    function resetPassword() {
+        let accountId = document.querySelector('input[name="id"]').value;
+        window.location.href = "/account/resetpwStaff?id=" + accountId;
+    }
+</script>
 
 <footer>
     &copy; 2025 Rice Sales Management. All Rights Reserved.

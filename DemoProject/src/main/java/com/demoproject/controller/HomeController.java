@@ -40,6 +40,11 @@ public class HomeController {
     @Autowired
     private JwtUtils jwtUtils;
 
+    @GetMapping("/")
+    public String redirectToLogin() {
+        return "redirect:/login";  // Chuyển hướng về trang login
+    }
+
     @GetMapping("/login")
     public String login() {
         return "login";

@@ -5,6 +5,31 @@
   <meta charset="UTF-8">
   <title></title>
   <link rel="stylesheet" href="/css/list.css">
+  <style>
+    .pagination {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .pagination a {
+      display: inline-block;
+      padding: 8px 16px;
+      margin: 4px;
+      text-decoration: none;
+      background-color: #2c3e50;
+      color: white;
+      border-radius: 5px;
+    }
+
+    .pagination a:hover {
+      background-color: #1a252f;
+    }
+
+    .pagination span {
+      font-size: 18px;
+      margin: 0 10px;
+    }
+  </style>
 
   <script src="/js/home.js"></script>
   <script>
@@ -77,12 +102,12 @@
 <div class="content" id="content">
 
   <!-- Modal Form -->
-  <button class="add-btn" onclick="openForm()">+</button>
+  <button class="add-btn" onclick="createProductForm()">+</button>
   <div id="studentFormModal" class="modal">
     <div class="modal-content">
       <span class="close" onclick="closeForm()">x</span>
       <h2>Add new rice</h2>
-      <form th:action="@{/form}" method="post" enctype="multipart/form-data"
+      <form th:action="@{/product/form}" method="post" enctype="multipart/form-data"
             onsubmit="showSuccessAlert()" >
 
         <label for="name">Name:</label>
@@ -109,7 +134,7 @@
     <input
             style="height: 30px; width: 750px"
             type="text" id="search" name="searchKeyWord"
-            placeholder="Search by product name or description..." required
+            placeholder="Search by product name or description..." 
     >
     <select name="searchBy">
       <option value="name" th:selected="${sortField == 'name'}">Name</option>
@@ -144,43 +169,23 @@
       <td th:text="${product.price}"></td>
       <td th:text="${product.description}"></td>
       <td >
-        <form th:action="@{/delete}" method="post">
+        <form th:action="@{/product/update}" method="get">
           <input type="hidden" name="id" th:value="${product.id}">
-          <button type="submit">Delete</button>
+          <button type="submit">Update</button>
         </form>
-        <button onclick="openUpdateForm(this)" th:data-id="${product.id}">Update</button>
-        <div id="updateForm" class="modal" style="display: none">
-          <div class="modal-content">
-            <span class="close" onclick="closeUpdateForm()">x</span>
-            <h2>Update rice information</h2>
-            <form th:action="@{/update}" method="post" enctype="multipart/form-data">
-              <input type="hidden" name="id" th:value="${product.id}">
-
-              <label for="newName">New Name:</label>
-              <input type="text" id="newName" name="newName" required>
-
-              <label for="newPrice">New Price:</label>
-              <input type="text" id="newPrice" name="newPrice" required>
-
-              <label for="newDescription">New Description:</label>
-              <input type="text" id="newDescription" name="newDescription" required>
-
-              <label for="newImage">New Image:</label>
-              <input type="file" id = "newImage" name="newImage" accept="image/*">
-
-              <button type="submit" class="submit-button">Update</button>
-            </form>
-          </div>
-        </div>
+        <form action="/product/delete" method="post">
+          <input type="hidden" name="id" th:value="${product.id}">
+          <button onclick="confirmDelete()" type="submit">Delete</button>
+        </form>
       </td>
     </tr>
     </tbody>
   </table>
 
-  <div>
+  <div class="pagination">
+    <a style="text-decoration: none " th:if="${currentPage > 0}" th:href="@{/product/listProduct(page=${currentPage - 1}, sortField=${sortField}, sortDirection=${sortDirection})}">Trước</a>
     <span th:text="'Trang ' + ${currentPage + 1} + ' / ' + ${totalPages}"></span>
-    <a style="text-decoration: none; color: inherit" th:if="${currentPage > 0}" th:href="@{/listproduct(page=${currentPage - 1}, sortField=${sortField}, sortDirection=${sortDirection})}">Trước</a>
-    <a style="text-decoration: none; color: inherit" th:if="${currentPage + 1 < totalPages}" th:href="@{/listproduct(page=${currentPage + 1}, sortField=${sortField}, sortDirection=${sortDirection})}">Sau</a>
+    <a style="text-decoration: none"th:if="${currentPage + 1 < totalPages}" th:href="@{/product/listProduct(page=${currentPage + 1}, sortField=${sortField}, sortDirection=${sortDirection})}">Sau</a>
   </div>
 
 
@@ -191,4 +196,20 @@
 </footer>
 
 </body>
+
+<script>
+  function createProductForm() {
+    window.location.href ="/product/create";
+  }
+
+  function showCreatedSuccess() {
+    alert("You are successfully created!");
+  }
+
+  function confirmDelete() {
+    if (confirm("Bạn có chắc chắn muốn xóa sản phẩm này không?")) {
+      window.location.href = "/deleteProduct?id=" + productId;
+    }
+  }
+</script>
 </html>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Rice Sales Management</title>
+    <link rel="stylesheet" href="/css/list.css">
+    <style>
+        .reset-form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            margin: 20px auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .reset-form label {
+            font-size: 16px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .reset-form input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .reset-form button {
+            background-color: #2c3e50;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .reset-form button:hover {
+            background-color: #1a252f;
+        }
+    </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.querySelector(".reset-form");
+            const newPassword = document.getElementById("newPassword");
+            const confirmPassword = document.getElementById("confirmPassword");
+            const errorMessage = document.createElement("div");
+            errorMessage.id = "error-message";
+            errorMessage.style.color = "red";
+            errorMessage.style.fontWeight = "bold";
+
+            form.addEventListener("submit", function (event) {
+                event.preventDefault();
+                let errors = [];
+                if (!newPassword.value) {
+                    errors.push("New password không được để trống.");
+                }
+                if (!confirmPassword.value) {
+                    errors.push("Confirm password không được để trống.");
+                }
+                if (newPassword.value !== confirmPassword.value) {
+                    errors.push("❌ Mật khẩu nhập lại không khớp!");
+                }
+                if (errors.length > 0) {
+                    errorMessage.innerHTML = errors.join("<br>");
+                    form.insertBefore(errorMessage, form.querySelector("button"));
+                } else {
+                    alert("Reset password successfully!");
+                    setTimeout(() => { form.submit(); }, 500);
+                }
+            });
+        });
+    </script>
+    <script src="/js/home.js"></script>
+</head>
+<body>
+<div class="header">
+    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+    <h2><a href="/home">RSMS</a></h2>
+    <div class="user-info">
+        <img src="/images/account.jpg" alt="User Avatar" class="user-avatar"/>
+        <div class="dropdown">
+            <span th:text="${account.displayName}" class="user-name" onclick="toggleDropdown()"> ▼</span>
+            <div id="dropdown-menu" class="dropdown-content">
+                <a href="/user/userprofile">👤 View Profile</a>
+                <a href="/#" id="logout">🚪 Logout</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="sidebar" id="sidebar">
+    <h2>Feature</h2>
+    <a href="/user/userprofile">Profile</a>
+    <a href="/account/listStaff">Staff Account Management</a>
+    <a href="/product/listProduct" >Rice Management</a>
+
+    <a href="/customer/listCustomer" >Customer Management</a>
+
+    <a href="/warehouse/listWarehouseZone" >WarehouseZone Management</a>
+
+    <a href="/listInvoice">Invoice Management</a>
+</div>
+
+<div class="content">
+    <h1>Reset password</h1>
+    <form class="reset-form" action="/account/resetpwStaff" method="POST">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" th:value="${accountStaff.username}" disabled>
+        <input type="hidden" id="hiddenUsername" name="username" th:value="${accountStaff.username}">
+
+        <label for="newPassword">New password:</label>
+        <input type="password" id="newPassword" name="newPassword">
+
+        <label for="confirmPassword">Confirm password:</label>
+        <input type="password" id="confirmPassword" name="confirmPassword">
+
+        <button type="submit">Change password</button>
+    </form>
+</div>
+
+<footer>
+    &copy; 2025 Rice Sales Management. All Rights Reserved.
+</footer>
+</body>
+</html>

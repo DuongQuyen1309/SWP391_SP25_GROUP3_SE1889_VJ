@@ -23,7 +23,7 @@
                     let data = await response.json();
                     return data.exists; // Trả về true nếu username tồn tại
                 } catch (error) {
-                    console.error("Lỗi khi kiểm tra username:", error);
+                    console.error("Error when checking username:", error);
                     return false;
                 }
             }
@@ -42,7 +42,7 @@
                     let data = await response.json();
                     return data.valid; // Trả về true nếu mật khẩu đúng
                 } catch (error) {
-                    console.error("Lỗi khi kiểm tra old password:", error);
+                    console.error("Error when checking old password:", error);
                     return false;
                 }
             }
@@ -54,35 +54,35 @@
                 console.log(newPasswordInput.value);
                 // ✅ Kiểm tra username
                 if (usernameInput.value.trim() === "") {
-                    errors.push("Username không được để trống.");
+                    errors.push("Username must not be empty.");
                 } else {
                     let isUsernameExists = await checkUsernameExists(usernameInput.value);
                     if (!isUsernameExists) {
-                        errors.push("Không có username này tồn tại.");
+                        errors.push("Username does not exist.");
                     }
                 }
 
                 // ✅ Kiểm tra old password
                 if (oldPasswordInput.value.trim() === "") {
-                    errors.push("Old Password không được để trống.");
+                    errors.push("Old Password must not be empty.");
                 } else {
                     let isOldPasswordCorrect = await checkOldPassword(usernameInput.value, oldPasswordInput.value);
                     console.log(isOldPasswordCorrect);
                     if (!isOldPasswordCorrect) {
-                        errors.push("Old Password không đúng.");
+                        errors.push("Old Password is not correct.");
                     }
                 }
 
                 // ✅ Kiểm tra new password
                 if (newPasswordInput.value.trim() === "") {
-                    errors.push("New Password không được để trống.");
+                    errors.push("New Password must be not empty.");
                 }
 
                 // ✅ Kiểm tra confirm password
                 if (confirmPasswordInput.value.trim() === "") {
-                    errors.push("Confirm Password không được để trống.");
+                    errors.push("Confirm Password must be not empty.");
                 } else if (newPasswordInput.value !== confirmPasswordInput.value) {
-                    errors.push("New Password và Confirm Password phải trùng nhau.");
+                    errors.push("New Password and Confirm Password must be similar.");
                 }
 
                 // ✅ Hiển thị lỗi hoặc submit form

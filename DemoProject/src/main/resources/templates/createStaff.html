@@ -46,18 +46,9 @@
         .create-form button:hover {
             background-color: #1a252f;
         }
-
     </style>
     <script src="/js/home.js"></script>
     <script>
-        function confirmDelete(event, form) {
-            event.preventDefault(); // Ngăn form submit ngay lập tức
-            if (confirm("Do you want to delete this account?")) {
-                form.submit(); // Nếu người dùng xác nhận, tiếp tục submit form
-            }
-        }
-
-
         document.addEventListener("DOMContentLoaded", function () {
             const form = document.querySelector(".create-form");
             const usernameInput = document.getElementById("username");
@@ -67,72 +58,53 @@
             errorContainer.style.color = "red";
             errorContainer.style.fontWeight = "bold";
 
-            // ✅ Hàm gửi request AJAX kiểm tra username có tồn tại không
             async function checkUsernameExists(username) {
                 try {
                     let response = await fetch(`/api/check-username?username=${username}`);
                     let data = await response.json();
                     return data.exists;
                 } catch (error) {
-                    console.error("Error when checking username:", error);
+                    console.error("Error checking username:", error);
                     return false;
                 }
             }
+
             form.addEventListener("submit", async function (event) {
-               event.preventDefault();
+                event.preventDefault();
                 let errors = [];
 
-
-
-                // ✅ Kiểm tra username không rỗng
                 if (usernameInput.value.trim() === "") {
-                    errors.push("Username must be not empty.");
+                    errors.push("Username cannot be empty.");
                 } else if (!/^[A-Za-z0-9]+$/.test(usernameInput.value)) {
-                    errors.push("Username must only contain letters (A-Z, a-z) or numbers, no special characters.");
+                    errors.push("Username can only contain letters and numbers.");
                 } else {
-                    // 🔍 Gửi AJAX kiểm tra username có tồn tại không
                     let isUsernameExists = await checkUsernameExists(usernameInput.value);
-                    console.log(isUsernameExists);
                     if (isUsernameExists) {
-                        errors.push("This username already exists, please enter another username.");
+                        errors.push("Username already exists. Please choose another.");
                     }
                 }
 
-                // ✅ Kiểm tra password không rỗng và có đủ điều kiện
                 if (passwordInput.value.trim() === "") {
-                    errors.push("Password must be not empty.");
+                    errors.push("Password cannot be empty.");
                 }
 
-                // ✅ Kiểm tra display name không rỗng
                 if (displaynameInput.value.trim() === "") {
-                    errors.push("Display Name must be not empty.");
+                    errors.push("Display Name cannot be empty.");
                 }
 
-                // ✅ Nếu có lỗi, hiển thị lỗi và ngăn form submit
                 if (errors.length > 0) {
-                    event.preventDefault();
                     errorContainer.innerHTML = errors.join("<br>");
                     form.insertBefore(errorContainer, form.querySelector("button"));
-                }
-                else {
-
-                    // ✅ Đợi 500ms để alert hiển thị, sau đó gửi form
+                } else {
                     setTimeout(() => {
-                        alert("Create account successfully.");
                         form.submit();
                     }, 500);
                 }
             });
-
-
         });
     </script>
-
-
 </head>
 <body>
-
-<!-- Header -->
 <div class="header">
     <button class="menu-btn" onclick="toggleSidebar()">☰</button>
     <h2><a href="/home">RSMS</a></h2>
@@ -148,43 +120,38 @@
     </div>
 </div>
 
-<!-- Sidebar -->
 <div class="sidebar" id="sidebar">
-
     <h2>Feature</h2>
     <a href="/user/userprofile">Profile</a>
-    <a href="/account/listOwner">Owner Account Management</a>
+    <a href="/account/listStaff">Staff Account Management</a>
+    <a href="/product/listProduct" >Rice Management</a>
 
-    <div id="accountMenu" class="submenu" style="display: none;">
+    <a href="/customer/listCustomer" >Customer Management</a>
 
-    </div>
+    <a href="/warehouse/listWarehouseZone" >WarehouseZone Management</a>
 
+    <a href="/listInvoice" >Invoice Management</a>
 </div>
 
-
-<!-- Content -->
 <div class="content">
-    <h1>Create New Owner's Account</h1>
-    <form class="create-form" action="/account/createOwner" method="POST">
-
+    <h1>Create New Staff</h1>
+    <form class="create-form" action="/account/createStaff" method="POST">
         <label for="username">Username:</label>
         <input type="text" id="username" name="username" >
 
         <label for="password">Password:</label>
         <input type="password" id="password" name="password" >
 
-
         <label for="displayname">Display Name:</label>
         <input type="text" id="displayname" name="displayname" >
 
         <p style="color: red;" th:if="${error}" th:text="${error}"></p>
-        <button type="submit" id="applyBtn">Create account</button>
+        <button type="submit" id="applyBtn">Create Staff</button>
     </form>
-
 </div>
+
 <footer>
     &copy; 2025 Rice Sales Management. All Rights Reserved.
 </footer>
-
 </body>
 </html>

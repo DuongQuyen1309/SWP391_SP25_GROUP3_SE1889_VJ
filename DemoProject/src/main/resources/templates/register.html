@@ -22,7 +22,7 @@
                     let data = await response.json();
                     return data.exists;
                 } catch (error) {
-                    console.error("Lỗi khi kiểm tra username:", error);
+                    console.error("Error when checking username:", error);
                     return false;
                 }
             }
@@ -34,26 +34,26 @@
 
                 // ✅ Kiểm tra username không rỗng
                 if (username.value.trim() === "") {
-                    errors.push("Username không được để trống.");
+                    errors.push("Username must be not empty.");
                 } else if (!/^[A-Za-z0-9]+$/.test(username.value)) {
-                    errors.push("Username chỉ được chứa chữ cái (A-Z, a-z) hoặc số, không chứa ký tự đặc biệt.");
+                    errors.push("Username must only contain letters (A-Z, a-z) or numbers, no special characters.");
                 } else {
                     // 🔍 Gửi AJAX kiểm tra username có tồn tại không
                     let isUsernameExists = await checkUsernameExists(usernameInput.value);
                     console.log(isUsernameExists);
                     if (isUsernameExists) {
-                        errors.push("Username đã tồn tại, vui lòng chọn username khác.");
+                        errors.push("This username already exists, please enter another username.");
                     }
                 }
 
                 // ✅ Kiểm tra password không rỗng và có đủ điều kiện
                 if (passwordInput.value.trim() === "") {
-                    errors.push("Mật khẩu không được để trống.");
+                    errors.push("Password must be not empty.");
                 }
 
                 // ✅ Kiểm tra display name không rỗng
                 if (displaynameInput.value.trim() === "") {
-                    errors.push("Display Name không được để trống.");
+                    errors.push("Display Name must be not empty.");
                 }
 
                 // ✅ Nếu có lỗi, hiển thị lỗi và ngăn form submit
@@ -102,8 +102,7 @@
                 <input type="text" id="displayname" name="displayname" >
             </div>
 
-            <p style="color: red;" th:if="${error}" th:text="${error}"></p>
-            <button type="submit" class="btn">Create</button>
+            <button type="submit" class="btn">Register</button>
 
         </form>
     </div>

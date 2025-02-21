@@ -9,6 +9,7 @@ import com.demoproject.mapper.CustomerMapper;
 import com.demoproject.service.AccountService;
 import com.demoproject.service.CustomerService;
 import com.demoproject.service.UserService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -59,13 +60,35 @@ public class CustomerController {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
         Page<Customer> customerPage;
         String username = jwtUtils.extractUsername(token);
-        Optional<Account> optAccount = accountService.findByUsernameAndIsDeleteFalse(username);
-        Account account = optAccount.orElse(null);
+        Account account = accountService.getAccountFromToken(token).orElse(null);
+        Optional<Users> user = userService.getUserProfile(account.getUserId());
+
         model.addAttribute("account", account);
 
-
+        List<String> phoneList =  customerService.getAllPhoneNumbers();
+        model.addAttribute("phoneList", phoneList);
+        System.out.println("phonne: ");
+        for(String phone : phoneList) {
+            System.out.println(phone);
+        }
+        //lấy id của người đang đăng nhập
+        System.out.println("user nguoi dang nhap: "+ user.get().getId());
 
         String role= jwtUtils.extractRole(token);
+        System.out.println("role la "+ role);
+        List<Long> relatedUserList = new ArrayList<>();
+        if(role.equalsIgnoreCase("OWNER")){
+            relatedUserList = userService.getStaffID(user.get().getId());
+            relatedUserList.add(user.get().getId());
+            System.out.println("cac id cau user "+user.get().getId()+" la:");
+            for(Long id:relatedUserList){
+                System.out.println(id);
+            }
+        }else if(role.equalsIgnoreCase("STAFF")){
+            Long ownerId = userService.getOwnerID(user.get().getId());
+            relatedUserList = userService.getStaffID(ownerId);
+            relatedUserList.add(ownerId);
+        }
         List<String> listHiddenPage = new ArrayList<>();
         if(role.equals("STAFF")){
             listHiddenPage.add("listStaff");
@@ -73,9 +96,9 @@ public class CustomerController {
         model.addAttribute("listHiddenPage", listHiddenPage);
 
         if ((search != null && !search.isEmpty()) || (ctype != null && !ctype.isEmpty())) {
-            customerPage = customerService.searchCustomersByNameAndType(search, ctype, pageable);
+            customerPage = customerService.searchCustomersByNameAndType(relatedUserList,search, ctype, pageable);
         } else {
-            customerPage = customerService.getAllCustomersAndIsDeleteFalse(pageable);
+            customerPage = customerService.getAllCustomersAndIsDeleteFalse(relatedUserList,pageable);
         }
 
         List<String> customerTypes = customerService.getAllCustomerTypes();
@@ -91,56 +114,6 @@ public class CustomerController {
     }
 
 
-    //    @GetMapping("/createCustomer")
-//    public String createCustomer() {
-//        return "createCustomer";
-//    }
-//
-//    @PostMapping("/createCustomer")
-//    public String createCustomerList(@RequestParam String firstname,
-//                                     @RequestParam String lastname,
-//                                     @RequestParam String address,
-//                                     @RequestParam LocalDate dob,
-//                                     @RequestParam String phone,
-//                                     @RequestParam Boolean gender,
-//                                     @RequestParam String ctype,
-//                                     @CookieValue(value = "token", required = false) String token,
-//                                     Model model,  RedirectAttributes redirectAttributes) {
-//        String username = jwtUtils.extractUsername(token);
-//        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-//        Account account= accountService.findByUsername(username);
-//        Users user= userService.getUserProfile(account.getUserId());
-//        Long id = user.getId();
-//
-//        CustomerRequest customer = new CustomerRequest();
-//        String name = firstname + " " + lastname;
-//        customer.setName(name);
-//        customer.setAddress(address);
-//        customer.setDob(dob);
-//        customer.setPhone(phone);
-//        customer.setGender(gender);
-//        customer.setCreatedBy(id);
-//        System.out.println("nguoi tao la: "+ customer.getCreatedBy());
-//        customer.setCreatedAt(LocalDate.now());
-//        System.out.println("ngay tao la: "+ customer.getCreatedAt());
-//        customer.setMoneyState(0);
-//        customer.setCtype(ctype);
-//        // Gọi service để tạo khách hàng (giả định khách hàng được tạo thành công)
-//        try {
-//            customerService.createCustomer(customer);
-//            System.out.print("controller "+ customer.getCtype());
-//            // Thêm thông báo thành công vào model
-//            redirectAttributes.addFlashAttribute("messageType", "success");
-//            redirectAttributes.addFlashAttribute("message", "Customer created successfully!");
-//        } catch (Exception e) {
-//            // Thêm thông báo thất bại nếu có lỗi
-//            redirectAttributes.addFlashAttribute("messageType", "fail");
-//            redirectAttributes.addFlashAttribute("message", "Failed to create customer.");
-//        }
-//
-//        // Sau khi tạo khách hàng thành công, chuyển hướng về danh sách khách hàng
-//        return "redirect:/listCustomer";
-//    }
     @GetMapping("/createCustomer")
     public String createCustomer(Model model,
                                  @CookieValue(value = "token", required = false) String token) {
@@ -180,18 +153,34 @@ public class CustomerController {
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
 
-
-
-        if (result.hasErrors() || !lastname.matches("^[a-zA-ZÀ-Ỹà-ỹ\\s]+$") || lastname.trim().isEmpty()) {
+        if (result.hasErrors() &&(!lastname.matches("^[a-zA-ZÀ-Ỹà-ỹ\\s]+$") || lastname.trim().isEmpty())) {
             model.addAttribute("customerRequest", customerRequest);
             model.addAttribute("lastnamemessage","Not be empty, not contain number and special characters");
             return "createCustomer"; // Quay lại form nếu có lỗi
         }
 
+        if (result.hasErrors() ) {
+            model.addAttribute("customerRequest", customerRequest);
+            model.addAttribute("lastname", lastname);
+            return "createCustomer"; // Quay lại form nếu có lỗi
+        }
+        if (!lastname.matches("^[a-zA-ZÀ-Ỹà-ỹ\\s]+$") || lastname.trim().isEmpty()) {
+            model.addAttribute("customerRequest", customerRequest);
+            model.addAttribute("lastnamemessage","Not be empty, not contain number and special characters");
+            return "createCustomer"; // Quay lại form nếu có lỗi
+        }
+        if (customerService.isPhoneNumberExist(customerRequest.getPhone())) {
+            model.addAttribute("lastname", lastname);
+            model.addAttribute("customerRequest", customerRequest);
+            model.addAttribute("phoneError","Phone is not duplicatied in system");
+            return "createCustomer"; // Quay lại form nếu có lỗi
+        }
+
+
         Long id = user.get().getId();
 
 
-        String fullname = customerRequest.getName().trim() + " " + lastname.trim();
+        String fullname = lastname.trim()+ " " +customerRequest.getName().trim();
         String phone = customerRequest.getPhone().trim();
         customerRequest.setPhone(phone.trim());
         customerRequest.setName(fullname);
@@ -215,7 +204,7 @@ public class CustomerController {
     @GetMapping("/updateCustomer/{id}")
     public String getUpdatedCustomer(@PathVariable Long id, Model model,
                                      @CookieValue(value = "token", required = false) String token
-                                     ) {
+    ) {
         Customer customer = customerService.getCustomer(id);
         System.out.println("ngay sinh la " + customer.getId());
         String username = jwtUtils.extractUsername(token);
@@ -228,37 +217,14 @@ public class CustomerController {
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
         model.addAttribute("account", account);
-        model.addAttribute("customer", customer);  // Truyền customer vào model
+        model.addAttribute("customer", customer);
+        List<String> phoneList =  customerService.getAllPhoneNumbers();
+        model.addAttribute("phoneList", phoneList);
         return "updateCustomer";
+
     }
 
-    //    @PostMapping("/updateCustomer")
-//    public String updateCustomer(@RequestParam String id,
-//                                 @RequestParam String name,
-//                                 @RequestParam String address,
-//                                 @RequestParam String dob,
-//                                 @RequestParam String phone,
-//                                 @RequestParam String gender,
-//                                 @RequestParam String ctype,
-//                                 @CookieValue(value = "token", required = false) String token) {
-//        String username = jwtUtils.extractUsername(token);
-//        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-//        Account account = accountService.findByUsername(username);
-//        Users user = userService.getUserProfile(account.getUserId());
-//        Long userId = user.getId();
-//
-//        Customer customer = new Customer();
-//        customer.setId(Long.parseLong(id));
-//        customer.setName(name);
-//        customer.setAddress(address);
-//        customer.setPhone(phone);
-//        customer.setDob(LocalDate.parse(dob));
-//        customer.setGender(Boolean.parseBoolean(gender));
-//        customer.setCtype(ctype);
-//        customer.setUpdatedAt(LocalDate.now());
-//        customerService.updateCustomer(Long.parseLong(id), customer); // Call service to update customer
-//        return "redirect:/listCustomer"; // Redirect to listCustomer after update
-//    }
+
     @PostMapping("/updateCustomer")
     public String updateCustomer(
             @RequestParam String id,
@@ -276,8 +242,9 @@ public class CustomerController {
         Optional<Account> optAccount = accountService.findByUsernameAndIsDeleteFalse(username);
         Account account = optAccount.orElse(null);
         model.addAttribute("account", account);
-        // Kiểm tra Name
 
+
+        // Kiểm tra Name
         if (name.trim().isEmpty()) {
             redirectAttributes.addFlashAttribute("messageType", "fail");
             redirectAttributes.addFlashAttribute("message", "Name cannot be empty.");

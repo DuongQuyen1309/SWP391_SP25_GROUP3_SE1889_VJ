@@ -23,7 +23,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new UserProfileInterceptor(userService, accountService))
-                .addPathPatterns("/product/**","/account/**","/customer/**","/warehouse/**","/home")
+                .addPathPatterns("/product/**","/account/**","/customer/**","/warehouse/**","/home","/warehouse","/zone/**")
                 .excludePathPatterns("/user/userprofile"); // Không áp dụng cho user profile
     }
 }

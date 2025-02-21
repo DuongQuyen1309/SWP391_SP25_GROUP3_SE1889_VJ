@@ -14,7 +14,7 @@
         color: white;
         font-size: 13px;
         border: none;
-        width: 100px;
+        width: 150px;
         height: 40px;
         border-radius: 10px;
         cursor: pointer;
@@ -52,7 +52,7 @@
         }
         function confirmDelete(event, form) {
             event.preventDefault(); // Ngăn form submit ngay lập tức
-            if (confirm("Bạn có chắc muốn xóa tài khoản này không?")) {
+            if (confirm("Do you want to delete this account?")) {
                 form.submit(); // Nếu người dùng xác nhận, tiếp tục submit form
             }
         }
@@ -95,7 +95,7 @@
 <div class="content" id="content">
 
     <!-- Modal Form -->
-    <button class="add-owner" onclick="callPage()">Add Owner</button>
+    <button class="add-owner" onclick="callPage()">Create New Account</button>
 
 <!-- List -->
 
@@ -112,9 +112,7 @@
             <td>Username</td>
             <td>Display Name</td>
             <td>Full Name</td>
-            <td>Phone</td>
-            <td>Gender</td>
-            <td>Address</td>
+
             <td>Action</td>
         </tr>
         </thead>
@@ -124,15 +122,13 @@
             <td th:text="${account.username}"></td>
             <td th:text="${account.displayName}"></td>
             <td th:text="${account.name}"></td>
-            <td th:text="${account.phone}"></td>
-            <td th:text="${account.gender == null} ? '' : (account.gender ? 'Male' : 'Female')"></td>
-            <td th:text="${account.address}"></td>
+
             <td>
                 <div style="display: flex; gap: 5px;">
 
-                <form th:action="@{/account/updateOwner}" method="get" >
+                <form th:action="@{/account/viewOwner}" method="get" >
                     <input type="hidden" name="id" th:value="${account.id}">
-                    <button type="submit" style="background-color: #06999c">Edit</button>
+                    <button type="submit" style="background-color: #06999c">View</button>
                 </form>
                     <form th:action="@{/account/deleteOwner}" method="post" onsubmit="return confirmDelete(event, this)">
                         <input type="hidden" name="id" th:value="${account.id}">
