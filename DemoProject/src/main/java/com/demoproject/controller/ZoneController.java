@@ -184,7 +184,6 @@ public class ZoneController {
         }
         // update zone with new detail
         currentZone.setName(zone.getName());
-        currentZone.setWarehouseName(zone.getWarehouseName());
         currentZone.setProductId(zone.getProductId());
         currentZone.setAmount(zone.getAmount());
         // Try saving the updated zone
