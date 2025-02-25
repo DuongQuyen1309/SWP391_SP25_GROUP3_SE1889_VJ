@@ -45,7 +45,7 @@ public class SecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) //
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/register","/login","/changepw","/api/**","/user/**","/forgotpw","/resetpw", "/css/**","/auth/**", "/js/**", "/images/**").permitAll() // Cho phép truy cập trang đăng ký
+                        .requestMatchers("/bill","/billdetail","/register","/login","/changepw","/api/**","/user/**","/forgotpw","/resetpw", "/css/**","/auth/**", "/js/**", "/images/**").permitAll() // Cho phép truy cập trang đăng ký
                         .requestMatchers("/account/listOwner").hasAuthority("ADMIN")
                         .requestMatchers(("/account/listStaff")).hasAuthority("OWNER")
                         .requestMatchers("/account/**").hasAnyAuthority("ADMIN", "OWNER")

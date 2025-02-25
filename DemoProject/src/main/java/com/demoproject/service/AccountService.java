@@ -58,13 +58,18 @@ public class AccountService {
             return;
         }
 
-        Optional<Account> accountAdmin= accountRepository.findById(account.getCreatedBy());
-        Optional<Users> userAdmin= userRepository.findById(accountAdmin.get().getUserId());
+
+
         // ✅ Tạo User mới với role = "OWNER" và createdAt = thời điểm hiện tại
         Users newUser= new Users();
         newUser.setCreatedAt(LocalDate.now()); // Đặt thời gian tạo tài khoản
         newUser.setRole("OWNER"); // ✅ Gán role mặc định là "OWNER"
-        newUser.setCreatedBy(userAdmin.get().getId());
+        Account accountAdmin= new Account();
+        if(account.getCreatedBy()!=null){
+            accountAdmin= accountRepository.findById(account.getCreatedBy()).get();
+            Optional<Users> userAdmin= userRepository.findById(accountAdmin.getUserId());
+            newUser.setCreatedBy(userAdmin.get().getId());
+        }
         userRepository.save(newUser);
 
         // ✅ Gán userId vào Account

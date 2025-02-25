@@ -132,6 +132,7 @@ html,body {
     transition: left 0.4s ease; /* Hiệu ứng co giãn mượt */
     padding: 20px; /* Khoảng cách bên trong content */
     padding-bottom: 40px;
+    background: linear-gradient(to right, #f8f9fa, #e3e7eb); /* Màu gradient nhẹ */
 }
 /* Centered Intro Section */
 .intro-container {

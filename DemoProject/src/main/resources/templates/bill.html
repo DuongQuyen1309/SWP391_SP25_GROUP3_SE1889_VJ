@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Bill List</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f4f4f4;
+        }
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+        }
+        .filter-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .filter-bar input, .filter-bar select {
+            padding: 10px;
+            width: 30%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        th {
+            background: #2c3e50;
+            color: white;
+        }
+        .btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn-view {
+            background: #3498db;
+            color: white;
+        }
+        .btn-download {
+            background: #2ecc71;
+            color: white;
+        }
+        .btn-print {
+            background: #e67e22;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Customer Bills</h2>
+    <div class="filter-bar">
+        <input type="text" id="search" placeholder="Search by Invoice ID or Customer">
+        <select id="status">
+            <option value="">All Status</option>
+            <option value="No Debt">No Debt</option>
+            <option value="Debt">Debt</option>
+        </select>
+        <input type="date" id="date-filter">
+    </div>
+    <table>
+        <thead>
+        <tr>
+            <th>Invoice ID</th>
+            <th>Customer Name</th>
+            <th>Date of Purchase</th>
+            <th>Total Money</th>
+            <th>Paid Money</th>
+            <th>Debt Money</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>#INV-001</td>
+            <td>Nguyen Van A</td>
+            <td>2025-02-25</td>
+            <td>$150.00</td>
+            <td>$100.00</td>
+            <td>$50.00</td>
+            <td style="color: orange;">Debt</td>
+            <td>
+                <button class="btn btn-view">View</button>
+                <button class="btn btn-download">Download</button>
+                <button class="btn btn-print">Print</button>
+            </td>
+        </tr>
+        <tr>
+            <td>#INV-002</td>
+            <td>Le Thi B</td>
+            <td>2025-02-24</td>
+            <td>$90.00</td>
+            <td>$90.00</td>
+            <td>$0.00</td>
+            <td style="color: green;">No Debt</td>
+            <td>
+                <button class="btn btn-view">View</button>
+                <button class="btn btn-download">Download</button>
+                <button class="btn btn-print">Print</button>
+            </td>
+        </tr>
+        <tr>
+            <td>#INV-003</td>
+            <td>Pham Van C</td>
+            <td>2025-02-23</td>
+            <td>$200.00</td>
+            <td>$50.00</td>
+            <td>$150.00</td>
+            <td style="color: red;">Debt</td>
+            <td>
+                <button class="btn btn-view">View</button>
+                <button class="btn btn-download">Download</button>
+                <button class="btn btn-print">Print</button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

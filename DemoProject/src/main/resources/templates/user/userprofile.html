@@ -25,7 +25,7 @@
         }
 
         .profile-form input {
-            width: 100%;
+            width: 95%;
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 5px;
@@ -327,7 +327,7 @@
     <button class="menu-btn" onclick="toggleSidebar()">☰</button>
     <h2><a href="/home">RSMS</a></h2>
     <div class="user-info">
-        <img  th:src="${user.avatar}" alt="User Avatar" class="user-avatar"/>
+        <img   th:src="${user.avatar} + '?t=' + ${#dates.createNow().getTime()}" alt="User Avatar" class="user-avatar"/>
         <div class="dropdown">
             <span th:text="${account.displayName}" class="user-name" onclick="toggleDropdown()"> ▼</span>
             <div id="dropdown-menu" class="dropdown-content">

@@ -120,4 +120,14 @@ public class HomeController {
     public String resetpw() {
         return "user/resetpw";
     }
+
+    @GetMapping("/bill")
+    public String getBill(Model model) {
+        return "bill";
+    }
+
+    @GetMapping("/billdetail")
+    public String getBilldetail(Model model) {
+        return "billdetail";
+    }
 }
