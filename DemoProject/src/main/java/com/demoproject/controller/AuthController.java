@@ -5,6 +5,7 @@ import com.demoproject.entity.Users;
 import com.demoproject.repository.AccountRepository;
 import com.demoproject.jwt.JwtUtils;
 import com.demoproject.service.AccountService;
+import com.demoproject.service.EmailService;
 import com.demoproject.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -34,6 +35,9 @@ public class AuthController {
 
     @Autowired
     private JwtUtils jwtUtils;
+
+    @Autowired
+    private EmailService emailService;
 
     @Autowired
     private AccountRepository accountRepository;
@@ -148,6 +152,51 @@ public class AuthController {
 
         response.put("exists", exists);
         return ResponseEntity.ok(response);
+    }
+
+
+    @GetMapping("/api/check-email")
+    public ResponseEntity<Map<String, Boolean>> checkEmailExists(@RequestParam String email) {
+        boolean exists = accountRepository.existsByEmailAndIsDeleteFalse(email);
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("exists", exists);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/auth/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        boolean isEmailExist= accountRepository.existsByEmailAndIsDeleteFalse(email);
+
+        if (!isEmailExist) {
+            return ResponseEntity.status(400).body(Map.of("error", "Email not found!"));
+        }
+
+        Account account= accountRepository.findByEmailAndIsDeleteFalse(email).orElse(null);
+        String resetToken = jwtUtils.generateToken(account.getUsername(), "RESET");
+        account.setResetToken(resetToken);
+        accountRepository.save(account);
+
+        emailService.sendResetPasswordEmail(email, resetToken);
+        return ResponseEntity.ok(Map.of("message", "Reset link has been sent to your email."));
+    }
+
+    @PostMapping("/auth/resetpw")
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
+        String token = request.get("token");
+        String newPassword = request.get("newPassword");
+
+        Optional<Account> accountOpt = accountRepository.findByResetTokenAndIsDeleteFalse(token);
+        if (accountOpt.isEmpty()) {
+            return ResponseEntity.status(400).body(Map.of("error", "Invalid or expired token!"));
+        }
+
+        Account account = accountOpt.get();
+        account.setPassword(passwordEncoder.encode(newPassword));
+        account.setResetToken(null);
+        accountRepository.save(account);
+
+        return ResponseEntity.ok(Map.of("message", "Password has been reset successfully!"));
     }
 
 }

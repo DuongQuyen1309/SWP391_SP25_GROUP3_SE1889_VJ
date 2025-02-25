@@ -58,10 +58,13 @@ public class AccountService {
             return;
         }
 
+        Optional<Account> accountAdmin= accountRepository.findById(account.getCreatedBy());
+        Optional<Users> userAdmin= userRepository.findById(accountAdmin.get().getUserId());
         // ✅ Tạo User mới với role = "OWNER" và createdAt = thời điểm hiện tại
         Users newUser= new Users();
         newUser.setCreatedAt(LocalDate.now()); // Đặt thời gian tạo tài khoản
         newUser.setRole("OWNER"); // ✅ Gán role mặc định là "OWNER"
+        newUser.setCreatedBy(userAdmin.get().getId());
         userRepository.save(newUser);
 
         // ✅ Gán userId vào Account
@@ -117,6 +120,7 @@ public class AccountService {
                     accountData.put("username", account.getUsername());
                     accountData.put("password", account.getPassword());
                     accountData.put("displayName", account.getDisplayName());
+                    accountData.put("email", account.getEmail());
 
                     // Lấy thông tin User từ userMap
                     Users user = userMap.get(account.getUserId());
@@ -148,6 +152,9 @@ public class AccountService {
         if (ownerUserIds.isEmpty()) {
             return Page.empty(); // Không có Owner nào, trả về danh sách rỗng
         }
+       for (Long userId : ownerUserIds) {
+           System.out.println(userId);
+       }
 
         // ✅ 2. Tìm kiếm danh sách Account của các User có role OWNER
         Page<Account> accountPage = accountRepository.searchOwnerAccounts(keyword, ownerUserIds, pageable);
@@ -164,6 +171,7 @@ public class AccountService {
                     accountData.put("id", account.getId());
                     accountData.put("username", account.getUsername());
                     accountData.put("displayName", account.getDisplayName());
+                    accountData.put("email", account.getEmail());
 
                     // Lấy thông tin User từ userMap
                     Users user = userMap.get(account.getUserId());
@@ -218,11 +226,16 @@ public class AccountService {
         if(accountRepository.existsByUsernameAndIsDeleteFalse(account.getUsername())) {
             return;
         }
-
+        Optional<Account> accountOwner= accountRepository.findById(account.getCreatedBy());
+        Users userOwner = userRepository.getById(accountOwner.get().getUserId());
         // Tạo User mới với role = "STAFF" và createdAt = thời điểm hiện tại
         Users newUser = new Users();
         newUser.setCreatedAt(LocalDate.now());
+        newUser.setCreatedBy(userOwner.getId());
         newUser.setRole("STAFF"); // Gán role là "STAFF"
+        if(userOwner.getWarehouseName() != null) {
+            newUser.setWarehouseName(userOwner.getWarehouseName());
+        }
         userRepository.save(newUser);
 
         // Gán userId vào Account
@@ -231,11 +244,11 @@ public class AccountService {
         accountRepository.save(account);
     }
 
-    public Page<Map<String, Object>> getStaffAccounts(int page, int size) {
+    public Page<Map<String, Object>> getStaffAccounts(Account accountOwner,int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
+        List<Long> staffUserIds=userRepository.getStaffID(accountOwner.getUserId());
         // Lấy danh sách userId của các User có role STAFF
-        List<Long> staffUserIds = userRepository.findIdByRole("STAFF");
 
         // Tìm danh sách Account của các User có role STAFF
         Page<Account> accountPage = accountRepository.findByUserIdInAndIsDeleteFalse(staffUserIds, pageable);
@@ -252,6 +265,7 @@ public class AccountService {
                     accountData.put("username", account.getUsername());
                     accountData.put("password", account.getPassword());
                     accountData.put("displayName", account.getDisplayName());
+                    accountData.put("email", account.getEmail());
 
                     // Lấy thông tin User từ userMap
                     Users user = userMap.get(account.getUserId());
@@ -275,11 +289,11 @@ public class AccountService {
         return new PageImpl<>(accountsWithUsers, pageable, accountPage.getTotalElements());
     }
 
-    public Page<Map<String, Object>> searchStaffAccounts(String keyword, int page, int size) {
+    public Page<Map<String, Object>> searchStaffAccounts(Account accountOwner,String keyword, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
         // 1. Lấy danh sách userId của các User có role STAFF
-        List<Long> staffUserIds = userRepository.findIdByRole("STAFF");
+        List<Long> staffUserIds=userRepository.getStaffID(accountOwner.getUserId());
         if (staffUserIds.isEmpty()) {
             return Page.empty();
         }
@@ -299,6 +313,7 @@ public class AccountService {
                     accountData.put("id", account.getId());
                     accountData.put("username", account.getUsername());
                     accountData.put("displayName", account.getDisplayName());
+                    accountData.put("email", account.getEmail());
 
                     Users user = userMap.get(account.getUserId());
                     if (user != null) {

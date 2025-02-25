@@ -35,13 +35,14 @@ public class ProductController {
         Optional<Account> account = accountService.findByUsernameAndIsDeleteFalse(username);
         Optional<Users> user = userService.getUserProfile(account.get().getUserId());
         model.addAttribute("account", account.get());
+        model.addAttribute("user", user.get());
         String role= jwtUtils.extractRole(token);
         List<String> listHiddenPage = new ArrayList<>();
         if(role.equals("STAFF")){
             listHiddenPage.add("listStaff");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
-        return "createproduct";
+        return "product/createProduct";
     }
 
 
@@ -57,6 +58,7 @@ public class ProductController {
         Optional<Account> account = accountService.findByUsernameAndIsDeleteFalse(username);
         Optional<Users> user = userService.getUserProfile(account.get().getUserId());
         model.addAttribute("account", account.get());
+        model.addAttribute("user", user.get());
         String role= jwtUtils.extractRole(token);
         List<String> listHiddenPage = new ArrayList<>();
         if(role.equals("STAFF")){
@@ -83,6 +85,8 @@ public class ProductController {
         String username = jwtUtils.extractUsername(token);
         Optional<Account> optAccount = accountService.findByUsernameAndIsDeleteFalse(username);
         Account account = optAccount.orElse(null);
+        Optional<Users> optUser = userService.getUserProfile(account.getUserId());
+        model.addAttribute("user", optUser.get());
 
         String role= jwtUtils.extractRole(token);
         List<String> listHiddenPage = new ArrayList<>();
@@ -102,7 +106,7 @@ public class ProductController {
 
 //        List<Product> products = productService.getAllProductIsDeleted();
 //        model.addAttribute("products", products);
-        return "listProduct";
+        return "product/listProduct";
     }
 
     @PostMapping("/delete")
@@ -125,6 +129,7 @@ public class ProductController {
         String username = jwtUtils.extractUsername(token);
         Optional<Account> account = accountService.findByUsernameAndIsDeleteFalse(username);
         Optional<Users> user = userService.getUserProfile(account.get().getUserId());
+        model.addAttribute("user", user.get());
         model.addAttribute("account", account.get());
         String role= jwtUtils.extractRole(token);
         List<String> listHiddenPage = new ArrayList<>();
@@ -134,7 +139,7 @@ public class ProductController {
         model.addAttribute("listHiddenPage", listHiddenPage);
         Product product = productService.getProductById(id);
         model.addAttribute("products", product);
-        return "updateproduct";
+        return "product/updateproduct";
     }
 
     @PostMapping("/update")
@@ -149,6 +154,7 @@ public class ProductController {
         String username = jwtUtils.extractUsername(token);
         Optional<Account> account = accountService.findByUsernameAndIsDeleteFalse(username);
         Optional<Users> user = userService.getUserProfile(account.get().getUserId());
+        model.addAttribute("user", user.get());
         model.addAttribute("account", account.get());
         String role= jwtUtils.extractRole(token);
         List<String> listHiddenPage = new ArrayList<>();
@@ -181,6 +187,8 @@ public class ProductController {
         String username = jwtUtils.extractUsername(token);
         Optional<Account> optAccount = accountService.findByUsernameAndIsDeleteFalse(username);
         Account account = optAccount.orElse(null);
+        Optional<Users> optUser = userService.getUserProfile(account.getUserId());
+        model.addAttribute("user", optUser.get());
         String role= jwtUtils.extractRole(token);
         List<String> listHiddenPage = new ArrayList<>();
         listHiddenPage.add("");
@@ -201,7 +209,7 @@ public class ProductController {
         model.addAttribute("sortDirection", sortDirection);
         model.addAttribute("reverseSortDirection", sortDirection.equals("asc") ? "desc" : "asc");
 
-        return "listProduct";
+        return "product/listProduct";
     }
 
 }

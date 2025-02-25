@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Password</title>
+    <link rel="stylesheet" href="/css/login.css">
+    <script>
+        document.addEventListener("DOMContentLoaded", async function () {
+            const params = new URLSearchParams(window.location.search);
+            const token = params.get("token");
+
+            if (!token) {
+                document.getElementById("message").innerText = "Invalid or missing reset token!";
+                return;
+            }
+
+            document.getElementById("resetForm").addEventListener("submit", async function (event) {
+                event.preventDefault();
+                const password = document.getElementById("password").value;
+
+                try {
+                    let response = await fetch("/auth/resetpw", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ token: token, newPassword: password })
+                    });
+
+                    let data = await response.json();
+                    document.getElementById("message").innerText = data.message;
+                    document.getElementById("message").style.color = response.ok ? "green" : "red";
+
+                    if (response.ok) {
+                        setTimeout(() => { window.location.href = "/login"; }, 3000);
+                    }
+                } catch (error) {
+                    document.getElementById("message").innerText = "Error resetting password!";
+                    document.getElementById("message").style.color = "red";
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+<!-- Header -->
+<div class="header">
+    <h2><a href="/login">RSMS</a></h2>
+</div>
+
+<section class="bottom">
+    <img th:src="@{/images/account.jpg}" alt="Background" class="background-img">
+
+    <!-- Reset Password Form -->
+    <div class="login-container">
+        <h2>Reset Password</h2>
+        <p>Enter your new password.</p>
+        <form id="resetForm">
+            <div class="input-group">
+                <label for="password">New Password</label>
+                <input type="password" id="password" placeholder="Enter new password" required>
+            </div>
+            <button type="submit" class="btn">Reset Password</button>
+        </form>
+        <p id="message"></p>
+        <p class="register-link">Back to <a href="/login">Login</a></p>
+    </div>
+</section>
+
+<footer>
+    &copy; 2025 Rice Sales Management. All Rights Reserved.
+</footer>
+</body>
+</html>

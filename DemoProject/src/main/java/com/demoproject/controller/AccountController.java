@@ -7,8 +7,6 @@ import com.demoproject.jwt.JwtUtils;
 import com.demoproject.service.AccountService;
 import com.demoproject.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.*;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,11 +14,9 @@ import org.springframework.web.bind.annotation.*;
 import com.demoproject.repository.AccountRepository;
 
 import java.time.LocalDate;
-import java.time.Period;
 import java.util.*;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 
@@ -73,8 +69,9 @@ public class AccountController {
         model.addAttribute("search", search);
 
         model.addAttribute("account", account);
+        model.addAttribute("user", user.orElse(null));
 
-        return "listOwner";
+        return "owner/listOwner";
     }
 
 
@@ -98,23 +95,28 @@ public class AccountController {
                               Model model) {
 
         Account account = accountService.getAccountFromToken(token).orElse(null);
+        Optional<Users> user = userService.getUserProfile(account.getUserId());
+        model.addAttribute("user",user.orElse(null));
         model.addAttribute("account", account);
-        return "createOwner";
+        return "owner/createOwner";
     }
 
     @PostMapping("/createOwner")
     public String createOwner(@RequestParam String username,
                               @RequestParam String password,
                               @RequestParam String displayname,
+                              @RequestParam String email,
                               @CookieValue(value = "token", required = false) String token,
                               Model model) {
         Optional<Account> adAccount= accountService.getAccountFromToken(token);
         model.addAttribute("account", adAccount.get());
-
+        Optional<Users> user = userService.getUserProfile(adAccount.get().getUserId());
+        model.addAttribute("user",user.orElse(null));
         Account accountOwner = new Account();
         accountOwner.setUsername(username);
         accountOwner.setPassword(passwordEncoder.encode(password));
         accountOwner.setDisplayName(displayname);
+        accountOwner.setEmail(email);
         accountOwner.setCreatedBy(adAccount.get().getId());
 
         accountService.createAccount(accountOwner);
@@ -129,12 +131,14 @@ public class AccountController {
                             @CookieValue(value = "token", required = false) String token){
         Account account = accountService.getAccountFromToken(token).orElse(null);
         Optional<Account> accountOwner= accountService.findById(Long.parseLong(id));
-        Optional<Users> userOpt= userService.getUserProfile(accountOwner.get().getUserId());
-        Users user=userOpt.orElse(null);
+        Optional<Users> userOwnerOpt= userService.getUserProfile(accountOwner.get().getUserId());
+        Users user=userOwnerOpt.orElse(null);
+        Optional<Users> userOpt= userService.getUserProfile(account.getUserId());
         model.addAttribute("accountOwner", accountOwner.get());
         model.addAttribute("account", account);
+        model.addAttribute("userCurrent", userOpt.get());
         model.addAttribute("user", user);
-        return "viewOwner";
+        return "owner/viewOwner";
     }
 
 //    @GetMapping("/updateOwner")
@@ -186,37 +190,6 @@ public class AccountController {
 
 
 
-    @GetMapping("/resetpwOwner")
-    public String resetPasswordOwner(Model model,@RequestParam String id,
-                                     @CookieValue(value = "token", required = false) String token){
-        Optional<Account> accountOwner= accountService.findById(Long.parseLong(id));
-        String usernameAccount = jwtUtils.extractUsername(token);
-        Optional<Account> optAccount = accountService.findByUsernameAndIsDeleteFalse(usernameAccount);
-        Account account = optAccount.orElse(null);
-        model.addAttribute("account", account);
-
-        model.addAttribute("accountOwner", accountOwner.get());
-        return "resetpwOwner";
-    }
-
-    @PostMapping("/resetpwOwner")
-    public String resetPasswordOwner(@RequestParam String username,
-                                     @RequestParam String newPassword,
-                                     @RequestParam String confirmPassword,
-                                     Model model,
-                                     @CookieValue(value = "token", required = false) String token) {
-        Optional<Account> optAccountOwner = accountRepository.findByUsernameAndIsDeleteFalse(username);
-        String usernameAccount = jwtUtils.extractUsername(token);
-        Optional<Account> optAccount = accountService.findByUsernameAndIsDeleteFalse(usernameAccount);
-        Account account = optAccount.orElse(null);
-        model.addAttribute("account", account);
-        optAccountOwner.get().setPassword(passwordEncoder.encode(newPassword));
-        accountRepository.save(optAccountOwner.get());
-
-        return "redirect:/account/updateOwner?id=" + optAccountOwner.get().getId();
-    }
-
-
 
 
     //    List staff
@@ -231,17 +204,19 @@ public class AccountController {
 
         // Lấy thông tin người dùng từ token
         Account account = accountService.getAccountFromToken(token).orElse(null);
-
+        Optional<Users> user = userService.getUserProfile(account.getUserId());
+        model.addAttribute("user", user.orElse(null));
 
         model.addAttribute("account", account);
 
         // Tìm kiếm hoặc lấy danh sách Staff
         Page<Map<String, Object>> staffPage;
         if (search != null && !search.isEmpty()) {
-            staffPage = accountService.searchStaffAccounts(search, page, size);
+            staffPage = accountService.searchStaffAccounts(account,search, page, size);
         } else {
-            staffPage = accountService.getStaffAccounts(page, size);
+            staffPage = accountService.getStaffAccounts(account,page, size);
         }
+
 
         // Đưa dữ liệu vào model
         model.addAttribute("accounts", staffPage.getContent());
@@ -249,7 +224,7 @@ public class AccountController {
         model.addAttribute("totalPages", staffPage.getTotalPages());
         model.addAttribute("search", search);
 
-        return "listStaff";
+        return "staff/listStaff";
     }
 
     @PostMapping("/deleteStaff")
@@ -266,8 +241,10 @@ public class AccountController {
     public String createStaff(@CookieValue(value = "token", required = false) String token,
                               Model model) {
         Account account = accountService.getAccountFromToken(token).orElse(null);
+        Optional<Users> user = userService.getUserProfile(account.getUserId());
+        model.addAttribute("user", user.orElse(null));
         model.addAttribute("account", account);
-        return "createStaff"; // Hiển thị trang createStaff.html
+        return "staff/createStaff"; // Hiển thị trang createStaff.html
     }
 
 
@@ -275,11 +252,12 @@ public class AccountController {
     public String createStaff(@RequestParam String username,
                               @RequestParam String password,
                               @RequestParam String displayname,
+                              @RequestParam String email,
                               @CookieValue(value = "token", required = false) String token,
                               Model model) {
         if (token == null || token.isEmpty()) {
             model.addAttribute("error", "Unauthorized: Missing authentication token.");
-            return "createStaff"; // Quay lại trang createStaff nếu có lỗi
+            return "staff/createStaff"; // Quay lại trang createStaff nếu có lỗi
         }
 
         String usernameAdmin = jwtUtils.extractUsername(token);
@@ -287,21 +265,23 @@ public class AccountController {
 
         if (adAccount.isEmpty()) {
             model.addAttribute("error", "Unauthorized: Admin account not found.");
-            return "createStaff"; // Quay lại trang createStaff nếu có lỗi
+            return "staff/createStaff"; // Quay lại trang createStaff nếu có lỗi
         }
 
         // Kiểm tra username có bị trùng không
         Optional<Account> existingAccount = accountRepository.findByUsernameAndIsDeleteFalse(username);
         if (existingAccount.isPresent()) {
             model.addAttribute("error", "Username already exists.");
-            return "createStaff"; // Quay lại trang createStaff nếu có lỗi
+            return "staff/createStaff"; // Quay lại trang createStaff nếu có lỗi
         }
 
         Account account = new Account();
         account.setUsername(username);
         account.setPassword(passwordEncoder.encode(password));
         account.setDisplayName(displayname);
+        account.setEmail(email);
         account.setCreatedBy(adAccount.get().getId());
+
 
 
         accountService.createStaffAccount(account);
@@ -315,13 +295,15 @@ public class AccountController {
         String username = jwtUtils.extractUsername(token);
         Optional<Account> optAccount = accountService.findByUsernameAndIsDeleteFalse(username);
         Account account = optAccount.orElse(null);
+        Optional<Users> userCurrent= userService.getUserProfile(account.getUserId());
         Optional<Account> accountStaff = accountService.findById(Long.parseLong(id));
         Optional<Users> userOpt = userService.getUserProfile(accountStaff.get().getUserId());
         Users user = userOpt.orElse(new Users());
         model.addAttribute("account", account);
+        model.addAttribute("userCurrent", userCurrent.get());
         model.addAttribute("accountStaff", accountStaff.get());
         model.addAttribute("user", user);
-        return "updateStaff";
+        return "staff/updateStaff";
     }
 
     @PostMapping("/updateStaff")
@@ -355,11 +337,13 @@ public class AccountController {
         String usernameAccount = jwtUtils.extractUsername(token);
         Optional<Account> optAccount = accountService.findByUsernameAndIsDeleteFalse(usernameAccount);
         Account account = optAccount.orElse(null);
+        Optional<Users> user= userService.getUserProfile(account.getUserId());
+        model.addAttribute("user", user.orElse(null));
 
         model.addAttribute("account", account);
         model.addAttribute("accountStaff", accountStaff.get());
 
-        return "resetpwStaff";
+        return "staff/resetpwStaff";
     }
 
     @PostMapping("/resetpwStaff")

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <title></title>
+  <link rel="stylesheet" href="/css/base.css">
+  <style>
+    .pagination {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .pagination a {
+      display: inline-block;
+      padding: 8px 16px;
+      margin: 4px;
+      text-decoration: none;
+      background-color: #2c3e50;
+      color: white;
+      border-radius: 5px;
+    }
+
+    .pagination a:hover {
+      background-color: #1a252f;
+    }
+
+    .pagination span {
+      font-size: 18px;
+      margin: 0 10px;
+    }
+  </style>
+
+  <script src="/js/home.js"></script>
+  <script>
+    function openForm() {
+      document.getElementById("studentFormModal").style.display = "block";
+    }
+
+    function closeForm() {
+      document.getElementById("studentFormModal").style.display = "none";
+    }
+
+    function openUpdateForm(button) {
+      document.getElementById("updateForm").style.display = "block";
+
+    }
+
+    function closeUpdateForm() {
+      document.getElementById("updateForm").style.display = "none";
+    }
+
+    // Đóng modal khi nhấn ra ngoài
+    window.onclick = function(event) {
+      const modal = document.getElementById("studentFormModal");
+      if (event.target === modal) {
+        modal.style.display = "none";
+      }
+    };
+  </script>
+
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+  <h2><a href="/home">RSMS</a></h2>
+  <div class="user-info">
+    <img  th:src="${user.avatar}" alt="User Avatar" class="user-avatar"/>
+    <div class="dropdown">
+      <span th:text="${account.displayName}" class="user-name" onclick="toggleDropdown()"> ▼</span>
+      <div id="dropdown-menu" class="dropdown-content">
+        <a href="/user/userprofile">👤 View Profile</a>
+        <a href="/user/changepw" id="changepw">🔑 Change password</a>
+        <a href="/static#" id="logout">🚪 Logout</a>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+
+  <h2>Feature</h2>
+  <a href="/user/userprofile" >Profile</a>
+  <a href="/account/listStaff" th:style="${#lists.contains(listHiddenPage, 'listStaff')} ? 'display: none;' : ''">Staff Account Management</a>
+
+  <a href="/product/listProduct" >Rice Management</a>
+
+  <a href="/customer/listCustomer">Customer Management</a>
+
+  <a href="/warehouse/listWarehouseZone" >Warehouse Management</a>
+
+
+  <a href="/listInvoice"  >Invoice Management</a>
+
+</div>
+
+
+
+<!-- Content -->
+<div class="content" id="content">
+
+  <!-- Modal Form -->
+  <button class="add-btn" onclick="createProductForm()">+</button>
+  <div id="studentFormModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeForm()">x</span>
+      <h2>Add new rice</h2>
+      <form th:action="@{/product/form}" method="post" enctype="multipart/form-data"
+            onsubmit="showSuccessAlert()" >
+
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required>
+
+        <label for="price">Price:</label>
+        <input type="text" id="price" name="price" required>
+
+        <label for="description">Description:</label>
+        <input type="text" id="description" name="description" required>
+
+        <label for="image">Image:</label>
+        <input type="file" id = image accept="image/*">
+
+        <button type="submit" class="submit-button">Create</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- List -->
+  <h1>List of Products</h1>
+  <form th:action="@{/product/search}" method="get">
+    <label for="search"></label>
+    <input
+            style="height: 30px; width: 750px"
+            type="text" id="search" name="searchKeyWord"
+            placeholder="Search by product name or description..."
+    >
+    <select name="searchBy">
+      <option value="name" th:selected="${sortField == 'name'}">Name</option>
+      <option value="description" th:selected="${sortField == 'description'}">Description</option>
+    </select>
+
+    <button type="submit" class="submit-button">Search</button>
+  </form>
+  <table class="styled-table">
+    <thead>
+    <tr>
+      <td>Image</td>
+      <th>
+        <a style="text-decoration: none; color: inherit"
+           th:href="@{/listproduct(page=${currentPage}, sortField='name', sortDirection=${reverseSortDirection})}">Name
+        </a>
+      </th>
+      <td>
+        <a style="text-decoration: none; color: inherit"
+           th:href="@{/listproduct(page=${currentPage}, sortField='price', sortDirection=${reverseSortDirection})}">Price
+        </a>
+      </td>
+      <td>Description</td>
+      <td>Action</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="product : ${products.content} " th:if="${product.isDeleted == 0}">
+      <!--                <td th:text="${product.name}"></td>-->
+      <td><img src="https://tvfood.com.vn/vnt_upload/news/09_2023/gao_nep_la_gi.jpg" width="100px" alt=""></td>
+      <td th:text="${product.name}"></td>
+      <td th:text="${product.price}"></td>
+      <td th:text="${product.description}"></td>
+      <td >
+        <form th:action="@{/product/update}" method="get">
+          <input type="hidden" name="id" th:value="${product.id}">
+          <button type="submit">Update</button>
+        </form>
+        <form action="/product/delete" method="post">
+          <input type="hidden" name="id" th:value="${product.id}">
+          <button onclick="confirmDelete()" type="submit">Delete</button>
+        </form>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <div class="pagination">
+    <a style="text-decoration: none " th:if="${currentPage > 0}" th:href="@{/product/listProduct(page=${currentPage - 1}, sortField=${sortField}, sortDirection=${sortDirection})}">Trước</a>
+    <span th:text="'Trang ' + ${currentPage + 1} + ' / ' + ${totalPages}"></span>
+    <a style="text-decoration: none"th:if="${currentPage + 1 < totalPages}" th:href="@{/product/listProduct(page=${currentPage + 1}, sortField=${sortField}, sortDirection=${sortDirection})}">Sau</a>
+  </div>
+
+
+
+</div>
+<footer>
+  &copy; 2025 Rice Sales Management. All Rights Reserved.
+</footer>
+
+</body>
+
+<script>
+  function createProductForm() {
+    window.location.href ="/product/create";
+  }
+
+  function showCreatedSuccess() {
+    alert("You are successfully created!");
+  }
+
+  function confirmDelete() {
+    if (confirm("Bạn có chắc chắn muốn xóa sản phẩm này không?")) {
+      window.location.href = "/deleteProduct?id=" + productId;
+    }
+  }
+</script>
+</html>

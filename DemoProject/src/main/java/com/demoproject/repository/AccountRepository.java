@@ -16,9 +16,12 @@ import org.springframework.stereotype.Repository;
 public interface AccountRepository extends JpaRepository<Account, Long> {
     Optional<Account> findByUsernameAndIsDeleteFalse(String username);
 
-
+    Optional<Account> findByEmailAndIsDeleteFalse(String email);
 
     boolean existsByUsername(String username);
+
+    boolean existsByEmailAndIsDeleteFalse(String email);
+
 
     boolean existsByUsernameAndIsDeleteFalse(String username);
     List<Account> findByUserIdIn(Collection<Long> userIds);
@@ -27,7 +30,8 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     Page<Account> findByUserIdInAndIsDeleteFalse(List<Long> userIds, Pageable pageable); // Chỉ lấy tài khoản chưa xóa
 
     @Query("SELECT a FROM Account a WHERE (LOWER(a.username) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-            "OR LOWER(a.displayName) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+            "OR LOWER(a.displayName) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(a.email) LIKE LOWER(CONCAT('%', :keyword, '%')))"+
             "AND a.userId IN :userIds AND a.isDelete = false")
     Page<Account> searchOwnerAccounts(@Param("keyword") String keyword, @Param("userIds") List<Long> userIds, Pageable pageable);
 
@@ -36,4 +40,5 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
             "AND a.userId IN :userIds AND a.isDelete = false")
     Page<Account> searchStaffAccounts(@Param("keyword") String keyword, @Param("userIds") List<Long> userIds, Pageable pageable);
 
+    Optional<Account> findByResetTokenAndIsDeleteFalse(String resetToken);
 }

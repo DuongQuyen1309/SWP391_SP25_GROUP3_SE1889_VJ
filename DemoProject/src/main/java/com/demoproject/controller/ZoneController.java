@@ -1,8 +1,6 @@
 package com.demoproject.controller;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -58,6 +56,8 @@ public class ZoneController {
         String username = jwtUtils.extractUsername(token);
         Optional<Account> account = accountService.findByUsernameAndIsDeleteFalse(username);
         Optional<Users> user = userService.getUserProfile(account.get().getUserId());
+        model.addAttribute("user", user.get());
+        model.addAttribute("account", account.get());
         String role= jwtUtils.extractRole(token);
         List<String> listHiddenPage = new ArrayList<>();
         listHiddenPage.add("");
@@ -66,7 +66,7 @@ public class ZoneController {
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
 
-        if (user.get().getWarehouseName() == null) {
+        if ((user.get().getWarehouseName() == null)&&(role.equals("OWNER"))) {
             redirectAttributes.addFlashAttribute("errorMessage", "You don't have any warehouse");
             return "redirect:/warehouse";
         }
@@ -78,20 +78,25 @@ public class ZoneController {
         }
         model.addAttribute("zonePage", zonePage);
         model.addAttribute("search", search);
-        return "zone";
+        return "warehouse/zone";
     }
 
     @GetMapping("/createWarehouseZone")
     public String getCreateZonePage(Model model,@CookieValue(value = "token", required = false) String token) {
         model.addAttribute("newZone", new Zone());
         String role= jwtUtils.extractRole(token);
+        String username = jwtUtils.extractUsername(token);
+        Optional<Account> account = accountService.findByUsernameAndIsDeleteFalse(username);
+        Optional<Users> user = userService.getUserProfile(account.get().getUserId());
+        model.addAttribute("user", user.get());
+        model.addAttribute("account", account.get());
         List<String> listHiddenPage = new ArrayList<>();
         listHiddenPage.add("");
         if(role.equals("STAFF")){
             listHiddenPage.add("listStaff");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
-        return "create";
+        return "warehouse/create";
     }
 
     @PostMapping("/createWarehouseZone")
@@ -103,7 +108,7 @@ public class ZoneController {
                 model.addAttribute("errorMessage", "Product ID does not exist");
                 model.addAttribute("newZone", newZone);
 
-                return "create";
+                return "warehouse/create";
             }
             String role= jwtUtils.extractRole(token);
             List<String> listHiddenPage = new ArrayList<>();
@@ -121,15 +126,20 @@ public class ZoneController {
             this.zoneService.handleSaveZone(newZone);
         } catch (IllegalArgumentException e) {
             model.addAttribute("errorMessage", e.getMessage());
-            return "create";
+            return "warehouse/create";
         }
         return "redirect:/warehouse/listWarehouseZone";
     }
 
-    @GetMapping("/zone/{id}")
-    public String getZoneDetail(Model model, @PathVariable long id,@CookieValue(value = "token", required = false) String token) {
-        Zone zone = this.zoneService.getZoneById(id);
+    @GetMapping("/zone")
+    public String getZoneDetail(Model model, @RequestParam String id,@CookieValue(value = "token", required = false) String token) {
+        Zone zone = this.zoneService.getZoneById(Long.parseLong(id));
         String role= jwtUtils.extractRole(token);
+        String username = jwtUtils.extractUsername(token);
+        Optional<Account> account = accountService.findByUsernameAndIsDeleteFalse(username);
+        Optional<Users> user = userService.getUserProfile(account.get().getUserId());
+        model.addAttribute("user", user.get());
+        model.addAttribute("account", account.get());
         List<String> listHiddenPage = new ArrayList<>();
         listHiddenPage.add("");
         if(role.equals("STAFF")){
@@ -142,15 +152,20 @@ public class ZoneController {
         model.addAttribute("zone", List.of(zone));
         // model.addAttribute("formattedCreatedAt", formattedCreatedAt);
         model.addAttribute("id", id);
-        return "zoneDetail";
+        return "warehouse/zoneDetail";
 
     }
 
-    @GetMapping("/zone/update/{id}")
-    public String getUpdateZonePage(Model model, @PathVariable long id,
+    @GetMapping("/zone/update")
+    public String getUpdateZonePage(Model model, @RequestParam String id,
                                     @CookieValue(value = "token", required = false) String token) {
-        Zone currentZone = this.zoneService.getZoneById(id);
+        Zone currentZone = this.zoneService.getZoneById(Long.parseLong(id));
         model.addAttribute("currentZone", currentZone);
+        String username = jwtUtils.extractUsername(token);
+        Optional<Account> account = accountService.findByUsernameAndIsDeleteFalse(username);
+        Optional<Users> user = userService.getUserProfile(account.get().getUserId());
+        model.addAttribute("user", user.get());
+        model.addAttribute("account", account.get());
         String role= jwtUtils.extractRole(token);
         List<String> listHiddenPage = new ArrayList<>();
         listHiddenPage.add("");
@@ -158,7 +173,7 @@ public class ZoneController {
             listHiddenPage.add("listStaff");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
-        return "updateZone";
+        return "warehouse/updateZone";
     }
 
     @PostMapping("/zone/update")
@@ -174,13 +189,13 @@ public class ZoneController {
         model.addAttribute("listHiddenPage", listHiddenPage);
         if (currentZone == null) {
             model.addAttribute("errorMessage", "Zone not found");
-            return "updateZone";
+            return "warehouse/updateZone";
         }
         boolean isNameExists = this.zoneService.isZoneNameAlreadyExists(zone.getName(), zone.getId());
         if (isNameExists) {
             model.addAttribute("errorMessage", "Zone with this name already exists");
             model.addAttribute("currentZone", currentZone);
-            return "updateZone";
+            return "warehouse/updateZone";
         }
         // update zone with new detail
         currentZone.setName(zone.getName());
@@ -191,31 +206,44 @@ public class ZoneController {
             if (!zoneService.existsById(currentZone.getProductId())) {
                 model.addAttribute("errorMessage", "Product ID does not exist");
                 model.addAttribute("currentZone", zone);
-                return "updateZone";
+                return "warehouse/updateZone";
             }
             this.zoneService.updateZone(currentZone);
             this.zoneService.handleSaveZone(currentZone);
         } catch (IllegalArgumentException e) {
             model.addAttribute("errorMessage", e.getMessage());
             model.addAttribute("currentZone", currentZone);
-            return "updateZone"; // Return to the update page with an error message
+            return "warehouse/updateZone"; // Return to the update page with an error message
         }
 
         return "redirect:/warehouse/listWarehouseZone";
     }
 
 
-    @GetMapping("/zone/delete/{id}")
-    public String getDeleteZonePage(Model model, @PathVariable long id) {
+    @GetMapping("/zone/delete")
+    public String getDeleteZonePage(Model model, @RequestParam String id,
+                                    @CookieValue(value = "token", required = false) String token) {
+        String username = jwtUtils.extractUsername(token);
+        Optional<Account> account = accountService.findByUsernameAndIsDeleteFalse(username);
+        Optional<Users> user = userService.getUserProfile(account.get().getUserId());
+        String role= jwtUtils.extractRole(token);
+        List<String> listHiddenPage = new ArrayList<>();
+        listHiddenPage.add("");
+        if(role.equals("STAFF")){
+            listHiddenPage.add("listStaff");
+        }
+        model.addAttribute("listHiddenPage", listHiddenPage);
+        model.addAttribute("user", user.get());
+        model.addAttribute("account", account.get());
         model.addAttribute("id", id);
         model.addAttribute("newZone", new Zone());
-        return "delete";
+        return "warehouse/delete";
 
     }
 
     @PostMapping("/zone/delete")
-    public String postDeleteZone(@RequestParam("id") long id) {
-        this.zoneService.deleteById(id);
+    public String postDeleteZone(@RequestParam String id) {
+        this.zoneService.deleteById(Long.parseLong(id));
 
         return "redirect:/warehouse/listWarehouseZone";
     }

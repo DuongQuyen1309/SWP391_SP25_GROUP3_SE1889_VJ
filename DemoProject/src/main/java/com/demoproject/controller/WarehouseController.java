@@ -4,6 +4,7 @@ import com.demoproject.entity.Account;
 import com.demoproject.entity.Users;
 import com.demoproject.entity.Zone;
 import com.demoproject.jwt.JwtUtils;
+import com.demoproject.repository.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -31,6 +32,8 @@ public class WarehouseController {
     private final ZoneService zoneService;
     @Autowired
     private final JwtUtils jwtUtils;
+    @Autowired
+    private AccountRepository accountRepository;
 
     public WarehouseController(AccountService accountService, UserService userService, ZoneService zoneService, JwtUtils jwtUtils) {
         this.accountService = accountService;
@@ -42,6 +45,12 @@ public class WarehouseController {
     @GetMapping("/warehouse")
     public String getWarehousePage(@CookieValue(value = "token", required = false) String token,
                                    Model model) {
+        String username = jwtUtils.extractUsername(token);
+        Optional<Account> optAccount = accountRepository.findByUsernameAndIsDeleteFalse(username);
+        Optional<Users> userOpt= userService.getUserProfile(optAccount.get().getUserId());
+        Users user = userOpt.orElse(new Users());
+        model.addAttribute("account", optAccount.get());
+        model.addAttribute("user", user);
         String role= jwtUtils.extractRole(token);
         List<String> listHiddenPage = new ArrayList<>();
         listHiddenPage.add("");
@@ -49,7 +58,7 @@ public class WarehouseController {
             listHiddenPage.add("listStaff");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
-        return "warehouse";
+        return "warehouse/warehouse";
 
     }
     @PostMapping("/warehouse")

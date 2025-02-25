@@ -41,6 +41,9 @@ public class Users {
     @Column(name = "warehouse_name")
     private String warehouseName;
 
+    @Column(name = "avatar")
+    private String avatar;
+
 
 
 
@@ -155,5 +158,13 @@ public class Users {
 
     public void setWarehouseName(String warehouseName) {
         this.warehouseName = warehouseName;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
 }

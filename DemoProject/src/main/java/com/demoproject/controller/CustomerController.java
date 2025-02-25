@@ -9,7 +9,6 @@ import com.demoproject.mapper.CustomerMapper;
 import com.demoproject.service.AccountService;
 import com.demoproject.service.CustomerService;
 import com.demoproject.service.UserService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -64,6 +63,7 @@ public class CustomerController {
         Optional<Users> user = userService.getUserProfile(account.getUserId());
 
         model.addAttribute("account", account);
+        model.addAttribute("user", user.orElse(null));
 
         List<String> phoneList =  customerService.getAllPhoneNumbers();
         model.addAttribute("phoneList", phoneList);
@@ -110,7 +110,7 @@ public class CustomerController {
         model.addAttribute("ctype", ctype);  // Đảm bảo giá trị ctype được truyền vào Thymeleaf
         model.addAttribute("customerTypes", customerTypes);
 
-        return "listCustomer";
+        return "customer/listCustomer";
     }
 
 
@@ -124,13 +124,14 @@ public class CustomerController {
         Optional<Account> account = accountService.findByUsernameAndIsDeleteFalse(username);
         Optional<Users> user = userService.getUserProfile(account.get().getUserId());
         model.addAttribute("account", account.get());
+        model.addAttribute("user", user.orElse(null));
         String role= jwtUtils.extractRole(token);
         List<String> listHiddenPage = new ArrayList<>();
         if(role.equals("STAFF")){
             listHiddenPage.add("listStaff");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
-        return "createCustomer";
+        return "customer/createCustomer";
     }
 
     @PostMapping("/createCustomer")
@@ -146,6 +147,7 @@ public class CustomerController {
         Optional<Account> account = accountService.findByUsernameAndIsDeleteFalse(username);
         Optional<Users> user = userService.getUserProfile(account.get().getUserId());
         model.addAttribute("account", account.get());
+        model.addAttribute("user", user.orElse(null));
         String role= jwtUtils.extractRole(token);
         List<String> listHiddenPage = new ArrayList<>();
         if(role.equals("STAFF")){
@@ -156,24 +158,24 @@ public class CustomerController {
         if (result.hasErrors() &&(!lastname.matches("^[a-zA-ZÀ-Ỹà-ỹ\\s]+$") || lastname.trim().isEmpty())) {
             model.addAttribute("customerRequest", customerRequest);
             model.addAttribute("lastnamemessage","Not be empty, not contain number and special characters");
-            return "createCustomer"; // Quay lại form nếu có lỗi
+            return "customer/createCustomer"; // Quay lại form nếu có lỗi
         }
 
         if (result.hasErrors() ) {
             model.addAttribute("customerRequest", customerRequest);
             model.addAttribute("lastname", lastname);
-            return "createCustomer"; // Quay lại form nếu có lỗi
+            return "customer/createCustomer"; // Quay lại form nếu có lỗi
         }
         if (!lastname.matches("^[a-zA-ZÀ-Ỹà-ỹ\\s]+$") || lastname.trim().isEmpty()) {
             model.addAttribute("customerRequest", customerRequest);
             model.addAttribute("lastnamemessage","Not be empty, not contain number and special characters");
-            return "createCustomer"; // Quay lại form nếu có lỗi
+            return "customer/createCustomer"; // Quay lại form nếu có lỗi
         }
         if (customerService.isPhoneNumberExist(customerRequest.getPhone())) {
             model.addAttribute("lastname", lastname);
             model.addAttribute("customerRequest", customerRequest);
             model.addAttribute("phoneError","Phone is not duplicatied in system");
-            return "createCustomer"; // Quay lại form nếu có lỗi
+            return "customer/createCustomer"; // Quay lại form nếu có lỗi
         }
 
 
@@ -210,6 +212,8 @@ public class CustomerController {
         String username = jwtUtils.extractUsername(token);
         Optional<Account> optAccount = accountService.findByUsernameAndIsDeleteFalse(username);
         Account account = optAccount.orElse(null);
+        Optional<Users> user = userService.getUserProfile(account.getUserId());
+        model.addAttribute("user", user.orElse(null));
         String role= jwtUtils.extractRole(token);
         List<String> listHiddenPage = new ArrayList<>();
         if(role.equals("STAFF")){
@@ -220,7 +224,7 @@ public class CustomerController {
         model.addAttribute("customer", customer);
         List<String> phoneList =  customerService.getAllPhoneNumbers();
         model.addAttribute("phoneList", phoneList);
-        return "updateCustomer";
+        return "customer/updateCustomer";
 
     }
 
@@ -241,6 +245,8 @@ public class CustomerController {
         String username = jwtUtils.extractUsername(token);
         Optional<Account> optAccount = accountService.findByUsernameAndIsDeleteFalse(username);
         Account account = optAccount.orElse(null);
+        Optional<Users> user = userService.getUserProfile(account.getUserId());
+        model.addAttribute("user", user.orElse(null));
         model.addAttribute("account", account);
 
 

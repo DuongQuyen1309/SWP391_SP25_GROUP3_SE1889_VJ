@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zone Detail</title>
+    <link rel="stylesheet" href="/css/base.css">
+
+    <script src="/js/home.js"></script>
+</head>
+
+<body>
+<!-- Header -->
+<div class="header">
+    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+    <h2><a href="/home">RSMS</a></h2>
+    <div class="user-info">
+        <img  th:src="${user.avatar}" alt="User Avatar" class="user-avatar"/>
+        <div class="dropdown">
+            <span th:text="${account.displayName}" class="user-name" onclick="toggleDropdown()"> ▼</span>
+            <div id="dropdown-menu" class="dropdown-content">
+                <a href="/user/userprofile">👤 View Profile</a>
+                <a href="/user/changepw" id="changepw">🔑 Change password</a>
+                <a href="/static#" id="logout">🚪 Logout</a>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+
+    <h2>Feature</h2>
+    <a href="/user/userprofile">Profile</a>
+
+
+    <a href="/account/listStaff" th:style="${#lists.contains(listHiddenPage, 'listStaff')} ? 'display: none;' : ''">Staff Account Management</a>
+
+    <a href="/product/listProduct">Rice Management</a>
+
+    <a href="/customer/listCustomer">Customer Management</a>
+
+    <a href="/warehouse/listWarehouseZone">Warehouse Management</a>
+
+
+    <a href="/listInvoice">Invoice Management</a>
+
+    <div id="accountMenu" class="submenu" style="display: none;">
+
+    </div>
+
+</div>
+
+
+
+<!-- Sidebar -->
+<div class="content" >
+        <h2 style="margin-top: 100px">Zone Detail</h2>
+        <div class="card-header">
+
+        </div>
+        <table class="styled-table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Warehouse Name</th>
+                <th>Product Id</th>
+                <th>Amount</th>
+                <th>Created Date</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="zone : ${zone}">
+                <td th:text="${zone.id}"></td>
+                <td th:text="${zone.name}"></td>
+                <td th:text="${zone.warehouseName}"></td>
+                <td th:text="${zone.productId}"></td>
+                <td th:text="${zone.amount}"></td>
+                <td th:text="${zone.createdAt}"></td>
+                <td>
+                    <form th:action="@{/warehouse/warehouse}" method="get" >
+                        <input type="hidden" name="id" th:value="${zone.id}">
+                        <button type="submit" style="background-color: #059fe3">Import rice</button>
+                    </form>
+
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+</div>
+</body>
+
+</html>
