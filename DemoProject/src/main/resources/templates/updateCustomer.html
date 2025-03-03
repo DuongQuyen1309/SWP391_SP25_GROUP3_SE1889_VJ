@@ -90,60 +90,10 @@
       }, 3000);  // Thời gian chờ 3 giây
     }
   </script>
-  <!--  <script type="text/javascript">-->
-  <!--    function validateForm(event) {-->
-  <!--      var name = document.getElementById("name").value;-->
-  <!--      var address = document.getElementById("address").value;-->
-  <!--      var dob = document.getElementById("dob").value;-->
-  <!--      var phone = document.getElementById("phone").value;-->
-  <!--      var today = new Date().toISOString().split("T")[0]; // Lấy ngày hiện tại-->
 
-  <!--      var nameRegex = /^[a-zA-ZÀ-Ỹà-ỹ\s]+$/; // Chỉ chứa chữ cái và khoảng trắng-->
-  <!--      var phoneRegex = /^[0-9]{10,11}$/; // Chỉ chứa 10 hoặc 11 chữ số-->
-
-  <!--      // Kiểm tra Name-->
-  <!--      if (!name.match(nameRegex)) {-->
-  <!--        alert("Name must not contain numbers or special characters.");-->
-  <!--        event.preventDefault();-->
-  <!--        return false;-->
-  <!--      }-->
-  <!--      if (name.value.trim() === "") {-->
-  <!--        alert("Name cannot be empty.");-->
-  <!--        event.preventDefault();-->
-  <!--        return false;-->
-  <!--      }-->
-
-  <!--      // Kiểm tra Address-->
-  <!--      if (address.value.trim() === "") {-->
-  <!--        alert("Address cannot be empty.");-->
-  <!--        event.preventDefault();-->
-  <!--        return false;-->
-  <!--      }-->
-
-  <!--      // Kiểm tra Date of Birth-->
-  <!--      if (dob === "") {-->
-  <!--        alert("Date of Birth cannot be empty.");-->
-  <!--        event.preventDefault();-->
-  <!--        return false;-->
-  <!--      }-->
-  <!--      if (dob > today) {-->
-  <!--        alert("Date of Birth cannot be a future date.");-->
-  <!--        event.preventDefault();-->
-  <!--        return false;-->
-  <!--      }-->
-
-  <!--      // Kiểm tra Phone-->
-  <!--      if (!phone.match(phoneRegex)) {-->
-  <!--        alert("Phone number must be between 10 and 11 digits and contain only numbers.");-->
-  <!--        event.preventDefault();-->
-  <!--        return false;-->
-  <!--      }-->
-
-  <!--      return true;-->
-  <!--    }-->
-  <!--  </script>-->
   <script th:inline="javascript">
     var existingPhones = /*[[${phoneList}]]*/ [];
+    var pre_phone = /*[[${pre_phone}]]*/ "";
   var nameRegex = /^[a-zA-ZÀ-Ỹà-ỹ\s]+$/;
     var phoneRegex = /^[0-9]{10,11}$/;
     var today = new Date().toISOString().split("T")[0];
@@ -183,7 +133,7 @@
           errors.push("Phone is not empty");
         } else if (!phone.value.match(phoneRegex)) {
           errors.push("Phone number must be between 10 and 11 digits and contain only numbers.");
-        } else if(existingPhones.includes(phone.value)){
+        } else if(existingPhones.includes(phone.value) && (pre_phone !== phone.value) ){
           errors.push("Phone is not duplicated");
         }
 
