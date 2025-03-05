@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -75,13 +76,34 @@ public class CustomerService {
         customerRepository.save(updatedCustomer.get());
     }
 
-    public List<String> getAllPhoneNumbers(){
-        return customerRepository.getAllPhoneNumbers();
+    public List<String> getAllPhoneNumbers(List<Long> relatedUserList){
+        return customerRepository.getAllPhoneNumbers(relatedUserList);
     }
 
 
-    public boolean isPhoneNumberExist(String phone) {
-        List<String> allPhoneNumbers = customerRepository.getAllPhoneNumbers();
+    public boolean isPhoneNumberExist(String phone, List<Long> relatedUserList) {
+        List<String> allPhoneNumbers = customerRepository.getAllPhoneNumbers(relatedUserList);
         return allPhoneNumbers.contains(phone);
+    }
+
+    public Optional<Customer> getCustomerByPhone(String phone) {
+        return customerRepository.findByPhone(phone);
+    }
+
+    public Page<Customer> searchCustomerByAttribute(List<Long> relatedUserList, Long req_idFrom, Long req_idTo, Integer req_moneyFrom,
+                                                    Integer req_moneyTo, String req_phone, LocalDate dobFrom, LocalDate dobTo, String req_customerType,
+                                                    String req_address, String req_name, Pageable pageable) {
+        return customerRepository.findByAttribute(relatedUserList, req_idFrom, req_idTo, req_moneyFrom,
+                req_moneyTo, req_phone, dobFrom, dobTo, req_customerType, req_address, req_name, pageable);
+    }
+
+    public Page<Customer> searchCustomerAll(List<Long> relatedUserList, Pageable pageable) {
+
+        Page<Customer> customers = customerRepository.findByIdInAndIsDeleteFalse(relatedUserList, pageable);
+        return customers;
+    }
+
+    public List<Customer> searchCustomer(List<Long> relatedUserList,String name){
+        return customerRepository.findByIdInAndIsDeleteFalseAndNameContainingIgnoreCase(relatedUserList,name);
     }
 }

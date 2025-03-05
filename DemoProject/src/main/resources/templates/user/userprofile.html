@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Rice Sales Management</title>
     <link rel="stylesheet" href="/css/base.css">
+    <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
     <style>
         /* Profile Form */
         .profile-form {
@@ -30,6 +31,11 @@
             border: 1px solid #ccc;
             border-radius: 5px;
             font-size: 16px;
+        }
+
+        .profile-form input:focus {
+            border-color: #e67e22;
+            box-shadow: 0 0 8px rgba(230, 126, 34, 0.5);
         }
 
         .profile-form button {
@@ -355,7 +361,7 @@
 
     <a href="/warehouse/listWarehouseZone" th:style="${#lists.contains(listHiddenPage, 'listWarehouse')} ? 'display: none;' : ''" >Warehouse Management</a>
 
-    <a href="/listInvoice" th:style="${#lists.contains(listHiddenPage, 'listInvoice')} ? 'display: none;' : ''" >Invoice Management </a>
+    <a href="/bill/listBill" th:style="${#lists.contains(listHiddenPage, 'listBill')} ? 'display: none;' : ''" >Invoice Management </a>
 
 </div>
 

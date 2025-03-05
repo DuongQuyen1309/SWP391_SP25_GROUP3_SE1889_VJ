@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>Rice Sales Management</title>
     <link rel="stylesheet" href="/css/base.css">
+    <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
     <style>
         .create-form {
             background-color: white;
@@ -46,6 +47,11 @@
         .create-form button:hover {
             background-color: #1a252f;
         }
+        .create-form input:focus {
+            border-color: #e67e22;
+            box-shadow: 0 0 8px rgba(230, 126, 34, 0.5);
+        }
+
     </style>
     <script src="/js/home.js"></script>
     <script>
@@ -122,6 +128,7 @@
                     form.insertBefore(errorContainer, form.querySelector("button"));
                 } else {
                     setTimeout(() => {
+                        alert("Registered successfully.");
                         form.submit();
                     }, 500);
                 }
@@ -162,7 +169,7 @@
     <a href="/warehouse/listWarehouseZone">Warehouse Management</a>
 
 
-    <a href="/listInvoice">Invoice Management</a>
+    <a href="/bill/listBill" >Invoice Management</a>
 </div>
 
 <div class="content">

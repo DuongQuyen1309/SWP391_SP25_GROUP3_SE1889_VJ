@@ -21,7 +21,7 @@ public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    int id;
+    Long id;
 
     @Column(name = "name", nullable = false)
     String name;
@@ -54,4 +54,10 @@ public class Product {
 
     @Column(name = "isDelete", nullable = true)
     int isDeleted;
+
+    @Column(name = "store_id", nullable = true)
+    private Long storeId;
+
+    @Column(name = "zone_id")
+    private Long zoneId;
 }

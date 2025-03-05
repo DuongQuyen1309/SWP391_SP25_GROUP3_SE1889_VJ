@@ -70,6 +70,7 @@ public class ProductController {
         product.setPrice(price);
         product.setDescription(description);
         product.setIsDeleted(0);
+        product.setCreatedBy(user.get().getId().toString());
         productRepository.save(product);
         return "redirect:/product/listProduct";
     }
@@ -93,6 +94,7 @@ public class ProductController {
         listHiddenPage.add("");
         if(role.equals("STAFF")){
             listHiddenPage.add("listStaff");
+            listHiddenPage.add("createProduct");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
         Page<Product> productPage = productService.getAllProductByPage(page, size, sortField, sortDirection);
@@ -111,7 +113,7 @@ public class ProductController {
 
     @PostMapping("/delete")
     public String deleteProduct(
-            @RequestParam int id,
+            @RequestParam Long id,
             @CookieValue(value = "token", required = false) String token
     ) {
 
@@ -123,7 +125,7 @@ public class ProductController {
 
     @GetMapping("/update")
     public String updateProductForm(
-            @RequestParam int id, Model model,
+            @RequestParam Long id, Model model,
             @CookieValue(value = "token", required = false) String token
     ) {
         String username = jwtUtils.extractUsername(token);
@@ -162,7 +164,7 @@ public class ProductController {
             listHiddenPage.add("listStaff");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
-        int idProduct = Integer.parseInt(id);
+        Long idProduct = Long.parseLong(id);
 
         Product product = productService.getProductById(idProduct);
         product.setName(name);

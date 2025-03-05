@@ -2,6 +2,7 @@ package com.demoproject.entity;
 
 import jakarta.persistence.*;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -44,7 +45,11 @@ public class Account {
     @Column(name = "reset_token")
     private String resetToken;
 
+    @Column(name="reset_token_expiry",columnDefinition = "DATETIME2")
+    private LocalDateTime resetTokenExpiry;
 
+    @Column(name = "store_id")
+    private Long storeId;
 
 
     public Long getId() {
@@ -145,6 +150,21 @@ public class Account {
     }
 
 
+    public LocalDateTime getResetTokenExpiry() {
+        return resetTokenExpiry;
+    }
+
+    public void setResetTokenExpiry(LocalDateTime resetTokenExpiry) {
+        this.resetTokenExpiry = resetTokenExpiry;
+    }
+
+    public Long getStoreId() {
+        return storeId;
+    }
+
+    public void setStoreId(Long storeId) {
+        this.storeId = storeId;
+    }
 }
 
 

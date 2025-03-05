@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <title>Rice Sales Management</title>
   <link rel="stylesheet" href="/css/base.css">
+  <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
   <style>
     .pagination {
       text-align: center;
@@ -80,6 +81,13 @@
     .search-button:hover {
       background-color: #1a252f;
     }
+    .twin-field{
+      display: flex;
+    }
+    .twin-field input{
+      margin-left: 5px;
+      margin-right: 5px;
+    }
 
   </style>
   <script src="/js/home.js"></script>
@@ -111,6 +119,32 @@
       }
     }
   </script>
+  <script>
+    function filterCustomers() {
+      let params = new URLSearchParams();
+      document.querySelectorAll('.filter-input').forEach(input => {
+        if (input.value.trim() !== '') { // Chỉ thêm tham số nếu có giá trị
+          params.append(input.name, input.value);
+        }
+      });
+
+      window.location.href = '/customer/listCustomer' + '?' + params.toString();
+    }
+    document.addEventListener("DOMContentLoaded", function() {
+      let params = new URLSearchParams(window.location.search);
+      document.querySelectorAll('.filter-input').forEach(input => {
+        if (params.has(input.name)) {
+          let value = params.get(input.name);
+          if (input.type === "date") {
+            input.value = value.substring(0, 10); // Định dạng YYYY-MM-DD
+          } else {
+            input.value = value;
+          }
+        }
+      });
+    });
+
+  </script>
 </head>
 <body>
 
@@ -140,15 +174,14 @@
   <a href="/user/userprofile" >Profile</a>
   <a href="/account/listStaff" th:style="${#lists.contains(listHiddenPage, 'listStaff')} ? 'display: none;' : ''">Staff Account Management</a>
 
-
   <a href="/product/listProduct" >Rice Management</a>
 
-  <a href="/customer/listCustomer" >Customer Management</a>
+  <a href="/customer/listCustomer">Customer Management</a>
 
   <a href="/warehouse/listWarehouseZone" >Warehouse Management</a>
 
 
-  <a href="/listInvoice" >Invoice Management</a>
+  <a href="/bill/listBill" >Invoice Management</a>
 
 </div>
 
@@ -173,16 +206,19 @@
   </div>
   <!-- List -->
   <h1>List of Customer Information</h1>
-  <form th:action="@{/customer/listCustomer}" method="get" class="search-form">
-    <input type="text" name="search" th:value="${search}" placeholder="Search by name..." class="search-input">
+  <!--  <form th:action="@{/customer/listCustomer}" method="get" class="search-form">-->
+  <!--    <input type="text" name="search" th:value="${search}" placeholder="Search by name..." class="search-input">-->
 
-    <select name="ctype" class="search-input">
-      <option value="">-- Select Customer Type --</option>
-      <option th:each="type : ${customerTypes}" th:value="${type}" th:text="${type}" th:selected="${type == ctype}"></option>
-    </select>
+  <!--    <select name="ctype" class="search-input">-->
+  <!--      <option value="">&#45;&#45; Select Customer Type &#45;&#45;</option>-->
+  <!--      <option th:each="type : ${customerTypes}" th:value="${type}" th:text="${type}" th:selected="${type == ctype}"></option>-->
+  <!--    </select>-->
 
-    <button type="submit" class="search-button">Search</button>
-  </form>
+  <!--    <button type="submit" class="search-button">Search</button>-->
+  <!--  </form>-->
+  <div th:if="${errorMessage}" style="color: red; font-weight: bold;">
+    <p th:text="${errorMessage}"></p>
+  </div>
   <table class="styled-table">
     <thead>
     <tr>
@@ -195,6 +231,37 @@
       <td>Customer Type</td>
       <td>Action</td>
     </tr>
+    <tr>
+      <td class="twin-field">
+        <input type="text" class="filter-input" name="idFrom" onchange="filterCustomers()" style="width: 23px;">
+        <input type="text" class="filter-input" name="idTo" onchange="filterCustomers()" style="width: 23px;">
+      </td>
+      <td>
+        <input type="text" class="filter-input" name="name" onchange="filterCustomers()" style="width: 90px;">
+      </td>
+      <td class="twin-field">
+        <input type="date" class="filter-input" name="dobFrom" onchange="filterCustomers()" style="width: 40%;">
+        <input type="date" class="filter-input" name="dobTo" onchange="filterCustomers()" style="width: 40%;">
+      </td>
+      <td>
+        <input type="text" class="filter-input" name="address" onchange="filterCustomers()" style="width: 100%;">
+      </td>
+      <td>
+        <input type="text" class="filter-input" name="phone" onchange="filterCustomers()" style="width: 100%;">
+      </td>
+      <td class="twin-field">
+        <input type="text" class="filter-input" name="moneyFrom" onchange="filterCustomers()" style="width: 60px;" step="1000">
+        <input type="text" class="filter-input" name="moneyTo" onchange="filterCustomers()" style="width: 60px;" step="1000">
+      </td>
+      <td>
+        <select class="filter-input" name="customerType" onchange="filterCustomers()" style="width: 50px;">
+          <option value="">All</option>
+          <option value="retail">Retail</option>
+          <option value="wholesale">Wholesale</option>
+        </select>
+      </td>
+      <td></td>
+    </tr>
     </thead>
     <tbody>
     <tr th:each="customer : ${customers}">
@@ -202,16 +269,25 @@
       <td th:if="${customer != null}" th:text="${customer.name}"></td>
       <td th:if="${customer != null}" th:text="${customer.dob}"></td>
       <td th:if="${customer != null}" th:text="${customer.address}"></td>
-      <td th:if="${customer != null}" th:text="${customer.phone}"></td>
+      <td th:if="${customer != null}"
+          th:text="${customer.phone != null and #strings.equals(role, 'OWNER')}
+             ? ${customer.phone}
+             : ${'x'.repeat(customer.phone.length() - 3) + customer.phone.substring(customer.phone.length() - 3)}">
+      </td>
       <td th:if="${customer != null}" th:text="${customer.moneyState}"></td>
       <td th:if="${customer != null}" th:text="${customer.ctype}"></td>
       <td>
+        <div style="display: flex; gap: 5px;">
         <form th:action="@{/customer/updateCustomer/{id}(id=${customer.id})}" method="get">
           <button type="submit">Update</button>
         </form>
         <form th:action="@{/customer/listCustomer}" method="get">
+          <button type="submit" style="background-color: #06999c">Order Detail</button>
+        </form>
+        <form th:action="@{../note/listNote/{id}(id=${customer.id})}" method="get">
           <button type="submit">Note Detail</button>
         </form>
+        </div>
       </td>
     </tr>
     </tbody>
@@ -220,18 +296,29 @@
   <!-- Phân trang -->
   <div class="pagination">
     <a th:if="${currentPage > 0}"
-       th:href="@{/customer/listCustomer(page=${currentPage - 1}, size=5, search=${search}, ctype=${ctype})}">
+       th:href="@{/customer/listCustomer(page=${currentPage - 1}, size=5,
+       idFrom=${idFrom}, idTo=${idTo},
+       name=${name}, dobFrom=${dobFrom},dobTo=${dobTo},
+       address=${address},
+       phone=${phone},
+       moneyFrom=${moneyFrom},
+       moneyTo=${moneyTo}, customerType=${customerType})}">
       Previous
     </a>
 
     <span>Page <span th:text="${currentPage + 1}"></span> of <span th:text="${totalPages}"></span></span>
 
     <a th:if="${currentPage + 1 < totalPages}"
-       th:href="@{/customer/listCustomer(page=${currentPage + 1}, size=5, search=${search}, ctype=${ctype})}">
+       th:href="@{/customer/listCustomer(page=${currentPage + 1}, size=5,
+       idFrom=${idFrom}, idTo=${idTo},
+       name=${name}, dobFrom=${dobFrom},dobTo=${dobTo},
+       address=${address},
+       phone=${phone},
+       moneyFrom=${moneyFrom},
+       moneyTo=${moneyTo}, customerType=${customerType})}">
       Next
     </a>
   </div>
-
 
 
 </div>
@@ -241,3 +328,4 @@
 
 </body>
 </html>
+

@@ -59,20 +59,20 @@ public class ZoneService {
     public Page<Zone> getAllZones(Pageable pageable) {
         return this.zoneRepository.findAll(pageable);
     }
-    public Page<Zone> getAllZonesByWarehouseName(Pageable pageable,String warehouseName) {
+    public Page<Zone> getAllZonesByStoreID(Pageable pageable,Long storeID) {
         // Fetch current user's warehouse name
 
 
         // Fetch zones associated with the warehouse name
-        return this.zoneRepository.findAllByWarehouseName(warehouseName, pageable);
+        return this.zoneRepository.findAllByStoreId(storeID, pageable);
     }
 
-    public Page<Zone> getZonesByName(String name,String warehouseName, Pageable pageable) {
+    public Page<Zone> getZonesByName(String name,Long storeID, Pageable pageable) {
         // Fetch the warehouse name of the current logged-in user
 
 
         // Fetch zones filtered by name and warehouse name
-        return this.zoneRepository.findByNameAndWarehouse(name,warehouseName,pageable);
+        return this.zoneRepository.findByNameAndStoreId(name, storeID, pageable);
     }
 
 
@@ -89,7 +89,7 @@ public class ZoneService {
         zoneRepository.save(zone);
     }
 
-    public boolean existsById(int productId) {
+    public boolean existsById(Long productId) {
         return productRepository.existsById(productId);
     }
 }

@@ -15,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -53,64 +54,123 @@ public class CustomerController {
                                @CookieValue(value = "token", required = false) String token,
                                @RequestParam(defaultValue = "0") int page,
                                @RequestParam(defaultValue = "5") int size,
-                               @RequestParam(required = false) String search,
-                               @RequestParam(required = false) String ctype,
+//                               @RequestParam(required = false) String search,
+//                               @RequestParam(required = false) String ctype,
+                               @RequestParam(required = false) String idFrom,
+                               @RequestParam(required = false) String idTo,
+                               @RequestParam(required = false) String name,
+                               @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dobFrom,
+                               @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dobTo,
+                               @RequestParam(required = false) String address,
+                               @RequestParam(required = false) String phone,
+                               @RequestParam(required = false) String moneyFrom,
+                               @RequestParam(required = false) String moneyTo,
+                               @RequestParam(required = false) String customerType,
                                RedirectAttributes redirectAttributes) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
         Page<Customer> customerPage;
-        String username = jwtUtils.extractUsername(token);
         Account account = accountService.getAccountFromToken(token).orElse(null);
-        Optional<Users> user = userService.getUserProfile(account.getUserId());
-
+        Users user = userService.getUserProfile(account.getUserId()).orElse(null);
         model.addAttribute("account", account);
-        model.addAttribute("user", user.orElse(null));
+        model.addAttribute("user", user);
 
-        List<String> phoneList =  customerService.getAllPhoneNumbers();
-        model.addAttribute("phoneList", phoneList);
-        System.out.println("phonne: ");
-        for(String phone : phoneList) {
-            System.out.println(phone);
-        }
-        //lấy id của người đang đăng nhập
-        System.out.println("user nguoi dang nhap: "+ user.get().getId());
+
+
+
 
         String role= jwtUtils.extractRole(token);
-        System.out.println("role la "+ role);
+        model.addAttribute("role", role);
         List<Long> relatedUserList = new ArrayList<>();
         if(role.equalsIgnoreCase("OWNER")){
-            relatedUserList = userService.getStaffID(user.get().getId());
-            relatedUserList.add(user.get().getId());
-            System.out.println("cac id cau user "+user.get().getId()+" la:");
+            relatedUserList = userService.getStaffID(user.getId());
+            relatedUserList.add(user.getId());
             for(Long id:relatedUserList){
                 System.out.println(id);
             }
         }else if(role.equalsIgnoreCase("STAFF")){
-            Long ownerId = userService.getOwnerID(user.get().getId());
+            Long ownerId = userService.getOwnerID(user.getId());
             relatedUserList = userService.getStaffID(ownerId);
             relatedUserList.add(ownerId);
+
         }
+        List<String> phoneList =  customerService.getAllPhoneNumbers(relatedUserList);
+        model.addAttribute("phoneList", phoneList);
         List<String> listHiddenPage = new ArrayList<>();
         if(role.equals("STAFF")){
             listHiddenPage.add("listStaff");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
 
-        if ((search != null && !search.isEmpty()) || (ctype != null && !ctype.isEmpty())) {
-            customerPage = customerService.searchCustomersByNameAndType(relatedUserList,search, ctype, pageable);
-        } else {
-            customerPage = customerService.getAllCustomersAndIsDeleteFalse(relatedUserList,pageable);
+        if ((idFrom != null && !idFrom.isEmpty() && !idFrom.matches("\\d+")) ||
+                (idTo != null && !idTo.isEmpty() && !idTo.matches("\\d+")) ||
+                (moneyFrom != null && !moneyFrom.isEmpty() && !moneyFrom.matches("-?\\d+")) ||
+                (moneyTo != null && !moneyTo.isEmpty() && !moneyTo.matches("-?\\d+")) ||
+                (phone != null && !phone.isEmpty() && !phone.matches("\\d+"))) {
+
+            model.addAttribute("errorMessage", "Id, Phone fields should be positive number. Money field should be negative number");
+            customerPage = Page.empty();
+            model.addAttribute("customers", customerPage.getContent());
+
+            model.addAttribute("idFrom", idFrom);
+            model.addAttribute("idTo", idTo);
+            model.addAttribute("name", name);
+            model.addAttribute("dobFrom", dobFrom);
+            model.addAttribute("dobTo", dobTo);
+            model.addAttribute("address", address);
+            model.addAttribute("phone", phone);
+            model.addAttribute("moneyFrom", moneyFrom);
+            model.addAttribute("moneyTo", moneyTo);
+            model.addAttribute("customerType", customerType);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", customerPage.getTotalPages());
+            model.addAttribute("size", size);
+            return "customer/listCustomer";
         }
+        else {
+            if ((idFrom != null && !idFrom.isEmpty()) || (idTo != null && !idTo.isEmpty())
+                    || (name != null && !name.isEmpty()) || (dobFrom != null)
+                    || (dobTo != null) || (address != null && !address.isEmpty())
+                    || (phone != null && !phone.isEmpty()) || (customerType != null && !customerType.isEmpty())
+                    || (moneyFrom != null && !moneyFrom.isEmpty()) || (moneyTo != null && !moneyTo.isEmpty())) {
 
-        List<String> customerTypes = customerService.getAllCustomerTypes();
 
-        model.addAttribute("customers", customerPage.getContent());
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", customerPage.getTotalPages());
-        model.addAttribute("search", search);
-        model.addAttribute("ctype", ctype);  // Đảm bảo giá trị ctype được truyền vào Thymeleaf
-        model.addAttribute("customerTypes", customerTypes);
+                Long req_idFrom = (idFrom != null && !idFrom.isBlank() && idFrom.matches("\\d+")) ? Long.valueOf(idFrom) : null;
+                Long req_idTo = (idTo != null && !idTo.isBlank() && idTo.matches("\\d+")) ? Long.valueOf(idTo) : null;
 
-        return "customer/listCustomer";
+                Integer req_moneyFrom = (moneyFrom != null && !moneyFrom.isBlank() && moneyFrom.matches("\\d+")) ? Integer.valueOf(moneyFrom) : null;
+                Integer req_moneyTo = (moneyTo != null && !moneyTo.isBlank() && moneyTo.matches("\\d+")) ? Integer.valueOf(moneyTo) : null;
+
+                String req_phone = (phone == null || phone.isEmpty())? null: phone;
+                String req_customerType = (customerType == null || customerType.isEmpty())? null: customerType;
+                String req_address = (address == null || address.isEmpty())? null: address;
+                String req_name = (name == null || name.isEmpty()) ? null : name;
+
+                customerPage = customerService.searchCustomerByAttribute(relatedUserList, req_idFrom, req_idTo, req_moneyFrom,
+                        req_moneyTo, req_phone, dobFrom, dobTo, req_customerType, req_address, req_name, pageable);
+
+            } else {
+                customerPage = customerService.searchCustomerAll(relatedUserList, pageable);
+            }
+
+            model.addAttribute("customers", customerPage.getContent());
+
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", customerPage.getTotalPages());
+            model.addAttribute("size", size);
+
+            model.addAttribute("idFrom", idFrom);
+            model.addAttribute("idTo", idTo);
+            model.addAttribute("name", name);
+            model.addAttribute("dobFrom", dobFrom);
+            model.addAttribute("dobTo", dobTo);
+            model.addAttribute("address", address);
+            model.addAttribute("phone", phone);
+            model.addAttribute("customerType", customerType);
+            model.addAttribute("moneyFrom", moneyFrom);
+            model.addAttribute("moneyTo", moneyTo);
+
+            return "customer/listCustomer";
+        }
     }
 
 
@@ -123,14 +183,27 @@ public class CustomerController {
         String username = jwtUtils.extractUsername(token);
         Optional<Account> account = accountService.findByUsernameAndIsDeleteFalse(username);
         Optional<Users> user = userService.getUserProfile(account.get().getUserId());
+        model.addAttribute("user", user.get());
         model.addAttribute("account", account.get());
-        model.addAttribute("user", user.orElse(null));
+
         String role= jwtUtils.extractRole(token);
+        model.addAttribute("role",role);
         List<String> listHiddenPage = new ArrayList<>();
         if(role.equals("STAFF")){
             listHiddenPage.add("listStaff");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
+        List<Long> relatedUserList = new ArrayList<>();
+        if(role.equalsIgnoreCase("OWNER")){
+            relatedUserList = userService.getStaffID(user.get().getId());
+            relatedUserList.add(user.get().getId());
+        }else if(role.equalsIgnoreCase("STAFF")){
+            Long ownerId = userService.getOwnerID(user.get().getId());
+            relatedUserList = userService.getStaffID(ownerId);
+            relatedUserList.add(ownerId);
+        }
+        List<String> phoneList =  customerService.getAllPhoneNumbers(relatedUserList);
+        model.addAttribute("phoneList", phoneList);
         return "customer/createCustomer";
     }
 
@@ -146,37 +219,18 @@ public class CustomerController {
         String username = jwtUtils.extractUsername(token);
         Optional<Account> account = accountService.findByUsernameAndIsDeleteFalse(username);
         Optional<Users> user = userService.getUserProfile(account.get().getUserId());
+        model.addAttribute("user", user.get());
         model.addAttribute("account", account.get());
-        model.addAttribute("user", user.orElse(null));
         String role= jwtUtils.extractRole(token);
+
+
         List<String> listHiddenPage = new ArrayList<>();
         if(role.equals("STAFF")){
             listHiddenPage.add("listStaff");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
 
-        if (result.hasErrors() &&(!lastname.matches("^[a-zA-ZÀ-Ỹà-ỹ\\s]+$") || lastname.trim().isEmpty())) {
-            model.addAttribute("customerRequest", customerRequest);
-            model.addAttribute("lastnamemessage","Not be empty, not contain number and special characters");
-            return "customer/createCustomer"; // Quay lại form nếu có lỗi
-        }
 
-        if (result.hasErrors() ) {
-            model.addAttribute("customerRequest", customerRequest);
-            model.addAttribute("lastname", lastname);
-            return "customer/createCustomer"; // Quay lại form nếu có lỗi
-        }
-        if (!lastname.matches("^[a-zA-ZÀ-Ỹà-ỹ\\s]+$") || lastname.trim().isEmpty()) {
-            model.addAttribute("customerRequest", customerRequest);
-            model.addAttribute("lastnamemessage","Not be empty, not contain number and special characters");
-            return "customer/createCustomer"; // Quay lại form nếu có lỗi
-        }
-        if (customerService.isPhoneNumberExist(customerRequest.getPhone())) {
-            model.addAttribute("lastname", lastname);
-            model.addAttribute("customerRequest", customerRequest);
-            model.addAttribute("phoneError","Phone is not duplicatied in system");
-            return "customer/createCustomer"; // Quay lại form nếu có lỗi
-        }
 
 
         Long id = user.get().getId();
@@ -208,13 +262,23 @@ public class CustomerController {
                                      @CookieValue(value = "token", required = false) String token
     ) {
         Customer customer = customerService.getCustomer(id);
+        String pre_phone = customer.getPhone();
         System.out.println("ngay sinh la " + customer.getId());
         String username = jwtUtils.extractUsername(token);
         Optional<Account> optAccount = accountService.findByUsernameAndIsDeleteFalse(username);
         Account account = optAccount.orElse(null);
         Optional<Users> user = userService.getUserProfile(account.getUserId());
-        model.addAttribute("user", user.orElse(null));
+        model.addAttribute("user", user.get());
         String role= jwtUtils.extractRole(token);
+        List<Long> relatedUserList = new ArrayList<>();
+        if(role.equalsIgnoreCase("OWNER")){
+            relatedUserList = userService.getStaffID(user.get().getId());
+            relatedUserList.add(user.get().getId());
+        }else if(role.equalsIgnoreCase("STAFF")){
+            Long ownerId = userService.getOwnerID(user.get().getId());
+            relatedUserList = userService.getStaffID(ownerId);
+            relatedUserList.add(ownerId);
+        }
         List<String> listHiddenPage = new ArrayList<>();
         if(role.equals("STAFF")){
             listHiddenPage.add("listStaff");
@@ -222,7 +286,8 @@ public class CustomerController {
         model.addAttribute("listHiddenPage", listHiddenPage);
         model.addAttribute("account", account);
         model.addAttribute("customer", customer);
-        List<String> phoneList =  customerService.getAllPhoneNumbers();
+        model.addAttribute("pre_phone", pre_phone);
+        List<String> phoneList =  customerService.getAllPhoneNumbers(relatedUserList);
         model.addAttribute("phoneList", phoneList);
         return "customer/updateCustomer";
 
@@ -246,46 +311,10 @@ public class CustomerController {
         Optional<Account> optAccount = accountService.findByUsernameAndIsDeleteFalse(username);
         Account account = optAccount.orElse(null);
         Optional<Users> user = userService.getUserProfile(account.getUserId());
-        model.addAttribute("user", user.orElse(null));
+        model.addAttribute("user", user.get());
         model.addAttribute("account", account);
 
-
-        // Kiểm tra Name
-        if (name.trim().isEmpty()) {
-            redirectAttributes.addFlashAttribute("messageType", "fail");
-            redirectAttributes.addFlashAttribute("message", "Name cannot be empty.");
-            return "redirect:/customer/updateCustomer/" + id;
-        }
-
-        // Kiểm tra Address
-        if (address.trim().isEmpty()) {
-            redirectAttributes.addFlashAttribute("messageType", "fail");
-            redirectAttributes.addFlashAttribute("message", "Address cannot be empty.");
-            return "redirect:/customer/updateCustomer/" + id;
-        }
-
-        // Kiểm tra Date of Birth
-        LocalDate dateOfBirth;
-        try {
-            dateOfBirth = LocalDate.parse(dob);
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("messageType", "fail");
-            redirectAttributes.addFlashAttribute("message", "Invalid date format. Please use yyyy-MM-dd.");
-            return "redirect:/customer/updateCustomer/" + id;
-        }
-
-        if (dateOfBirth.isAfter(LocalDate.now())) {
-            redirectAttributes.addFlashAttribute("messageType", "fail");
-            redirectAttributes.addFlashAttribute("message", "Date of Birth cannot be a future date.");
-            return "redirect:/customer/updateCustomer/" + id;
-        }
-
-        // Kiểm tra Phone
-        if (!phone.matches("^[0-9]{10,11}$")) {
-            redirectAttributes.addFlashAttribute("messageType", "fail");
-            redirectAttributes.addFlashAttribute("message", "Phone number must be between 10 and 11 digits and contain only numbers.");
-            return "redirect:/customer/updateCustomer/" + id;
-        }
+        LocalDate dateOfBirth = LocalDate.parse(dob);
 
         // Tạo đối tượng Customer để cập nhật
         Customer customer = new Customer();

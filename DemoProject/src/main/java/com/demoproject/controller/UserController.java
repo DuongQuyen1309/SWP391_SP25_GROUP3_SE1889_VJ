@@ -66,7 +66,7 @@ public class UserController {
             listHiddenPage.add("listCustomer");
             listHiddenPage.add("listProduct");
             listHiddenPage.add("listWarehouse");
-            listHiddenPage.add("listInvoice");
+            listHiddenPage.add("listBill");
         }
         if(role.equals("ADMIN")||role.equals("STAFF")){
             listHiddenPage.add("listStaff");
@@ -96,7 +96,6 @@ public class UserController {
     ) {
 
         String username = jwtUtils.extractUsername(token);
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         Optional<Account> account= accountService.findByUsernameAndIsDeleteFalse(username);
         model.addAttribute("account", account.get());
         Optional<Users> userOpt= userService.getUserProfile(account.get().getUserId());
@@ -111,7 +110,7 @@ public class UserController {
             listHiddenPage.add("listCustomer");
             listHiddenPage.add("listproduct");
             listHiddenPage.add("listWarehouse");
-            listHiddenPage.add("listInvoice");
+            listHiddenPage.add("listBill");
         }
         if(role.equals("ADMIN")||role.equals("STAFF")){
             listHiddenPage.add("listStaff");
@@ -153,7 +152,7 @@ public class UserController {
             listHiddenPage.add("listCustomer");
             listHiddenPage.add("listProduct");
             listHiddenPage.add("listWarehouse");
-            listHiddenPage.add("listInvoice");
+            listHiddenPage.add("listBill");
         }
         if(role.equals("ADMIN")||role.equals("STAFF")){
             listHiddenPage.add("listStaff");
@@ -166,9 +165,7 @@ public class UserController {
     @PostMapping("/changepw")
     public String resetPassword(
             @CookieValue(value = "token", required = false) String token,
-            @RequestParam("oldPassword") String oldPassword,
             @RequestParam("newPassword") String newPassword,
-            @RequestParam("confirmPassword") String confirmPassword,
             Model model) {
         String username = jwtUtils.extractUsername(token);
         Optional<Account> optionalAccount = accountRepository.findByUsernameAndIsDeleteFalse(username);
@@ -186,7 +183,7 @@ public class UserController {
             listHiddenPage.add("listCustomer");
             listHiddenPage.add("listProduct");
             listHiddenPage.add("listWarehouse");
-            listHiddenPage.add("listInvoice");
+            listHiddenPage.add("listBill");
         }
         if(role.equals("ADMIN")||role.equals("STAFF")){
             listHiddenPage.add("listStaff");

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Rice Sales Management</title>
     <link rel="stylesheet" href="/css/base.css">
+    <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
     <style>
         /* Profile Form */
         .profile-form {
@@ -30,6 +31,11 @@
             border: 1px solid #ccc;
             border-radius: 5px;
             font-size: 16px;
+        }
+
+        .profile-form input:focus {
+            border-color: #e67e22;
+            box-shadow: 0 0 8px rgba(230, 126, 34, 0.5);
         }
 
         .profile-form button {
@@ -81,6 +87,69 @@
             }, 3000);  // Thời gian chờ 3 giây
         }
     </script>
+    <script th:inline="javascript">
+        var existingPhones = /*[[${phoneList}]]*/ [];
+        var nameRegex = /^[a-zA-ZÀ-Ỹà-ỹ\s]+$/;
+        var phoneRegex = /^[0-9]{10,11}$/;
+        var today = new Date().toISOString().split("T")[0];
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.querySelector(".profile-form");
+
+            const firstname = document.getElementById("firstname");
+            const lastname = document.getElementById("lastname");
+            const address = document.getElementById("address");
+            const dob = document.getElementById("dob");
+            const phone = document.getElementById("phone");
+            const errorMessage = document.createElement("p");
+            errorMessage.style.color = "red";
+            errorMessage.style.fontWeight = "bold";
+
+            form.addEventListener("submit", function (event) {
+                let errors = [];
+
+                // Kiểm tra name
+                if (firstname.value.trim() === "") {
+                    errors.push("FirstName is not empty");
+                } else if (!firstname.value.match(nameRegex)) {
+                    errors.push("FirstName must not contain numbers or special characters.");
+                }
+
+                if (lastname.value.trim() === "") {
+                    errors.push("LastName is not empty");
+                } else if (!lastname.value.match(nameRegex)) {
+                    errors.push("LastName must not contain numbers or special characters.");
+                }
+
+                // Kiểm tra Address
+                if (address.value.trim() === "") {
+                    errors.push("Address is not empty");
+                }
+                if (dob.value === "") {
+                    errors.push("Date of Birth cannot be empty.");
+                }
+                if (dob.value > today) {
+                    errors.push("Date of Birth cannot be a future date.");
+                }
+
+                // Kiểm tra phone
+                if (phone.value.trim() === "") {
+                    errors.push("Phone is not empty");
+                } else if (!phone.value.match(phoneRegex)) {
+                    errors.push("Phone number must be between 10 and 11 digits and contain only numbers.");
+                } else if(existingPhones.includes(phone.value)){
+                    errors.push("Phone is not duplicated");
+                }
+
+
+                // Nếu có lỗi, ngăn submit và hiển thị thông báo
+                if (errors.length > 0) {
+                    event.preventDefault();
+                    errorMessage.innerHTML = errors.join("<br>");
+                    form.insertBefore(errorMessage, form.querySelector("button"));
+                }
+            });
+        });
+    </script>
 </head>
 <body>
 
@@ -115,7 +184,7 @@
 
     <a href="/warehouse/listWarehouseZone" >Warehouse Management</a>
 
-    <a href="/listInvoice" >Invoice Management</a>
+    <a href="/bill/listBill" >Invoice Management</a>
 
 </div>
 
@@ -126,25 +195,24 @@
 
         <label for="firstname">First Name:</label>
         <input type="text" id="firstname" name="firstname" th:field="*{name}" >
-        <p style="color: red;" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></p>
+<!--        <p style="color: red;" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></p>-->
 
         <label for="lastname">Last Name:</label>
         <input type="text" id="lastname" name="lastname" th:value="${lastname}">
-        <p style="color:red;" th:if="${lastnamemessage != null and lastnamemessage != ''}" th:text="${lastnamemessage}"></p>
+<!--        <p style="color:red;" th:if="${lastnamemessage != null and lastnamemessage != ''}" th:text="${lastnamemessage}"></p>-->
 
 
         <label for="address">Address:</label>
         <input type="text" id="address" name="address" th:field="*{address}">
-        <p style="color: red;" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></p>
+<!--        <p style="color: red;" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></p>-->
 
         <label for="dob">Date of Birth:</label>
         <input type="date" id="dob" name="dob" th:value="${customerRequest.dob}">
-        <p style="color: red;" th:if="${#fields.hasErrors('dob')}" th:errors="*{dob}"></p>
+
 
         <label for="phone">Phone:</label>
         <input type="text" id="phone" name="phone" th:field="*{phone}">
-        <p style="color: red;" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></p>
-        <p style="color: red;" th:if="${phoneError != null}" th:text="${phoneError}"></p>
+
 
         <label for="gender">Gender:</label>
         <select name="gender" id="gender">

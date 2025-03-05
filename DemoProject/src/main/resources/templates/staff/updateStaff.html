@@ -5,6 +5,7 @@
     <title>Update Staff</title>
     <link rel="stylesheet" href="/css/base.css">
     <script src="/js/home.js"></script>
+    <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
     <style>
 
 
@@ -33,6 +34,11 @@
             border-radius: 5px;
             font-size: 16px;
             box-sizing: border-box;
+        }
+
+        .profile-form input:focus {
+            border-color: #e67e22;
+            box-shadow: 0 0 8px rgba(230, 126, 34, 0.5);
         }
 
         .profile-form button {
@@ -197,7 +203,7 @@
     <a href="/warehouse/listWarehouseZone">Warehouse Management</a>
 
 
-    <a href="/listInvoice" >Invoice Management</a>
+    <a href="/bill/listBill" >Invoice Management</a>
 </div>
 
 <!-- Content -->

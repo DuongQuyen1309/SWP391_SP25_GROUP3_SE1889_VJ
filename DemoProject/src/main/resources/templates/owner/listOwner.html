@@ -5,11 +5,12 @@
     <meta charset="UTF-8">
     <title>Rice Sales Management</title>
     <link rel="stylesheet" href="/css/base.css">
+    <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
 <style>
     .add-owner {
         position: absolute; /* Giữ vị trí cố định so với content */
         right: 20px; /* Sát mép phải của content */
-        top: 150px; /* Đẩy xuống dưới một chút */
+        top: 90px; /* Đẩy xuống dưới một chút */
         background-color: #d35400; /* Cam */
         color: white;
         font-size: 13px;
@@ -44,6 +45,34 @@
         margin: 0 10px;
     }
 
+    .form-search input:focus {
+        border-color: #e67e22;
+        box-shadow: 0 0 8px rgba(230, 126, 34, 0.5);
+    }
+    .twin-field {
+        background-color: #3c566e;
+    }
+
+    .twin-field input {
+        background-color: transparent; /* Giữ nền giống bảng */
+        border: 1px solid rgba(255, 255, 255, 0.3); /* Viền nhẹ */
+        transition: border 0.3s, background-color 0.3s;
+        color: #ffffff; /* Màu chữ trắng để nổi bật */
+        font-size: 14px;
+    }
+    /* Placeholder màu sáng để dễ nhìn thấy */
+    .twin-field input::placeholder {
+        color: rgba(255, 255, 255, 0.7); /* Màu chữ nhạt hơn để không lẫn với dữ liệu */
+        font-style: italic;
+    }
+
+    /* Hiệu ứng khi focus */
+    .twin-field input:focus {
+        outline: none;
+        background-color: rgba(255, 255, 255, 0.1); /* Làm nổi bật ô nhập */
+        border-color: #f39c12; /* Viền màu cam khi focus */
+        box-shadow: 0px 0px 5px rgba(243, 156, 18, 0.8); /* Hiệu ứng sáng nhẹ */
+    }
 </style>
     <script src="/js/home.js"></script>
     <script>
@@ -56,6 +85,49 @@
                 form.submit(); // Nếu người dùng xác nhận, tiếp tục submit form
             }
         }
+
+        function sortTable(columnIndex) {
+            var table = document.querySelector(".styled-table tbody");
+            var rows = Array.from(table.querySelectorAll("tr"));
+
+            var ascending = table.getAttribute("data-sort") !== "asc";
+            table.setAttribute("data-sort", ascending ? "asc" : "desc");
+
+            rows.sort((rowA, rowB) => {
+                var cellA = rowA.cells[columnIndex].textContent.trim().toLowerCase();
+                var cellB = rowB.cells[columnIndex].textContent.trim().toLowerCase();
+
+                if (!isNaN(cellA) && !isNaN(cellB)) { // Nếu là số, so sánh số
+                    return ascending ? cellA - cellB : cellB - cellA;
+                }
+
+                return ascending ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
+            });
+
+            table.innerHTML = ""; // Xóa nội dung cũ
+            rows.forEach(row => table.appendChild(row)); // Thêm lại các hàng đã sắp xếp
+        }
+
+        function filterOwner() {
+            let params = new URLSearchParams();
+            document.querySelectorAll('.filter-input').forEach(input => {
+                if (input.value.trim() !== '') { // Chỉ thêm tham số nếu có giá trị
+                    params.append(input.name, input.value);
+                }
+            });
+
+            window.location.href = '/account/listOwner' + '?' + params.toString();
+        }
+        document.addEventListener("DOMContentLoaded", function() {
+            let params = new URLSearchParams(window.location.search);
+            document.querySelectorAll('.filter-input').forEach(input => {
+                if (params.has(input.name)) {
+                    let value = params.get(input.name);
+                    input.value = value;
+                }
+            });
+        });
+
 
     </script>
 </head>
@@ -102,21 +174,38 @@
 
 <!-- List -->
 
-    <form action="/account/listOwner" method="get" style="margin-bottom: 20px;">
-        <input type="text" name="search" placeholder="Search owner by username or display name or email..."
-               th:value="${search}" style="width: 80%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
-        <button type="submit" style="padding: 10px; background-color: #2c3e50; color: white; border: none; border-radius: 5px;">Search</button>
-    </form>
+
 
     <table class="styled-table" style="margin-top: 70px">
         <thead>
         <tr>
-            <td>ID</td>
-            <td>Username</td>
-            <td>Display Name</td>
-            <td>Email</td>
-            <td>Full Name</td>
+            <th onclick="sortTable(0)">ID</th>
+            <th onclick="sortTable(1)">Username</th>
+            <th onclick="sortTable(2)">Display Name</th>
+            <th onclick="sortTable(3)">Email</th>
+            <th onclick="sortTable(4)">Full Name</th>
             <td>Action</td>
+        </tr>
+        <tr>
+            <td class="twin-field">
+                <input type="text" class="filter-input" name="idFrom" onchange="filterOwner()" style="width: 23px;">
+                <input type="text" class="filter-input" name="idTo" onchange="filterOwner()" style="width: 23px;">
+            </td>
+            <td class="twin-field">
+                <input type="text" class="filter-input" name="username" onchange="filterOwner()" style="width: 100px;">
+            </td>
+
+            <td class="twin-field">
+                <input type="text" class="filter-input" name="displayName" onchange="filterOwner()" style="width: 120px;">
+            </td>
+            <td class="twin-field">
+                <input type="text" class="filter-input" name="email" onchange="filterOwner()" style="width: 100%;">
+            </td>
+            <td class="twin-field">
+                <input type="text" class="filter-input" name="fullname" onchange="filterOwner()" style="width: 100px;">
+            </td>
+
+            <td class="twin-field"></td>
         </tr>
         </thead>
         <tbody>
@@ -146,11 +235,13 @@
     </table>
     <!-- Phân trang -->
     <div class="pagination">
-        <a th:if="${currentPage > 0}" th:href="@{/account/listOwner(page=${currentPage - 1}, size=5)}">Previous</a>
+        <a th:if="${currentPage > 0}" th:href="@{/account/listOwner(page=${currentPage - 1}, size=5,idFrom=${idFrom}, idTo=${idTo},
+       username=${username},displayName=${displayName},email=${email},name=${fullname})}">Previous</a>
 
         <span>Page <span th:text="${totalPages==0? currentPage:  currentPage + 1}"></span> of <span th:text="${totalPages }  "></span></span>
 
-        <a th:if="${currentPage + 1 < totalPages}" th:href="@{/account/listOwner(page=${currentPage + 1}, size=5)}">Next</a>
+        <a th:if="${currentPage + 1 < totalPages}" th:href="@{/account/listOwner(page=${currentPage + 1}, size=5,idFrom=${idFrom}, idTo=${idTo},
+       username=${username},displayName=${displayName},email=${email},name=${fullname})}">Next</a>
     </div>
 
 

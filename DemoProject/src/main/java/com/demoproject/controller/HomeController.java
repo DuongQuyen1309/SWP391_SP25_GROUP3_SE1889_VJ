@@ -68,6 +68,7 @@ public class HomeController {
         account.setEmail(email);
 
 
+
         // Lưu vào cơ sở dữ liệu
         accountService.createAccount(account);
 
@@ -91,7 +92,7 @@ public class HomeController {
             listHiddenPage.add("listCustomer");
             listHiddenPage.add("listProduct");
             listHiddenPage.add("listWarehouse");
-            listHiddenPage.add("listInvoice");
+            listHiddenPage.add("listBill");
         }
         if(role.equals("ADMIN")||role.equals("STAFF")){
             listHiddenPage.add("listStaff");
@@ -121,13 +122,10 @@ public class HomeController {
         return "user/resetpw";
     }
 
-    @GetMapping("/bill")
-    public String getBill(Model model) {
-        return "bill";
+
+    @GetMapping("/sell")
+    public String sell(){
+        return "createBill";
     }
 
-    @GetMapping("/billdetail")
-    public String getBilldetail(Model model) {
-        return "billdetail";
-    }
 }

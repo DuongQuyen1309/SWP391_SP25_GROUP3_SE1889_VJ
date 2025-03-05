@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Warehouse Zones</title>
   <link rel="stylesheet" href="/css/base.css">
+  <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
   <style>
     .add-zone {
       position: absolute; /* Giữ vị trí cố định so với content */
@@ -44,6 +45,11 @@
     .pagination span {
       font-size: 18px;
       margin: 0 10px;
+    }
+
+    .search-form input:focus {
+      border-color: #e67e22;
+      box-shadow: 0 0 8px rgba(230, 126, 34, 0.5);
     }
   </style>
   <script>
@@ -87,7 +93,7 @@
   <a href="/warehouse/listWarehouseZone">Warehouse Management</a>
 
 
-  <a href="/listInvoice">Invoice Management</a>
+  <a href="/bill/listBill">Invoice Management</a>
 </div>
 
 <!-- Content -->

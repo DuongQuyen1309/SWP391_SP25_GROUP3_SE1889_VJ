@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <title></title>
   <link rel="stylesheet" href="/css/base.css">
+  <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
   <style>
     .pagination {
       text-align: center;
@@ -28,6 +29,11 @@
     .pagination span {
       font-size: 18px;
       margin: 0 10px;
+    }
+
+    .form-search input:focus {
+      border-color: #e67e22;
+      box-shadow: 0 0 8px rgba(230, 126, 34, 0.5);
     }
   </style>
 
@@ -95,7 +101,7 @@
   <a href="/warehouse/listWarehouseZone" >Warehouse Management</a>
 
 
-  <a href="/listInvoice"  >Invoice Management</a>
+  <a href="/bill/listBill" >Invoice Management</a>
 
 </div>
 
@@ -105,7 +111,7 @@
 <div class="content" id="content">
 
   <!-- Modal Form -->
-  <button class="add-btn" onclick="createProductForm()">+</button>
+  <button class="add-btn" onclick="createProductForm()" th:style="${#lists.contains(listHiddenPage, 'createProduct')} ? 'display: none;' : ''">+</button>
   <div id="studentFormModal" class="modal">
     <div class="modal-content">
       <span class="close" onclick="closeForm()">x</span>
@@ -132,7 +138,7 @@
 
   <!-- List -->
   <h1>List of Products</h1>
-  <form th:action="@{/product/search}" method="get">
+  <form class="form-search" th:action="@{/product/search}" method="get">
     <label for="search"></label>
     <input
             style="height: 30px; width: 750px"

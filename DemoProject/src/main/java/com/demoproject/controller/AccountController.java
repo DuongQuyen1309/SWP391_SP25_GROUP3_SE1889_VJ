@@ -7,6 +7,9 @@ import com.demoproject.jwt.JwtUtils;
 import com.demoproject.service.AccountService;
 import com.demoproject.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -45,33 +48,86 @@ public class AccountController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
             @RequestParam(required = false, name = "search") String search,
+            @RequestParam(required = false) String idFrom,
+            @RequestParam(required = false) String idTo,
+            @RequestParam(required = false) String username,
+            @RequestParam(required = false) String displayName,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String fullname,
             RedirectAttributes redirectAttributes) {
 
         // ✅ Lấy thông tin người dùng từ token
-
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
         Account account = accountService.getAccountFromToken(token).orElse(null);
         Optional<Users> user = userService.getUserProfile(account.getUserId());
+        model.addAttribute("account", account);
+        model.addAttribute("user", user.orElse(null));
 
 
 
         // ✅ Gọi phương thức tìm kiếm nếu có từ khóa, ngược lại lấy toàn bộ danh sách Owner
         Page<Map<String, Object>> accountPage;
-        if (search != null && !search.isEmpty()) {
-            accountPage = accountService.searchOwnerAccounts(search, page, size);
-        } else {
-            accountPage = accountService.getOwnerAccounts(page, size);
+
+        if ((idFrom != null && !idFrom.isEmpty() && !idFrom.matches("\\d+")) ||
+                (idTo != null && !idTo.isEmpty() && !idTo.matches("\\d+"))) {
+
+            model.addAttribute("errorMessage", "Id, Phone fields should be positive number. Money field should be negative number");
+            accountPage = Page.empty();
+            model.addAttribute("accounts", accountPage.getContent());
+
+            model.addAttribute("idFrom", idFrom);
+            model.addAttribute("idTo", idTo);
+            model.addAttribute("username", username);
+            model.addAttribute("displayName", displayName);
+            model.addAttribute("email", email);
+            model.addAttribute("name", fullname);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", accountPage.getTotalPages());
+            model.addAttribute("size", size);
+            return "owner/listOwner";
+        }
+        else {
+            if ((idFrom != null && !idFrom.isEmpty()) || (idTo != null && !idTo.isEmpty())
+                    || (username != null && !username.isEmpty()) || (username != null)
+                    || (displayName != null) || (displayName != null && !displayName.isEmpty())
+                    || (email != null && !email.isEmpty()) || (email != null && !email.isEmpty())
+                    || (fullname != null && !fullname.isEmpty()) || (fullname != null && !fullname.isEmpty())) {
+
+
+                Long req_idFrom = (idFrom != null && !idFrom.isBlank() && idFrom.matches("\\d+")) ? Long.valueOf(idFrom) : null;
+                Long req_idTo = (idTo != null && !idTo.isBlank() && idTo.matches("\\d+")) ? Long.valueOf(idTo) : null;
+
+                String req_username = (username == null || username.isEmpty())? null: username;
+                String req_displayName = (displayName == null || displayName.isEmpty())? null: displayName;
+                String req_email = (email == null || email.isEmpty())? null: email;
+                String req_fullname = (fullname == null || fullname.isEmpty()) ? null : fullname;
+
+                accountPage = accountService.searchOwnerByAttribute(req_idFrom,req_idTo,req_username,req_displayName,req_email,req_fullname,pageable);
+            } else {
+                accountPage = accountService.searchOwnerAll( pageable);
+            }
+
+            model.addAttribute("accounts", accountPage.getContent());
+
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", accountPage.getTotalPages());
+            model.addAttribute("size", size);
+
+            model.addAttribute("idFrom", idFrom);
+            model.addAttribute("idTo", idTo);
+            model.addAttribute("username", username);
+            model.addAttribute("displayName", displayName);
+            model.addAttribute("email", email);
+            model.addAttribute("name", fullname);
+
+
+            return "owner/listOwner";
         }
 
-        // ✅ Đưa dữ liệu vào model để Thymeleaf hiển thị
-        model.addAttribute("accounts", accountPage.getContent());
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", accountPage.getTotalPages());
-        model.addAttribute("search", search);
 
-        model.addAttribute("account", account);
-        model.addAttribute("user", user.orElse(null));
 
-        return "owner/listOwner";
+
+
     }
 
 
@@ -259,28 +315,17 @@ public class AccountController {
             model.addAttribute("error", "Unauthorized: Missing authentication token.");
             return "staff/createStaff"; // Quay lại trang createStaff nếu có lỗi
         }
+        Account accountOwner = accountService.getAccountFromToken(token).orElse(null);
 
-        String usernameAdmin = jwtUtils.extractUsername(token);
-        Optional<Account> adAccount = accountRepository.findByUsernameAndIsDeleteFalse(usernameAdmin);
 
-        if (adAccount.isEmpty()) {
-            model.addAttribute("error", "Unauthorized: Admin account not found.");
-            return "staff/createStaff"; // Quay lại trang createStaff nếu có lỗi
-        }
-
-        // Kiểm tra username có bị trùng không
-        Optional<Account> existingAccount = accountRepository.findByUsernameAndIsDeleteFalse(username);
-        if (existingAccount.isPresent()) {
-            model.addAttribute("error", "Username already exists.");
-            return "staff/createStaff"; // Quay lại trang createStaff nếu có lỗi
-        }
 
         Account account = new Account();
         account.setUsername(username);
         account.setPassword(passwordEncoder.encode(password));
         account.setDisplayName(displayname);
         account.setEmail(email);
-        account.setCreatedBy(adAccount.get().getId());
+        account.setCreatedBy(accountOwner.getId());
+        account.setStoreId(accountOwner.getStoreId());
 
 
 

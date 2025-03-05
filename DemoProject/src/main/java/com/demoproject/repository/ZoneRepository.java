@@ -21,7 +21,7 @@ public interface ZoneRepository extends JpaRepository<Zone, Long> {
 
     Optional<Zone> findById(Long id);
 
-    List<Zone> findByWarehouseName(String warehouseName);
+
 
     void deleteById(int id);
 
@@ -30,10 +30,12 @@ public interface ZoneRepository extends JpaRepository<Zone, Long> {
     Optional<Zone> findByName(String name);
 
     boolean existsByNameAndIdNot(String name, Long id);
-    @Query("SELECT z FROM Zone z WHERE z.warehouseName = :warehouseName")
-    Page<Zone> findAllByWarehouseName(String warehouseName, Pageable pageable);
-    @Query("SELECT z FROM Zone z WHERE z.warehouseName = :warehouseName AND LOWER(z.name) LIKE LOWER(CONCAT('%', :name, '%'))")
-    Page<Zone> findByNameAndWarehouse(String name, String warehouseName, Pageable pageable);
+
+
+    @Query("SELECT z FROM Zone z WHERE z.storeId = :storeID")
+    Page<Zone> findAllByStoreId(Long storeId, Pageable pageable);
+    @Query("SELECT z FROM Zone z WHERE z.storeId = :storeID AND LOWER(z.name) LIKE LOWER(CONCAT('%', :name, '%'))")
+    Page<Zone> findByNameAndStoreId(String name, Long storeId, Pageable pageable);
 
 
 

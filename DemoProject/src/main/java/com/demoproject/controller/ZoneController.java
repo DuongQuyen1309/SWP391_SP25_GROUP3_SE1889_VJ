@@ -53,11 +53,10 @@ public class ZoneController {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
         Page<Zone> zonePage;
         // Lấy thông tin người dùng từ token
-        String username = jwtUtils.extractUsername(token);
-        Optional<Account> account = accountService.findByUsernameAndIsDeleteFalse(username);
-        Optional<Users> user = userService.getUserProfile(account.get().getUserId());
-        model.addAttribute("user", user.get());
-        model.addAttribute("account", account.get());
+        Account account = accountService.getAccountFromToken(token).orElse(null);
+        Users user = userService.getUserProfile(account.getUserId()).orElse(null);
+        model.addAttribute("user", user);
+        model.addAttribute("account", account);
         String role= jwtUtils.extractRole(token);
         List<String> listHiddenPage = new ArrayList<>();
         listHiddenPage.add("");
@@ -66,15 +65,12 @@ public class ZoneController {
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
 
-        if ((user.get().getWarehouseName() == null)&&(role.equals("OWNER"))) {
-            redirectAttributes.addFlashAttribute("errorMessage", "You don't have any warehouse");
-            return "redirect:/warehouse";
-        }
+
 
         if (search.isEmpty()) {
-            zonePage = this.zoneService.getAllZonesByWarehouseName(pageable, user.get().getWarehouseName());
+            zonePage = this.zoneService.getAllZonesByStoreID(pageable,user.getStoreId());
         } else {
-            zonePage = this.zoneService.getZonesByName(search, user.get().getWarehouseName(), pageable);
+            zonePage = this.zoneService.getZonesByName(search,user.getStoreId(), pageable);
         }
         model.addAttribute("zonePage", zonePage);
         model.addAttribute("search", search);
@@ -104,12 +100,7 @@ public class ZoneController {
                                  @CookieValue(value = "token", required = false) String token,
                                  RedirectAttributes redirectAttributes) {
         try {
-            if (!zoneService.existsById(newZone.getProductId())) {
-                model.addAttribute("errorMessage", "Product ID does not exist");
-                model.addAttribute("newZone", newZone);
 
-                return "warehouse/create";
-            }
             String role= jwtUtils.extractRole(token);
             List<String> listHiddenPage = new ArrayList<>();
             listHiddenPage.add("");
@@ -119,8 +110,8 @@ public class ZoneController {
             model.addAttribute("listHiddenPage", listHiddenPage);
             String username = jwtUtils.extractUsername(token);
             Optional<Account> account = accountService.findByUsernameAndIsDeleteFalse(username);
-            Optional<Users> user = userService.getUserProfile(account.get().getUserId());
-            newZone.setWarehouseName(user.get().getWarehouseName());
+            Users user = userService.getUserProfile(account.get().getUserId()).orElse(null);
+            newZone.setStoreId(user.getStoreId());
             model.addAttribute("newZone", newZone);
             newZone.setCreatedAt(LocalDate.now());
             this.zoneService.handleSaveZone(newZone);
@@ -149,8 +140,9 @@ public class ZoneController {
         // DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd
         // HH:mm:ss");
         // String formattedCreatedAt = zone.getCreatedAt().format(formatter);
-        model.addAttribute("zone", List.of(zone));
-        // model.addAttribute("formattedCreatedAt", formattedCreatedAt);
+        model.addAttribute("zone", zone);
+
+
         model.addAttribute("id", id);
         return "warehouse/zoneDetail";
 
@@ -199,15 +191,9 @@ public class ZoneController {
         }
         // update zone with new detail
         currentZone.setName(zone.getName());
-        currentZone.setProductId(zone.getProductId());
-        currentZone.setAmount(zone.getAmount());
         // Try saving the updated zone
         try {
-            if (!zoneService.existsById(currentZone.getProductId())) {
-                model.addAttribute("errorMessage", "Product ID does not exist");
-                model.addAttribute("currentZone", zone);
-                return "warehouse/updateZone";
-            }
+
             this.zoneService.updateZone(currentZone);
             this.zoneService.handleSaveZone(currentZone);
         } catch (IllegalArgumentException e) {

@@ -7,6 +7,7 @@
   <title>Update Zone</title>
 
   <link rel="stylesheet" href="/css/base.css">
+  <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
   <script>
     $(document).ready(function () {
       const form = $('#update-zone-form');
@@ -68,6 +69,11 @@
       font-size: 16px;
     }
 
+    .update-form input:focus {
+      border-color: #e67e22;
+      box-shadow: 0 0 8px rgba(230, 126, 34, 0.5);
+    }
+
     .update-form button {
       background-color: #2c3e50;
       color: white;
@@ -119,7 +125,7 @@
   <a href="/product/listProduct">Rice Management</a>
   <a href="/customer/listCustomer">Customer Management</a>
   <a href="/warehouse/listWarehouseZone">Warehouse Management</a>
-  <a href="/listInvoice">Invoice Management</a>
+  <a href="/bill/listBill">Invoice Management</a>
 </div>
 
 <!-- Content -->

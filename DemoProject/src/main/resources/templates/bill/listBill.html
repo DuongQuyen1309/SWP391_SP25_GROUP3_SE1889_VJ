@@ -4,14 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Customer Bill List</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background: #f4f4f4;
-        }
+
         .container {
             max-width: 1000px;
             margin: auto;
@@ -34,19 +30,6 @@
             border: 1px solid #ccc;
             border-radius: 5px;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 10px;
-            border: 1px solid #ddd;
-            text-align: center;
-        }
-        th {
-            background: #2c3e50;
-            color: white;
-        }
         .btn {
             padding: 5px 10px;
             border: none;
@@ -65,11 +48,65 @@
             background: #e67e22;
             color: white;
         }
+
+        .add-bill {
+            position: absolute; /* Giữ vị trí cố định so với content */
+            right: 20px; /* Sát mép phải của content */
+            top: 20px; /* Đẩy xuống dưới một chút */
+            background-color: #d35400; /* Cam */
+            color: white;
+            font-size: 13px;
+            border: none;
+            width: 150px;
+            height: 40px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
     </style>
+    <script src="/js/home.js"></script>
+    <script>
+        function callPage() {
+            window.location.href ="/bill/createBill";
+        }
+    </script>
 </head>
 <body>
-<div class="container">
-    <h2>Customer Bills</h2>
+
+
+<!-- Header -->
+<div class="header">
+    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+    <h2><a href="/home">RSMS</a></h2>
+    <div class="user-info">
+        <img  th:src="${user.avatar}" alt="User Avatar" class="user-avatar"/>
+        <div class="dropdown">
+            <span th:text="${account.displayName}" class="user-name" onclick="toggleDropdown()"> ▼</span>
+            <div id="dropdown-menu" class="dropdown-content">
+                <a href="/user/userprofile">👤 View Profile</a>
+                <a href="/user/changepw" id="changepw">🔑 Change password</a>
+                <a href="/static#" id="logout">🚪 Logout</a>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar" style="height: 100%;">
+    <h2>Feature</h2>
+    <a href="/user/userprofile">Profile</a>
+    <a href="/account/listStaff" th:style="${#lists.contains(listHiddenPage, 'listStaff')} ? 'display: none;' : ''">Staff Account Management</a>
+    <a href="/product/listProduct">Rice Management</a>
+    <a href="/customer/listCustomer">Customer Management</a>
+    <a href="/warehouse/listWarehouseZone">Warehouse Management</a>
+    <a href="/bill/listBill">Invoice Management</a>
+</div>
+
+<div class="content">
+    <h2>List of Customer Bills</h2>
+
+    <button class="add-bill" onclick="callPage()">Create New Bill</button>
     <div class="filter-bar">
         <input type="text" id="search" placeholder="Search by Invoice ID or Customer">
         <select id="status">
@@ -79,7 +116,7 @@
         </select>
         <input type="date" id="date-filter">
     </div>
-    <table>
+    <table class="styled-table">
         <thead>
         <tr>
             <th>Invoice ID</th>
@@ -102,9 +139,10 @@
             <td>$50.00</td>
             <td style="color: orange;">Debt</td>
             <td>
-                <button class="btn btn-view">View</button>
-                <button class="btn btn-download">Download</button>
-                <button class="btn btn-print">Print</button>
+                    <form th:action="@{/bill/billDetail}" method="get" >
+                        <button type="submit" style="background-color: #06999c">View</button>
+                    </form>
+
             </td>
         </tr>
         <tr>
@@ -116,9 +154,9 @@
             <td>$0.00</td>
             <td style="color: green;">No Debt</td>
             <td>
-                <button class="btn btn-view">View</button>
-                <button class="btn btn-download">Download</button>
-                <button class="btn btn-print">Print</button>
+                <form th:action="@{/bill/billDetail}" method="get" >
+                    <button type="submit" style="background-color: #06999c">View</button>
+                </form>
             </td>
         </tr>
         <tr>
@@ -130,9 +168,9 @@
             <td>$150.00</td>
             <td style="color: red;">Debt</td>
             <td>
-                <button class="btn btn-view">View</button>
-                <button class="btn btn-download">Download</button>
-                <button class="btn btn-print">Print</button>
+                <form th:action="@{/bill/billDetail}" method="get" >
+                    <button type="submit" style="background-color: #06999c">View</button>
+                </form>
             </td>
         </tr>
         </tbody>

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Forgot Password</title>
   <link rel="stylesheet" href="/css/login.css">
+  <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       const form = document.querySelector(".resetRequestForm");
@@ -12,6 +13,17 @@
       const emailInput = document.getElementById("email");
       errorContainer.style.color = "red";
       errorContainer.style.fontWeight = "bold";
+
+      async function checkEmailExists(email) {
+        try {
+          let response = await fetch(`/api/check-email?email=${email}`);
+          let data = await response.json();
+          return data.exists;
+        } catch (error) {
+          console.error("Error when checking email:", error);
+          return false;
+        }
+      }
       form.addEventListener("submit", async function (event) {
         event.preventDefault();
         let errors = [];
@@ -23,6 +35,11 @@
           errors.push("Please includes '@' in email.");
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value)) {
           errors.push("Email is not in the correct format, please enter the correct format (for example: example@gmail.com)");
+        } else {
+          let isEmailExists = await checkEmailExists(emailInput.value);
+          if (!isEmailExists) {
+            errors.push("Email does not exist");
+          }
         }
 
         if (errors.length > 0) {

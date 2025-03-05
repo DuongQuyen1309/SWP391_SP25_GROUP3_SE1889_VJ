@@ -37,6 +37,9 @@ public class Customer {
     @Column(name = "ctype")
     private String ctype;
 
+    @Column(name = "store_id")
+    private Long storeId;
+
     public Customer() {
     }
 
@@ -163,5 +166,13 @@ public class Customer {
 
     public void setCtype(String ctype) {
         this.ctype = ctype;
+    }
+
+    public Long getStoreId() {
+        return storeId;
+    }
+
+    public void setStoreId(Long storeId) {
+        this.storeId = storeId;
     }
 }

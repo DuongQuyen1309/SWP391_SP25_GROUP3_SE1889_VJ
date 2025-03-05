@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Rice Sales Management</title>
     <link rel="stylesheet" href="/css/base.css">
+    <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
     <style>
         .reset-form {
             background-color: white;
@@ -41,6 +42,12 @@
         .reset-form button:hover {
             background-color: #1a252f;
         }
+
+        .reset-form input:focus {
+            border-color: #e67e22;
+            box-shadow: 0 0 8px rgba(230, 126, 34, 0.5);
+        }
+
     </style>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
@@ -56,13 +63,13 @@
                 event.preventDefault();
                 let errors = [];
                 if (!newPassword.value) {
-                    errors.push("New password không được để trống.");
+                    errors.push("New password must be not empty.");
                 }
                 if (!confirmPassword.value) {
-                    errors.push("Confirm password không được để trống.");
+                    errors.push("Confirm password must be not empty.");
                 }
                 if (newPassword.value !== confirmPassword.value) {
-                    errors.push("❌ Mật khẩu nhập lại không khớp!");
+                    errors.push("Confirm password and new password must be similar.");
                 }
                 if (errors.length > 0) {
                     errorMessage.innerHTML = errors.join("<br>");
@@ -107,7 +114,7 @@
 
     <a href="/warehouse/listWarehouseZone" >Warehouse Management</a>
 
-    <a href="/listInvoice">Invoice Management</a>
+    <a href="/bill/listBill" >Invoice Management</a>
 
 </div>
 

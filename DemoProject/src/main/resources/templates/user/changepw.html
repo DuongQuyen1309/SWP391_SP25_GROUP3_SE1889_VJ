@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Rice Sales Management</title>
     <link rel="stylesheet" href="/css/base.css">
+    <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
     <style>
         .changepw-form {
             background-color: white;
@@ -45,12 +46,22 @@
         .changepw-form button:hover {
             background-color: #1a252f;
         }
+
+        .changepw-form input:focus {
+            border-color: #e67e22;
+            box-shadow: 0 0 8px rgba(230, 126, 34, 0.5);
+        }
     </style>
     <script src="/js/home.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const form = document.querySelector(".changepw-form");
             const usernameInput = document.getElementById("username");
+            let username = document.getElementById("username");
+
+            // Đảm bảo input luôn bị vô hiệu hóa
+            username.disabled = true;
+
             const oldPasswordInput = document.getElementById("oldPassword");
             const newPasswordInput = document.getElementById("newPassword");
             const confirmPasswordInput = document.getElementById("confirmPassword");
@@ -173,7 +184,7 @@
 
     <a href="/warehouse/listWarehouseZone" th:style="${#lists.contains(listHiddenPage, 'listWarehouse')} ? 'display: none;' : ''" >Warehouse Management</a>
 
-    <a href="/listInvoice" th:style="${#lists.contains(listHiddenPage, 'listInvoice')} ? 'display: none;' : ''" >Invoice Management </a>
+    <a href="/bill/listBill" th:style="${#lists.contains(listHiddenPage, 'listBill')} ? 'display: none;' : ''" >Invoice Management </a>
 
 
 </div>
@@ -187,7 +198,8 @@
     <form class="changepw-form" action="/user/changepw" method="POST">
 
         <label for="username">Username:</label>
-        <input type="text" id="username" name="username" th:value="${account.username}" disabled>
+        <input type="text" id="username" name="username" th:value="${account.username}" >
+
 
         <label for="oldPassword">Old Password:</label>
         <input type="password" id="oldPassword" name="oldPassword" >
