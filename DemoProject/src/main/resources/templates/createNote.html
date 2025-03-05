@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Rice Sales Management</title>
+    <link rel="stylesheet" href="/css/list.css">
+    <style>
+        /* Chia nội dung thành 2 phần */
+        .container {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        /* Phần bên trái: Form nhập Note */
+        .note-section {
+            flex: 1;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Phần bên phải: Thông tin khách hàng */
+        .customer-section {
+            flex: 1;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .profile-form label {
+            font-size: 16px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .profile-form input, select {
+            width: 90%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .profile-form button {
+            background-color: #2c3e50;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .profile-form button:hover {
+            background-color: #1a252f;
+        }
+
+    </style>
+    <script src="/js/home.js"></script>
+<!--    <script>-->
+<!--        function confirmUpdate(event, form) {-->
+<!--            event.preventDefault(); // Ngăn form submit ngay lập tức-->
+<!--            if (confirm("Are you sure to update customer?")) {-->
+<!--                form.submit(); // Nếu người dùng xác nhận, tiếp tục submit form-->
+<!--            }-->
+<!--        }-->
+<!--    </script>-->
+    <script>
+        function formatNumber(input) {
+            // Lấy giá trị từ input và loại bỏ dấu phẩy
+            let value = input.value.replace(/,/g, '');
+
+            // Kiểm tra xem có phải số hợp lệ không
+            if (!isNaN(value) && value !== "") {
+                // Cập nhật input với giá trị có dấu phẩy (format số)
+                input.value = Number(value).toLocaleString('en-US');
+
+                // Hiển thị cách đọc số bằng chữ
+                document.getElementById("numberInWords").innerText = numberToWords(value) + " VND";
+            } else {
+                document.getElementById("numberInWords").innerText = "";
+            }
+        }
+
+        function numberToWords(num) {
+            const units = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
+            const teens = ["Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+            const tens = ["", "Ten", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+            const thousands = ["", "Thousand", "Million", "Billion"];
+
+            if (num == 0) return "Zero";
+            let words = "";
+            let numStr = num.toString();
+            let numArr = [];
+
+            // Chia số thành nhóm ba chữ số
+            while (numStr.length > 0) {
+                numArr.unshift(numStr.slice(-3));
+                numStr = numStr.slice(0, -3);
+            }
+
+            numArr.forEach((part, index) => {
+                if (part != "000") {
+                    let word = "";
+                    let n = parseInt(part);
+
+                    if (n >= 100) {
+                        word += units[Math.floor(n / 100)] + " Hundred ";
+                        n %= 100;
+                    }
+
+                    if (n >= 11 && n <= 19) {
+                        word += teens[n - 11] + " ";
+                    } else {
+                        word += tens[Math.floor(n / 10)] + " ";
+                        word += units[n % 10] + " ";
+                    }
+
+                    if (thousands[numArr.length - 1 - index]) {
+                        word += thousands[numArr.length - 1 - index] + " ";
+                    }
+
+                    words += word;
+                }
+            });
+
+            return words.trim();
+        }
+    </script>
+    <script>
+        function callPage() {
+            window.location.href ="/customer/createCustomer";
+        }
+        function showCreatedSuccess() {
+            alert("You are successfully created!");
+        }
+    </script>
+    <script type="text/javascript">
+        function showMessage(messageType, message) {
+            if (message && messageType) {
+                alert(message);
+                // Điều hướng về trang listCustomer sau 3 giây
+                setTimeout(function () {
+                    window.location.href = "/customer/listCustomer";
+                });
+                // Hiển thị thông báo bằng alert
+            }
+        }
+    </script>
+    <script th:inline="javascript">
+        var existingPhones = /*[[${phoneList}]]*/ [];
+        var nameRegex = /^[a-zA-ZÀ-Ỹà-ỹ\s]+$/;
+        var phoneRegex = /^[0-9]{10,11}$/;
+        var moneyRegex = /^[0-9]+$/;
+        var today = new Date().toISOString().split("T")[0];
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.querySelector(".profile-form");
+
+            const notename = document.getElementById("notename");
+            const money = document.getElementById("money");
+            const errorMessage = document.createElement("p");
+            errorMessage.style.color = "red";
+            errorMessage.style.fontWeight = "bold";
+
+            form.addEventListener("submit", function (event) {
+                let value = money.value.replace(/,/g, '');
+                let errors = [];
+                money.value = money.value.replace(/,/g, '');
+                if (notename.value.trim() === "") {
+                    errors.push("Note name is not empty");
+                }
+
+                if (money.value.trim() === "") {
+                    errors.push("Money is not empty");
+                } else if (!/^\d+$/.test(value)) {
+                    errors.push("Money only contain number.");
+                }
+
+                // Nếu có lỗi, ngăn submit và hiển thị thông báo
+                if (errors.length > 0) {
+                    event.preventDefault();
+                    errorMessage.innerHTML = errors.join("<br>");
+                    form.insertBefore(errorMessage, form.querySelector("button"));
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+    <h2><a href="/home">RSMS</a></h2>
+    <div class="user-info">
+        <img src="/images/account.jpg" alt="User Avatar" class="user-avatar"/>
+        <div class="dropdown">
+            <span th:text="${account.displayName}" class="user-name" onclick="toggleDropdown()"> ▼</span>
+            <div id="dropdown-menu" class="dropdown-content">
+                <a href="/user/userprofile">👤 View Profile</a>
+                <a href="/#" id="logout">🚪 Logout</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+
+    <h2>Feature</h2>
+    <a href="/user/userprofile" >Profile</a>
+    <a href="/account/listStaff" th:style="${#lists.contains(listHiddenPage, 'listStaff')} ? 'display: none;' : ''">Staff Account Management</a>
+
+
+    <a href="/product/listProduct" >Rice Management</a>
+
+    <a href="/customer/listCustomer" >Customer Management</a>
+
+    <a href="/warehouse/listWarehouseZone" >WarehouseZone Management</a>
+
+
+    <a href="/listInvoice" >Invoice Management</a>
+
+</div>
+
+
+<!-- Content -->
+<!-- Content -->
+<div class="content" id="content">
+    <h1>Information about Note</h1>
+
+    <div class="container">
+        <!-- Phần bên trái: Form tạo Note -->
+        <aside class="note-section">
+            <h3>Create Note</h3>
+            <form class="profile-form" action="/note/createNote" method="POST">
+                <input type="hidden" name="customerID" th:value="${customer.id}"/>
+                <label for="notename">Note name:</label>
+                <input type="text" id="notename" name="notename">
+
+                <label for="kindOfNote">Note Type:</label>
+                <select id="kindOfNote" name="kindOfNote">
+                    <option value="true">Debit</option>
+                    <option value="false">Pay off debt</option>
+                </select>
+
+                <label for="money">Money:</label>
+                <input type="text" id="money" name="money" oninput="formatNumber(this)">
+                <p id="numberInWords" style="font-style: italic; color: #555;"></p>
+                <p style="color: red;" th:if="${error}" th:text="${error}"></p>
+                <button type="submit">Create Note</button>
+            </form>
+        </aside>
+
+        <!-- Phần bên phải: Thông tin khách hàng -->
+        <aside class="customer-section">
+            <h3>Customer Information</h3>
+            <p><strong>Name:</strong> <span th:text="${customer.name}"></span></p>
+            <p><strong>Phone:</strong> <span th:text="${customer.phone}"></span></p>
+            <p><strong>Address:</strong> <span th:text="${customer.address}"></span></p>
+        </aside>
+    </div>
+</div>
+</div>
+<footer>
+    &copy; 2025 Rice Sales Management. All Rights Reserved.
+</footer>
+
+</body>
+</html>
+

@@ -1,50 +1,33 @@
 package com.demoproject.service;
 
+import com.demoproject.entity.Note;
 import com.demoproject.repository.NoteRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
+@Service
 public class NoteService {
-
-    private NoteRepository noteRepository; // Lỗi: Field injection, nên dùng Constructor injection
-    private String defaultNote = "Default Note"; // Lỗi: Biến instance không được sử dụng
-
-    public void addNote(String note) {
-        if (note == "") {  // Lỗi: So sánh String bằng '==', nên dùng .equals()
-            System.out.println("Note is empty");
-        }
+    @Autowired
+    private final NoteRepository noteRepository;
+    public NoteService(NoteRepository noteRepository) {
+        this.noteRepository = noteRepository;
     }
 
-    public void processNotes(List<String> notes) {
-        for (int i = 0; i < notes.size(); i--) {  // Lỗi: Vòng lặp vô tận do i giảm dần
-            System.out.println("Processing: " + notes.get(i));
-        }
+    public Page<Note> getNotes(Long id, List<Long> relatedUserList,Pageable pageable) {
+        return noteRepository.findAllNote(id, relatedUserList, pageable);
     }
-
-    public void logSensitiveData() {
-        String password = "superSecret123"; // Lỗi: Hardcoded password
-        System.out.println("Logging password: " + password);
+    public Page<Note> searchNoteByAttribute(Long id, List<Long> relatedUserList, Long idFrom, Long idTo, Boolean kindOfNote, LocalDateTime createdDateFrom, LocalDateTime createdDateTo, String noteSearch,
+                                            Integer moneyFrom, Integer moneyTo, Pageable pageable) { //lưu ý lại chỗ int và Integer vi dang o 2 doi tuong khac nhau
+        return noteRepository.findNoteByAttribute(id, relatedUserList,idFrom, idTo,kindOfNote,createdDateFrom,createdDateTo,noteSearch,
+                moneyFrom,moneyTo, pageable);
     }
-
-    public void unusedMethod() {  // Lỗi: Phương thức không được sử dụng
-        System.out.println("This method is never called.");
-    }
-
-    public void emptyCatchBlock() {
-        try {
-            int result = 10 / 0;
-        } catch (Exception e) {
-            // Lỗi: Bắt ngoại lệ nhưng không xử lý hoặc log
-        }
-    }
-
-    public void infiniteRecursion() {
-        infiniteRecursion(); // Lỗi: Đệ quy vô tận có thể gây StackOverflowError
-    }
-
-    public void duplicatedStringLiterals() {
-        System.out.println("Error: Note not found");
-        System.out.println("Error: Note not found");  // Lỗi: Trùng lặp literal
-        System.out.println("Error: Note not found");
+    public Page<Note> searchNoteAll(Long id, List<Long> relatedUserList,  Pageable pageable) { //lưu ý lại chỗ int và Integer vi dang o 2 doi tuong khac nhau
+        return noteRepository.findNoteAll(id, relatedUserList, pageable);
     }
 }

@@ -203,16 +203,6 @@
   </div>
   <!-- List -->
   <h1>List of Customer Information</h1>
-<!--  <form th:action="@{/customer/listCustomer}" method="get" class="search-form">-->
-<!--    <input type="text" name="search" th:value="${search}" placeholder="Search by name..." class="search-input">-->
-
-<!--    <select name="ctype" class="search-input">-->
-<!--      <option value="">&#45;&#45; Select Customer Type &#45;&#45;</option>-->
-<!--      <option th:each="type : ${customerTypes}" th:value="${type}" th:text="${type}" th:selected="${type == ctype}"></option>-->
-<!--    </select>-->
-
-<!--    <button type="submit" class="search-button">Search</button>-->
-<!--  </form>-->
   <div th:if="${errorMessage}" style="color: red; font-weight: bold;">
     <p th:text="${errorMessage}"></p>
   </div>

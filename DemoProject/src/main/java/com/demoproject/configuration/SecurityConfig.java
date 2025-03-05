@@ -49,7 +49,7 @@ public class SecurityConfig {
                         .requestMatchers("/account/listOwner").hasAuthority("ADMIN")
                         .requestMatchers(("/account/listStaff")).hasAuthority("OWNER")
                         .requestMatchers("/account/**").hasAnyAuthority("ADMIN", "OWNER")
-                        .requestMatchers("/product/**","/customer/**").hasAnyAuthority("STAFF", "OWNER")
+                        .requestMatchers("/product/**","/customer/**","/note/**").hasAnyAuthority("STAFF", "OWNER")
                         .anyRequest().authenticated()
                 )
                 .logout(logout -> logout
