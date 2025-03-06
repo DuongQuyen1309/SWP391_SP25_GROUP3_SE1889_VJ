@@ -38,8 +38,11 @@ public class Users {
     @Column(name = "isDelete")
     private Boolean isDelete = false;
 
-    @Column(name = "warehouse_name")
-    private String warehouseName;
+    @Column(name = "store_id")
+    private Long storeId;
+
+    @Column(name = "avatar")
+    private String avatar;
 
 
 
@@ -149,11 +152,21 @@ public class Users {
         isDelete = delete;
     }
 
-    public String getWarehouseName() {
-        return warehouseName;
+
+
+    public String getAvatar() {
+        return avatar;
     }
 
-    public void setWarehouseName(String warehouseName) {
-        this.warehouseName = warehouseName;
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+
+    public Long getStoreId() {
+        return storeId;
+    }
+
+    public void setStoreId(Long storeId) {
+        this.storeId = storeId;
     }
 }

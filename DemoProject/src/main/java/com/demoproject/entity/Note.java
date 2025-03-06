@@ -24,6 +24,8 @@ public class Note {
     private String note;
     @Column(name = "money")
     private int money;
+    @Column(name = "store_id")
+    private Long storeId;
 
     public Note() {
     }
@@ -97,5 +99,13 @@ public class Note {
 
     public void setMoney(int money) {
         this.money = money;
+    }
+
+    public Long getStoreId() {
+        return storeId;
+    }
+
+    public void setStoreId(Long storeId) {
+        this.storeId = storeId;
     }
 }

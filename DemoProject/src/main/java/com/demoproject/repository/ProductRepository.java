@@ -10,7 +10,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Repository
-public interface ProductRepository extends JpaRepository<Product, Integer> {
+public interface ProductRepository extends JpaRepository<Product, Long> {
 
 
 
@@ -20,4 +20,6 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     Page<Product> findByNameContaining(String name, Pageable pageable);
 
     Page<Product> findByDescriptionContaining(String name, Pageable pageable);
+
+    List<Product> findByNameContainingAndStoreId(String name, Long storeId);
 }

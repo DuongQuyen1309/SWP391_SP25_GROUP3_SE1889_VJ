@@ -22,27 +22,18 @@ public class Zone {
     private Long id;
     @Column(name = "NAME", length = 50)
     private String name;
-    @Column(name = "PRODUCT_ID", nullable = false)
-    private int productId;
-    @Column(name = "WAREHOUSE_NAME")
-    private String warehouseName;
-    @Column(name = "AMOUNT")
-    private int amount;
+
+    @Column(name = "STORE_ID")
+    private Long storeId;
+
     @Column(name = "CREATED_AT")
     private LocalDate createdAt;
     @Column(name = "CREATED_BY")
     private int createdBy;
-    public Zone() {
-    }
 
-    public Zone(Long id, String name, int productId, String warehouseName, int amount, LocalDate createdAt) {
-        this.id = id;
-        this.name = name;
-        this.productId = productId;
-        this.warehouseName = warehouseName;
-        this.amount = amount;
-        this.createdAt = createdAt;
-    }
+    @Column(name = "POSITION")
+    private String position;
+
 
     public Long getId() {
         return id;
@@ -60,29 +51,7 @@ public class Zone {
         this.name = name;
     }
 
-    public int getProductId() {
-        return productId;
-    }
 
-    public void setProductId(int productId) {
-        this.productId = productId;
-    }
-
-    public String getWarehouseName() {
-        return warehouseName;
-    }
-
-    public void setWarehouseName(String warehouseName) {
-        this.warehouseName = warehouseName;
-    }
-
-    public int getAmount() {
-        return amount;
-    }
-
-    public void setAmount(int amount) {
-        this.amount = amount;
-    }
 
     public LocalDate getCreatedAt() {
         return createdAt;
@@ -92,4 +61,27 @@ public class Zone {
         this.createdAt = createdAt;
     }
 
+    public Long getStoreId() {
+        return storeId;
+    }
+
+    public void setStoreId(Long storeId) {
+        this.storeId = storeId;
+    }
+
+    public int getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(int createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public String getPosition() {
+        return position;
+    }
+
+    public void setPosition(String position) {
+        this.position = position;
+    }
 }

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Rice Sales Management</title>
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
+    <!-- JavaScript -->
+    <script src="/js/home.js"></script>
+
+
+</head>
+<body>
+<!-- Header -->
+<div class="header">
+    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+    <h2><a href="/home">RSMS</a></h2>
+    <div class="user-info">
+        <img  th:src="${user.avatar}" alt="User Avatar" class="user-avatar"/>
+        <div class="dropdown">
+            <span th:text="${account.displayName}" class="user-name" onclick="toggleDropdown()"> ▼</span>
+            <div id="dropdown-menu" class="dropdown-content">
+                <a href="/user/userprofile">👤 View Profile</a>
+                <a href="/user/changepw" id="changepw">🔑 Change password</a>
+                <a href="/static#" id="logout">🚪 Logout</a>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+
+    <h2>Feature</h2>
+    <a href="/user/userprofile" >Profile</a>
+    <a href="/account/listOwner" th:style="${#lists.contains(listHiddenPage, 'listOwner')} ? 'display: none;' : ''" >Owner Account Management</a>
+
+    <a href="/account/listStaff" th:style="${#lists.contains(listHiddenPage, 'listStaff')} ? 'display: none;' : ''">Staff Account Management</a>
+
+    <a href="/product/listProduct" th:style="${#lists.contains(listHiddenPage, 'listProduct')} ? 'display: none;' : ''">Rice Management</a>
+
+    <a href="/customer/listCustomer" th:style="${#lists.contains(listHiddenPage, 'listCustomer')} ? 'display: none;' : ''">Customer Management</a>
+
+    <a href="/warehouse/listWarehouseZone" th:style="${#lists.contains(listHiddenPage, 'listWarehouse')} ? 'display: none;' : ''">Warehouse Management</a>
+
+
+    <a href="/bill/listBill" th:style="${#lists.contains(listHiddenPage, 'listBill')} ? 'display: none;' : ''">Invoice Management</a>
+
+</div>
+
+<!-- Content -->
+<div class="content" id="content"> <!-- Mặc định đẩy nội dung sang phải -->
+    <div class="intro-container">
+        <h1>Welcome to <span class="highlight">RSMS</span></h1>
+        <p class="intro-text">
+            Your trusted solution for effortless rice business management.
+        </p>
+        <div class="intro-features">
+            <div class="feature-item">
+                <h3>📦 Inventory Tracking</h3>
+                <p>Monitor stock levels and ensure efficient supply management</p>
+            </div>
+            <div class="feature-item">
+                <h3>🛠 Sales Assistance</h3>
+                <p>Empower sales staff with easy access to product information and customer details</p>
+            </div>
+            <div class="feature-item">
+                <h3>👥 Customer Management</h3>
+                <p>Engage with customers and streamline service processes</p>
+            </div>
+        </div>
+        <p class="intro-text">
+            <strong>Start today</strong> and enhance your rice business effortlessly!
+        </p>
+    </div>
+</div>
+
+
+<footer>
+    &copy; 2025 Rice Sales Management. All Rights Reserved.
+</footer>
+</body>
+</html>

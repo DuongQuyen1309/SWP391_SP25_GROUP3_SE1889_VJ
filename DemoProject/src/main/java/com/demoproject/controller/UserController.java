@@ -1,6 +1,5 @@
 package com.demoproject.controller;
 
-import com.demoproject.dto.UsersDTO;
 import com.demoproject.entity.Account;
 import com.demoproject.entity.Users;
 import com.demoproject.jwt.JwtUtils;
@@ -8,13 +7,11 @@ import com.demoproject.repository.AccountRepository;
 import com.demoproject.service.AccountService;
 import com.demoproject.service.UserService;
 import jakarta.servlet.http.HttpSession;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.ui.Model;
 
@@ -36,6 +33,8 @@ public class UserController {
     private UserDetailsService userDetailsService; // Thêm Autowired để lấy thông tin user
     @Autowired
     private AccountRepository accountRepository;
+
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public UserController(UserService userService,AccountService accountService) {
         this.userService = userService;
@@ -67,7 +66,7 @@ public class UserController {
             listHiddenPage.add("listCustomer");
             listHiddenPage.add("listProduct");
             listHiddenPage.add("listWarehouse");
-            listHiddenPage.add("listInvoice");
+            listHiddenPage.add("listBill");
         }
         if(role.equals("ADMIN")||role.equals("STAFF")){
             listHiddenPage.add("listStaff");
@@ -83,21 +82,20 @@ public class UserController {
         Account account= optAccount.orElse(new Account());
         model.addAttribute("user", user);
         model.addAttribute("account", account);
-        return "userprofile";
+        return "user/userprofile";
     }
 
     @PostMapping("/userprofile")
     public String updateProfile(@RequestParam String name,
                                 @RequestParam String phone,
-                                @RequestParam String address,
-                                @RequestParam String dob,
+                                @RequestParam (required = false) String address,
+                                @RequestParam (required = false) String dob,
                                 @RequestParam String gender,
                                 Model model,
                                 @CookieValue(value = "token", required = false) String token
     ) {
 
         String username = jwtUtils.extractUsername(token);
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         Optional<Account> account= accountService.findByUsernameAndIsDeleteFalse(username);
         model.addAttribute("account", account.get());
         Optional<Users> userOpt= userService.getUserProfile(account.get().getUserId());
@@ -112,7 +110,7 @@ public class UserController {
             listHiddenPage.add("listCustomer");
             listHiddenPage.add("listproduct");
             listHiddenPage.add("listWarehouse");
-            listHiddenPage.add("listInvoice");
+            listHiddenPage.add("listBill");
         }
         if(role.equals("ADMIN")||role.equals("STAFF")){
             listHiddenPage.add("listStaff");
@@ -122,8 +120,14 @@ public class UserController {
 
         user.setName(name);
         user.setPhone(phone);
-        user.setAddress(address);
-        user.setDateOfBirth(LocalDate.parse(dob));
+        if(address!=null){
+            user.setAddress(address);
+        }
+        if(dob.length()!=0){
+            user.setDateOfBirth(LocalDate.parse(dob));
+        }
+
+
         user.setGender(Boolean.parseBoolean(gender));
         userService.saveUserProfile(user);
 
@@ -134,24 +138,65 @@ public class UserController {
 
 
 
-    private boolean isValidAge(LocalDate dateOfBirth) {
-        if (dateOfBirth == null) {
-            return false;
+    @GetMapping("/changepw")
+    public String changepw(
+                           Model model,
+                           @CookieValue(value = "token", required = false) String token) {
+        String username = jwtUtils.extractUsername(token);
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        Optional<Account> account= accountService.findByUsernameAndIsDeleteFalse(username);
+        model.addAttribute("account", account.get());
+        Optional<Users> userOpt= userService.getUserProfile(account.get().getUserId());
+        Users user = userOpt.orElse(new Users());
+        String role= jwtUtils.extractRole(token);
+        List<String> listHiddenPage = new ArrayList<>();
+        if(role.equals("OWNER")||role.equals("STAFF")){
+            listHiddenPage.add("listOwner");
         }
-        return Period.between(dateOfBirth, LocalDate.now()).getYears() >= 18;
+        if(role.equals("ADMIN")){
+
+            listHiddenPage.add("listCustomer");
+            listHiddenPage.add("listProduct");
+            listHiddenPage.add("listWarehouse");
+            listHiddenPage.add("listBill");
+        }
+        if(role.equals("ADMIN")||role.equals("STAFF")){
+            listHiddenPage.add("listStaff");
+        }
+        model.addAttribute("listHiddenPage",listHiddenPage);
+        model.addAttribute("user", user);
+        return "user/changepw";
     }
 
-    private boolean isValidName(String name) {
-        if (name.isEmpty()) {
-            return false;
-        }
-        return true;
-    }
+    @PostMapping("/changepw")
+    public String resetPassword(
+            @CookieValue(value = "token", required = false) String token,
+            @RequestParam("newPassword") String newPassword,
+            Model model) {
+        String username = jwtUtils.extractUsername(token);
+        Optional<Account> optionalAccount = accountRepository.findByUsernameAndIsDeleteFalse(username);
 
-    private boolean isValidPhone(String phone) {
-        if (!phone.matches("^0\\d{9}$")) {
-           return false;
+        Optional<Account> account = optionalAccount;
+        account.get().setPassword(passwordEncoder.encode(newPassword)); // Mã hóa mật khẩu mới
+        accountRepository.save(account.get());
+        String role= jwtUtils.extractRole(token);
+        List<String> listHiddenPage = new ArrayList<>();
+        if(role.equals("OWNER")||role.equals("STAFF")){
+            listHiddenPage.add("listOwner");
         }
-        return true;
+        if(role.equals("ADMIN")){
+
+            listHiddenPage.add("listCustomer");
+            listHiddenPage.add("listProduct");
+            listHiddenPage.add("listWarehouse");
+            listHiddenPage.add("listBill");
+        }
+        if(role.equals("ADMIN")||role.equals("STAFF")){
+            listHiddenPage.add("listStaff");
+        }
+        model.addAttribute("listHiddenPage",listHiddenPage);
+
+        model.addAttribute("success", "Đổi mật khẩu thành công! Vui lòng đăng nhập lại.");
+        return "redirect:/user/changepw";
     }
 }

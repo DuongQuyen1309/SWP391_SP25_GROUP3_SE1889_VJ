@@ -20,11 +20,9 @@ public class CustomerRequest {
 
     private Boolean gender;
 
-    @NotNull(message = "Date of Birth cannot be empty.")
     @PastOrPresent(message = "Date of Birth cannot be a future date.")
     private LocalDate dob;
 
-    @NotBlank(message = "Address cannot be empty.")
     private String address;
 
     @NotBlank(message = "Phone number cannot be empty.")
@@ -39,4 +37,5 @@ public class CustomerRequest {
     private LocalDate deletedAt;
     private Boolean isDelete = false;
 
+    private Long storeId;
 }

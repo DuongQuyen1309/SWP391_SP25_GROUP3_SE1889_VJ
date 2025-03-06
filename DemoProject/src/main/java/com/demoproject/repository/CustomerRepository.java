@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
@@ -29,7 +30,6 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
     @Query("SELECT DISTINCT c.ctype FROM Customer c WHERE c.isDelete = false")
     List<String> findDistinctCtypes();
 
-
     @Query("SELECT c FROM Customer c WHERE (c.createdBy IN :ids) AND (c.isDelete = false) " +
             " AND (:req_idFrom IS NULL OR c.id >= :req_idFrom) " +
             " AND (:req_idTo IS NULL OR c.id <= :req_idTo) " +
@@ -47,6 +47,13 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
                                    @Param("req_phone") String req_phone, @Param("dobFrom") LocalDate dobFrom,
                                    @Param("dobTo") LocalDate dobTo, @Param("req_customerType") String req_customerType,
                                    @Param("req_address") String req_address, @Param("name") String name, Pageable pageable);
+
     @Query("SELECT c.phone FROM Customer c WHERE c.createdBy IN :ids ")
     List<String> getAllPhoneNumbers(@Param("ids") List<Long> ids );
+
+
+    @Query("SELECT c FROM Customer c WHERE c.storeId = :storeId " +
+            "AND (:name IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%')))")
+    List<Customer> findByStoreIdAndIsDeleteFalseAndNameContainingIgnoreCase(@Param("storeId") Long storeId,String name);
+
 }

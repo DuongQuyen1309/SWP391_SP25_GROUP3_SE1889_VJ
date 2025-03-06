@@ -1,0 +1,450 @@
+/* styles.css */
+
+/* Reset mặc định */
+
+html,body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    display: flex; /* Bố cục ngang để hiển thị cả sidebar và content */
+    height: 100vh; /* Chiều cao toàn màn hình */
+    overflow: hidden;
+}
+
+/* Header */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #2c3e50;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    color: white;
+}
+.header h2 a {
+    text-decoration: none;
+    color: white;
+}
+
+.header h2 {
+    margin: 0;
+    text-decoration: none;
+    color: white;
+}
+
+.header .logout {
+    display: flex;
+    gap: 10px;
+    text-decoration: none;
+    color: #2c3e50;
+    background-color: white;
+    padding: 8px 15px;
+    border: 1px solid white;
+    border-radius: 5px;
+    transition: background-color 0.3s, color 0.3s;
+    cursor: pointer;
+    margin-right: 40px;
+}
+
+.header .logout:hover {
+    background-color: #1a252f;
+    color: white;
+}
+
+
+
+/* Sidebar */
+.sidebar {
+
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 250px;
+    background-color: #2c3e50;
+    color: white;
+    height: calc(100vh - 60px - 40px);
+    padding: 60px 20px 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
+    overflow-y: auto; /* Cuộn nếu nội dung dài */
+    margin-top: 20px; /* Đẩy xuống dưới header */
+    scrollbar-width: thin; /* Điều chỉnh độ dày thanh cuộn (đối với Firefox) */
+    scrollbar-color: #ccc #2c3e50; /* Màu thanh cuộn: thanh trượt và nền */
+    transition: transform 0.4s ease;
+}
+
+.sidebar h2 {
+    margin: 0 0 10px;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    width: 100%;
+    border-bottom: 1px solid #7f8c8d;
+    padding-bottom: 10px;
+}
+
+.sidebar a {
+    text-decoration: none;
+    color: #ecf0f1;
+    font-size: 17px;
+    padding: 10px 15px;
+    margin: 5px 0 20px;
+    border-bottom: 1px solid #7f8c8d;
+    border-radius: 5px;
+    display: block; /* Đảm bảo các liên kết chiếm toàn bộ chiều rộng */
+    transition: background-color 0.3s ease;
+}
+
+.sidebar a:hover {
+    background-color: #34495e;
+}
+
+.sidebar.show {
+    transform: translateX(0); /* Hiện sidebar */
+}
+/* Khi sidebar ẩn, trượt sang trái */
+.sidebar.hide {
+    transform: translateX(-300px);
+}
+.sidebar.hide + .content {
+    left: 0; /* Khi sidebar bị thu gọn, bảng kéo dài sang trái */
+}
+
+.arrow {
+    display: inline-block;
+    transition: transform 0.3s;
+    margin-left: 5px;
+}
+
+/* Content */
+.content {
+    position: absolute; /* Để cố định vị trí */
+    top: 60px; /* Tránh che bởi header */
+    right: 0; /* Mép phải cố định */
+    bottom: 0;
+    left: 295px; /* Vị trí mép trái khi sidebar mở */
+    overflow-y: auto; /* Cho phép cuộn nội dung */
+    transition: left 0.4s ease; /* Hiệu ứng co giãn mượt */
+    padding: 20px; /* Khoảng cách bên trong content */
+    padding-bottom: 40px;
+    background: linear-gradient(to right, #f8f9fa, #e3e7eb); /* Màu gradient nhẹ */
+}
+/* Centered Intro Section */
+.intro-container {
+    max-width: 750px;
+    margin: 60px auto;
+    text-align: center;
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Highlighted Title */
+.highlight {
+    color: #2c3e50;
+    font-weight: bold;
+}
+
+/* Main Text Styling */
+.intro-text {
+    font-size: 20px;
+    line-height: 1.6;
+    color: #444;
+    margin-bottom: 20px;
+}
+
+/* Features Section */
+.intro-features {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+}
+
+.feature-item {
+    width: 30%;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.feature-item h3 {
+    color: #2c3e50;
+    font-size: 18px;
+    margin-bottom: 8px;
+}
+
+.feature-item p {
+    font-size: 16px;
+    color: #555;
+}
+
+
+
+/* Menu button styles */
+.menu-btn {
+    cursor: pointer;
+    font-size: 24px;
+    background: none;
+    border: none;
+    color: white;
+    outline: none;
+}
+.submenu {
+    margin-left: 20px;
+
+    padding-left: 20px;
+}
+
+.submenu a {
+    display: block;
+    color: #ecf0f1;
+    text-decoration: none;
+    margin-bottom: 15px; /* Tăng khoảng cách giữa các mục con */
+    padding: 5px 0;
+}
+
+.submenu a:hover {
+    text-decoration: underline;
+}
+footer {
+    text-align: center;
+    padding: 10px;
+    background-color: #2c3e50;
+    color: white;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    z-index: 999; /* Footer có z-index thấp hơn sidebar */
+    box-shadow: 0px -5px 10px rgba(0, 0, 0, 0.3); /* Tạo hiệu ứng bóng phía trên */
+}
+
+
+.add-btn {
+    position: absolute; /* Giữ vị trí cố định so với content */
+    right: 20px; /* Sát mép phải của content */
+    top: 20px; /* Đẩy xuống dưới một chút */
+    background-color: #d35400; /* Cam */
+    color: white;
+    font-size: 24px;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.add-btn:hover {
+    background-color: #B65D1B; /* Cam đậm hơn */
+}
+
+/* Modal (Form nhập học sinh) */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background-color: white;
+    width: 350px;
+    padding: 20px;
+    border-radius: 10px;
+    margin: 10% auto;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.close {
+    float: right;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/* Form trong modal */
+.modal-content form {
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-content label {
+    margin-top: 10px;
+}
+
+.modal-content input {
+    padding: 8px;
+    border: 1px solid #BDC3C7;
+    border-radius: 5px;
+}
+
+.submit-button {
+    background-color: #D67C2C;
+    color: white;
+    padding: 10px;
+    border: none;
+    margin-top: 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.submit-button:hover {
+    background-color: #B65D1B;
+}
+
+.styled-table {
+    width: 100%; /* Chiếm toàn bộ chiều rộng khung nội dung */
+    border-collapse: collapse; /* Loại bỏ khoảng cách giữa các ô */
+    font-size: 16px; /* Kích thước chữ dễ đọc */
+    font-family: Arial, sans-serif; /* Font chữ đẹp */
+    color: #f2f2f2; /* Màu chữ sáng để nổi bật */
+    background-color: #34495e; /* Màu nền bảng */
+    margin: 20px 0; /* Khoảng cách trên dưới */
+    border: 1px solid #2c3e50; /* Viền ngoài bảng */
+    border-radius: 8px; /* Bo góc nhẹ cho bảng */
+    overflow: hidden; /* Đảm bảo bo góc cũng áp dụng với nội dung bảng */
+}
+
+.styled-table thead {
+    background-color: #2c3e50; /* Màu nền của header bảng */
+    color: #fff; /* Màu chữ header */
+    text-align: left; /* Căn chữ sang trái */
+    font-weight: bold; /* Chữ header đậm hơn */
+}
+
+.styled-table th,
+.styled-table td {
+    padding: 12px 15px; /* Khoảng cách bên trong các ô */
+    text-align: center; /* Căn giữa nội dung */
+    border-bottom: 1px solid #2c3e50; /* Viền dưới giữa các hàng */
+}
+
+.styled-table td form {
+    display: inline-block; /* Đảm bảo các form hiển thị trên cùng một dòng */
+    margin: 0;
+}
+
+.styled-table td div {
+    display: flex;
+    justify-content: center; /* Căn giữa nội dung */
+    align-items: center;
+    gap: 10px; /* Khoảng cách giữa các nút */
+}
+
+.styled-table tbody tr {
+    transition: background-color 0.2s; /* Hiệu ứng hover */
+}
+
+.styled-table tbody tr:nth-of-type(even) {
+    background-color: #3c566e; /* Màu nền khác cho các hàng chẵn */
+}
+
+.styled-table tbody tr:hover {
+    background-color: #1abc9c; /* Màu nền khi hover */
+}
+
+.styled-table button {
+    background-color: #e74c3c; /* Màu đỏ cho nút xóa */
+    color: #fff; /* Chữ trắng */
+    border: none; /* Loại bỏ viền nút */
+    border-radius: 4px; /* Bo góc nhẹ cho nút */
+    padding: 6px 12px; /* Khoảng cách bên trong nút */
+    cursor: pointer; /* Thêm hiệu ứng con trỏ */
+    font-size: 14px; /* Chữ vừa phải */
+    transition: background-color 0.2s; /* Hiệu ứng chuyển màu */
+}
+
+.styled-table button:hover {
+    background-color: #c0392b; /* Màu đỏ đậm hơn khi hover */
+}
+
+
+/* Dropdown menu styling */
+.dropdown {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+
+/* User info styling */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-right: 20px;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid white;
+}
+
+.user-name {
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+.user-name:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+/* Dropdown menu */
+.dropdown {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.dropdown-content {
+    position: absolute;
+    top: 100%; /* Đặt dropdown ngay dưới tên user */
+    right: 0;
+    background-color: white;
+    min-width: 180px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+    overflow: hidden;
+    z-index: 1000;
+
+    /* Ẩn dropdown ban đầu */
+    opacity: 0;
+    transform: translateY(-10px);
+    visibility: hidden;
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+}
+
+/* Khi dropdown mở */
+.dropdown-content.show {
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
+}
+
+/* Tùy chỉnh các mục bên trong dropdown */
+.dropdown-content a {
+    color: black;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    gap: 5px; /* Khoảng cách giữa icon và chữ */
+}
+
+.dropdown-content a:hover {
+    background-color: #f1f1f1;
+}

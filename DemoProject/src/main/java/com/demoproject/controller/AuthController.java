@@ -5,6 +5,7 @@ import com.demoproject.entity.Users;
 import com.demoproject.repository.AccountRepository;
 import com.demoproject.jwt.JwtUtils;
 import com.demoproject.service.AccountService;
+import com.demoproject.service.EmailService;
 import com.demoproject.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -22,6 +23,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -34,6 +38,9 @@ public class AuthController {
 
     @Autowired
     private JwtUtils jwtUtils;
+
+    @Autowired
+    private EmailService emailService;
 
     @Autowired
     private AccountRepository accountRepository;
@@ -96,58 +103,51 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/api/check-username")
-    public ResponseEntity<Map<String, Boolean>> checkUsername(@RequestParam String username) {
-        boolean exists = accountRepository.existsByUsernameAndIsDeleteFalse(username);
-        Map<String, Boolean> response = new HashMap<>();
-        response.put("exists", exists);
-        return ResponseEntity.ok(response);
-    }
 
-    @PostMapping("/api/check-old-password")
-    public ResponseEntity<Map<String, Boolean>> checkOldPassword(@RequestBody Map<String, String> request) {
-        String username = request.get("username");
-        String oldPassword = request.get("oldPassword");
 
-        boolean valid = false;
-        Account account = accountService.findByUsernameAndIsDeleteFalse(username).orElse(null);
-        if (account != null && passwordEncoder.matches(oldPassword, account.getPassword())) {
-            valid = true;
+    @PostMapping("/auth/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        boolean isEmailExist= accountRepository.existsByEmailAndIsDeleteFalse(email);
+
+        if (!isEmailExist) {
+            return ResponseEntity.status(400).body(Map.of("error", "Email not found!"));
         }
 
-        Map<String, Boolean> response = new HashMap<>();
-        response.put("valid", valid);
-        return ResponseEntity.ok(response);
+        Account account= accountRepository.findByEmailAndIsDeleteFalse(email).orElse(null);
+
+
+
+        if (account.getResetToken() != null && account.getResetTokenExpiry() != null && account.getResetTokenExpiry().isAfter(LocalDateTime.now())) {
+            return ResponseEntity.badRequest().body(Map.of("message","Reset link has already been sent. Please check your email."));
+        }
+
+        String resetToken = jwtUtils.generateToken(account.getUsername(), "RESET");
+        account.setResetToken(resetToken);
+        account.setResetTokenExpiry(LocalDateTime.now().plusMinutes(5)); // Token có hiệu lực 30 phút
+        accountRepository.save(account);
+
+        emailService.sendResetPasswordEmail(email, resetToken);
+        return ResponseEntity.ok(Map.of("message", "Reset link has been sent to your email."));
     }
 
-    @GetMapping("/api/check-phone-account")
-    public ResponseEntity<Map<String, Boolean>> checkPhoneExists(@RequestParam String phone, Principal principal) {
-        Map<String, Boolean> response = new HashMap<>();
+    @PostMapping("/auth/resetpw")
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
+        String token = request.get("token");
+        String newPassword = request.get("newPassword");
 
-        Account account= accountService.findByUsernameAndIsDeleteFalse(principal.getName()).orElse(null);
-        // Lấy user hiện tại từ principal (dựa trên token hoặc session)
-        Users currentUser = userService.getUserProfile(account.getUserId()).orElse(null);
+        Optional<Account> accountOpt = accountRepository.findByResetTokenAndIsDeleteFalse(token);
+        if (accountOpt.isEmpty() || accountOpt.get().getResetTokenExpiry() == null || accountOpt.get().getResetTokenExpiry().isBefore(LocalDateTime.now())) {
+            return ResponseEntity.badRequest().body("Invalid or expired token");
+        }
 
-        // Kiểm tra nếu có user khác đã dùng số điện thoại này, ngoại trừ user hiện tại
-        boolean exists = userService.existsByPhoneExcludingUser(phone, currentUser.getId());
+        Account account = accountOpt.get();
+        account.setPassword(passwordEncoder.encode(newPassword));
+        account.setResetToken(null);
+        account.setResetTokenExpiry(null);
+        accountRepository.save(account);
 
-        response.put("exists", exists);
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/api/check-phone-owneraccount")
-    public ResponseEntity<Map<String, Boolean>> checkOwnerPhoneExists(@RequestParam String phone,@RequestParam String username) {
-        Map<String, Boolean> response = new HashMap<>();
-
-        Account account = accountService.findByUsernameAndIsDeleteFalse(username).orElse(null);
-
-        Users currentUser = userService.getUserProfile(account.getUserId()).orElse(null);
-
-        // Kiểm tra nếu có user khác đã dùng số điện thoại này, ngoại trừ user hiện tại
-        boolean exists = userService.existsByPhoneExcludingUser(phone, currentUser.getId());
-
-        response.put("exists", exists);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(Map.of("message", "Password has been reset successfully!"));
     }
 
 }

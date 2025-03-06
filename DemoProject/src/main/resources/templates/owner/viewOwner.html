@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Rice Sales Management</title>
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
+    <style>
+        /* Profile Form */
+        .profile-form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            margin: 20px auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .profile-form label {
+            font-size: 16px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .profile-form input {
+            width: 95%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .profile-form button {
+            background-color: #2c3e50;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .profile-form button:hover {
+            background-color: #1a252f;
+        }
+        select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        select:disabled {
+            background-color: #e9e9e9;
+            cursor: not-allowed;
+        }
+
+    </style>
+    <script src="/js/home.js"></script>
+    <script>
+
+        function backToList() {
+            window.location.href = "/account/listOwner";
+        }
+    </script>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+    <h2><a href="/home">RSMS</a></h2>
+    <div class="user-info">
+        <img  th:src="${user.avatar}" alt="User Avatar" class="user-avatar"/>
+        <div class="dropdown">
+            <span th:text="${account.displayName}" class="user-name" onclick="toggleDropdown()"> ▼</span>
+            <div id="dropdown-menu" class="dropdown-content">
+                <a href="/user/userprofile">👤 View Profile</a>
+                <a href="/user/changepw" id="changepw">🔑 Change password</a>
+                <a href="/static#" id="logout">🚪 Logout</a>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <h2>Feature</h2>
+    <a href="/user/userprofile" >Profile</a>
+    <a href="/account/listOwner" >Owner Account Management</a>
+
+
+</div>
+
+
+<!-- Content -->
+<div class="content">
+    <h1>Account of <span th:text="${user.name}"></span></h1>
+    <form class="profile-form" >
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" th:value="${accountOwner.username}" disabled>
+        <input type="hidden" id="hiddenUsername" name="username" th:value="${accountOwner.username}">
+
+        <label for="displayname">Displayname:</label>
+        <input type="text" id="displayname" name="displayname" th:value="${accountOwner.displayName}" disabled>
+
+        <label for="email">Email:</label>
+        <input type="text" id="email" name="email" th:value="${accountOwner.email}" disabled>
+
+        <label for="name">Full Name:</label>
+        <input type="text" id="name" name="name" th:value="${user.name}" disabled>
+
+        <label for="phone">Phone:</label>
+        <input type="text" id="phone" name="phone" th:value="${user.phone}" disabled>
+
+        <label for="address">Address:</label>
+        <input type="text" id="address" name="address" th:value="${user.address}" disabled>
+
+        <label for="dob">Date of Birth:</label>
+        <input type="date" id="dob" name="dob" th:value="${user.dateOfBirth}" disabled>
+
+
+        <label for="gender">Gender:</label>
+        <select name="gender" id="gender" disabled>
+            <option value="true" th:selected="${user.gender == true}">Male</option>
+            <option value="false" th:selected="${user.gender == false}">Female</option>
+        </select>
+
+
+        <div class="button-group" onclick="backToList()">
+            <button type="button"  >Back</button>
+
+
+        </div>
+
+
+    </form>
+
+
+
+</div>
+
+<footer>
+    &copy; 2025 Rice Sales Management. All Rights Reserved.
+</footer>
+
+</body>
+</html>

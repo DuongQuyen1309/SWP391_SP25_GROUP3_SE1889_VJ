@@ -34,7 +34,7 @@ public class ProductService {
         productRepository.save(product);
     }
 
-    public Product getProductById(int id) {
+    public Product getProductById(Long id) {
         return productRepository.findById(id).orElse(null);
     }
 
@@ -42,37 +42,11 @@ public class ProductService {
         return productRepository.findAll();
     }
 
-    public void deleteProduct(int productId, String deletedBy) throws Exception {
-        Optional<Product> optionalProduct = productRepository.findById(productId);
-
-        if (optionalProduct.isPresent()) {
-            Product product = optionalProduct.get();
-            product.setIsDeleted(1); // Soft delete
-            product.setDeletedAt(LocalDateTime.now());
-//            product.setDeletedBy(deletedBy);
-
-            productRepository.save(product);
-        } else {
-            throw new Exception("Product with ID " + productId + " not found");
-        }
+    public List<Product> getProductsByNameAndCreatedBy(String productName, Long storeId) {
+        return productRepository.findByNameContainingAndStoreId(productName, storeId);
     }
 
-    public Product updateProduct(ProductDTO productDTO) throws Exception {
-        Optional<Product> optionalProduct = productRepository.findById(productDTO.getId());
 
-        if (optionalProduct.isPresent()) {
-            Product product = optionalProduct.get();
-            product.setName(productDTO.getName());
-            product.setDescription(productDTO.getDescription());
-            product.setPrice(productDTO.getPrice());
-            product.setUpdatedAt(LocalDateTime.now());
-//            product.setUpdatedBy(productDTO.getUpdatedBy());
-
-            return productRepository.save(product);
-        } else {
-            throw new Exception("Product with ID " + productDTO.getId() + " not found");
-        }
-    }
 
 
     public List<Product> getAllProductIsDeleted() {
@@ -103,5 +77,11 @@ public class ProductService {
         return productRepository.findByDescriptionContaining(keyword,pageable);
     }
 
+    public String getProductNameById(long productId){
+        return productRepository.findById(productId)
+                .map(Product::getName)
+                .orElse("Product Not Found");
+
+    }
 
 }

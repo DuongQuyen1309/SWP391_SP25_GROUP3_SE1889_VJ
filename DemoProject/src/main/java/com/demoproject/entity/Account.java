@@ -2,6 +2,7 @@ package com.demoproject.entity;
 
 import jakarta.persistence.*;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -18,6 +19,10 @@ public class Account {
     private String password;
     @Column(name = "DISPLAYNAME", length = 50, nullable = false)
     private String displayName;
+
+    @Column(name = "email", length = 50)
+    private String email;
+
     @Column(name = "createdBy")
     private Long createdBy;
 
@@ -37,15 +42,15 @@ public class Account {
     private Long userId; // ✅ Thêm trường liên kết với User
 
 
-    public Account() {
-    }
+    @Column(name = "reset_token")
+    private String resetToken;
 
-    public Account(String username, Long id, String password, String displayName) {
-        this.username = username;
-        this.id = id;
-        this.password = password;
-        this.displayName = displayName;
-    }
+    @Column(name="reset_token_expiry",columnDefinition = "DATETIME2")
+    private LocalDateTime resetTokenExpiry;
+
+    @Column(name = "store_id")
+    private Long storeId;
+
 
     public Long getId() {
         return id;
@@ -125,6 +130,40 @@ public class Account {
 
     public void setDelete(Boolean delete) {
         isDelete = delete;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+
+    public String getResetToken() {
+        return resetToken;
+    }
+
+    public void setResetToken(String resetToken) {
+        this.resetToken = resetToken;
+    }
+
+
+    public LocalDateTime getResetTokenExpiry() {
+        return resetTokenExpiry;
+    }
+
+    public void setResetTokenExpiry(LocalDateTime resetTokenExpiry) {
+        this.resetTokenExpiry = resetTokenExpiry;
+    }
+
+    public Long getStoreId() {
+        return storeId;
+    }
+
+    public void setStoreId(Long storeId) {
+        this.storeId = storeId;
     }
 }
 

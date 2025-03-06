@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Staff Management</title>
+    <link rel="stylesheet" href="/css/base.css">
+    <script src="/js/home.js"></script>
+    <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
+    <style>
+        .pagination {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .pagination a {
+            display: inline-block;
+            padding: 8px 16px;
+            margin: 4px;
+            text-decoration: none;
+            background-color: #2c3e50;
+            color: white;
+            border-radius: 5px;
+        }
+        .pagination a:hover {
+            background-color: #1a252f;
+        }
+
+        .form-search input:focus {
+            border-color: #e67e22;
+            box-shadow: 0 0 8px rgba(230, 126, 34, 0.5);
+        }
+    </style>
+    <script>
+        function callPage() {
+            window.location.href ="/account/createStaff";
+        }
+    </script>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+    <h2><a href="/home">RSMS</a></h2>
+    <div class="user-info">
+        <img  th:src="${user.avatar}" alt="User Avatar" class="user-avatar"/>
+        <div class="dropdown">
+            <span th:text="${account.displayName}" class="user-name" onclick="toggleDropdown()"> ▼</span>
+            <div id="dropdown-menu" class="dropdown-content">
+                <a href="/user/userprofile">👤 View Profile</a>
+                <a href="/user/changepw" id="changepw">🔑 Change password</a>
+                <a href="/static#" id="logout">🚪 Logout</a>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <h2>Feature</h2>
+    <a href="/user/userprofile" >Profile</a>
+
+
+    <a href="/account/listStaff" >Staff Account Management</a>
+
+    <a href="/product/listProduct" >Rice Management</a>
+
+    <a href="/customer/listCustomer" >Customer Management</a>
+
+    <a href="/warehouse/listWarehouseZone">Warehouse Management</a>
+
+
+    <a href="/bill/listBill" >Invoice Management</a>
+
+</div>
+
+
+<!-- Content -->
+<div class="content" id="content">
+    <button class="add-btn" onclick="callPage()">+</button>
+    <div id="staffFormModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeForm()">&times;</span>
+            <h2>Add new staff</h2>
+            <form th:action="@{/account/createStaff}" method="post">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+
+                <label for="displayname">Display Name:</label>
+                <input type="text" id="displayname" name="displayname" required>
+
+                <button type="submit" class="submit-button">Create</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Search Box -->
+    <form class="form-search" action="/account/listStaff" method="get" style="margin-bottom: 20px;">
+        <input type="text" name="search" placeholder="Search staff..." th:value="${search}" style="width: 80%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+        <button type="submit" style="padding: 10px; background-color: #2c3e50; color: white; border: none; border-radius: 5px;">Search</button>
+    </form>
+
+    <h1>List of Staff Accounts</h1>
+    <table class="styled-table">
+        <thead>
+        <tr>
+            <td>ID</td>
+            <td>Username</td>
+            <td>Display Name</td>
+            <td>Email</td>
+            <td>Full Name</td>
+            <td>Phone</td>
+            <td>Gender</td>
+            <td>Address</td>
+            <td>Action</td>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="account : ${accounts}">
+            <td th:text="${account.id}"></td>
+            <td th:text="${account.username}"></td>
+            <td th:text="${account.displayName}"></td>
+            <td th:text="${account.email}"></td>
+            <td th:text="${account.name}"></td>
+            <td th:text="${account.phone}"></td>
+            <td th:text="${account.gender == null} ? '' : (account.gender ? 'Male' : 'Female')"></td>
+            <td th:text="${account.address}"></td>
+            <td>
+                <div style="display: flex; gap: 5px;">
+                    <form th:action="@{/account/updateStaff}" method="get">
+                        <input type="hidden" name="id" th:value="${account.id}">
+                        <button type="submit" style="background-color: #06999c">Edit</button>
+                    </form>
+                    <form th:action="@{/account/deleteStaff}" method="post" onsubmit="return confirm('Are you sure?')">
+                        <input type="hidden" name="id" th:value="${account.id}">
+                        <button type="submit" style="background-color: #c0392b">Delete</button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <div class="pagination">
+        <a th:if="${currentPage > 0}" th:href="@{/account/listStaff(page=${currentPage - 1}, size=5,search=${search})}">Previous</a>
+        <span>Page <span th:text="${totalPages == 0 ? currentPage : currentPage + 1}"></span> of <span th:text="${totalPages}"></span></span>
+        <a th:if="${currentPage + 1 < totalPages}" th:href="@{/account/listStaff(page=${currentPage + 1}, size=5,search=${search})}">Next</a>
+    </div>
+</div>
+
+<footer>
+    &copy; 2025 Rice Sales Management. All Rights Reserved.
+</footer>
+
+<script>
+    function openForm() {
+        document.getElementById("staffFormModal").style.display = "block";
+    }
+    function closeForm() {
+        document.getElementById("staffFormModal").style.display = "none";
+    }
+</script>
+
+</body>
+</html>

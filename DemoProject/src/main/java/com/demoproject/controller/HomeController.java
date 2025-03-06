@@ -40,28 +40,33 @@ public class HomeController {
     @Autowired
     private JwtUtils jwtUtils;
 
+
+
     @GetMapping("/login")
     public String login() {
-        return "login";
+        return "user/login";
     }
 
 
 
     @GetMapping("/register")
     public String register() {
-        return "register";
+        return "user/register";
     }
 
     @PostMapping("/register")
     public String register(@RequestParam String username,
                            @RequestParam String password,
                            @RequestParam String displayname,
+                           @RequestParam String email,
                            Model model) {
 
         Account account = new Account();
         account.setUsername(username);
         account.setPassword(passwordEncoder.encode(password));
         account.setDisplayName(displayname);
+        account.setEmail(email);
+
 
 
         // Lưu vào cơ sở dữ liệu
@@ -70,42 +75,7 @@ public class HomeController {
         return "redirect:/login";
     }
 
-    @GetMapping("/changepw")
-    public String changepw() {
-        return "changepw";
-    }
 
-    @PostMapping("/changepw")
-    public String resetPassword(
-            @RequestParam("username") String username,
-            @RequestParam("oldPassword") String oldPassword,
-            @RequestParam("newPassword") String newPassword,
-            @RequestParam("confirmPassword") String confirmPassword,
-            Model model) {
-
-        Optional<Account> optionalAccount = accountRepository.findByUsernameAndIsDeleteFalse(username);
-        boolean isMatch= accountService.checkPassword(username, oldPassword);
-        if(!isMatch){
-            model.addAttribute("error", "❌ Sai tài khoản hoặc mật khẩu cũ!");
-            return "changepw";
-        }
-        if(oldPassword.equals(newPassword)){
-            model.addAttribute("error", "❌ Mật khẩu mới trùng với mật khẩu cũ");
-            return "changepw";
-        }
-        if(!newPassword.equals(confirmPassword)){
-            model.addAttribute("error", "❌ Mật khẩu nhập lai không khớp");
-            return "changepw";
-        }
-
-
-        Optional<Account> account = optionalAccount;
-        account.get().setPassword(passwordEncoder.encode(newPassword)); // Mã hóa mật khẩu mới
-        accountRepository.save(account.get());
-
-        model.addAttribute("success", "Đổi mật khẩu thành công! Vui lòng đăng nhập lại.");
-        return "redirect:/login";
-    }
 
     @GetMapping("/home")
     public String home(@CookieValue(value = "token", required = false) String token,
@@ -122,7 +92,7 @@ public class HomeController {
             listHiddenPage.add("listCustomer");
             listHiddenPage.add("listProduct");
             listHiddenPage.add("listWarehouse");
-            listHiddenPage.add("listInvoice");
+            listHiddenPage.add("listBill");
         }
         if(role.equals("ADMIN")||role.equals("STAFF")){
             listHiddenPage.add("listStaff");
@@ -137,8 +107,25 @@ public class HomeController {
         }
         Account account= optAccount.orElse(null);
         model.addAttribute("account", account);
-        return "home";
+        model.addAttribute("user",user.get());
+        return "user/home";
     }
 
+    @GetMapping("/forgotpw")
+    public String forgotpw() {
+        return "user/forgotpw";
+    }
+
+
+    @GetMapping("/resetpw")
+    public String resetpw() {
+        return "user/resetpw";
+    }
+
+
+    @GetMapping("/sell")
+    public String sell(){
+        return "createBill";
+    }
 
 }

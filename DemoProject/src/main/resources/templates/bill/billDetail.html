@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Details</title>
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        h2, h3 {
+            text-align: center;
+        }
+        .details {
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        th {
+            background: #2c3e50;
+            color: white;
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-top: 20px;
+            text-align: center;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background: #2980b9;
+        }
+    </style>
+    <script src="/js/home.js"></script>
+</head>
+<body>
+<div class="container">
+    <h2>Invoice Details</h2>
+    <div class="details">
+        <p><strong>Invoice ID:</strong> #INV-001</p>
+        <p><strong>Customer Name:</strong> Nguyen Van A</p>
+        <p><strong>Date of Purchase:</strong> 2025-02-25</p>
+        <p><strong>Total Money:</strong> $150.00</p>
+        <p><strong>Paid Money:</strong> $100.00</p>
+        <p><strong>Debt Money:</strong> $50.00</p>
+    </div>
+    <h3>Purchased Items</h3>
+    <table>
+        <thead>
+        <tr>
+            <th>Product Name</th>
+            <th>Quantity</th>
+            <th>Unit Price</th>
+            <th>Total</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>Rice ST25</td>
+            <td>2</td>
+            <td>$25.00</td>
+            <td>$50.00</td>
+        </tr>
+        <tr>
+            <td>Rice Jasmine</td>
+            <td>5</td>
+            <td>$20.00</td>
+            <td>$100.00</td>
+        </tr>
+        </tbody>
+    </table>
+    <button class="btn">Back to List</button>
+</div>
+</body>
+</html>

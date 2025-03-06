@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forgot Password</title>
+  <link rel="stylesheet" href="/css/login.css">
+  <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const form = document.querySelector(".resetRequestForm");
+      const errorContainer = document.createElement("div");
+      const emailInput = document.getElementById("email");
+      errorContainer.style.color = "red";
+      errorContainer.style.fontWeight = "bold";
+
+      async function checkEmailExists(email) {
+        try {
+          let response = await fetch(`/api/check-email?email=${email}`);
+          let data = await response.json();
+          return data.exists;
+        } catch (error) {
+          console.error("Error when checking email:", error);
+          return false;
+        }
+      }
+      form.addEventListener("submit", async function (event) {
+        event.preventDefault();
+        let errors = [];
+        errorContainer.style.color = "red";
+        console.log(`${emailInput.value}`);
+        if (emailInput.value.trim() === "") {
+          errors.push("Email must be not empty.");
+        } else if (!emailInput.value.includes("@")) {
+          errors.push("Please includes '@' in email.");
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value)) {
+          errors.push("Email is not in the correct format, please enter the correct format (for example: example@gmail.com)");
+        } else {
+          let isEmailExists = await checkEmailExists(emailInput.value);
+          if (!isEmailExists) {
+            errors.push("Email does not exist");
+          }
+        }
+
+        if (errors.length > 0) {
+          event.preventDefault();
+          errorContainer.innerHTML = errors.join("<br>");
+          form.insertBefore(errorContainer, form.querySelector("button"));
+        }
+        else{
+          try {
+            let response = await fetch("/auth/forgot-password", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email: emailInput.value })
+            });
+
+            let data = await response.json();
+            errors.push(data.message);
+            errorContainer.style.color  = response.ok ? "green" : "red";
+            errorContainer.innerHTML = errors.join("<br>");
+            form.insertBefore(errorContainer, form.querySelector("button"));
+
+          } catch (error) {
+            errors.push("Error sending reset email!");
+            errorContainer.style.color = "red";
+          }
+        }
+
+
+
+      });
+    });
+  </script>
+</head>
+<body>
+<!-- Header -->
+<div class="header">
+  <h2><a href="/login">RSMS</a></h2>
+</div>
+
+<section class="bottom">
+  <img th:src="@{/images/account.jpg}" alt="Background" class="background-img">
+
+  <!-- Forgot Password Form -->
+  <div class="login-container">
+    <h2>Forgot Password</h2>
+    <p>Enter your email to receive a password reset link.</p>
+    <form class="resetRequestForm">
+      <div class="input-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="Enter your email" >
+      </div>
+      <button type="submit" class="btn">Send Reset Link</button>
+    </form>
+
+    <p class="register-link">Back to <a href="/login">Login</a></p>
+  </div>
+</section>
+
+<footer>
+  &copy; 2025 Rice Sales Management. All Rights Reserved.
+</footer>
+</body>
+</html>

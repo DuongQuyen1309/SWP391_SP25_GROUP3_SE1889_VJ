@@ -70,10 +70,12 @@ public class CustomerController {
                                RedirectAttributes redirectAttributes) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
         Page<Customer> customerPage;
-        String username = jwtUtils.extractUsername(token);
-        Optional<Account> optAccount = accountService.findByUsernameAndIsDeleteFalse(username);
-        Account account = optAccount.orElse(null);
+        Account account = accountService.getAccountFromToken(token).orElse(null);
+        Users user = userService.getUserProfile(account.getUserId()).orElse(null);
         model.addAttribute("account", account);
+        model.addAttribute("user", user);
+
+
 
 
         //lấy id của người đang đăng nhập
@@ -83,13 +85,16 @@ public class CustomerController {
         model.addAttribute("role", role);
         List<Long> relatedUserList = new ArrayList<>();
         if(role.equalsIgnoreCase("OWNER")){
-            relatedUserList = userService.getStaffID(user.get().getId());
-            relatedUserList.add(user.get().getId());
+
+            relatedUserList = userService.getStaffID(user.getId());
+            relatedUserList.add(user.getId());
             for(Long id:relatedUserList){
                 System.out.println(id);
             }
         }else if(role.equalsIgnoreCase("STAFF")){
-            Long ownerId = userService.getOwnerID(user.get().getId());
+
+            Long ownerId = userService.getOwnerID(user.getId());
+
             relatedUserList = userService.getStaffID(ownerId);
             relatedUserList.add(ownerId);
 
@@ -125,7 +130,9 @@ public class CustomerController {
             model.addAttribute("currentPage", page);
             model.addAttribute("totalPages", customerPage.getTotalPages());
             model.addAttribute("size", size);
+
             return "listCustomer";
+
         }
         else {
             if ((idFrom != null && !idFrom.isEmpty()) || (idTo != null && !idTo.isEmpty())
@@ -171,6 +178,7 @@ public class CustomerController {
             model.addAttribute("moneyTo", moneyTo);
 
             return "listCustomer";
+
         }
     }
 
@@ -184,8 +192,11 @@ public class CustomerController {
         String username = jwtUtils.extractUsername(token);
         Optional<Account> account = accountService.findByUsernameAndIsDeleteFalse(username);
         Optional<Users> user = userService.getUserProfile(account.get().getUserId());
+        model.addAttribute("user", user.get());
         model.addAttribute("account", account.get());
+
         String role= jwtUtils.extractRole(token);
+        model.addAttribute("role",role);
         List<String> listHiddenPage = new ArrayList<>();
         if(role.equals("STAFF")){
             listHiddenPage.add("listStaff");
@@ -215,9 +226,10 @@ public class CustomerController {
             Model model) {
 
         String username = jwtUtils.extractUsername(token);
-        Optional<Account> account = accountService.findByUsernameAndIsDeleteFalse(username);
-        Optional<Users> user = userService.getUserProfile(account.get().getUserId());
-        model.addAttribute("account", account.get());
+        Account account = accountService.findByUsernameAndIsDeleteFalse(username).orElse(null);
+        Users user = userService.getUserProfile(account.getUserId()).orElse(null);
+        model.addAttribute("user", user);
+        model.addAttribute("account", account);
         String role= jwtUtils.extractRole(token);
 
 
@@ -230,7 +242,7 @@ public class CustomerController {
 
 
 
-        Long id = user.get().getId();
+        Long id = user.getId();
 
 
         String fullname = lastname.trim()+ " " +customerRequest.getName().trim();
@@ -240,6 +252,7 @@ public class CustomerController {
         customerRequest.setMoneyState(0);
         customerRequest.setCreatedBy(id);
         customerRequest.setCreatedAt(LocalDate.now());
+        customerRequest.setStoreId(user.getStoreId());
 
         try {
             customerService.createCustomer(customerRequest);
@@ -265,6 +278,9 @@ public class CustomerController {
         Optional<Account> optAccount = accountService.findByUsernameAndIsDeleteFalse(username);
         Account account = optAccount.orElse(null);
         Optional<Users> user = userService.getUserProfile(account.getUserId());
+
+        model.addAttribute("user", user.get());
+
         String role= jwtUtils.extractRole(token);
         List<Long> relatedUserList = new ArrayList<>();
         if(role.equalsIgnoreCase("OWNER")){
@@ -285,7 +301,9 @@ public class CustomerController {
         model.addAttribute("pre_phone", pre_phone);
         List<String> phoneList =  customerService.getAllPhoneNumbers(relatedUserList);
         model.addAttribute("phoneList", phoneList);
+
         return "updateCustomer";
+
 
     }
 
@@ -306,6 +324,8 @@ public class CustomerController {
         String username = jwtUtils.extractUsername(token);
         Optional<Account> optAccount = accountService.findByUsernameAndIsDeleteFalse(username);
         Account account = optAccount.orElse(null);
+        Optional<Users> user = userService.getUserProfile(account.getUserId());
+        model.addAttribute("user", user.get());
         model.addAttribute("account", account);
 
         LocalDate dateOfBirth = LocalDate.parse(dob);

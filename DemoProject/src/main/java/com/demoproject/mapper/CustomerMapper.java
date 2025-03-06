@@ -13,6 +13,7 @@ public interface CustomerMapper {
     @Mapping(target = "createdAt", source = "createdAt")
     @Mapping(target = "updatedAt", source = "updatedAt")
     @Mapping(target = "deletedAt", source = "deletedAt")
+    @Mapping(target = "storeId", source = "storeId")
     Customer toCustomer(CustomerRequest customerRequest);
     CustomerRequest toCustomerRequest(Customer customer);
     CustomerResponse toCustomerResponse(Customer customer);
