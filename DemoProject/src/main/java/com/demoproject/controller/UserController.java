@@ -88,8 +88,8 @@ public class UserController {
     @PostMapping("/userprofile")
     public String updateProfile(@RequestParam String name,
                                 @RequestParam String phone,
-                                @RequestParam String address,
-                                @RequestParam String dob,
+                                @RequestParam (required = false) String address,
+                                @RequestParam (required = false) String dob,
                                 @RequestParam String gender,
                                 Model model,
                                 @CookieValue(value = "token", required = false) String token
@@ -120,8 +120,14 @@ public class UserController {
 
         user.setName(name);
         user.setPhone(phone);
-        user.setAddress(address);
-        user.setDateOfBirth(LocalDate.parse(dob));
+        if(address!=null){
+            user.setAddress(address);
+        }
+        if(dob.length()!=0){
+            user.setDateOfBirth(LocalDate.parse(dob));
+        }
+
+
         user.setGender(Boolean.parseBoolean(gender));
         userService.saveUserProfile(user);
 

@@ -239,16 +239,14 @@
                     }
                 }
 
-                if (!dob.value || dob.value.length <= 0) {
-                    errors.push("Date of Birth must be not empty.");
-                } else {
+
                     const dobDate = new Date(dob.value);
                     const today = new Date();
                     today.setHours(0, 0, 0, 0);
                     if (dobDate >= today) {
                         errors.push("Date of Birth must be in the past.");
                     }
-                }
+
 
                 if (errors.length > 0) {
                     event.preventDefault();

@@ -29,6 +29,7 @@ public class CustomerService {
         Customer customer = new Customer();
         customer = customerMapper.toCustomer(customerRequest);
         customer.setPhone(customer.getPhone().trim());
+        customer.setStoreId(customer.getStoreId());
         customerRepository.save(customer);
     }
 
@@ -103,7 +104,7 @@ public class CustomerService {
         return customers;
     }
 
-    public List<Customer> searchCustomer(List<Long> relatedUserList,String name){
-        return customerRepository.findByIdInAndIsDeleteFalseAndNameContainingIgnoreCase(relatedUserList,name);
+    public List<Customer> searchCustomer(Long storeId,String name){
+        return customerRepository.findByStoreIdAndIsDeleteFalseAndNameContainingIgnoreCase(storeId, name);
     }
 }

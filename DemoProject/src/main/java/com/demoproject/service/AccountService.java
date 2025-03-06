@@ -255,7 +255,7 @@ public class AccountService {
     public Page<Map<String, Object>> getStaffAccounts(Account accountOwner,int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
-        List<Long> staffUserIds=userRepository.getStaffID(accountOwner.getUserId());
+        List<Long> staffUserIds=userRepository.getStaffID(accountOwner.getStoreId());
         // Lấy danh sách userId của các User có role STAFF
 
         // Tìm danh sách Account của các User có role STAFF
@@ -301,7 +301,7 @@ public class AccountService {
         Pageable pageable = PageRequest.of(page, size);
 
         // 1. Lấy danh sách userId của các User có role STAFF
-        List<Long> staffUserIds=userRepository.getStaffID(accountOwner.getUserId());
+        List<Long> staffUserIds=userRepository.getStaffID(accountOwner.getStoreId());
         if (staffUserIds.isEmpty()) {
             return Page.empty();
         }

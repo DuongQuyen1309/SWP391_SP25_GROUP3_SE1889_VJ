@@ -42,8 +42,8 @@ public class ProductService {
         return productRepository.findAll();
     }
 
-    public List<Product> getProductsByNameAndCreatedBy(String productName, String createdBy) {
-        return productRepository.findByNameContainingAndCreatedBy(productName, createdBy);
+    public List<Product> getProductsByNameAndCreatedBy(String productName, Long storeId) {
+        return productRepository.findByNameContainingAndStoreId(productName, storeId);
     }
 
 

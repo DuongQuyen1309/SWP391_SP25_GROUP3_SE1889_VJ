@@ -217,10 +217,10 @@ public class CustomerController {
             Model model) {
 
         String username = jwtUtils.extractUsername(token);
-        Optional<Account> account = accountService.findByUsernameAndIsDeleteFalse(username);
-        Optional<Users> user = userService.getUserProfile(account.get().getUserId());
-        model.addAttribute("user", user.get());
-        model.addAttribute("account", account.get());
+        Account account = accountService.findByUsernameAndIsDeleteFalse(username).orElse(null);
+        Users user = userService.getUserProfile(account.getUserId()).orElse(null);
+        model.addAttribute("user", user);
+        model.addAttribute("account", account);
         String role= jwtUtils.extractRole(token);
 
 
@@ -233,7 +233,7 @@ public class CustomerController {
 
 
 
-        Long id = user.get().getId();
+        Long id = user.getId();
 
 
         String fullname = lastname.trim()+ " " +customerRequest.getName().trim();
@@ -243,6 +243,7 @@ public class CustomerController {
         customerRequest.setMoneyState(0);
         customerRequest.setCreatedBy(id);
         customerRequest.setCreatedAt(LocalDate.now());
+        customerRequest.setStoreId(user.getStoreId());
 
         try {
             customerService.createCustomer(customerRequest);

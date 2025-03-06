@@ -65,6 +65,7 @@ public class AccountController {
 
 
 
+
         // ✅ Gọi phương thức tìm kiếm nếu có từ khóa, ngược lại lấy toàn bộ danh sách Owner
         Page<Map<String, Object>> accountPage;
 
@@ -174,7 +175,6 @@ public class AccountController {
         accountOwner.setDisplayName(displayname);
         accountOwner.setEmail(email);
         accountOwner.setCreatedBy(adAccount.get().getId());
-
         accountService.createAccount(accountOwner);
         return "redirect:/account/listOwner ";
 

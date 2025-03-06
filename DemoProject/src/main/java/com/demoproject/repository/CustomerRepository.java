@@ -64,4 +64,8 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
     "AND (:name IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%')))")
 
     List<Customer> findByIdInAndIsDeleteFalseAndNameContainingIgnoreCase(@Param("ids") List<Long> ids,String name);
+
+    @Query("SELECT c FROM Customer c WHERE c.storeId = :storeId " +
+            "AND (:name IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%')))")
+    List<Customer> findByStoreIdAndIsDeleteFalseAndNameContainingIgnoreCase(@Param("storeId") Long storeId,String name);
 }

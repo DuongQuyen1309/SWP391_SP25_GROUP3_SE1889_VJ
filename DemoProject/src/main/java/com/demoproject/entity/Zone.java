@@ -30,16 +30,10 @@ public class Zone {
     private LocalDate createdAt;
     @Column(name = "CREATED_BY")
     private int createdBy;
-    public Zone() {
-    }
 
-    public Zone(Long id, String name, Long storeId, LocalDate createdAt, int createdBy) {
-        this.id = id;
-        this.name = name;
-        this.storeId = storeId;
-        this.createdAt = createdAt;
-        this.createdBy = createdBy;
-    }
+    @Column(name = "POSITION")
+    private String position;
+
 
     public Long getId() {
         return id;
@@ -81,5 +75,13 @@ public class Zone {
 
     public void setCreatedBy(int createdBy) {
         this.createdBy = createdBy;
+    }
+
+    public String getPosition() {
+        return position;
+    }
+
+    public void setPosition(String position) {
+        this.position = position;
     }
 }

@@ -46,8 +46,7 @@ public class UserProfileInterceptor implements HandlerInterceptor {
         if (user.isPresent()) {
             Users currentUser = user.get();
             if (currentUser.getName() == null || currentUser.getPhone() == null ||
-                    currentUser.getGender() == null  ||
-                    currentUser.getDateOfBirth() == null) {
+                    currentUser.getGender() == null  ) {
 
                 // Lưu thông báo vào session để hiển thị trên trang userprofile
                 HttpSession session = request.getSession();

@@ -5,342 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Quản lý bán hàng</title>
   <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/bill.css">
   <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
-  <style>
-    .search-container {
-      background: white;
-      border-radius: 3px;
-      display: flex;
-      align-items: center;
-      margin-left: 15px;
-      padding: 0 8px;
-      width: 240px;
-      margin-bottom: 20px;
-    }
-    .search-container input {
-      border: none;
-      padding: 6px;
-      outline: none;
-      width: 100%;
-    }
-    .search-icon {
-      color: #666;
-    }.tab-container {
-       background-color: #f9f9f9;
-       display: flex;
-       align-items: center;
-       border-bottom: 1px solid #ddd;
-       overflow-x: auto;
-       white-space: nowrap;
-     }
-    .tab {
-      display: inline-flex;
-      align-items: center;
-      padding: 8px 20px 8px 15px;
-      background-color: #f1f1f1;
-      border-right: 1px solid #ddd;
-      cursor: pointer;
-      position: relative;
-      min-width: 150px;
-      max-width: 220px;
-    }
-    .tab.active {
-      background-color: white;
-      border-bottom: 2px solid #2c5aa9;
-    }
-    .tab-title {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      flex: 1;
-    }
-    .tab-close {
-      margin-left: 8px;
-      width: 16px;
-      height: 16px;
-      line-height: 14px;
-      text-align: center;
-      border-radius: 50%;
-    }
-    .tab-close:hover {
-      background-color: #ddd;
-    }
-    .add-tab {
-      padding: 8px 15px;
-      cursor: pointer;
-      font-size: 18px;
-      background-color: transparent;
-      border: none;
-    }
-    .main-container {
-      display: flex;
-      margin: 20px;
-      gap: 20px;
-      height: calc(100vh - 180px);
-    }
-    .left-panel {
-      flex: 3;
-      background-color: white;
-      border-radius: 4px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      display: flex;
-      flex-direction: column;
-      max-height: 100%;
-    }
-    .right-panel {
-      flex: 1;
-      background-color: white;
-      border-radius: 4px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      padding: 15px;
-      max-height: 100%;
-      overflow-y: auto;
-      min-width: 300px;
-    }
-    .toolbar {
-      display: flex;
-      justify-content: space-between;
-      padding: 15px;
-      align-items: center;
-      border-bottom: 1px solid #eee;
-    }
-    .toolbar-left {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-    .toolbar-right {
-      display: flex;
-      gap: 15px;
-      align-items: center;
-    }
-    .products-container {
-      flex: 1;
-      overflow-y: auto;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    th, td {
-      padding: 10px 15px;
-      text-align: left;
-      border-bottom: 1px solid #eee;
-    }
-    th {
-      font-weight: 500;
-      color: #333;
-      background-color: #f9f9f9;
-      position: sticky;
-      top: 0;
-      z-index: 1;
-    }
-    tr:hover {background-color: #f5f5f5;
-    }
-    .quantity-cell {
-      text-align: center;
-      position: relative;
-    }
-    .quantity-controls {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background-color: #f9f9f9;
-      border: 1px solid #ddd;
-      border-radius: 3px;
-      display: none;
-    }
-    .quantity-cell:hover .quantity-controls {
-      display: flex;
-    }
-    .quantity-btn {
-      width: 24px;
-      height: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      user-select: none;
-    }
-    .quantity-btn:hover {
-      background-color: #eee;
-    }
-    .quantity-btn.minus {
-      border-right: 1px solid #ddd;
-    }
-    .price-cell {
-      text-align: right;
-    }
-    .add-product {
-      display: flex;
-      padding: 15px;
-      border-top: 1px solid #eee;
-      color: #999;
-      font-style: italic;
-      cursor: pointer;
-    }
-    .add-product:hover {
-      background-color: #f9f9f9;
-    }
-    /* Định dạng modal */
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      justify-content: center;
-      align-items: center;
-    }
 
-    /* Nội dung modal */
-    .modal-content {
-      background: white;
-      padding: 20px;
-      width: 50%;
-      max-width: 600px;
-      border-radius: 8px;
-      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
-      position: relative;
-    }
-
-    /* Nút đóng modal */
-    .close {
-      position: absolute;
-      top: 10px;
-      right: 15px;
-      font-size: 24px;
-      cursor: pointer;
-    }
-
-    /* Input tìm kiếm */
-    .styled-input {
-      width: 100%;
-      padding: 8px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      margin-bottom: 10px;
-    }
-
-    /* Danh sách sản phẩm */
-    .product-list {
-      max-height: 300px;
-      overflow-y: auto;
-      border: 1px solid #ddd;
-      padding: 10px;
-      background: white;
-    }
-
-    /* Mỗi sản phẩm */
-    .product-item {
-      padding: 10px;
-      border-bottom: 1px solid #ddd;
-      cursor: pointer;
-    }
-
-    .product-item:hover {
-      background: #f1f1f1;
-    }
-
-    .customer-list {
-      position: absolute;
-      background: white;
-      border: 1px solid #ddd;
-      max-height: 200px;
-      overflow-y: auto;
-      width: 280px;
-      box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
-      display: none;
-    }
-
-    .customer-item {
-      padding: 10px;
-      cursor: pointer;
-      border-bottom: 1px solid #ddd;
-    }
-
-    .customer-item:hover {
-      background: #f1f1f1;
-    }
-
-
-    .checkout-button {
-      background-color: #3480e3;
-      color: white;
-      border: none;
-      padding: 12px 30px;
-      font-weight: 500;
-      border-radius: 4px;
-      cursor: pointer;
-      width: 100%;
-      margin-top: 20px;
-      text-align: center;
-    }
-
-    .section {
-      margin-bottom: 20px;
-      border: 1px solid #eee;
-      border-radius: 4px;
-    }
-    .section-header {
-      padding: 10px 15px;
-      background-color: #f9f9f9;
-      border-bottom: 1px solid #eee;
-      font-weight: 500;
-    }
-    .section-content {
-      padding: 15px;
-    }
-    .form-group {
-      margin-bottom: 15px;
-    }
-    .form-group label {
-      display: block;
-      margin-bottom: 5px;
-      font-size: 14px;
-      color: #666;
-    }
-    .form-control {
-      width: 100%;
-      padding: 8px 12px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-    }
-    .total-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 8px 0;
-      border-bottom: 1px solid #eee;
-    }
-    .total-row:last-child {
-      border-bottom: none;
-    }
-    .total-label {
-      color: #666;
-    }
-    .total-value {
-      font-weight: 500;
-    }
-    .total-value.highlight {
-      color: #e74c3c;
-      font-weight: bold;
-    }
-    .payment-methods {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    .payment-method {
-      flex: 1;
-      min-width: 80px;
-      display: flex;
-      align-items: center;
-    }
-  </style>
   <script src="/js/home.js"></script>
 
 </head>
@@ -440,26 +107,82 @@
       <div class="section-header">Thông tin khách hàng</div>
       <div class="section-content">
         <div class="form-group">
+           <div class="customer-buttons">
+            <button id="search-customer-btn">🔍 Tìm</button>
+            <button id="add-customer-btn">➕ Thêm</button>
+          </div>
+        </div>
+        <div class="form-group">
           <label>Khách hàng</label>
-          <input type="text" class="form-control" id="customer-search" onkeyup="searchCustomer()"  placeholder="Nhập tên khách hàng">
-          <div id="customer-list" class="customer-list"></div>
+          <input type="text" class="form-control" id="customer-name"  >
         </div>
         <div class="form-group">
           <label>Địa chỉ</label>
-          <input type="text" class="form-control" id="customer-address" placeholder="Nhập địa chỉ khách hàng" readonly>
+          <input type="text" class="form-control" id="customer-address"  >
         </div>
         <div class="form-group">
           <label>Số điện thoại</label>
-          <input type="text" class="form-control" id="customer-phone" placeholder="Nhập số điện thoại" readonly>
+          <input type="text" class="form-control" id="customer-phone"  >
+        </div>
+        <div class="form-group">
+          <label>Gender</label>
+          <input type="text" class="form-control" id="customer-gender" >
+        </div>
+        <div class="form-group">
+          <label>Date Of Birth</label>
+          <input type="text" class="form-control" id="customer-dob" >
         </div>
         <div class="form-group">
           <label>Nợ cũ</label>
-          <input type="text" class="form-control" placeholder="Nợ cũ" readonly>
+          <input type="text" class="form-control" id="customer-moneystate" readonly>
         </div>
         <div class="form-group">
           <label>Tổng côn nợ</label>
           <input type="text" class="form-control" placeholder="Tổng côn nợ" readonly>
         </div>
+      </div>
+    </div>
+    <!-- Popup tìm kiếm khách hàng -->
+    <div id="customer-search-modal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeCustomerSearchModal()">&times;</span>
+        <h2>Tìm kiếm khách hàng</h2>
+        <input type="text" id="search-customer-input" class="styled-input" placeholder="Nhập tên khách hàng..." onkeyup="searchCustomer()">
+        <div id="customer-list" class="customer-list"></div>
+      </div>
+    </div>
+
+    <!-- Popup thêm khách hàng -->
+    <div id="add-customer-modal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeAddCustomerModal()">&times;</span>
+        <h2>Thêm khách hàng mới</h2>
+        <div class="form-group">
+          <label>Tên khách hàng</label>
+          <input type="text" class="form-control" id="new-customer-name">
+        </div>
+        <div class="form-group">
+          <label>Gender:</label>
+          <select id="new-customer-gender">
+            <option value="true" >Male</option>
+            <option value="false" >Female</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Địa chỉ</label>
+          <input type="text" class="form-control" id="new-customer-address">
+        </div>
+        <div class="form-group">
+          <label>Số điện thoại</label>
+          <input type="text" class="form-control" id="new-customer-phone">
+        </div>
+        <div class="form-group">
+          <label>Date of birth</label>
+          <input type="date" class="form-control" id="new-customer-dob">
+        </div>
+
+
+        <button id="save-customer-btn">Lưu khách hàng</button>
       </div>
     </div>
 
@@ -482,10 +205,10 @@
       <div class="section-content">
         <div class="total-row">
           <span class="total-label">Khách thanh toán:</span>
-          <span class="total-value" id="payment-amount">13,815,000</span>
+          <span class="total-value highlight" id="display-payment-amount">0</span> <!-- Chỉ hiển thị số tiền -->
         </div>
 
-        <div class="payment-methods">
+        <div class="payment-methods" style="margin-bottom: 10px">
           <div class="payment-method">
             <input type="radio" name="payment" id="pay-all">
             <label for="pay-all">Trả hết</label>
@@ -499,10 +222,15 @@
             <label for="loading">Bốc hàng</label>
           </div>
         </div>
+        <!-- Ô nhập tiền trả nợ, mặc định ẩn -->
+        <div id="debt-payment-container" style="display: none; margin-bottom: 10px">
+          <label>Nhập số tiền trả nợ:</label>
+          <input type="text" class="form-control" id="debt-payment-amount" value="0">
+        </div>
 
         <div class="payment-amount">
           <div>Tiền bốc hàng:</div>
-          <input type="text" class="form-control payment-input" id="loading-amount" value="0">
+          <input type="text" class="form-control payment-input" id="loading-amount" value="0" readonly>
         </div>
 
         <button class="checkout-button">THANH TOÁN</button>
@@ -517,6 +245,7 @@
 </footer>
 
 <script>
+
   let tabData = {}; // Lưu dữ liệu cho từng tab
   let activeTabId = "tab-1"; // ID của tab đang được chọn
 
@@ -564,15 +293,15 @@
 
   /* Khi chọn sản phẩm, thêm vào hóa đơn và đóng modal */
   function selectProduct(id, name, price) {
-    if (!tabData[activeTabId]) tabData[activeTabId] = [];
+    if (!tabData[activeTabId])tabData[activeTabId] = { customer: {}, products: [] };
 
-    let existingProduct = tabData[activeTabId].find(p => p.id === id);
+    let existingProduct = tabData[activeTabId].products.find(p => p.id === id);
     if (existingProduct) {
       alert("Sản phẩm này đã được thêm vào tab này!");
       return;
     }
 
-    tabData[activeTabId].push({ id, name, price, quantity: 1 });
+    tabData[activeTabId].products.push({ id, name, price, quantity: 1 });
     document.getElementById("search-product").value = ""; // Xóa nội dung tìm kiếm
     document.getElementById("product-list").innerHTML = "<p>Nhập tên sản phẩm để tìm kiếm...</p>";
     renderProducts(activeTabId);
@@ -581,23 +310,58 @@
     closeProductModal(); // Đóng modal sau khi chọn sản phẩm
   }
 
-  document.getElementById("customer-search").addEventListener("keypress", function(event) {
-    if (event.key === "Enter") {
-      event.preventDefault(); // Ngăn chặn reload trang
-
-      let customerList = document.getElementById("customer-list").children;
-      if (customerList.length > 0) {
-        // Nếu danh sách có khách hàng, chọn khách hàng đầu tiên
-        customerList[0].click();
-      } else {
-        // Nếu không có khách hàng, mở khóa nhập thông tin mới
-        resetCustomerFields();
-      }
-    }
+  // Mở popup tìm kiếm khách hàng
+  document.getElementById("search-customer-btn").addEventListener("click", function () {
+    document.getElementById("customer-search-modal").style.display = "flex";
   });
 
+  // Đóng popup tìm kiếm khách hàng
+  function closeCustomerSearchModal() {
+    document.getElementById("customer-search-modal").style.display = "none";
+  }
+
+  // Mở popup thêm khách hàng
+  document.getElementById("add-customer-btn").addEventListener("click", function () {
+    document.getElementById("add-customer-modal").style.display = "flex";
+  });
+
+  // Đóng popup thêm khách hàng
+  function closeAddCustomerModal() {
+    document.getElementById("add-customer-modal").style.display = "none";
+  }
+
+
+
+  // Lắng nghe sự kiện thay đổi trên các ô nhập thông tin khách hàng
+  document.getElementById("customer-name").addEventListener("input", updateCustomerData);
+  document.getElementById("customer-phone").addEventListener("input", updateCustomerData);
+  document.getElementById("customer-address").addEventListener("input", updateCustomerData);
+  document.getElementById("customer-dob").addEventListener("input", updateCustomerData);
+  document.getElementById("customer-gender").addEventListener("input", updateCustomerData);
+  document.getElementById("customer-moneystate").addEventListener("input", updateCustomerData);
+
+  // Hàm cập nhật dữ liệu vào tab hiện tại
+  function updateCustomerData() {
+    if (!tabData[activeTabId]) {
+      tabData[activeTabId] = { customer: {}, products: [] };
+    }
+
+    tabData[activeTabId].customer = {
+      name: document.getElementById("customer-name").value.trim(),
+      phone: document.getElementById("customer-phone").value.trim(),
+      address: document.getElementById("customer-address").value.trim(),
+      dob: document.getElementById("customer-dob").value.trim(),
+      gender: document.getElementById("customer-gender").value.trim(),
+      moneystate: document.getElementById("customer-moneystate").value.trim(),
+
+
+    };
+
+    console.log(`Cập nhật khách hàng cho tab ${activeTabId}:`, tabData[activeTabId].customer);
+  }
+
   function searchCustomer() {
-    let keyword = document.getElementById("customer-search").value.trim();
+    let keyword = document.getElementById("search-customer-input").value.trim();
     let customerList = document.getElementById("customer-list");
 
     if (keyword.length >= 1) {
@@ -608,20 +372,22 @@
               .then(response => response.json())
               .then(data => {
                 if (data.length === 0) {
-                  customerList.innerHTML = `<p>Không tìm thấy khách hàng. Nhấn Enter để thêm mới</p>`;
-                  resetCustomerFields(); // Cho phép nhập mới
+                  customerList.innerHTML = `<p>Không tìm thấy khách hàng.</p>`;
                 } else {
                   customerList.innerHTML = data.map(customer => `
                         <div class="customer-item" onclick="selectCustomer(
-                            '${customer.name || ''}',
-                            '${customer.phone || ''}',
-                            '${customer.address || ''}',
-                            true
+                            '${customer.name}',
+                            '${customer.phone}',
+                            '${customer.address}',
+                            '${customer.dob}',
+                            '${customer.gender}',
+                            '${customer.moneyState}'
                         )">
-                            ${customer.name || 'Không có tên'} - ${customer.phone || 'Không có số điện thoại'}
-                        </div>
-                    `).join("");
 
+                            ${customer.name} - ${customer.phone}
+                        </div>
+
+                    `).join("");
                 }
               })
               .catch(error => {
@@ -631,57 +397,89 @@
     } else {
       customerList.innerHTML = "";
       customerList.style.display = "none";
-      resetCustomerFields(); // Cho phép nhập mới khi không tìm thấy khách hàng
     }
   }
 
-  function selectCustomer(name, phone, address) {
-
+  // Chọn khách hàng từ danh sách
+  function selectCustomer(name, phone, address,dob,gender,moneystate) {
+    document.getElementById("customer-name").value = name;
+    document.getElementById("customer-phone").value = phone;
+    document.getElementById("customer-address").value = address;
+    document.getElementById("customer-dob").value = dob;
+    document.getElementById("customer-gender").value = gender;
+    document.getElementById("customer-moneystate").value = moneystate;
+    console.log(gender)
     if (!tabData[activeTabId]) {
       tabData[activeTabId] = { customer: {}, products: [] };
     }
 
-    tabData[activeTabId].customer = {
-      name,
-      phone,
-      address
-    };
-    let customerList = document.getElementById("customer-list");
-    document.getElementById("customer-search").value = name;
-    document.getElementById("customer-phone").value = phone;
-    document.getElementById("customer-address").value = address;
-    customerList.innerHTML = "";
-    customerList.style.display = "none";
-    if (exists) {
-      // Nếu khách hàng đã tồn tại, khóa các ô nhập
-      document.getElementById("customer-phone").readOnly = true;
-      document.getElementById("customer-address").readOnly = true;
+    // Lưu tên khách hàng ban đầu
+    tabData[activeTabId].originalCustomerName = name;
 
-    } else {
-      // Nếu là khách hàng mới, mở khóa để nhập thông tin
-      document.getElementById("customer-phone").readOnly = false;
-      document.getElementById("customer-address").readOnly = false;
+    tabData[activeTabId].customer = { name, phone, address ,dob,gender ,moneystate };
+    // Đặt readonly
+    document.getElementById("customer-name").readOnly = true;
+    document.getElementById("customer-phone").readOnly = true;
+    document.getElementById("customer-address").readOnly = true;
+    document.getElementById("customer-dob").readOnly = true;
+    document.getElementById("customer-gender").readOnly = true;
+    document.getElementById("customer-moneystate").readOnly = true;
+
+    // Đóng popup
+    closeCustomerSearchModal();
+  }
+  document.getElementById("save-customer-btn").addEventListener("click", function () {
+    let name = document.getElementById("new-customer-name").value.trim();
+    let phone = document.getElementById("new-customer-phone").value.trim();
+    let address = document.getElementById("new-customer-address").value.trim();
+    let dob = document.getElementById("new-customer-dob").value.trim();
+    let gender = document.getElementById("new-customer-gender").value.trim();
+    if (!name || !phone || !address) {
+      alert("Vui lòng nhập đầy đủ thông tin khách hàng!");
+      return;
     }
 
-    document.getElementById("customer-list").style.display = "none"; // Ẩn danh sách gợi ý sau khi chọn
-  }
+    let requestData = {
+      name: name,
+      phone: phone,
+      address: address,
+      dob: dob,
+      gender: gender
+    };
 
-  // Xóa dữ liệu cũ và mở khóa nhập liệu nếu khách hàng chưa có
-  function resetCustomerFields() {
-    document.getElementById("customer-phone").value = "";
-    document.getElementById("customer-address").value = "";
-    let customerList = document.getElementById("customer-list");
-    customerList.innerHTML = "";
-    customerList.style.display = "none";
-    document.getElementById("customer-phone").readOnly = false;
-    document.getElementById("customer-address").readOnly = false;
-  }
+    fetch("/bill/addCustomer", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(requestData)
+    })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                alert("Thêm khách hàng thành công!");
+
+
+                closeAddCustomerModal();
+              } else {
+                alert("Lỗi khi thêm khách hàng: " + data.message);
+              }
+            })
+            .catch(error => {
+              console.error("Lỗi gửi dữ liệu:", error);
+              alert("Có lỗi xảy ra khi gửi dữ liệu.");
+            });
+  });
 
   function renderProducts(tabId) {
     let productTable = document.getElementById("selected-products");
     productTable.innerHTML = "";
 
-    tabData[tabId].forEach((product, index) => {
+    if (!tabData[tabId] || !Array.isArray(tabData[tabId].products)) {
+      tabData[tabId] = { customer: {}, products: [] }; // Đảm bảo có mảng products
+    }
+
+    tabData[tabId].products.forEach((product, index) => {
       let row = `
             <tr id="product-${product.id}">
                 <td>${index + 1}</td>
@@ -703,7 +501,8 @@
   }
 
   function changeQuantity(tabId, id, change) {
-    let product = tabData[tabId].find(p => p.id === id);
+    let product = tabData[tabId].products.find(p => p.id === id);
+    console.log(product)
     if (!product) return;
 
     product.quantity = Math.max(1, product.quantity + change);
@@ -713,28 +512,103 @@
   }
 
   function removeProduct(tabId, id) {
-    tabData[tabId] = tabData[tabId].filter(p => p.id !== id);
+    if (!tabData[tabId] || !Array.isArray(tabData[tabId].products)) return;
+    tabData[tabId] = tabData[tabId].products.filter(p => p.id !== id);
     renderProducts(tabId);
     updateOrderTotal(tabId);
   }
 
-  function updateOrderTotal(tabId) {
-    let total = tabData[tabId].reduce((sum, product) => sum + product.price * product.quantity, 0);
-    document.getElementById("total-amount").textContent = formatPrice(total);
-    document.getElementById("customer-pay").textContent = formatPrice(total);
+  document.getElementById("loading").addEventListener("change", function () {
+    let loadingAmountInput = document.getElementById("loading-amount");
+    console.log(loadingAmountInput);
+    if (this.checked) {
+      loadingAmountInput.removeAttribute("readonly"); // Cho phép nhập tiền bốc hàng
+    } else {
+      loadingAmountInput.setAttribute("readonly", true); // Không cho phép nhập
+      loadingAmountInput.value = "0"; // Đặt lại về 0 khi bỏ chọn
+    }
+
+    updateOrderTotal(activeTabId);
+  });
+
+  // Khi chọn "Trả hết", ẩn ô nhập tiền trả nợ và cập nhật số tiền khách thanh toán = tổng tiền
+  document.getElementById("pay-all").addEventListener("change", function () {
+    if (this.checked) {
+      let totalAmount = parsePrice(document.getElementById("customer-pay").textContent);
+      document.getElementById("display-payment-amount").textContent = formatPrice(totalAmount);
+
+      document.getElementById("debt-payment-container").style.display = "none"; // Ẩn ô nhập số tiền trả nợ
+    }
+  });
+
+  // Khi chọn "Trả nợ", hiển thị ô nhập tiền trả nợ và cập nhật số tiền khách thanh toán
+  document.getElementById("pay-rent").addEventListener("change", function () {
+    if (this.checked) {
+      document.getElementById("debt-payment-container").style.display = "block"; // Hiển thị ô nhập số tiền trả nợ
+      updatePaymentAmount(); // Cập nhật số tiền khách thanh toán
+    }
+  });
+
+  // Khi nhập số tiền trả nợ, cập nhật số tiền khách thanh toán
+  document.getElementById("debt-payment-amount").addEventListener("input", function () {
+    updatePaymentAmount();
+  });
+
+  // Hàm cập nhật tổng tiền khách thanh toán
+  function updatePaymentAmount() {
+    let totalAmount = parsePrice(document.getElementById("customer-pay").textContent);
+    let debtPayment = parsePrice(document.getElementById("debt-payment-amount").value);
+
+    if (document.getElementById("pay-rent").checked) {
+      document.getElementById("display-payment-amount").textContent = formatPrice(totalAmount + debtPayment);
+    }
   }
+
+  function updateOrderTotal(tabId) {
+    let productTotal = 0; // Mặc định tổng tiền sản phẩm là 0 nếu chưa có sản phẩm nào
+    if (tabData[activeTabId] && tabData[activeTabId].products) {
+      productTotal = tabData[activeTabId].products.reduce((sum, product) => sum + product.price * product.quantity, 0);
+    }
+
+    // Lấy tiền bốc hàng nếu checkbox "Bốc hàng" được chọn
+    let loadingFee = document.getElementById("loading").checked ? parsePrice(document.getElementById("loading-amount").value) : 0;
+
+    let finalTotal = productTotal + loadingFee;
+
+    document.getElementById("total-amount").textContent = formatPrice(finalTotal);
+    document.getElementById("customer-pay").textContent = formatPrice(finalTotal);
+    // Nếu đang chọn "Trả hết", cập nhật lại số tiền khách thanh toán
+    if (document.getElementById("pay-all").checked) {
+      document.getElementById("display-payment-amount").textContent = formatPrice(finalTotal);
+    } else {
+      updatePaymentAmount(); // Nếu chọn "Trả nợ", cập nhật theo số tiền nhập
+    }
+  }
+  // Gán sự kiện khi nhập tiền bốc hàng sẽ cập nhật tổng tiền ngay lập tức
+  document.getElementById("loading-amount").addEventListener("input", function () {
+    if (document.getElementById("loading").checked) {
+      updateOrderTotal(); // Cập nhật tổng tiền ngay khi nhập giá trị
+    }
+  });
 
   // Xử lý tạo và chuyển tab
   document.querySelector(".add-tab").addEventListener("click", function () {
-    let tabCount = document.querySelectorAll(".tab").length + 1;
-    let tabId = `tab-${tabCount}`;
-    tabData[tabId] = [];
+    let existingNumbers = [...document.querySelectorAll(".tab")]
+            .map(tab => parseInt(tab.querySelector(".tab-title").textContent.replace("Hóa đơn ", "")))
+            .filter(n => !isNaN(n)); // Lấy danh sách các số hóa đơn hiện tại
+
+    let newNumber = 1;
+    while (existingNumbers.includes(newNumber)) {
+      newNumber++; // Tìm số nhỏ nhất chưa được dùng
+    }
+    let tabId = `tab-${Date.now()}`; // Sử dụng timestamp để tạo ID duy nhất
+    tabData[tabId] = { customer: {}, products: [] }; // Đúng cú pháp
 
     let newTab = document.createElement("div");
     newTab.className = "tab";
     newTab.setAttribute("data-tab", tabId);
     newTab.innerHTML = `
-        <span class="tab-title">Hóa đơn ${tabCount}</span>
+        <span class="tab-title">Hóa đơn ${newNumber}</span>
         <span class="tab-close">×</span>
     `;
 
@@ -752,19 +626,144 @@
       }
     });
 
-    document.querySelector(".tab-container").insertBefore(newTab, this);
+    // ✅ Chèn tab vào đúng vị trí thay vì chỉ đặt trước dấu +
+    let tabContainer = document.querySelector(".tab-container");
+    let tabs = [...tabContainer.querySelectorAll(".tab")];
+
+    let inserted = false;
+    for (let tab of tabs) {
+      let tabNumber = parseInt(tab.querySelector(".tab-title").textContent.replace("Hóa đơn ", ""));
+      if (newNumber < tabNumber) {
+        tabContainer.insertBefore(newTab, tab);
+        inserted = true;
+        break;
+      }
+    }
+
+    if (!inserted) {
+      tabContainer.insertBefore(newTab, document.querySelector(".add-tab"));
+    }
+
     switchTab(tabId);
   });
 
   function switchTab(tabId) {
+    savePaymentData(activeTabId);
+    console.log(tabData[activeTabId]?.payment.method);
+    // Nếu tab chưa có dữ liệu, khởi tạo mới
+
     activeTabId = tabId;
     document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
     document.querySelector(`[data-tab="${tabId}"]`).classList.add("active");
 
+    if (!tabData[tabId]) {
+      tabData[tabId] = { customer: {}, products: [], payment: { method: "pay-all", loading: false, debtAmount: 0, loadingAmount: 0 } };
+    }
+
     renderProducts(tabId);
     updateOrderTotal(tabId);
+
+    // Reset và cập nhật lựa chọn thanh toán
+    loadPaymentData(tabId);
+
     // Reset thông tin khách hàng khi chuyển tab
+    loadCustomerData(tabId);
   }
+
+  function savePaymentData(tabId) {
+    if (!tabData[tabId]) {
+      tabData[tabId] = { customer: {}, products: [], payment: {} }; // Khởi tạo nếu chưa có
+    }
+
+    tabData[tabId].payment = {
+      method: document.getElementById("pay-all").checked ? "pay-all" : "pay-rent",
+      debtAmount: parsePrice(document.getElementById("debt-payment-amount").value),
+      loading: document.getElementById("loading").checked,
+      loadingAmount: parsePrice(document.getElementById("loading-amount").value)
+    };
+  }
+
+
+
+  function loadPaymentData(tabId) {
+    let paymentData = tabData[tabId]?.payment || { method: "pay-all", loading: false, debtAmount: 0, loadingAmount: 0 };
+
+    // Reset lại radio button và checkbox
+    console.log(paymentData.method);
+    document.getElementById("pay-all").checked = paymentData.method === "pay-all";
+    document.getElementById("pay-rent").checked = paymentData.method === "pay-rent";
+    document.getElementById("loading").checked = paymentData.loading;
+
+    // Hiển thị hoặc ẩn ô nhập tiền trả nợ
+    document.getElementById("debt-payment-container").style.display = paymentData.method === "pay-rent" ? "block" : "none";
+    document.getElementById("debt-payment-amount").value = paymentData.debtAmount;
+
+    // Hiển thị tiền bốc hàng
+    let loadingAmountInput = document.getElementById("loading-amount");
+    loadingAmountInput.value = paymentData.loadingAmount;
+    loadingAmountInput.readOnly = !paymentData.loading;
+
+    // ✅ **Cập nhật số tiền khách thanh toán theo tab hiện tại**
+    let totalAmount = parsePrice(document.getElementById("customer-pay").textContent);
+    let debtPayment = paymentData.debtAmount || 0;
+    let finalPayment = paymentData.method === "pay-rent" ? totalAmount + debtPayment : totalAmount;
+    document.getElementById("display-payment-amount").textContent = formatPrice(finalPayment);
+    // Cập nhật số tiền khách thanh toán
+    updatePaymentAmount(tabId);
+  }
+
+
+  function loadCustomerData(tabId) {
+    let customer = tabData[tabId]?.customer || {};
+    console.log(customer.moneystate)
+    document.getElementById("customer-name").value = customer.name || "";
+    document.getElementById("customer-phone").value = customer.phone || "";
+    document.getElementById("customer-address").value = customer.address || "";
+    document.getElementById("customer-dob").value = customer.dob || "";
+    document.getElementById("customer-gender").value = customer.gender || "";
+    document.getElementById("customer-moneystate").value = customer.moneystate || "";
+  }
+
+  document.querySelector(".checkout-button").addEventListener("click", function () {
+    if (!tabData[activeTabId]) {
+      alert("Không có dữ liệu để thanh toán!");
+      return;
+    }
+
+    let customerData = tabData[activeTabId]?.customer || {};
+    let productData = tabData[activeTabId]?.products || [];
+
+    if (!customerData.name || productData.length === 0) {
+      alert("Vui lòng nhập thông tin khách hàng và thêm sản phẩm!");
+      return;
+    }
+
+    let requestData = {
+      customer: customerData,
+      products: productData
+    };
+
+    fetch("/bill/submitBill", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(requestData)
+    })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                alert("Thanh toán thành công!");
+                removeTab(activeTabId); // Xóa tab đã xử lý
+              } else {
+                alert("Lỗi khi xử lý thanh toán: " + data.message);
+              }
+            })
+            .catch(error => {
+              console.error("Lỗi gửi dữ liệu:", error);
+              alert("Có lỗi xảy ra khi gửi dữ liệu.");
+            });
+  });
 </script>
 
 

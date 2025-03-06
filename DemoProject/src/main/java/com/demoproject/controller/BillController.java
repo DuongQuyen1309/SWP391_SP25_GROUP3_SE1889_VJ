@@ -1,5 +1,6 @@
 package com.demoproject.controller;
 
+import com.demoproject.dto.request.CustomerRequest;
 import com.demoproject.entity.Account;
 import com.demoproject.entity.Customer;
 import com.demoproject.entity.Product;
@@ -10,6 +11,7 @@ import com.demoproject.service.AccountService;
 import com.demoproject.service.CustomerService;
 import com.demoproject.service.ProductService;
 import com.demoproject.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -17,9 +19,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalDate;
+import java.util.*;
 
 @Controller
 @RequestMapping("/bill")
@@ -97,40 +98,43 @@ public class BillController {
         Optional<Account> optAccount = accountRepository.findByUsernameAndIsDeleteFalse(username);
         Optional<Users> userOpt= userService.getUserProfile(optAccount.get().getUserId());
         Users user = userOpt.orElse(new Users());
-        return productService.getProductsByNameAndCreatedBy(keyword,user.getId().toString());
+        return productService.getProductsByNameAndCreatedBy(keyword,user.getStoreId());
     }
 
     @GetMapping("/searchCustomers")
     @ResponseBody
     public List<Customer> searchCustomers(@RequestParam String keyword, @CookieValue(value = "token", required = false) String token) {
-        List<Long> relatedUserList = new ArrayList<>();
-        relatedUserList = getUserId(token);
-        String username = jwtUtils.extractUsername(token);
-        Optional<Account> optAccount = accountRepository.findByUsernameAndIsDeleteFalse(username);
-        Optional<Users> userOpt= userService.getUserProfile(optAccount.get().getUserId());
-        Users user = userOpt.orElse(new Users());
-        return customerService.searchCustomer(relatedUserList,keyword);
+
+        Account account = accountService.getAccountFromToken(token).orElse(null);
+        Users user = userService.getUserProfile(account.getUserId()).orElse(null);
+        List<Customer> customers= customerService.searchCustomer(user.getStoreId(),keyword);
+
+        return customers;
     }
 
 
-
-    public List<Long> getUserId(@CookieValue(value = "token", required = false) String token){
-        String username = jwtUtils.extractUsername(token);
-        Optional<Account> optAccount = accountRepository.findByUsernameAndIsDeleteFalse(username);
-        Optional<Users> userOpt= userService.getUserProfile(optAccount.get().getUserId());
-        Users user = userOpt.orElse(new Users());
-        String role= jwtUtils.extractRole(token);
-        List<Long> relatedUserList = new ArrayList<>();
-        if(role.equalsIgnoreCase("OWNER")){
-            relatedUserList = userService.getStaffID(user.getId());
-            relatedUserList.add(user.getId());
-
-        }else if(role.equalsIgnoreCase("STAFF")){
-            Long ownerId = userService.getOwnerID(user.getId());
-            relatedUserList = userService.getStaffID(ownerId);
-            relatedUserList.add(ownerId);
-
+    @PostMapping("/addCustomer")
+    @ResponseBody
+    public Map<String, Object> addCustomer(@RequestBody CustomerRequest customerRequest,
+                                           @CookieValue(value = "token", required = false) String token) {
+        Map<String, Object> response = new HashMap<>();
+        Account account = accountService.getAccountFromToken(token).orElse(null);
+        Users user = userService.getUserProfile(account.getUserId()).orElse(null);
+        String phone = customerRequest.getPhone().trim();
+        customerRequest.setPhone(phone.trim());
+        customerRequest.setMoneyState(0);
+        customerRequest.setCreatedBy(user.getId());
+        customerRequest.setCreatedAt(LocalDate.now());
+        customerRequest.setStoreId(user.getStoreId());
+        try {
+            customerService.createCustomer(customerRequest);
+            response.put("success", true);
+            response.put("message", "Thêm khách hàng thành công!");
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Lỗi khi thêm khách hàng: " + e.getMessage());
         }
-        return relatedUserList;
+        return response;
     }
+
 }

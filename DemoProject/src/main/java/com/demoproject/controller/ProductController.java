@@ -71,6 +71,7 @@ public class ProductController {
         product.setDescription(description);
         product.setIsDeleted(0);
         product.setCreatedBy(user.get().getId().toString());
+        product.setStoreId(user.get().getStoreId());
         productRepository.save(product);
         return "redirect:/product/listProduct";
     }
