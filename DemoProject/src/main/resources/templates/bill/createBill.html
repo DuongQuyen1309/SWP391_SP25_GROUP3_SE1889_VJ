@@ -138,7 +138,7 @@
         </div>
         <div class="form-group">
           <label>Tổng côn nợ</label>
-          <input type="text" class="form-control" placeholder="Tổng côn nợ" readonly>
+          <input type="text" class="form-control" id="customer-totaldebt" placeholder="Tổng côn nợ" readonly>
         </div>
       </div>
     </div>
@@ -408,6 +408,7 @@
     document.getElementById("customer-dob").value = dob;
     document.getElementById("customer-gender").value = gender;
     document.getElementById("customer-moneystate").value = moneystate;
+    document.getElementById("customer-totaldebt").value = moneystate;
     console.log(gender)
     if (!tabData[activeTabId]) {
       tabData[activeTabId] = { customer: {}, products: [] };
@@ -534,24 +535,37 @@
   // Khi chọn "Trả hết", ẩn ô nhập tiền trả nợ và cập nhật số tiền khách thanh toán = tổng tiền
   document.getElementById("pay-all").addEventListener("change", function () {
     if (this.checked) {
+      let oldDebt = parsePrice(document.getElementById("customer-moneystate").value);
       let totalAmount = parsePrice(document.getElementById("customer-pay").textContent);
       document.getElementById("display-payment-amount").textContent = formatPrice(totalAmount);
 
       document.getElementById("debt-payment-container").style.display = "none"; // Ẩn ô nhập số tiền trả nợ
+
+      // ✅ Giữ nguyên tổng công nợ bằng nợ cũ
+      document.getElementById("customer-totaldebt").value = formatPrice(oldDebt);
     }
   });
 
   // Khi chọn "Trả nợ", hiển thị ô nhập tiền trả nợ và cập nhật số tiền khách thanh toán
   document.getElementById("pay-rent").addEventListener("change", function () {
+
+    let customerName = document.getElementById("customer-name").value.trim();
     if (this.checked) {
       document.getElementById("debt-payment-container").style.display = "block"; // Hiển thị ô nhập số tiền trả nợ
-      updatePaymentAmount(); // Cập nhật số tiền khách thanh toán
+
+      if (customerName === "") {
+        document.getElementById("total-debt").value = "";
+      } else {
+        updatePaymentAmount(); // Cập nhật số tiền khách thanh toán
+        updateTotalDebt(); // Cập nhật đúng tổng công nợ
+      }
     }
   });
 
   // Khi nhập số tiền trả nợ, cập nhật số tiền khách thanh toán
   document.getElementById("debt-payment-amount").addEventListener("input", function () {
     updatePaymentAmount();
+    updateTotalDebt();
   });
 
   // Hàm cập nhật tổng tiền khách thanh toán
@@ -561,6 +575,25 @@
 
     if (document.getElementById("pay-rent").checked) {
       document.getElementById("display-payment-amount").textContent = formatPrice(totalAmount + debtPayment);
+    }
+  }
+
+  function updateTotalDebt() {
+    let customerName = document.getElementById("customer-name").value.trim();
+    let oldDebt = parsePrice(document.getElementById("customer-moneystate").value);
+    let paidDebt = parsePrice(document.getElementById("debt-payment-amount").value);
+
+    // ✅ Nếu chưa có khách hàng, tổng công nợ là ""
+    if (customerName === "") {
+      document.getElementById("total-debt").value = "";
+      return;
+    }
+    // Nếu chọn "Trả hết", tổng còn nợ phải là 0
+    if (document.getElementById("pay-all").checked) {
+      document.getElementById("total-debt").value = formatPrice(oldDebt);
+    } else {
+      let newTotalDebt = oldDebt + paidDebt;
+      document.getElementById("customer-totaldebt").value = formatPrice(newTotalDebt);
     }
   }
 
@@ -722,6 +755,7 @@
     document.getElementById("customer-dob").value = customer.dob || "";
     document.getElementById("customer-gender").value = customer.gender || "";
     document.getElementById("customer-moneystate").value = customer.moneystate || "";
+    document.getElementById("customer-totaldebt").value = customer.moneystate || "";
   }
 
   document.querySelector(".checkout-button").addEventListener("click", function () {

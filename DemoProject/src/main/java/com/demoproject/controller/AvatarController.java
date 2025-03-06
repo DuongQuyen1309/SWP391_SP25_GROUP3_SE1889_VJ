@@ -65,9 +65,14 @@ public class AvatarController {
                 return ResponseEntity.status(401).body(response);
             }
 
-            // Tạo tên file duy nhất
-            String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+            String originalFileName = file.getOriginalFilename();
+            String fileExtension = originalFileName.contains(".") ?
+                    originalFileName.substring(originalFileName.lastIndexOf(".")) : ".png"; // Mặc định PNG nếu không có phần mở rộng
+
+            // Tạo tên file ngắn gọn
+            String fileName = UUID.randomUUID().toString().substring(0, 8) + fileExtension;
             String uploadDir = "uploads/images/";
+
 
             // Tạo thư mục nếu chưa có
             Path uploadPath = Paths.get(uploadDir);
