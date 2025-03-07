@@ -220,11 +220,7 @@
             <option value="false" th:selected="${param.gender == 'false'}">Female</option>
         </select>
 
-        <label for="ctype">Customer Type:</label>
-        <select name="ctype" id="ctype">
-            <option value="retail" th:selected="${param.ctype == 'retail'}">Retail</option>
-            <option value="wholesale" th:selected="${param.ctype == 'wholesale'}">Wholesale</option>
-        </select>
+
 
         <button type="submit">Create Customer</button>
     </form>

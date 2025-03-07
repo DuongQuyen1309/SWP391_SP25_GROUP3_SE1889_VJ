@@ -34,34 +34,10 @@ public class Customer {
     private Boolean isDelete = false;
     @Column(name = "moneyState")
     private Integer moneyState ;
-    @Column(name = "ctype")
-    private String ctype;
 
     @Column(name = "store_id")
     private Long storeId;
 
-    public Customer() {
-    }
-
-    public Customer(String name, Boolean gender, LocalDate dob, String address, String phone, Integer moneyState, String ctype) {
-        this.name = name;
-        this.gender = gender;
-        this.dob = dob;
-        this.address = address;
-        this.phone = phone;
-        this.moneyState = moneyState;
-        this.ctype = ctype;
-    }
-
-    public Customer(Long id, String name, Boolean gender, LocalDate dob, String address, String phone, Integer moneyState) {
-        this.id = id;
-        this.name = name;
-        this.gender = gender;
-        this.dob = dob;
-        this.address = address;
-        this.phone = phone;
-        this.moneyState = moneyState;
-    }
 
 
     public Long getId() {
@@ -160,13 +136,6 @@ public class Customer {
         this.moneyState = moneyState;
     }
 
-    public String getCtype() {
-        return ctype;
-    }
-
-    public void setCtype(String ctype) {
-        this.ctype = ctype;
-    }
 
     public Long getStoreId() {
         return storeId;

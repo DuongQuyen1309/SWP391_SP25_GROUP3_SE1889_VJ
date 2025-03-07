@@ -228,7 +228,6 @@
       <td>Address</td>
       <td>Phone</td>
       <td>MoneyState</td>
-      <td>Customer Type</td>
       <td>Action</td>
     </tr>
     <tr>
@@ -253,13 +252,7 @@
         <input type="text" class="filter-input" name="moneyFrom" onchange="filterCustomers()" style="width: 60px;" step="1000">
         <input type="text" class="filter-input" name="moneyTo" onchange="filterCustomers()" style="width: 60px;" step="1000">
       </td>
-      <td>
-        <select class="filter-input" name="customerType" onchange="filterCustomers()" style="width: 50px;">
-          <option value="">All</option>
-          <option value="retail">Retail</option>
-          <option value="wholesale">Wholesale</option>
-        </select>
-      </td>
+
       <td></td>
     </tr>
     </thead>
@@ -275,7 +268,6 @@
              : ${'x'.repeat(customer.phone.length() - 3) + customer.phone.substring(customer.phone.length() - 3)}">
       </td>
       <td th:if="${customer != null}" th:text="${customer.moneyState}"></td>
-      <td th:if="${customer != null}" th:text="${customer.ctype}"></td>
       <td>
         <div style="display: flex; gap: 5px;">
         <form th:action="@{/customer/updateCustomer/{id}(id=${customer.id})}" method="get">
@@ -302,7 +294,7 @@
        address=${address},
        phone=${phone},
        moneyFrom=${moneyFrom},
-       moneyTo=${moneyTo}, customerType=${customerType})}">
+       moneyTo=${moneyTo})}">
       Previous
     </a>
 
@@ -315,7 +307,7 @@
        address=${address},
        phone=${phone},
        moneyFrom=${moneyFrom},
-       moneyTo=${moneyTo}, customerType=${customerType})}">
+       moneyTo=${moneyTo})}">
       Next
     </a>
   </div>

@@ -40,17 +40,14 @@ public class CustomerService {
         }
         return null;
     }
-    public Page<Customer> searchCustomersByNameAndType(List<Long> relatedUserList,String name, String ctype, Pageable pageable) {
+    public Page<Customer> searchCustomersByNameAndType(List<Long> relatedUserList,String name, Pageable pageable) {
 //        List<Long> ids = customerRepository.findAllActiveCustomerIds();
 //        if (ids.isEmpty()) {
 //            return Page.empty();
 //        }
-        return customerRepository.findByIdInAndIsDeleteFalseAndNameAndCtype(relatedUserList, name, ctype, pageable);
+        return customerRepository.findByIdInAndIsDeleteFalseAndNameAndCtype(relatedUserList, name, pageable);
     }
 
-    public List<String> getAllCustomerTypes() {
-        return customerRepository.findDistinctCtypes();
-    }
 
     public Page<Customer> getAllCustomersAndIsDeleteFalse(List<Long> relatedUserList, Pageable pageable) {
 
@@ -72,7 +69,6 @@ public class CustomerService {
         updatedCustomer.get().setPhone(customer.getPhone());
         updatedCustomer.get().setGender(customer.getGender());
         updatedCustomer.get().setDob(customer.getDob());
-        updatedCustomer.get().setCtype(customer.getCtype());
         updatedCustomer.get().setUpdatedAt(customer.getUpdatedAt());
         customerRepository.save(updatedCustomer.get());
     }
@@ -92,10 +88,10 @@ public class CustomerService {
     }
 
     public Page<Customer> searchCustomerByAttribute(List<Long> relatedUserList, Long req_idFrom, Long req_idTo, Integer req_moneyFrom,
-                                                    Integer req_moneyTo, String req_phone, LocalDate dobFrom, LocalDate dobTo, String req_customerType,
+                                                    Integer req_moneyTo, String req_phone, LocalDate dobFrom, LocalDate dobTo,
                                                     String req_address, String req_name, Pageable pageable) {
         return customerRepository.findByAttribute(relatedUserList, req_idFrom, req_idTo, req_moneyFrom,
-                req_moneyTo, req_phone, dobFrom, dobTo, req_customerType, req_address, req_name, pageable);
+                req_moneyTo, req_phone, dobFrom, dobTo, req_address, req_name, pageable);
     }
 
     public Page<Customer> searchCustomerAll(List<Long> relatedUserList, Pageable pageable) {

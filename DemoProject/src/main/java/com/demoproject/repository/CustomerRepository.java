@@ -27,15 +27,11 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
     @Query("SELECT c FROM Customer c WHERE c.id IN :ids AND c.isDelete = false AND LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%'))")
     Page<Customer> findByIdInAndIsDeleteFalseAndNameContainingIgnoreCase(@Param("ids") List<Long> ids, @Param("name") String name, Pageable pageable);
 
-    @Query("SELECT DISTINCT c.ctype FROM Customer c WHERE c.isDelete = false")
-    List<String> findDistinctCtypes();
 
     @Query("SELECT c FROM Customer c WHERE c.createdBy IN :ids AND c.isDelete = false " +
-            "AND (:name IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%'))) " +
-            "AND (:ctype IS NULL OR LOWER(c.ctype) LIKE LOWER(CONCAT('%', :ctype, '%')))")
+            "AND (:name IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%'))) ")
     Page<Customer> findByIdInAndIsDeleteFalseAndNameAndCtype(@Param("ids") List<Long> ids,
                                                              @Param("name") String name,
-                                                             @Param("ctype") String ctype,
                                                              Pageable pageable);
     @Query("SELECT c.phone FROM Customer c WHERE c.createdBy IN :ids ")
     List<String> getAllPhoneNumbers(@Param("ids") List<Long> ids );
@@ -48,7 +44,6 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
             " AND (:req_moneyFrom IS NULL OR c.moneyState >= :req_moneyFrom) " +
             " AND (:req_moneyTo IS NULL OR c.moneyState <= :req_moneyTo) " +
             " AND (:req_phone IS NULL OR c.phone = :req_phone)" +
-            " AND (:req_customerType IS NULL OR c.ctype = :req_customerType)" +
             " AND (:dobFrom IS NULL OR c.dob >= :dobFrom) " +
             " AND (:dobTo IS NULL OR c.dob <= :dobTo) " +
             " AND (:name IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%'))) " +
@@ -57,7 +52,7 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
                                    @Param("req_idFrom") Long req_idFrom, @Param("req_idTo") Long req_idTo,
                                    @Param("req_moneyFrom") Integer req_moneyFrom, @Param("req_moneyTo")Integer req_moneyTo,
                                    @Param("req_phone") String req_phone, @Param("dobFrom") LocalDate dobFrom,
-                                   @Param("dobTo") LocalDate dobTo, @Param("req_customerType") String req_customerType,
+                                   @Param("dobTo") LocalDate dobTo,
                                    @Param("req_address") String req_address, @Param("name") String name, Pageable pageable);
 
     @Query("SELECT c FROM Customer c WHERE c.createdBy IN :ids AND c.isDelete = false " +

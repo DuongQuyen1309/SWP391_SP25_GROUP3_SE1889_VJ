@@ -16,10 +16,12 @@ public class JwtUtils {
     private final Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
 
     // Tạo JWT token
-    public String generateToken(String username, String role) {
+    public String generateToken(String username, String role, String storeId) {
+
         return Jwts.builder()
                 .setSubject(username)
                 .claim("role", role)
+                .claim("storeId", storeId)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(key, SignatureAlgorithm.HS256)
@@ -40,6 +42,13 @@ public class JwtUtils {
                 .parseClaimsJws(token)
                 .getBody()
                 .get("role", String.class);
+    }
+
+    public String extractStoreId(String token) {
+        return Jwts.parserBuilder().setSigningKey(key).build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("storeId", String.class);
     }
 
     public boolean validateToken(String token, UserDetails userDetails) {

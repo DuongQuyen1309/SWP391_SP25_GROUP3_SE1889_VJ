@@ -28,6 +28,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 @RestController
@@ -63,9 +64,11 @@ public class AuthController {
                     new UsernamePasswordAuthenticationToken(username, password));
 
             Optional<Account> account= accountRepository.findByUsernameAndIsDeleteFalse(username);
-            Optional<Users> user= userService.getUserProfile(account.get().getUserId());
+            Users user= userService.getUserProfile(account.get().getUserId()).orElse(null);
+            System.out.println(user.getStoreId());
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            String token = jwtUtils.generateToken(username, user.get().getRole());
+            String storeId= Objects.toString(account.get().getStoreId());
+            String token = jwtUtils.generateToken(username, user.getRole(),storeId);
 
             // ✅ Lưu token vào Cookie
             Cookie cookie = new Cookie("token", token);
@@ -122,7 +125,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body(Map.of("message","Reset link has already been sent. Please check your email."));
         }
 
-        String resetToken = jwtUtils.generateToken(account.getUsername(), "RESET");
+        String resetToken = jwtUtils.generateToken(account.getUsername(), "RESET",account.getStoreId().toString());
         account.setResetToken(resetToken);
         account.setResetTokenExpiry(LocalDateTime.now().plusMinutes(5)); // Token có hiệu lực 30 phút
         accountRepository.save(account);

@@ -65,7 +65,6 @@ public class CustomerController {
                                @RequestParam(required = false) String phone,
                                @RequestParam(required = false) String moneyFrom,
                                @RequestParam(required = false) String moneyTo,
-                               @RequestParam(required = false) String customerType,
                                RedirectAttributes redirectAttributes) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
         Page<Customer> customerPage;
@@ -120,7 +119,6 @@ public class CustomerController {
             model.addAttribute("phone", phone);
             model.addAttribute("moneyFrom", moneyFrom);
             model.addAttribute("moneyTo", moneyTo);
-            model.addAttribute("customerType", customerType);
             model.addAttribute("currentPage", page);
             model.addAttribute("totalPages", customerPage.getTotalPages());
             model.addAttribute("size", size);
@@ -130,7 +128,7 @@ public class CustomerController {
             if ((idFrom != null && !idFrom.isEmpty()) || (idTo != null && !idTo.isEmpty())
                     || (name != null && !name.isEmpty()) || (dobFrom != null)
                     || (dobTo != null) || (address != null && !address.isEmpty())
-                    || (phone != null && !phone.isEmpty()) || (customerType != null && !customerType.isEmpty())
+                    || (phone != null && !phone.isEmpty())
                     || (moneyFrom != null && !moneyFrom.isEmpty()) || (moneyTo != null && !moneyTo.isEmpty())) {
 
 
@@ -141,12 +139,12 @@ public class CustomerController {
                 Integer req_moneyTo = (moneyTo != null && !moneyTo.isBlank() && moneyTo.matches("\\d+")) ? Integer.valueOf(moneyTo) : null;
 
                 String req_phone = (phone == null || phone.isEmpty())? null: phone;
-                String req_customerType = (customerType == null || customerType.isEmpty())? null: customerType;
+
                 String req_address = (address == null || address.isEmpty())? null: address;
                 String req_name = (name == null || name.isEmpty()) ? null : name;
 
                 customerPage = customerService.searchCustomerByAttribute(relatedUserList, req_idFrom, req_idTo, req_moneyFrom,
-                        req_moneyTo, req_phone, dobFrom, dobTo, req_customerType, req_address, req_name, pageable);
+                        req_moneyTo, req_phone, dobFrom, dobTo, req_address, req_name, pageable);
 
             } else {
                 customerPage = customerService.searchCustomerAll(relatedUserList, pageable);
@@ -165,7 +163,6 @@ public class CustomerController {
             model.addAttribute("dobTo", dobTo);
             model.addAttribute("address", address);
             model.addAttribute("phone", phone);
-            model.addAttribute("customerType", customerType);
             model.addAttribute("moneyFrom", moneyFrom);
             model.addAttribute("moneyTo", moneyTo);
 
@@ -303,7 +300,6 @@ public class CustomerController {
             @RequestParam String dob,
             @RequestParam String phone,
             @RequestParam Boolean gender,
-            @RequestParam String ctype,
             RedirectAttributes redirectAttributes,
             @CookieValue(value = "token", required = false) String token,
             Model model) {
@@ -325,7 +321,6 @@ public class CustomerController {
         customer.setPhone(phone);
         customer.setGender(gender);
         customer.setDob(dateOfBirth);
-        customer.setCtype(ctype);
         customer.setUpdatedAt(LocalDate.now());
 
         // Lưu vào database

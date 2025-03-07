@@ -114,31 +114,31 @@
         </div>
         <div class="form-group">
           <label>Khách hàng</label>
-          <input type="text" class="form-control" id="customer-name"  >
+          <input type="text" class="form-control" id="customer-name" style="width: 230px" >
         </div>
         <div class="form-group">
           <label>Địa chỉ</label>
-          <input type="text" class="form-control" id="customer-address"  >
+          <input type="text" class="form-control" id="customer-address" style="width: 90%" >
         </div>
         <div class="form-group">
           <label>Số điện thoại</label>
-          <input type="text" class="form-control" id="customer-phone"  >
+          <input type="text" class="form-control" id="customer-phone" style="width: 90%">
         </div>
         <div class="form-group">
           <label>Gender</label>
-          <input type="text" class="form-control" id="customer-gender" >
+          <input type="text" class="form-control" id="customer-gender" style="width: 90%">
         </div>
         <div class="form-group">
           <label>Date Of Birth</label>
-          <input type="text" class="form-control" id="customer-dob" >
+          <input type="text" class="form-control" id="customer-dob" style="width: 90%">
         </div>
         <div class="form-group">
           <label>Nợ cũ</label>
-          <input type="text" class="form-control" id="customer-moneystate" readonly>
+          <input type="text" class="form-control" id="customer-moneystate" style="width: 90%">
         </div>
         <div class="form-group">
           <label>Tổng côn nợ</label>
-          <input type="text" class="form-control" id="customer-totaldebt" placeholder="Tổng côn nợ" readonly>
+          <input type="text" class="form-control" id="customer-totaldebt" placeholder="Tổng côn nợ" readonly style="width: 90%">
         </div>
       </div>
     </div>
@@ -203,35 +203,32 @@
     <div class="section">
       <div class="section-header">Thanh toán</div>
       <div class="section-content">
+
         <div class="total-row">
           <span class="total-label">Khách thanh toán:</span>
-          <span class="total-value highlight" id="display-payment-amount">0</span> <!-- Chỉ hiển thị số tiền -->
+
+        </div>
+        <div class="total-row" style="display:block">
+          <input type="text" style="width: 90%" class="form-control" id="customer-payment" placeholder="Nhập số tiền khách thanh toán" >
+          <span id="customer-payment-error" class="error-message"></span>
         </div>
 
-        <div class="payment-methods" style="margin-bottom: 10px">
-          <div class="payment-method">
-            <input type="radio" name="payment" id="pay-all">
-            <label for="pay-all">Trả hết</label>
-          </div>
-          <div class="payment-method">
-            <input type="radio" name="payment" id="pay-rent">
-            <label for="pay-rent">Trả nợ</label>
-          </div>
-          <div class="payment-method">
+        <div class="payment-method" style="margin-top: 10px">
             <input type="checkbox" name="payment" id="loading">
-            <label for="loading">Bốc hàng</label>
-          </div>
-        </div>
-        <!-- Ô nhập tiền trả nợ, mặc định ẩn -->
-        <div id="debt-payment-container" style="display: none; margin-bottom: 10px">
-          <label>Nhập số tiền trả nợ:</label>
-          <input type="text" class="form-control" id="debt-payment-amount" value="0">
+            <label for="loading" class="total-label">Bốc hàng</label>
         </div>
 
-        <div class="payment-amount">
-          <div>Tiền bốc hàng:</div>
-          <input type="text" class="form-control payment-input" id="loading-amount" value="0" readonly>
+        <div class="total-row" style="display: block">
+          <span class="total-label">Tiền bốc hàng:</span>
+
+          <input type="text" class="form-control" id="loading-amount" value="0" readonly style="width: 90%; margin-top: 5px">
+          <span id="loading-amount-error" class="error-message"></span>
         </div>
+      </div>
+
+
+
+
 
         <button class="checkout-button">THANH TOÁN</button>
       </div>
@@ -254,8 +251,13 @@
   }
 
   function parsePrice(priceStr) {
-    return parseInt(priceStr.replace(/[,.]/g, '')) || 0;
+    if (!priceStr) return 0;
+    // Giữ dấu trừ nếu có, rồi thay thế dấu ',' hoặc '.'
+    if(priceStr === "0") return 0;
+    return parseInt(priceStr.replace(/,/g, '').replace(/[^\d-]/g, '')) || 0;
+
   }
+
 
   function showProductModal() {
     document.getElementById("product-modal").style.display = "flex";
@@ -264,6 +266,58 @@
   function closeProductModal() {
     document.getElementById("product-modal").style.display = "none";
   }
+
+  document.getElementById("customer-name").readOnly = true;
+  document.getElementById("customer-address").readOnly = true;
+  document.getElementById("customer-phone").readOnly = true;
+  document.getElementById("customer-gender").readOnly = true;
+  document.getElementById("customer-dob").readOnly = true;
+  document.getElementById("customer-moneystate").readOnly = true;
+  document.getElementById("customer-totaldebt").readOnly = true;
+
+  document.getElementById("customer-name").addEventListener("keydown", function(event) {
+    event.preventDefault(); // Ngăn nhập bàn phím
+  });
+  document.getElementById("customer-address").addEventListener("keydown", function(event) {
+    event.preventDefault(); // Ngăn nhập bàn phím
+  });
+  document.getElementById("customer-phone").addEventListener("keydown", function(event) {
+        event.preventDefault(); // Ngăn nhập bàn phím
+  });
+  document.getElementById("customer-gender").addEventListener("keydown", function(event) {
+    event.preventDefault(); // Ngăn nhập bàn phím
+  });
+  document.getElementById("customer-dob").addEventListener("keydown", function(event) {
+    event.preventDefault(); // Ngăn nhập bàn phím
+  });
+  document.getElementById("customer-moneystate").addEventListener("keydown", function(event) {
+    event.preventDefault(); // Ngăn nhập bàn phím
+  });
+  document.getElementById("customer-totaldebt").addEventListener("keydown", function(event) {
+    event.preventDefault(); // Ngăn nhập bàn phím
+  });
+  document.getElementById("customer-name").addEventListener("contextmenu", function(event) {
+    event.preventDefault();
+  });
+  document.getElementById("customer-address").addEventListener("contextmenu", function(event) {
+    event.preventDefault();// Chặn chuột phải
+  });
+  document.getElementById("customer-phone").addEventListener("contextmenu", function(event) {
+    event.preventDefault();// Chặn chuột phải
+  });
+  document.getElementById("customer-gender").addEventListener("contextmenu", function(event) {
+    event.preventDefault();// Chặn chuột phải
+  });
+  document.getElementById("customer-dob").addEventListener("contextmenu", function(event) {
+    event.preventDefault();// Chặn chuột phải
+  });
+  document.getElementById("customer-moneystate").addEventListener("contextmenu", function(event) {
+    event.preventDefault();// Chặn chuột phải
+  });
+  document.getElementById("customer-totaldebt").addEventListener("contextmenu", function(event) {
+    event.preventDefault();// Chặn chuột phải
+  });
+
 
   /* Hàm tìm kiếm sản phẩm */
   function searchProduct() {
@@ -306,7 +360,7 @@
     document.getElementById("product-list").innerHTML = "<p>Nhập tên sản phẩm để tìm kiếm...</p>";
     renderProducts(activeTabId);
     updateOrderTotal(activeTabId);
-
+    updateTotalDebt();
     closeProductModal(); // Đóng modal sau khi chọn sản phẩm
   }
 
@@ -329,6 +383,7 @@
   function closeAddCustomerModal() {
     document.getElementById("add-customer-modal").style.display = "none";
   }
+
 
 
 
@@ -428,6 +483,7 @@
 
     // Đóng popup
     closeCustomerSearchModal();
+    updateTotalDebt();
   }
   document.getElementById("save-customer-btn").addEventListener("click", function () {
     let name = document.getElementById("new-customer-name").value.trim();
@@ -510,6 +566,7 @@
 
     renderProducts(tabId);
     updateOrderTotal(tabId);
+    updateTotalDebt();
   }
 
   function removeProduct(tabId, id) {
@@ -517,6 +574,7 @@
     tabData[tabId] = tabData[tabId].products.filter(p => p.id !== id);
     renderProducts(tabId);
     updateOrderTotal(tabId);
+    updateTotalDebt();
   }
 
   document.getElementById("loading").addEventListener("change", function () {
@@ -530,71 +588,65 @@
     }
 
     updateOrderTotal(activeTabId);
-  });
-
-  // Khi chọn "Trả hết", ẩn ô nhập tiền trả nợ và cập nhật số tiền khách thanh toán = tổng tiền
-  document.getElementById("pay-all").addEventListener("change", function () {
-    if (this.checked) {
-      let oldDebt = parsePrice(document.getElementById("customer-moneystate").value);
-      let totalAmount = parsePrice(document.getElementById("customer-pay").textContent);
-      document.getElementById("display-payment-amount").textContent = formatPrice(totalAmount);
-
-      document.getElementById("debt-payment-container").style.display = "none"; // Ẩn ô nhập số tiền trả nợ
-
-      // ✅ Giữ nguyên tổng công nợ bằng nợ cũ
-      document.getElementById("customer-totaldebt").value = formatPrice(oldDebt);
-    }
-  });
-
-  // Khi chọn "Trả nợ", hiển thị ô nhập tiền trả nợ và cập nhật số tiền khách thanh toán
-  document.getElementById("pay-rent").addEventListener("change", function () {
-
-    let customerName = document.getElementById("customer-name").value.trim();
-    if (this.checked) {
-      document.getElementById("debt-payment-container").style.display = "block"; // Hiển thị ô nhập số tiền trả nợ
-
-      if (customerName === "") {
-        document.getElementById("total-debt").value = "";
-      } else {
-        updatePaymentAmount(); // Cập nhật số tiền khách thanh toán
-        updateTotalDebt(); // Cập nhật đúng tổng công nợ
-      }
-    }
-  });
-
-  // Khi nhập số tiền trả nợ, cập nhật số tiền khách thanh toán
-  document.getElementById("debt-payment-amount").addEventListener("input", function () {
-    updatePaymentAmount();
     updateTotalDebt();
   });
 
-  // Hàm cập nhật tổng tiền khách thanh toán
-  function updatePaymentAmount() {
-    let totalAmount = parsePrice(document.getElementById("customer-pay").textContent);
-    let debtPayment = parsePrice(document.getElementById("debt-payment-amount").value);
 
-    if (document.getElementById("pay-rent").checked) {
-      document.getElementById("display-payment-amount").textContent = formatPrice(totalAmount + debtPayment);
+  document.getElementById("customer-payment").addEventListener("input", function (event) {
+    let inputValue = event.target.value.trim();
+    let errorSpan = document.getElementById("customer-payment-error");
+    let oldDebt = parsePrice(document.getElementById("customer-moneystate").value);
+    if (inputValue === "") {
+      errorSpan.textContent = ""; // Nếu trống thì không hiển thị lỗi
+      event.target.classList.remove("input-error");
+      document.getElementById("customer-totaldebt").value = oldDebt;
+      return;
     }
-  }
+    // Kiểm tra nếu nhập không phải số dương
+    if (!/^\d+$/.test(inputValue)) {
+      errorSpan.textContent = "Vui lòng nhập số nguyên dương!";
+      event.target.classList.add("input-error"); // Đánh dấu ô nhập bị lỗi
+      return;
+    } else {
+      errorSpan.textContent = ""; // Xóa lỗi nếu nhập đúng
+      event.target.classList.remove("input-error");
+    }
+
+    // Cập nhật tổng công nợ nếu nhập hợp lệ
+    updateTotalDebt();
+  });
+
+
 
   function updateTotalDebt() {
     let customerName = document.getElementById("customer-name").value.trim();
     let oldDebt = parsePrice(document.getElementById("customer-moneystate").value);
-    let paidDebt = parsePrice(document.getElementById("debt-payment-amount").value);
+    let payment = document.getElementById("customer-payment").value ;
+    let total_amount = parsePrice(document.getElementById("total-amount").textContent) || 0;
+    let lengthNum;
+    if(payment.length >0){
+      console.log("aaaaaaa " );
+      payment= parsePrice(payment);
+      lengthNum = payment.toString().length;
+    }
 
     // ✅ Nếu chưa có khách hàng, tổng công nợ là ""
     if (customerName === "") {
-      document.getElementById("total-debt").value = "";
+      document.getElementById("customer-totaldebt").value = "";
       return;
     }
-    // Nếu chọn "Trả hết", tổng còn nợ phải là 0
-    if (document.getElementById("pay-all").checked) {
-      document.getElementById("total-debt").value = formatPrice(oldDebt);
-    } else {
-      let newTotalDebt = oldDebt + paidDebt;
-      document.getElementById("customer-totaldebt").value = formatPrice(newTotalDebt);
+
+    if(payment >=0  && lengthNum>0){
+      console.log(payment );
+      console.log("payment"+ (oldDebt +(payment-total_amount)));
+      document.getElementById("customer-totaldebt").value = formatPrice((oldDebt +(payment-total_amount)));
     }
+    else if(!payment){
+      document.getElementById("customer-totaldebt").value = oldDebt;
+    }
+
+
+
   }
 
   function updateOrderTotal(tabId) {
@@ -605,22 +657,45 @@
 
     // Lấy tiền bốc hàng nếu checkbox "Bốc hàng" được chọn
     let loadingFee = document.getElementById("loading").checked ? parsePrice(document.getElementById("loading-amount").value) : 0;
-
+    console.log(document.getElementById("loading-amount").value);
     let finalTotal = productTotal + loadingFee;
 
     document.getElementById("total-amount").textContent = formatPrice(finalTotal);
     document.getElementById("customer-pay").textContent = formatPrice(finalTotal);
-    // Nếu đang chọn "Trả hết", cập nhật lại số tiền khách thanh toán
-    if (document.getElementById("pay-all").checked) {
-      document.getElementById("display-payment-amount").textContent = formatPrice(finalTotal);
-    } else {
-      updatePaymentAmount(); // Nếu chọn "Trả nợ", cập nhật theo số tiền nhập
-    }
+
   }
   // Gán sự kiện khi nhập tiền bốc hàng sẽ cập nhật tổng tiền ngay lập tức
-  document.getElementById("loading-amount").addEventListener("input", function () {
+  document.getElementById("loading-amount").addEventListener("input", function (event) {
     if (document.getElementById("loading").checked) {
-      updateOrderTotal(); // Cập nhật tổng tiền ngay khi nhập giá trị
+      let inputValue = event.target.value;
+      let errorSpan = document.getElementById("loading-amount-error");
+
+
+      if (inputValue === "") {
+        errorSpan.textContent = ""; // Nếu trống thì không hiển thị lỗi
+        event.target.classList.remove("input-error");
+        let productTotal = 0; // Mặc định tổng tiền sản phẩm là 0 nếu chưa có sản phẩm nào
+        if (tabData[activeTabId] && tabData[activeTabId].products) {
+          productTotal = tabData[activeTabId].products.reduce((sum, product) => sum + product.price * product.quantity, 0);
+        }
+        document.getElementById("total-amount").textContent = formatPrice(productTotal);
+        document.getElementById("customer-pay").textContent = formatPrice(productTotal);
+        updateTotalDebt();
+        return;
+      }
+      // Kiểm tra nếu nhập không phải số dương
+      if (!/^\d+$/.test(inputValue)) {
+        errorSpan.textContent = "Vui lòng nhập số nguyên dương!";
+        event.target.classList.add("input-error");
+        return;
+      } else {
+        errorSpan.textContent = "";
+        event.target.classList.remove("input-error");
+      }
+
+      // Cập nhật tổng tiền ngay khi nhập tiền bốc hàng
+      updateOrderTotal();
+      updateTotalDebt();
     }
   });
 
@@ -635,7 +710,8 @@
       newNumber++; // Tìm số nhỏ nhất chưa được dùng
     }
     let tabId = `tab-${Date.now()}`; // Sử dụng timestamp để tạo ID duy nhất
-    tabData[tabId] = { customer: {}, products: [] }; // Đúng cú pháp
+    tabData[tabId] = { customer: {}, products: [], payment: {totalDebt: document.getElementById("customer-totaldebt").value, customerPayment: 0, loading: false, loadingAmount: 0 } };
+
 
     let newTab = document.createElement("div");
     newTab.className = "tab";
@@ -682,22 +758,24 @@
 
   function switchTab(tabId) {
     savePaymentData(activeTabId);
-    console.log(tabData[activeTabId]?.payment.method);
+    console.log(tabData[activeTabId]?.payment.loadingAmount);
     // Nếu tab chưa có dữ liệu, khởi tạo mới
 
     activeTabId = tabId;
     document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
     document.querySelector(`[data-tab="${tabId}"]`).classList.add("active");
 
+    console.log(activeTabId);
+    console.log(tabData[tabId]);
     if (!tabData[tabId]) {
-      tabData[tabId] = { customer: {}, products: [], payment: { method: "pay-all", loading: false, debtAmount: 0, loadingAmount: 0 } };
+      tabData[tabId] = { customer: {}, products: [], payment: {totalDebt: document.getElementById("customer-totaldebt").value, customerPayment: 0, loading: false, loadingAmount: 0 } };
     }
 
     renderProducts(tabId);
+    loadPaymentData(tabId);
     updateOrderTotal(tabId);
 
     // Reset và cập nhật lựa chọn thanh toán
-    loadPaymentData(tabId);
 
     // Reset thông tin khách hàng khi chuyển tab
     loadCustomerData(tabId);
@@ -707,55 +785,61 @@
     if (!tabData[tabId]) {
       tabData[tabId] = { customer: {}, products: [], payment: {} }; // Khởi tạo nếu chưa có
     }
-
+    console.log("aaaaa");
+    console.log(document.getElementById("customer-payment").value)
     tabData[tabId].payment = {
-      method: document.getElementById("pay-all").checked ? "pay-all" : "pay-rent",
-      debtAmount: parsePrice(document.getElementById("debt-payment-amount").value),
+      totalDebt: document.getElementById("customer-totaldebt").value,
+
+      customerPayment: document.getElementById("customer-payment").value,
       loading: document.getElementById("loading").checked,
       loadingAmount: parsePrice(document.getElementById("loading-amount").value)
     };
   }
 
-
-
   function loadPaymentData(tabId) {
-    let paymentData = tabData[tabId]?.payment || { method: "pay-all", loading: false, debtAmount: 0, loadingAmount: 0 };
-
+    let customer = tabData[tabId]?.customer || {};
+    let paymentData = tabData[tabId]?.payment || { totalDebt: document.getElementById("customer-totaldebt").value,customerPayment: 0, loading: false, loadingAmount: 0 };
+    let exist = typeof customer.name !== "undefined" && customer.name !== "";
     // Reset lại radio button và checkbox
     console.log(paymentData.method);
-    document.getElementById("pay-all").checked = paymentData.method === "pay-all";
-    document.getElementById("pay-rent").checked = paymentData.method === "pay-rent";
     document.getElementById("loading").checked = paymentData.loading;
-
-    // Hiển thị hoặc ẩn ô nhập tiền trả nợ
-    document.getElementById("debt-payment-container").style.display = paymentData.method === "pay-rent" ? "block" : "none";
-    document.getElementById("debt-payment-amount").value = paymentData.debtAmount;
 
     // Hiển thị tiền bốc hàng
     let loadingAmountInput = document.getElementById("loading-amount");
     loadingAmountInput.value = paymentData.loadingAmount;
     loadingAmountInput.readOnly = !paymentData.loading;
-
-    // ✅ **Cập nhật số tiền khách thanh toán theo tab hiện tại**
-    let totalAmount = parsePrice(document.getElementById("customer-pay").textContent);
-    let debtPayment = paymentData.debtAmount || 0;
-    let finalPayment = paymentData.method === "pay-rent" ? totalAmount + debtPayment : totalAmount;
-    document.getElementById("display-payment-amount").textContent = formatPrice(finalPayment);
-    // Cập nhật số tiền khách thanh toán
-    updatePaymentAmount(tabId);
+console.log(document.getElementById("customer-payment").value);
+console.log(tabData[tabId].payment.customerPayment);
+    if(tabData[tabId].payment.customerPayment !== 0 ) {
+      document.getElementById("customer-payment").value = tabData[tabId].payment.customerPayment;
+    }
+    else{
+        document.getElementById("customer-payment").value = "";
+    }
   }
 
 
   function loadCustomerData(tabId) {
     let customer = tabData[tabId]?.customer || {};
-    console.log(customer.moneystate)
+    let payment = tabData[tabId]?.payment || {};
+    console.log("aaaa");
+    console.log(customer.name)
+    let exist = typeof customer.name !== "undefined" && customer.name !== "";
+
     document.getElementById("customer-name").value = customer.name || "";
     document.getElementById("customer-phone").value = customer.phone || "";
     document.getElementById("customer-address").value = customer.address || "";
     document.getElementById("customer-dob").value = customer.dob || "";
     document.getElementById("customer-gender").value = customer.gender || "";
     document.getElementById("customer-moneystate").value = customer.moneystate || "";
-    document.getElementById("customer-totaldebt").value = customer.moneystate || "";
+
+    if(exist ){
+      console.log("aaaa");
+      document.getElementById("customer-totaldebt").value = payment.totalDebt || "";
+    }
+    else{
+      document.getElementById("customer-totaldebt").value = "" ;
+    }
   }
 
   document.querySelector(".checkout-button").addEventListener("click", function () {

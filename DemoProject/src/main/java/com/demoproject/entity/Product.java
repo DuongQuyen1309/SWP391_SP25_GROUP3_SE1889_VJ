@@ -60,4 +60,7 @@ public class Product {
 
     @Column(name = "zone_id")
     private Long zoneId;
+
+    @Column(name = "quantity")
+    private int quantity;
 }

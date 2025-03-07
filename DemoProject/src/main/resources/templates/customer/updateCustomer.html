@@ -272,11 +272,7 @@
       <option th:attr="selected=${customer.gender == false ? 'selected' : ''}" value="false">Female</option>
     </select>
 
-    <label for="ctype">Customer Type:</label>
-    <select name="ctype" id="ctype" >
-      <option th:attr="selected=${customer.ctype == retail ? 'selected' : ''}" value="retail">Retail</option>
-      <option th:attr="selected=${customer.gender == wholesale ? 'selected' : ''}" value="wholesale">Wholesale</option>
-    </select>
+
     <p style="color: red;" th:if="${error}" th:text="${error}"></p>
     <button type="submit" id="applyBtn">Update Customer</button>
   </form>
