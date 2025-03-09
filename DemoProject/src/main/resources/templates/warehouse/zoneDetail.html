@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<!-- zoneDetail.html -->
 
 <head>
     <meta charset="UTF-8">
@@ -7,6 +6,35 @@
     <title>Zone Detail</title>
     <link rel="stylesheet" href="/css/base.css">
     <style>
+        .pagination {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .pagination a {
+            display: inline-block;
+            padding: 8px 16px;
+            margin: 4px;
+            text-decoration: none;
+            background-color: #2c3e50;
+            color: white;
+            border-radius: 5px;
+        }
+
+        .pagination a:hover {
+            background-color: #1a252f;
+        }
+
+        .pagination span {
+            font-size: 18px;
+            margin: 0 10px;
+        }
+
+        .form-search input:focus {
+            border-color: #e67e22;
+            box-shadow: 0 0 8px rgba(230, 126, 34, 0.5);
+        }
+
         .header .login {
             display: flex;
             gap: 10px;
@@ -149,6 +177,7 @@
     </style>
     <script src="/js/home.js"></script>
 </head>
+<!-- zoneDetail.html -->
 
 <body>
 <!-- Header -->
@@ -156,70 +185,56 @@
     <button class="menu-btn" onclick="toggleSidebar()">☰</button>
     <h2><a href="/home">RSMS</a></h2>
     <div class="user-info">
-        <img  th:src="${user.avatar}" alt="User Avatar" class="user-avatar"/>
+        <img th:src="${user.avatar}" alt="User Avatar" class="user-avatar" />
         <div class="dropdown">
             <span th:text="${account.displayName}" class="user-name" onclick="toggleDropdown()"> ▼</span>
             <div id="dropdown-menu" class="dropdown-content">
                 <a href="/user/userprofile">👤 View Profile</a>
                 <a href="/user/changepw" id="changepw">🔑 Change password</a>
                 <a href="/static#" id="logout">🚪 Logout</a>
-
             </div>
         </div>
     </div>
-
 </div>
 
 <!-- Sidebar -->
 <div class="sidebar" id="sidebar">
     <h2>Feature</h2>
-    <a href="/user/userprofile" >Profile</a>
-    <a href="/account/listStaff" th:style="${#lists.contains(listHiddenPage, 'listStaff')} ? 'display: none;' : ''">Staff Account Management</a>
-
-    <a href="/product/listProduct" >Rice Management</a>
-
-    <a href="/customer/listCustomer" >Customer Management</a>
-
-    <a href="/warehouse/listWarehouseZone" >Warehouse Management</a>
-
-    <a href="/bill/listBill" >Invoice Management</a>
-
+    <a href="/user/userprofile">Profile</a>
+    <a href="/account/listStaff"
+       th:style="${#lists.contains(listHiddenPage, 'listStaff')} ? 'display: none;' : ''">Staff Account
+        Management</a>
+    <a href="/product/listProduct">Rice Management</a>
+    <a href="/customer/listCustomer">Customer Management</a>
+    <a href="/warehouse/listWarehouseZone">Warehouse Management</a>
+    <a href="/bill/listBill">Invoice Management</a>
 </div>
 
 <!-- Content -->
-<div class="content">
-    <h2>Zone Detail</h2>
-    <div class="zone-detail">
-        <div>
-            <label>ID:</label>
-            <span th:text="${zone.id}"></span>
-        </div>
-        <div>
-            <label>Name:</label>
-            <span th:text="${zone.name}"></span>
-        </div>
-        <div>
-            <label>Warehouse Name:</label>
-            <span th:text="${zone.warehouseName}"></span>
-        </div>
-        <div>
-            <label>Product Name:</label>
-            <span th:text="${productName}"></span>
-        </div>
-        <div>
-            <label>Created Date:</label>
-            <span th:text="${zone.createdAt}"></span>
-        </div>
-    </div>
-    <div class="button-group">
-        <button type="button"><a href="/warehouse/listWarehouseZone"
-                                 style="color: white;text-decoration: none;">Back</a></button>
-    </div>
+<div class="content" id="content">
+    <h1>List of Products in Zone</h1>
+    <table class="styled-table">
+        <thead>
+        <tr>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Description</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="product : ${products}">
+            <td><img src="https://tvfood.com.vn/vnt_upload/news/09_2023/gao_nep_la_gi.jpg" width="100px" alt="">
+            </td>
+            <td th:text="${product.name}"></td>
+            <td th:text="${product.price}"></td>
+            <td th:text="${product.description}"></td>
+        </tr>
+        </tbody>
+    </table>
 </div>
 
 <footer>
     &copy; 2025 Rice Sales Management. All Rights Reserved.
 </footer>
 </body>
-
-</html>

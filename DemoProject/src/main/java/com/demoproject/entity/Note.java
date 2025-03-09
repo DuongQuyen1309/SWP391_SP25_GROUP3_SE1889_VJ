@@ -3,6 +3,7 @@ package com.demoproject.entity;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "Note")
@@ -18,7 +19,7 @@ public class Note {
     @Column(name = "createdBy")
     private Integer createdBy;
     @Column(name = "createdAt")
-    private LocalDate createdAt;
+    private LocalDateTime createdAt;
     @Column(name = "note")
     private String note;
     @Column(name = "money")
@@ -84,11 +85,11 @@ public class Note {
         this.note = note;
     }
 
-    public LocalDate getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDate createdAt) {
+    public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
 

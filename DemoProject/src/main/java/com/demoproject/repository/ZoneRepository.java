@@ -32,11 +32,13 @@ public interface ZoneRepository extends JpaRepository<Zone, Long> {
     boolean existsByNameAndIdNot(String name, Long id);
 
 
-    @Query("SELECT z FROM Zone z WHERE z.storeId = :storeID")
+    @Query("SELECT z FROM Zone z WHERE z.storeId = :storeId")
     Page<Zone> findAllByStoreId(Long storeId, Pageable pageable);
-    @Query("SELECT z FROM Zone z WHERE z.storeId = :storeID AND LOWER(z.name) LIKE LOWER(CONCAT('%', :name, '%'))")
+    @Query("SELECT z FROM Zone z WHERE z.storeId = :storeId AND LOWER(z.name) LIKE LOWER(CONCAT('%', :name, '%'))")
     Page<Zone> findByNameAndStoreId(String name, Long storeId, Pageable pageable);
 
+    Page<Zone> findByPositionAndStoreId(String position, Long storeId, Pageable pageable);
 
+    boolean existsByNameAndStoreId(String name, Long storeId);
 
 }

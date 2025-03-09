@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import java.time.LocalDate;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -73,6 +74,7 @@ public class AccountService {
 
 
         Store store= new Store();
+        store.setCreatedAt(LocalDateTime.now());
         store.setCreatedBy(newUser.getId());
         storeRepository.save(store);
 

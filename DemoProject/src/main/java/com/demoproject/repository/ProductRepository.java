@@ -22,4 +22,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Page<Product> findByDescriptionContaining(String name, Pageable pageable);
 
     List<Product> findByNameContainingAndStoreId(String name, Long storeId);
+
+    List<Product> findByZoneId(Long zoneId);
+
+    List<Product> findByZoneIdAndNameContaining(Long zoneId, String name);
+
+    List<Product> findByZoneIdAndPriceBetween(Long zoneId, Double minPrice, Double maxPrice);
 }

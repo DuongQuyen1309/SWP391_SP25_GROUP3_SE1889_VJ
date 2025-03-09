@@ -92,4 +92,8 @@ public class ZoneService {
     public boolean existsById(Long productId) {
         return productRepository.existsById(productId);
     }
+
+    public Page<Zone> getZonesByPosition(String position, Long storeID, Pageable pageable) {
+        return this.zoneRepository.findByPositionAndStoreId(position, storeID, pageable);
+    }
 }

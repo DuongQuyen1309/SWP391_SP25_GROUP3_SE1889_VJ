@@ -61,6 +61,6 @@ public class Product {
     @Column(name = "zone_id")
     private Long zoneId;
 
-    @Column(name = "quantity")
-    private int quantity;
+    @Column(name = "quantity", nullable = true)
+    private Integer quantity;
 }

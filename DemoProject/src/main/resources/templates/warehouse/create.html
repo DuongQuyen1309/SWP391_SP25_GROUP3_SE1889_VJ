@@ -8,40 +8,42 @@
 
   <link rel="stylesheet" href="/css/base.css">
   <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script>
     $(document).ready(function () {
-      const form = $('#create-zone-form');
-      const errorElement = $('#error');
+      $('#create-zone-form').on('submit', function (e) {
+        let isValid = true;
 
-      form.on('submit', function (e) {
-        let messages = [];
-        const name = $('input[name="name"]').val();
-        const productId = $('input[name="productId"]').val();
-        const amount = $('input[name="amount"]').val();
+        // Xóa thông báo lỗi cũ
+        $('.error-message').remove();
 
-        if (name === '' || name === null) {
-          messages.push('Name is required');
-        }
-        if (productId === '' || productId === null) {
-          messages.push('Product ID is required');
-        }
-        if (amount === '' || amount === null) {
-          messages.push('Amount is required');
+        // Kiểm tra từng trường
+        const name = $('input[name="name"]');
+        const position = $('input[name="position"]');
+
+        if (!name.val().trim()) {
+          showError(name, 'Please enter zone name');
+          isValid = false;
         }
 
-        if (messages.length > 0) {
-          e.preventDefault();
-          errorElement.html(messages.join(', '));
-          errorElement.show();
-        } else {
-          errorElement.hide();
+        if (!position.val().trim()) {
+          showError(position, 'Please enter position');
+          isValid = false;
+        }
+
+        if (!isValid) {
+          e.preventDefault(); // Ngăn form gửi nếu có lỗi
         }
       });
+
+      function showError(element, message) {
+        const errorElement = $('<div class="error-message" style="color: red; font-size: 14px; margin-top: 5px;"></div>').text(message);
+        element.after(errorElement);
+      }
     });
   </script>
+
   <style>
-
-
     .create-form {
       background-color: white;
       padding: 20px;
@@ -102,9 +104,9 @@
   <button class="menu-btn" onclick="toggleSidebar()">☰</button>
   <h2><a href="/home">RSMS</a></h2>
   <div class="user-info">
-    <img  th:src="${user.avatar}" alt="User Avatar" class="user-avatar"/>
+    <!--      <img th:src="${user.avatar}" alt="User Avatar" class="user-avatar" />-->
     <div class="dropdown">
-      <span th:text="${account.displayName}" class="user-name" onclick="toggleDropdown()"> ▼</span>
+      <!--        <span th:text="${account.displayName}" class="user-name" onclick="toggleDropdown()"> ▼</span>-->
       <div id="dropdown-menu" class="dropdown-content">
         <a href="/user/userprofile">👤 View Profile</a>
         <a href="/user/changepw" id="changepw">🔑 Change password</a>
@@ -120,7 +122,8 @@
 <div class="sidebar" id="sidebar" style="height: 100%;">
   <h2>Feature</h2>
   <a href="/user/userprofile">Profile</a>
-  <a href="/account/listStaff" th:style="${#lists.contains(listHiddenPage, 'listStaff')} ? 'display: none;' : ''">Staff Account Management</a>
+  <a href="/account/listStaff"
+     th:style="${#lists.contains(listHiddenPage, 'listStaff')} ? 'display: none;' : ''">Staff Account Management</a>
   <a href="/product/listProduct">Rice Management</a>
   <a href="/customer/listCustomer">Customer Management</a>
   <a href="/warehouse/listWarehouseZone">Warehouse Management</a>
@@ -129,31 +132,29 @@
 
 <!-- Content -->
 <div class="content" id="content">
-  <h2 >Create a Zone</h2>
-    <form class="create-form" id="create-zone-form" method="post" action="/warehouse/createWarehouseZone"
-          modelAttribute="newZone">
-      <div class="mb-3">
-        <label class="form-label">Zone Name:</label>
-        <input type="text" class="form-control" name="name" id="name">
-      </div>
-      <div class="mb-3">
-        <label class="form-label">Product ID:</label>
-        <input type="number" class="form-control" name="productId" id="productId">
-      </div>
-      <div class="mb-3">
-        <label class="form-label">Amount:</label>
-        <input type="number" class="form-control" name="amount" id="amount">
-      </div>
-      <button type="submit" class="btn btn-success">Submit</button>
-      <div id="error" class="alert alert-danger mt-3" role="alert"
-           style="display: none; background-color: #2c3e50;color: white;">
-      </div>
-    </form>
+  <h2>Create a Zone</h2>
+  <form class="create-form" id="create-zone-form" method="post" action="/warehouse/createWarehouseZone"
+        modelAttribute="newZone">
+    <div class="mb-3">
+      <label class="form-label">Zone Name:</label>
+      <input type="text" class="form-control" name="name" id="name">
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Position:</label>
+      <input type="text" class="form-control" name="position" id="position">
+    </div>
+
+    <button type="submit" class="btn btn-success">Submit</button>
+    <div id="error" class="alert alert-danger mt-3" role="alert"
+         style="display: none; background-color: #2c3e50;color: white;">
+    </div>
+  </form>
 
   <div th:if="${errorMessage}" class="alert alert-danger mt-3" role="alert"
-       style="margin: 38%; text-align: center; background-color: #2c3e50;color: white;">
+       style="margin-left: 350px; text-align: center; background-color: #2c3e50; color: white;height: 40px;padding: 8px;border-radius: 5px">
     <p th:text="${errorMessage}" class="mb-0"></p>
   </div>
+
 </div>
 
 <script src="/js/home.js"></script>

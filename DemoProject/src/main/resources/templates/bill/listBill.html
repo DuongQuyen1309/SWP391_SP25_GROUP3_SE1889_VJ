@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="/css/base.css">
     <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
     <style>
-
         .container {
             max-width: 1000px;
             margin: auto;
@@ -16,26 +15,26 @@
             border-radius: 10px;
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
         }
-        h2 {
-            text-align: center;
-        }
-        .filter-bar {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-        .filter-bar input, .filter-bar select {
-            padding: 10px;
-            width: 30%;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        .btn {
-            padding: 5px 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
+        /*h2 {*/
+        /*    text-align: center;*/
+        /*}*/
+        /*.filter-bar {*/
+        /*    display: flex;*/
+        /*    justify-content: space-between;*/
+        /*    margin-bottom: 20px;*/
+        /*}*/
+        /*.filter-bar input, .filter-bar select {*/
+        /*    padding: 10px;*/
+        /*    width: 30%;*/
+        /*    border: 1px solid #ccc;*/
+        /*    border-radius: 5px;*/
+        /*}*/
+        /*.btn {*/
+        /*    padding: 5px 10px;*/
+        /*    border: none;*/
+        /*    border-radius: 5px;*/
+        /*    cursor: pointer;*/
+        /*}*/
         .btn-view {
             background: #3498db;
             color: white;
@@ -48,12 +47,11 @@
             background: #e67e22;
             color: white;
         }
-
         .add-bill {
-            position: absolute; /* Giữ vị trí cố định so với content */
-            right: 20px; /* Sát mép phải của content */
-            top: 20px; /* Đẩy xuống dưới một chút */
-            background-color: #d35400; /* Cam */
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            background-color: #d35400;
             color: white;
             font-size: 13px;
             border: none;
@@ -63,34 +61,51 @@
             cursor: pointer;
             transition: 0.3s;
         }
-    </style>
-    <script src="/js/home.js"></script>
-    <script>
-        function callPage() {
-            window.location.href ="/bill/createBill";
+        .pagination {
+            text-align: center;
+            margin-top: 20px;
         }
-    </script>
+
+        .pagination a {
+            display: inline-block;
+            padding: 8px 16px;
+            margin: 4px;
+            text-decoration: none;
+            background-color: #2c3e50;
+            color: white;
+            border-radius: 5px;
+        }
+
+        .pagination a:hover {
+            background-color: #1a252f;
+        }
+
+        .pagination span {
+            font-size: 18px;
+            margin: 0 10px;
+        }
+        .filter-bar input:focus {
+            border-color: #e67e22;
+            box-shadow: 0 0 8px rgba(230, 126, 34, 0.5);
+        }
+    </style>
 </head>
 <body>
-
-
 <!-- Header -->
 <div class="header">
     <button class="menu-btn" onclick="toggleSidebar()">☰</button>
     <h2><a href="/home">RSMS</a></h2>
     <div class="user-info">
-        <img  th:src="${user.avatar}" alt="User Avatar" class="user-avatar"/>
+        <img th:src="${user.avatar}" alt="User Avatar" class="user-avatar"/>
         <div class="dropdown">
             <span th:text="${account.displayName}" class="user-name" onclick="toggleDropdown()"> ▼</span>
             <div id="dropdown-menu" class="dropdown-content">
                 <a href="/user/userprofile">👤 View Profile</a>
                 <a href="/user/changepw" id="changepw">🔑 Change password</a>
                 <a href="/static#" id="logout">🚪 Logout</a>
-
             </div>
         </div>
     </div>
-
 </div>
 <!-- Sidebar -->
 <div class="sidebar" id="sidebar" style="height: 100%;">
@@ -105,17 +120,16 @@
 
 <div class="content">
     <h2>List of Customer Bills</h2>
-
-    <button class="add-bill" onclick="callPage()">Create New Bill</button>
-    <div class="filter-bar">
-        <input type="text" id="search" placeholder="Search by Invoice ID or Customer">
-        <select id="status">
-            <option value="">All Status</option>
-            <option value="No Debt">No Debt</option>
-            <option value="Debt">Debt</option>
+    <button style="margin-top: 70px" class="add-bill" onclick="callPage()">Create New Bill</button>
+    <form class="filter-bar" action="/bill/listBill" method="get">
+        <input type="search" name="search" placeholder="Enter search value" style="width: 30%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+        <select name="searchBy" style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+            <option value="invoiceId" th:selected="${searchBy == 'invoiceId'}">Invoice ID</option>
+            <option value="customerName" th:selected="${searchBy == 'customerName'}">Customer Name</option>
         </select>
-        <input type="date" id="date-filter">
-    </div>
+        <button type="submit" style="padding: 10px; background-color: #2c3e50; color: white; border: none; border-radius: 5px;">Search</button>
+    </form>
+    <div class="error-message" th:if="${error}" th:text="${error}"></div>
     <table class="styled-table">
         <thead>
         <tr>
@@ -130,51 +144,34 @@
         </tr>
         </thead>
         <tbody>
-        <tr>
-            <td>#INV-001</td>
-            <td>Nguyen Van A</td>
-            <td>2025-02-25</td>
-            <td>$150.00</td>
-            <td>$100.00</td>
-            <td>$50.00</td>
-            <td style="color: orange;">Debt</td>
+        <tr th:each="bill : ${bills}">
+            <td th:text="${bill.id}"></td>
+            <td th:text="${bill.customer.name}"></td>
+            <td th:text="${bill.createdAt}"></td>
+            <td th:text="${bill.totalMoney}"></td>
+            <td th:text="${bill.paidMoney}"></td>
+            <td th:text="${bill.debtMoney}"></td>
+            <td th:text="${bill.status}"></td>
             <td>
-                    <form th:action="@{/bill/billDetail}" method="get" >
-                        <button type="submit" style="background-color: #06999c">View</button>
-                    </form>
-
-            </td>
-        </tr>
-        <tr>
-            <td>#INV-002</td>
-            <td>Le Thi B</td>
-            <td>2025-02-24</td>
-            <td>$90.00</td>
-            <td>$90.00</td>
-            <td>$0.00</td>
-            <td style="color: green;">No Debt</td>
-            <td>
-                <form th:action="@{/bill/billDetail}" method="get" >
-                    <button type="submit" style="background-color: #06999c">View</button>
-                </form>
-            </td>
-        </tr>
-        <tr>
-            <td>#INV-003</td>
-            <td>Pham Van C</td>
-            <td>2025-02-23</td>
-            <td>$200.00</td>
-            <td>$50.00</td>
-            <td>$150.00</td>
-            <td style="color: red;">Debt</td>
-            <td>
-                <form th:action="@{/bill/billDetail}" method="get" >
-                    <button type="submit" style="background-color: #06999c">View</button>
-                </form>
+                <button class="btn btn-view">View</button>
             </td>
         </tr>
         </tbody>
     </table>
+
+    <div class="pagination">
+
+
+        <a th:if="${bills.hasPrevious()}"
+           th:href="@{/bill/listBill(page=${bills.number - 1}, size=${bills.size})}"
+           class="pagination-button">Previous</a>
+        <span th:text="'Page ' + ${bills.number + 1} + ' of ' + ${bills.totalPages}"></span>
+        <a th:if="${bills.hasNext()}"
+           th:href="@{/bill/listBill(page=${bills.number + 1}, size=${bills.size})}"
+           class="pagination-button">Next</a>
+
+    </div>
 </div>
+<script src="/js/home.js"></script>
 </body>
 </html>

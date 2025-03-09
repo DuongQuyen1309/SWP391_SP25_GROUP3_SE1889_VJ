@@ -123,9 +123,5 @@ public class HomeController {
     }
 
 
-    @GetMapping("/sell")
-    public String sell(){
-        return "createBill";
-    }
 
 }
