@@ -13,7 +13,7 @@ public class Note {
     @Column(name = "id", nullable = false, columnDefinition = "Numeric(18)")
     private Long id;
     @Column(name = "isDebt")
-    private Boolean isDebt;
+    private String isDebt;
     @Column(name = "customerId")
     private Long customerId;
     @Column(name = "createdBy")
@@ -30,14 +30,14 @@ public class Note {
     public Note() {
     }
 
-    public Note(Boolean isDebt, Long customerId, String note, int money) {
+    public Note(String isDebt, Long customerId, String note, int money) {
         this.isDebt = isDebt;
         this.customerId = customerId;
         this.note = note;
         this.money = money;
     }
 
-    public Note(Long id, Boolean isDebt, Long customerId, String note, int money) {
+    public Note(Long id, String isDebt, Long customerId, String note, int money) {
         this.id = id;
         this.isDebt = isDebt;
         this.customerId = customerId;
@@ -53,11 +53,11 @@ public class Note {
         this.id = id;
     }
 
-    public Boolean getDebt() {
+    public String getDebt() {
         return isDebt;
     }
 
-    public void setDebt(Boolean debt) {
+    public void setDebt(String debt) {
         isDebt = debt;
     }
 

@@ -22,12 +22,20 @@ public class NoteService {
     public Page<Note> getNotes(Long id, List<Long> relatedUserList,Pageable pageable) {
         return noteRepository.findAllNote(id, relatedUserList, pageable);
     }
-    public Page<Note> searchNoteByAttribute(Long id, List<Long> relatedUserList, Long idFrom, Long idTo, Boolean kindOfNote, LocalDateTime createdDateFrom, LocalDateTime createdDateTo, String noteSearch,
+    public Page<Note> searchNoteByAttribute(Long id, List<Long> relatedUserList, Long idFrom, Long idTo, String kindOfNote, LocalDateTime createdDateFrom, LocalDateTime createdDateTo, String noteSearch,
                                             Integer moneyFrom, Integer moneyTo, Pageable pageable) { //lưu ý lại chỗ int và Integer vi dang o 2 doi tuong khac nhau
         return noteRepository.findNoteByAttribute(id, relatedUserList,idFrom, idTo,kindOfNote,createdDateFrom,createdDateTo,noteSearch,
                 moneyFrom,moneyTo, pageable);
     }
+    public Page<Note> searchNoteByAttribute(Long id, Long storeID, Long idFrom, Long idTo, String kindOfNote, LocalDateTime createdDateFrom, LocalDateTime createdDateTo, String noteSearch,
+                                            Integer moneyFrom, Integer moneyTo, Pageable pageable) { //lưu ý lại chỗ int và Integer vi dang o 2 doi tuong khac nhau
+        return noteRepository.findNoteByAttribute(id, storeID,idFrom, idTo,kindOfNote,createdDateFrom,createdDateTo,noteSearch,
+                moneyFrom,moneyTo, pageable);
+    }
     public Page<Note> searchNoteAll(Long id, List<Long> relatedUserList,  Pageable pageable) { //lưu ý lại chỗ int và Integer vi dang o 2 doi tuong khac nhau
         return noteRepository.findNoteAll(id, relatedUserList, pageable);
+    }
+    public Page<Note> searchNoteAll(Long id, Long storeID,  Pageable pageable) { //lưu ý lại chỗ int và Integer vi dang o 2 doi tuong khac nhau
+        return noteRepository.findNoteAll(id, storeID, pageable);
     }
 }

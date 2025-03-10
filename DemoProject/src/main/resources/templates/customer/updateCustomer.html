@@ -198,10 +198,7 @@
   <div th:if="${message != null}">
     <p th:text="${message}" th:class="${messageType == 'success' ? 'success' : 'error'}"></p>
   </div>
-  <form class="profile-form" action="/customer/updateCustomer" method="POST" accept-charset="UTF-8" >
-    <!-- onsubmit="return validateForm(event)" <form class="profile-form" action="/updateCustomer/{id}" method="POST" th:object="${customer}" onsubmit="return confirmUpdate(event, this)">-->
-    <!-- Name Field  -->
-    <input type="hidden" id="id" name="id" th:value="${customer.id}" required>
+  <form class="profile-form" th:action="@{/customer/updateCustomer/{id}(id=${customer.id})}" method="POST" accept-charset="UTF-8" >
 
     <label for="name">Name:</label>
     <input type="text" id="name" name="name" th:value="${customer.name}">
@@ -220,27 +217,16 @@
 
     <!-- Gender Field -->
     <label for="gender">Gender:</label>
-    <select name="gender" id="gender" >
-      <option th:attr="selected=${customer.gender == true ? 'selected' : ''}" value="true">Male</option>
-      <option th:attr="selected=${customer.gender == false ? 'selected' : ''}" value="false">Female</option>
+    <select name="gender" id="gender">
+      <option value="true" th:selected="${customer.gender == true}">Male</option>
+      <option value="false" th:selected="${customer.gender == false}">Female</option>
     </select>
 
-    <label for="ctype">Customer Type:</label>
-    <select name="ctype" id="ctype" >
-      <option th:attr="selected=${customer.ctype == retail ? 'selected' : ''}" value="retail">Retail</option>
-      <option th:attr="selected=${customer.gender == wholesale ? 'selected' : ''}" value="wholesale">Wholesale</option>
-    </select>
     <p style="color: red;" th:if="${error}" th:text="${error}"></p>
     <button type="submit" id="applyBtn">Update Customer</button>
   </form>
 
 </div>
-<!--<div th:if="${message != null}" th:with="messageType=${messageType}">-->
-<!--    <script type="text/javascript">-->
-<!--        showMessage('[[${messageType}]]', '[[${message}]]');-->
-<!--    </script>-->
-<!--</div>-->
-
 <footer>
   &copy; 2025 Rice Sales Management. All Rights Reserved.
 </footer>

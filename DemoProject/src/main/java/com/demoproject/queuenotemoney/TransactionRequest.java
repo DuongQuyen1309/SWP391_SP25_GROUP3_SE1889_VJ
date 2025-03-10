@@ -1,17 +1,29 @@
 package com.demoproject.queuenotemoney;
 
+import jakarta.persistence.Column;
+
 public class TransactionRequest {
     private Long customerId;
     private Integer amount;
-    private boolean isDebt; // true: nợ, false: thanh toán
+    private String isDebt; // true: nợ, false: thanh toán
     private String notename;
     private Long createdByID;
-    public TransactionRequest(Long customerId, Integer amount, boolean isDebt, String notename, Long createdByID) {
+    private Long storeId;
+    public TransactionRequest(Long customerId, Integer amount, String isDebt, String notename, Long createdByID, Long storeId) {
         this.customerId = customerId;
         this.amount = amount;
         this.isDebt = isDebt;
         this.notename = notename;
         this.createdByID = createdByID;
+        this.storeId = storeId;
+    }
+
+    public Long getStoreId() {
+        return storeId;
+    }
+
+    public void setStoreId(Long storeId) {
+        this.storeId = storeId;
     }
 
     public Long getCustomerId() {
@@ -22,7 +34,7 @@ public class TransactionRequest {
         return amount;
     }
 
-    public boolean isDebt() {
+    public String isDebt() {
         return isDebt;
     }
     public String getNotename() {
@@ -37,7 +49,7 @@ public class TransactionRequest {
         this.amount = amount;
     }
 
-    public void setDebt(boolean debt) {
+    public void setDebt(String debt) {
         isDebt = debt;
     }
 

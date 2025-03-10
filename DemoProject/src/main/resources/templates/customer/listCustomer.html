@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <title>Rice Sales Management</title>
   <link rel="stylesheet" href="/css/base.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
   <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
   <style>
     .pagination {
@@ -88,7 +89,47 @@
       margin-left: 5px;
       margin-right: 5px;
     }
+    .add-customer {
+      background-color: #d35400;
+      color: white;
+      width: 15%;
+      font-size: 16px;
+      font-weight: bold;
+      text-decoration: none;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease-in-out;
+      padding: 10px 20px;
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    }
 
+    .add-customer:hover {
+      background-color: #e67e22;
+      transform: scale(1.05);
+    }
+    .action-button {
+      padding: 0;
+      border: none;
+      background: none;
+      cursor: pointer;
+    }
+
+    .action-button i {
+      font-size: 30px;
+      color: #06999c;
+      transition: transform 0.2s ease-in-out;
+    }
+
+    .action-button i:hover {
+      transform: scale(1.1);
+    }
+
+
+    /*.content{*/
+    /*  margin-top: 4%;*/
+    /*  background-color: #cccccc;*/
+    /*}*/
   </style>
   <script src="/js/home.js"></script>
   <script>
@@ -219,7 +260,7 @@
       <td>Address</td>
       <td>Phone</td>
       <td>MoneyState</td>
-      <td>Customer Type</td>
+      <td>Created By</td>
       <td>Action</td>
     </tr>
     <tr>
@@ -227,7 +268,7 @@
         <input type="text" class="filter-input" name="idFrom" onchange="filterCustomers()" style="width: 23px;">
         <input type="text" class="filter-input" name="idTo" onchange="filterCustomers()" style="width: 23px;">
       </td>
-
+      <td>
         <input type="text" class="filter-input" name="name" onchange="filterCustomers()" style="width: 120px;">
       </td>
       <td class="twin-field">
@@ -245,11 +286,10 @@
         <input type="text" class="filter-input" name="moneyTo" onchange="filterCustomers()" style="width: 90px;" step="1000">
       </td>
       <td>
-        <select class="filter-input" name="customerType" onchange="filterCustomers()" style="width: 100px;">
-          <option value="">-------- All --------</option>
-
-          <option value="retail">Retail</option>
-          <option value="wholesale">Wholesale</option>
+        <select class="filter-input" name="createBy" onchange="filterCustomers()" style="width: 100px;">
+          <option value="">All</option>
+          <!-- Sử dụng th:each để lặp qua userList và tạo các option -->
+          <option th:each="user : ${usersList}" th:value="${user.id}" th:text="${user.name}"></option>
         </select>
       </td>
       <td></td>
@@ -267,18 +307,29 @@
              : ${'x'.repeat(customer.phone.length() - 3) + customer.phone.substring(customer.phone.length() - 3)}">
       </td>
       <td th:if="${customer != null}" th:text="${customer.moneyState}"></td>
-      <td th:if="${customer != null}" th:text="${customer.ctype}"></td>
+      <td th:if="${customer != null}">
+        <span th:each="user : ${usersList}"
+          th:text="${user.id == customer.createdBy ? user.name : ''}"></span>
+      </td>
       <td>
         <div style="display: flex; gap: 5px;">
-        <form th:action="@{/customer/updateCustomer/{id}(id=${customer.id})}" method="get">
-          <button type="submit">Update</button>
-        </form>
+          <a th:href="@{/customer/updateCustomer/{id}(id=${customer.id})}" class="action-button" title="Update Customer">
+            <i class="fas fa-pen-square"></i>
+          </a>
+<!--        <form th:action="@{/customer/updateCustomer/{id}(id=${customer.id})}" method="GET">-->
+<!--          <button type="submit" style="padding: 0; border: none; background: none;" title="Update Customer">-->
+<!--            <i class="fas fa-pen-square" style="font-size: 30px; color: #06999c;"></i> &lt;!&ndash; Icon Update &ndash;&gt;-->
+<!--          </button>-->
+<!--        </form>-->
         <form th:action="@{/customer/listCustomer}" method="get">
-
-          <button type="submit" style="background-color: #06999c">Order Detail</button>
+          <button type="submit" style="padding: 0; border: none; background: none;" title="View Order Detail">
+            <i class="fas fa-box-open" style="font-size: 30px; color: #06999c;"></i> <!-- Icon Order Detail -->
+          </button>
         </form>
         <form th:action="@{../note/listNote/{id}(id=${customer.id})}" method="get">
-          <button type="submit">Note Detail</button>
+          <button type="submit" style="padding: 0; border: none; background: none;" title="View Note Detail">
+            <i class="fas fa-clipboard-list" style="font-size: 30px; color: #06999c;"></i> <!-- Icon Note Detail -->
+          </button>
         </form>
         </div>
       </td>
@@ -295,7 +346,7 @@
        address=${address},
        phone=${phone},
        moneyFrom=${moneyFrom},
-       moneyTo=${moneyTo}, customerType=${customerType})}">
+       moneyTo=${moneyTo},createBy=${createBy})}">
       Previous
     </a>
 
@@ -308,7 +359,7 @@
        address=${address},
        phone=${phone},
        moneyFrom=${moneyFrom},
-       moneyTo=${moneyTo}, customerType=${customerType})}">
+       moneyTo=${moneyTo},createBy=${createBy})}">
       Next
     </a>
   </div>

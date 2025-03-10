@@ -38,7 +38,7 @@ public interface NoteRepository extends JpaRepository<Note, Long> {
             @Param("relatedUserList") List<Long> relatedUserList,
             @Param("idFrom") Long idFrom,
             @Param("idTo") Long idTo,
-            @Param("kindOfNote") Boolean kindOfNote,
+            @Param("kindOfNote") String kindOfNote,
             @Param("createdDateFrom") LocalDateTime createdDateFrom,
             @Param("createdDateTo") LocalDateTime createdDateTo,
             @Param("noteSearch") String noteSearch,
@@ -46,7 +46,31 @@ public interface NoteRepository extends JpaRepository<Note, Long> {
             @Param("moneyTo") Integer moneyTo,
             Pageable pageable);
 
+    @Query("SELECT n FROM Note n WHERE (n.customerId = :id) AND (n.storeId = :storeID) " +
+            " AND (:idFrom IS NULL OR n.id >= :idFrom) " +
+            " AND (:idTo IS NULL OR n.id <= :idTo) " +
+            " AND (:kindOfNote IS NULL OR n.isDebt = :kindOfNote)" +
+            " AND (:createdDateFrom IS NULL OR n.createdAt >= :createdDateFrom) " +
+            " AND (:createdDateTo IS NULL OR n.createdAt <= :createdDateTo) " +
+            " AND (:moneyFrom IS NULL OR n.money >= :moneyFrom) " +
+            " AND (:moneyTo IS NULL OR n.money <= :moneyTo) " +
+            " AND (:noteSearch IS NULL OR LOWER(n.note) LIKE LOWER(CONCAT('%', :noteSearch, '%')))")
+    Page<Note> findNoteByAttribute(@Param("id") Long id,
+                                   @Param("storeID") Long storeID,
+                                   @Param("idFrom") Long idFrom,
+                                   @Param("idTo") Long idTo,
+                                   @Param("kindOfNote") String kindOfNote,
+                                   @Param("createdDateFrom") LocalDateTime createdDateFrom,
+                                   @Param("createdDateTo") LocalDateTime createdDateTo,
+                                   @Param("noteSearch") String noteSearch,
+                                   @Param("moneyFrom") Integer moneyFrom,
+                                   @Param("moneyTo") Integer moneyTo,
+                                   Pageable pageable);
+
 
     @Query("SELECT n FROM Note n WHERE n.customerId = :id AND n.createdBy IN :relatedUserList" )
     Page<Note> findNoteAll(@Param("id") Long id, @Param("relatedUserList") List<Long> relatedUserList, Pageable pageable);
+
+    @Query("SELECT n FROM Note n WHERE n.customerId = :id AND n.storeId = :storeID" )
+    Page<Note> findNoteAll(@Param("id") Long id, @Param("storeID") Long storeID, Pageable pageable);
 }

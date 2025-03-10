@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Rice Sales Management</title>
-    <link rel="stylesheet" href="/css/list.css">
+    <link rel="stylesheet" href="/css/base.css">
     <style>
         .pagination {
             text-align: center;
@@ -80,6 +80,39 @@
         .search-button:hover {
             background-color: #1a252f;
         }
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .add-note-button {
+            background-color: #d35400;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            text-decoration: none;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            padding: 10px 20px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .add-note-button:hover {
+            background-color: #e67e22;
+            transform: scale(1.05);
+        }
+
+
 
     </style>
     <script src="/js/home.js"></script>
@@ -100,13 +133,14 @@
             alert("You are successfully created!");
         }
     </script>
-    <script type="text/javascript">
+    <script type="text/javascript" th:inline="javascript">
         function showMessage(messageType, message) {
             if (message && messageType) {
                 alert(message);
                 // Điều hướng về trang listCustomer sau 3 giây
+                var customerId = /*[[${customer.id}]]*/ '0';
                 setTimeout(function () {
-                    window.location.href = "/customer/listCustomer";
+                    window.location.href = "/note/listNote/" + customerId;
                 });
                 // Hiển thị thông báo bằng alert
             }
@@ -182,7 +216,8 @@
 <div class="content" id="content">
 
     <!-- Modal Form -->
-    <button class="add-customer" onclick="callPage()">Create New Note</button>
+<!--    <button class="add-customer" onclick="callPage()">Create New Note</button>-->
+
 
     <div id="messageBox">
         <script type="text/javascript">
@@ -196,6 +231,7 @@
             }
         </script>
     </div>
+
     <!-- List -->
     <h1>Information about Customer</h1>
     <table class="styled-table">
@@ -207,7 +243,6 @@
             <td>Address</td>
             <td>Phone</td>
             <td>MoneyState</td>
-            <td>Customer Type</td>
         </tr>
         </thead>
         <tbody>
@@ -222,11 +257,17 @@
              : ${'x'.repeat(customer.phone.length() - 3) + customer.phone.substring(customer.phone.length() - 3)}">
             </td>
             <td th:if="${customer != null}" th:text="${customer.moneyState}"></td>
-            <td th:if="${customer != null}" th:text="${customer.ctype}"></td>
         </tr>
         </tbody>
     </table>
-    <h1>Information about Notes</h1>
+
+<!--    <h1>Information about Notes</h1>-->
+<!--    <a th:href="@{/note/createNote/{id}(id=${customer.id})}" class="add-customer">Create New Note</a>-->
+    <div class="header-container">
+        <h1 >Information about Notes</h1>
+        <a th:href="@{/note/createNote/{id}(id=${customer.id})}" class="add-note-button">Create New Note</a>
+    </div>
+
     <div th:if="${errorMessage}" style="color: red; font-weight: bold;">
         <p th:text="${errorMessage}"></p>
     </div>
@@ -246,9 +287,11 @@
             </td>
             <td>
                 <select class="filter-input" name="kindOfNote" onchange="filterNotes()" style="width: 150px;">
-                    <option value="">------------ All ------------</option>
-                    <option value="true">Debit</option>
-                    <option value="false">Pay off debt</option>
+                    <option value="">------------All------------</option>
+                    <option value="customerOwe">Customer owes money</option>
+                    <option value="customerPay">Customer pays money</option>
+                    <option value="storeOwe">Store owes money</option>
+                    <option value="storePay">Store pays money</option>
                 </select>
             </td>
             <td>
@@ -267,7 +310,7 @@
         <tbody>
         <tr th:each="note : ${notes}">
             <td th:if="${note != null}" th:text="${note.id}"></td>
-            <td th:if="${note != null}" th:text="${note.debt} ? 'Debit' : 'Pay off debt'"></td>
+            <td th:if="${note != null}" th:text="${note.debt}"></td>
             <td th:if="${note != null}" th:text="${note.createdAt}"></td>
             <td th:if="${note != null}" th:text="${note.note}"></td>
             <td th:if="${note != null}" th:text="${note.money}"></td>

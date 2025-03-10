@@ -8,7 +8,6 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface CustomerMapper {
-    @Mapping(target = "ctype", source = "ctype")
     @Mapping(target = "createdBy", source = "createdBy")
     @Mapping(target = "createdAt", source = "createdAt")
     @Mapping(target = "updatedAt", source = "updatedAt")

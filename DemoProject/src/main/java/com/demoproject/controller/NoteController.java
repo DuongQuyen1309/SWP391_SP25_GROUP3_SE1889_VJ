@@ -11,6 +11,8 @@ import com.demoproject.service.AccountService;
 import com.demoproject.service.CustomerService;
 import com.demoproject.service.NoteService;
 import com.demoproject.service.UserService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -46,11 +48,12 @@ public class NoteController {
 
 
     public NoteController(NoteService noteService, AccountService accountService,
-                          UserService userService, TransactionQueueProcessor transactionQueueProcessor) {
+                          UserService userService, TransactionQueueProcessor transactionQueueProcessor,CustomerService customerService) {
         this.noteService = noteService;
         this.accountService = accountService;
         this.userService = userService;
         this.transactionQueueProcessor = transactionQueueProcessor;
+        this.customerService = customerService;
     }
 
     @GetMapping("/listNote/{id}")
@@ -86,15 +89,41 @@ public class NoteController {
             listHiddenPage.add("listStaff");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
-        List<Long> relatedUserList = new ArrayList<>();
-        if(role.equalsIgnoreCase("OWNER")){
-            relatedUserList = userService.getStaffID(user.get().getId());
-            relatedUserList.add(user.get().getId());
-        }else if(role.equalsIgnoreCase("STAFF")){
-            Long ownerId = userService.getOwnerID(user.get().getId());
-            relatedUserList = userService.getStaffID(ownerId);
-            relatedUserList.add(ownerId);
+
+        // bắt đầu đoạn code cần thay thế
+//        List<Long> relatedUserList = new ArrayList<>();
+//        if(role.equalsIgnoreCase("OWNER")){
+//            relatedUserList = userService.getStaffID1(user.get().getId());
+//            relatedUserList.add(user.get().getId());
+//        }else if(role.equalsIgnoreCase("STAFF")){
+//            Long ownerId = userService.getOwnerID(user.get().getId());
+//            relatedUserList = userService.getStaffID1(ownerId);
+//            relatedUserList.add(ownerId);
+//        }
+//
+//        Customer customercCheck = customerService.getCustomer(id);
+//
+//        int check=0;
+//        for(int i=0; i<relatedUserList.size(); i++){
+//            if(relatedUserList.get(i).equals(customercCheck.getCreatedBy())){
+//                check=check+1;
+//            }
+//        }
+//        if(check==0) {
+//            return "redirect:/customer/listCustomer";
+//        }
+        //ket thuc doan code can thay the
+
+        // bắt đầu đoạn code moi
+        String storeId = jwtUtils.extractStoreID(token);
+        Long last_storedID = Long.parseLong(storeId);
+        Customer customerForNote = customerService.getCustomer(id);
+        Long createdByUserID = customerForNote.getCreatedBy();
+        Optional<Users> createdByUser = userService.getUserProfile(createdByUserID);
+        if(!last_storedID.equals(createdByUser.get().getStoreId())) {
+            return "redirect:/customer/listCustomer";
         }
+        // ket thuc đoạn code moi
 
         if ((idFrom != null && !idFrom.isEmpty() && !idFrom.matches("\\d+")) ||
                 (idTo != null && !idTo.isEmpty() && !idTo.matches("\\d+")) ||
@@ -137,12 +166,26 @@ public class NoteController {
 
                 String note_search = noteSearch == null || noteSearch.isEmpty() ? null : noteSearch;
 
-                Boolean req_isDebt = (kindOfNote != null && !kindOfNote.isBlank()) ? Boolean.valueOf(kindOfNote) : null;
-                notePage = noteService.searchNoteByAttribute(id, relatedUserList, req_idFrom, req_idTo, req_isDebt, createdDateFrom, createdDateTo, note_search,
+                String req_isDebt = (kindOfNote != null && !kindOfNote.isBlank()) ? kindOfNote : null;
+
+                // bắt đầu đoạn code cần thay thế
+//                notePage = noteService.searchNoteByAttribute(id, relatedUserList, req_idFrom, req_idTo, req_isDebt, createdDateFrom, createdDateTo, note_search,
+//                        req_moneyFrom, req_moneyTo, pageable);
+                // kết thúc đoạn code cần thay thế
+
+                // bắt đầu đoạn code moi
+                notePage = noteService.searchNoteByAttribute(id,last_storedID, req_idFrom, req_idTo, req_isDebt, createdDateFrom, createdDateTo, note_search,
                         req_moneyFrom, req_moneyTo, pageable);
+                // ket thuc đoạn code moi
 
             } else {
-                notePage = noteService.searchNoteAll(id, relatedUserList, pageable);
+                // bắt đầu đoạn code cần thay thế
+//                notePage = noteService.searchNoteAll(id, relatedUserList, pageable);
+                // ket thuc đoạn code cần thay thế
+
+                // bắt đầu đoạn code moi
+                notePage = noteService.searchNoteAll(id, last_storedID, pageable);
+                // ket thuc đoạn code moi
             }
 
             Customer customer = customerService.getCustomer(id);
@@ -169,7 +212,7 @@ public class NoteController {
     @GetMapping("/createNote/{id}")
     public String createNoteForm(@PathVariable("id") Long id,
                              @CookieValue(value = "token", required = false) String token,
-                             Model model) {
+                             Model model,  HttpServletResponse response) {
         String username = jwtUtils.extractUsername(token);
         Optional<Account> optAccount = accountService.findByUsernameAndIsDeleteFalse(username);
         Account account = optAccount.orElse(null);
@@ -185,14 +228,63 @@ public class NoteController {
         model.addAttribute("listHiddenPage", listHiddenPage);
         Customer customer = customerService.getCustomer(id);
         model.addAttribute("customer",customer);
+
+        //bat dau doan code can thay the
+//        List<Long> relatedUserList = new ArrayList<>();
+//        if(role.equalsIgnoreCase("OWNER")){
+//            relatedUserList = userService.getStaffID1(user.get().getId());
+//            relatedUserList.add(user.get().getId());
+//        }else if(role.equalsIgnoreCase("STAFF")){
+//            Long ownerId = userService.getOwnerID(user.get().getId());
+//            relatedUserList = userService.getStaffID1(ownerId);
+//            relatedUserList.add(ownerId);
+//        }
+//
+//        Customer customercCheck = customerService.getCustomer(id);
+//
+//        int check=0;
+//        for(int i=0; i<relatedUserList.size(); i++){
+//            if(relatedUserList.get(i).equals(customercCheck.getCreatedBy())){
+//                check=check+1;
+//            }
+//        }
+//        if(check==0) {
+//            return "redirect:/customer/listCustomer";
+//        }
+        //ket thuc doan code can thay the
+
+        //bắt đầu đoạn code mới
+        String storeId = jwtUtils.extractStoreID(token);
+        Long last_storedID = Long.parseLong(storeId);
+        Long createdByUserID = customer.getCreatedBy();
+        Optional<Users> createdByUser = userService.getUserProfile(createdByUserID);
+        if(!last_storedID.equals(createdByUser.get().getStoreId())) {
+            return "redirect:/customer/listCustomer";
+        }
+        //ket thuc doan code moi
+
+        String updatedToken = jwtUtils.addCustomerIdToToken(token, id);
+
+        // Cập nhật cookie với token mới
+        Cookie cookie = new Cookie("token", updatedToken);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false);
+        cookie.setPath("/");
+        cookie.setMaxAge(24 * 60 * 60);
+        response.addCookie(cookie);
+
+
+        model.addAttribute("customerId", id);
+
         return "createNote";
     }
 
-    @PostMapping("/createNote")
-    public String createNote(@RequestParam("customerID") String customerID,
+    @PostMapping("/createNote/{id}")
+    public String createNote(@PathVariable("id") Long id,
                              @RequestParam("notename") String notename,
                              @RequestParam("kindOfNote") String kindOfNote,
                              @RequestParam("money") String money,
+                             RedirectAttributes redirectAttributes, HttpServletResponse response,
                            Model model,@CookieValue(value = "token", required = false) String token) {
         String username = jwtUtils.extractUsername(token);
         Optional<Account> optAccount = accountService.findByUsernameAndIsDeleteFalse(username);
@@ -207,13 +299,42 @@ public class NoteController {
             listHiddenPage.add("listStaff");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
-        Long id = Long.parseLong(customerID);
-        Integer amount = Integer.parseInt(money);
-        Boolean isDebt = (kindOfNote != null && !kindOfNote.isBlank()) ? Boolean.valueOf(kindOfNote) : null;
-        Long cID =  user.get().getId();
-        TransactionRequest request = new TransactionRequest(id, amount, isDebt, notename,cID);
-        transactionQueueProcessor.addTransaction(request);
-        return "redirect:/note/listNote/" + customerID;
+
+        List<Long> relatedUserList = new ArrayList<>();
+        if (role.equalsIgnoreCase("OWNER")) {
+            relatedUserList = userService.getStaffID(user.get().getId());
+            relatedUserList.add(user.get().getId());
+        } else if (role.equalsIgnoreCase("STAFF")) {
+            Long ownerId = userService.getOwnerID(user.get().getId());
+            relatedUserList = userService.getStaffID(ownerId);
+            relatedUserList.add(ownerId);
+        }
+
+        Long tokenCustomerId = jwtUtils.extractCustomerId(token);
+        if (tokenCustomerId == null || !tokenCustomerId.equals(id)) {
+            return "redirect:/customer/listCustomer"; // Nếu không đúng, chặn request
+        }else {
+
+            Integer amount = Integer.parseInt(money);
+            String isDebt = (kindOfNote != null && !kindOfNote.isBlank()) ? kindOfNote : null;
+            Long cID = user.get().getId();
+            String storeId = jwtUtils.extractStoreID(token);
+            Long last_storedID = Long.parseLong(storeId);
+
+            TransactionRequest request = new TransactionRequest(tokenCustomerId, amount, isDebt, notename, cID, last_storedID);
+            transactionQueueProcessor.addTransaction(request);
+            redirectAttributes.addFlashAttribute("messageType", "success");
+            redirectAttributes.addFlashAttribute("message", "Note created successfully!");
+            model.addAttribute("customerId", id);
+            // Xóa customerId khỏi token sau khi tạo phiếu
+            String updatedToken = jwtUtils.removeCustomerIdFromToken(token);
+            Cookie cookie = new Cookie("token", updatedToken);
+            cookie.setHttpOnly(true);
+            cookie.setPath("/");
+            response.addCookie(cookie);
+
+            return "redirect:/note/listNote/" + id;
+        }
 
     }
 

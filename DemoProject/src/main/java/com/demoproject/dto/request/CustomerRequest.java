@@ -30,7 +30,6 @@ public class CustomerRequest {
     private String phone;
 
     private Integer moneyState;
-    private String ctype;
     private Long createdBy;
     private LocalDate createdAt;
     private LocalDate updatedAt;
