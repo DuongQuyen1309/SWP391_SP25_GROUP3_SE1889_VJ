@@ -5,15 +5,15 @@
     <title>Rice Sales Management</title>
     <link rel="stylesheet" href="/css/base.css">
     <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
+    <script src="/js/validationProduct.js"></script>
     <style>
-        /* Profile Form */
         .profile-form {
             background-color: white;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3); /* Tạo hiệu ứng bóng phía trên */
             max-width: 500px;
-            margin: 20px auto;
+            margin: 0 auto;
             display: flex;
             flex-direction: column;
             gap: 15px;
@@ -52,6 +52,7 @@
         .profile-form button:hover {
             background-color: #1a252f;
         }
+
         select {
             width: 100%;
             padding: 8px;
@@ -67,10 +68,61 @@
             cursor: not-allowed;
         }
 
-        .error{
-            color: red;
+        #uploadAvatarBtn {
+            background-color: #2c3e50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease-in-out;
         }
 
+        #uploadAvatarBtn:hover {
+            background-color: #2980b9;
+        }
+
+        /* Chia layout trong div.content thành 2 phần */
+        .profile-container {
+            display: flex;
+            align-items: flex-start;
+            justify-content: flex-start;
+            gap: 10px; /* Khoảng cách giữa form và avatar */
+            max-width: 800px;
+            margin: auto;
+        }
+
+        /* Định dạng form */
+        .profile-form-container {
+            flex: 1;
+            max-width: 500px;
+        }
+
+        /* Định dạng avatar */
+        .avatar-container {
+            display: flex;
+            flex-direction: column;
+            width: 150px;
+            margin-top: 0;
+            margin-right: 200px;
+        }
+
+
+        /* Avatar lớn hơn */
+        .user-avatar-large {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #2c3e50;
+        }
+
+        .avatar-header {
+            margin-left: 50px;
+            margin-bottom: 50px;
+            margin-top: 50px;
+        }
     </style>
 </head>
 <body>
@@ -79,7 +131,7 @@
     <button class="menu-btn" onclick="toggleSidebar()">☰</button>
     <h2><a href="/home">RSMS</a></h2>
     <div class="user-info">
-        <img  th:src="${user.avatar}" alt="User Avatar" class="user-avatar"/>
+        <img th:src="${products.image}" alt="Product Image" class="user-avatar"/>
         <div class="dropdown">
             <span th:text="${account.displayName}" class="user-name" onclick="toggleDropdown()"> ▼</span>
             <div id="dropdown-menu" class="dropdown-content">
@@ -95,96 +147,80 @@
 
 <div class="content">
     <h1>Update Product</h1>
-    <form id="productValid" class="profile-form" action="/product/update" method="POST" th:object="${products}">
+    <div class="profile-container">
+        <div class="avatar-container">
+            <h1 class="avatar-header">Image</h1>
+            <img class="user-avatar-large" th:src="${products.image}" alt=""/>
+        </div>
+        <div class="profile-form-container">
+            <form id="productValid" class="profile-form" action="/product/update" method="POST" th:object="${products}"
+            enctype="multipart/form-data"
+            >
 
-        <label for="name">Name:</label>
-        <input type="text" id="name" name="name" th:field="*{name}" >
-        <span id="nameError" class="error"></span>
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" th:field="*{name}">
+                <span id="nameError" class="error"></span>
 
-        <label for="price">Price:</label>
-        <input type="text" id="price" name="price" th:field="*{price}" min="0" >
-        <span id="priceError" class="error"></span>
+                <label for="price">Price:</label>
+                <input type="text" id="price" name="price" th:field="*{price}" min="0">
+                <span id="priceError" class="error"></span>
 
-        <label for="description">Description:</label>
-        <input type="text" id="description" name="description" th:field="*{description}">
-        <span id="descriptionError" class="error"></span>
+                <label for="description">Description:</label>
+                <input type="text" id="description" name="description" th:field="*{description}">
+                <span id="descriptionError" class="error"></span>
 
-        <label for="image">Image:</label>
-        <input type="file" id = "image" accept="image/*">
+                <label for="image">Image:</label>
+                <input type="file" name="image" id="image" accept="image/*">
 
-        <input type="hidden" name="id" th:field="*{id}">
-        <button type="submit">Update Product</button>
-    </form>
-
+                <input type="hidden" name="id" th:field="*{id}">
+                <button type="submit">Update Product</button>
+            </form>
+        </div>
+    </div>
 </div>
 
-<!--Sidebar -->
-<div class="sidebar" id="sidebar">
-    <h2>Feature</h2>
-    <a href="/user/userprofile" >Profile</a>
-    <a href="/account/listStaff" th:style="${#lists.contains(listHiddenPage, 'listStaff')} ? 'display: none;' : ''"> Staff Account Management</a>
+    <!--Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <h2>Feature</h2>
+        <a href="/user/userprofile">Profile</a>
+        <a href="/account/listStaff" th:style="${#lists.contains(listHiddenPage, 'listStaff')} ? 'display: none;' : ''">
+            Staff Account Management</a>
 
-    <a href="/product/listProduct" >Rice Management</a>
+        <a href="/product/listProduct">Rice Management</a>
 
-    <a href="/customer/listCustomer" >Customer Management</a>
+        <a href="/customer/listCustomer">Customer Management</a>
 
-    <a href="/warehouse/listWarehouseZone" >Warehouse Management</a>
+        <a href="/warehouse/listWarehouseZone">Warehouse Management</a>
 
-    <a href="/bill/listBill" >Invoice Management</a>
-</div>
+        <a href="/bill/listBill">Invoice Management</a>
+    </div>
 
-<footer>
-    &copy; 2025 Rice Sales Management. All Rights Reserved.
-</footer>
+    <footer>
+        &copy; 2025 Rice Sales Management. All Rights Reserved.
+    </footer>
 </body>
+
 <script>
-    document.getElementById("productValid").addEventListener("submit", function(event) {
-        let isValid = true;
+    document.addEventListener('DOMContentLoaded', function() {
+        const fileInput = document.getElementById('image');
+        const imgElement = document.querySelector('.user-avatar-large');
+        let currentImageUrl = null;
 
-        // Lấy giá trị input
-        let name = document.getElementById("name").value.trim();
-        let price = document.getElementById("price").value.trim();
-        let description = document.getElementById("description").value.trim();
+        fileInput.addEventListener('change', function(event) {
+            // Nếu đã có URL tạm trước đó, hủy nó để tránh rò rỉ bộ nhớ
+            if (currentImageUrl) {
+                URL.revokeObjectURL(currentImageUrl);
+            }
 
-        console.log(name);
-        console.log(price);
-        console.log(description);
-
-        // Reset thông báo lỗi
-        document.getElementById("nameError").innerText = "";
-        document.getElementById("priceError").innerText = "";
-        document.getElementById("descriptionError").innerText = "";
-
-        // Kiểm tra tên sản phẩm
-        let namePattern = /^[a-zA-Z0-9\s\u00C0-\u1EF9]+$/;
-        if (!namePattern.test(name)) {
-            document.getElementById("nameError").innerText = "Product name contains special character!!!";
-            isValid = false;
-        }
-
-        console.log(namePattern.test(name));
-
-        // Kiểm tra giá của sản phẩm
-        let pricePattern = /^\d+(\.\d{1,4})?$/;
-        if (!pricePattern.test(price)) {
-            document.getElementById("priceError").innerText = "Product price doesn't valid!!!";
-            isValid = false;
-        }
-
-        // Kiểm tra description
-        let descriptionPattern = /^[a-zA-Z0-9\s\u00C0-\u1EF9]+$/;
-        if (!descriptionPattern.test(description)) {
-            document.getElementById("descriptionError").innerText = "Description contains word only!!!";
-            isValid = false;
-        }
-
-        // Nếu có lỗi, chặn form submit
-        if (!isValid) {
-            event.preventDefault();
-        }
+            const file = event.target.files[0];
+            if (file) {
+                currentImageUrl = URL.createObjectURL(file);
+                imgElement.src = currentImageUrl;
+            }
+        });
     });
-
 </script>
+
 <script src="/js/home.js"></script>
 
 

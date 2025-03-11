@@ -92,4 +92,8 @@ public class ZoneService {
     public boolean existsById(Long productId) {
         return productRepository.existsById(productId);
     }
+
+    public List<Zone> getZonesByStoreId(Long storeId) {
+        return zoneRepository.findByStoreId(storeId);
+    }
 }

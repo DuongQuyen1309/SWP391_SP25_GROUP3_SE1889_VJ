@@ -32,35 +32,30 @@ public class Product {
     @Column(name = "description", nullable = false)
     String description;
 
-//    @Column(name = "image", nullable = false)
-//    String image;
+    @Column(name = "url", nullable = true)
+    String image;
 
-    @Column(name = "createdBy", nullable = true)
-    String createdBy;
+    @Column(name = "created_by", nullable = false)
+    Long createdBy;
 
-//    @Column(name = "createdAt")  // Đổi tên cho đúng với DB
-//    LocalDateTime createdAt;
-//    @Column(name = "updatedBy", nullable = false)
-//    String updatedBy;
+    @Column(name = "created_at", nullable = false)
+    LocalDateTime createdAt;
 
-    @Column(name = "updatedAt", nullable = true)
+    @Column(name = "updated_at", nullable = false)
     LocalDateTime updatedAt;
 
-//    @Column(name = "deletedBy", nullable = false)
-//    String deletedBy;
-
-    @Column(name = "deletedAt", nullable = true)
+    @Column(name = "deleted_at", nullable = false)
     LocalDateTime deletedAt;
 
-    @Column(name = "isDelete", nullable = true)
+    @Column(name = "is_delete", nullable = false)
     int isDeleted;
 
-    @Column(name = "store_id", nullable = true)
-    private Long storeId;
+    @Column(name = "store_id", nullable = false)
+    Long storeId;
 
-    @Column(name = "zone_id")
-    private Long zoneId;
+    @Column(name = "zone_id", nullable = false)
+    Long zoneId;
 
-    @Column(name = "quantity")
-    private int quantity;
+    @Column(name = "quantity", nullable = false)
+    int quantity;
 }

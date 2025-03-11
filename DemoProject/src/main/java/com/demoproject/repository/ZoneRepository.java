@@ -37,6 +37,8 @@ public interface ZoneRepository extends JpaRepository<Zone, Long> {
     @Query("SELECT z FROM Zone z WHERE z.storeId = :storeID AND LOWER(z.name) LIKE LOWER(CONCAT('%', :name, '%'))")
     Page<Zone> findByNameAndStoreId(String name, Long storeId, Pageable pageable);
 
+    List<Zone> findByStoreId(Long storeId);
+
 
 
 }

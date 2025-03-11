@@ -6,6 +6,7 @@
   <title></title>
   <link rel="stylesheet" href="/css/base.css">
   <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
+  <script src="/js/importProduct.js"></script>
   <style>
     .pagination {
       text-align: center;
@@ -35,6 +36,18 @@
       border-color: #e67e22;
       box-shadow: 0 0 8px rgba(230, 126, 34, 0.5);
     }
+
+    .importBtn{
+      position: absolute;
+      margin-left: 940px;
+      top: 50px;
+      background-color: #D67C2C;
+      color: white;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
   </style>
 
   <script src="/js/home.js"></script>
@@ -56,7 +69,6 @@
       document.getElementById("updateForm").style.display = "none";
     }
 
-    // Đóng modal khi nhấn ra ngoài
     window.onclick = function(event) {
       const modal = document.getElementById("studentFormModal");
       if (event.target === modal) {
@@ -110,34 +122,11 @@
 <!-- Content -->
 <div class="content" id="content">
 
-  <!-- Modal Form -->
   <button class="add-btn" onclick="createProductForm()" th:style="${#lists.contains(listHiddenPage, 'createProduct')} ? 'display: none;' : ''">+</button>
-  <div id="studentFormModal" class="modal">
-    <div class="modal-content">
-      <span class="close" onclick="closeForm()">x</span>
-      <h2>Add new rice</h2>
-      <form th:action="@{/product/form}" method="post" enctype="multipart/form-data"
-            onsubmit="showSuccessAlert()" >
-
-        <label for="name">Name:</label>
-        <input type="text" id="name" name="name" required>
-
-        <label for="price">Price:</label>
-        <input type="text" id="price" name="price" required>
-
-        <label for="description">Description:</label>
-        <input type="text" id="description" name="description" required>
-
-        <label for="image">Image:</label>
-        <input type="file" id = image accept="image/*">
-
-        <button type="submit" class="submit-button">Create</button>
-      </form>
-    </div>
-  </div>
 
   <!-- List -->
   <h1>List of Products</h1>
+  <button class="importBtn" onclick="importProduct()">Import product</button>
   <form class="form-search" th:action="@{/product/search}" method="get">
     <label for="search"></label>
     <input
@@ -156,35 +145,42 @@
     <thead>
     <tr>
       <td>Image</td>
-      <th>
-        <a style="text-decoration: none; color: inherit"
-           th:href="@{/listproduct(page=${currentPage}, sortField='name', sortDirection=${reverseSortDirection})}">Name
-        </a>
-      </th>
       <td>
         <a style="text-decoration: none; color: inherit"
-           th:href="@{/listproduct(page=${currentPage}, sortField='price', sortDirection=${reverseSortDirection})}">Price
+           th:href="@{/product/listProduct(page=${currentPage}, sortField='name', sortDirection=${reverseSortDirection})}">Name
+        </a>
+      </td>
+      <td>
+        <a style="text-decoration: none; color: inherit"
+           th:href="@{/product/listProduct(page=${currentPage}, sortField='price', sortDirection=${reverseSortDirection})}">Price
+        </a>
+      </td>
+      <td>
+        <a style="text-decoration: none; color: inherit"
+           th:href="@{/product/listProduct(page=${currentPage}, sortField='quantity', sortDirection=${reverseSortDirection})}">Quantity(kg)
         </a>
       </td>
       <td>Description</td>
+      <td>Zones</td>
       <td>Action</td>
     </tr>
     </thead>
     <tbody>
-    <tr th:each="product : ${products.content} " th:if="${product.isDeleted == 0}">
-      <!--                <td th:text="${product.name}"></td>-->
-      <td><img src="https://tvfood.com.vn/vnt_upload/news/09_2023/gao_nep_la_gi.jpg" width="100px" alt=""></td>
+    <tr th:each="product : ${products} " th:if="${product.isDeleted == 0}">
+      <td><img th:src="${product.image}" width="100px" height="70px" alt=""></td>
       <td th:text="${product.name}"></td>
-      <td th:text="${product.price}"></td>
+      <td class="price" th:attr="data-price=${product.price}"></td>
+      <td th:text="${product.quantity}"></td>
       <td th:text="${product.description}"></td>
+      <td th:text="${product.zoneId}"></td>
       <td >
         <form th:action="@{/product/update}" method="get">
           <input type="hidden" name="id" th:value="${product.id}">
           <button type="submit">Update</button>
         </form>
-        <form action="/product/delete" method="post">
+        <form action="/product/delete" method="post" onsubmit="return confirmDelete()">
           <input type="hidden" name="id" th:value="${product.id}">
-          <button onclick="confirmDelete()" type="submit">Delete</button>
+          <button type="submit">Delete</button>
         </form>
       </td>
     </tr>
@@ -192,13 +188,22 @@
   </table>
 
   <div class="pagination">
-    <a style="text-decoration: none " th:if="${currentPage > 0}" th:href="@{/product/listProduct(page=${currentPage - 1}, sortField=${sortField}, sortDirection=${sortDirection})}">Trước</a>
-    <span th:text="'Trang ' + ${currentPage + 1} + ' / ' + ${totalPages}"></span>
-    <a style="text-decoration: none"th:if="${currentPage + 1 < totalPages}" th:href="@{/product/listProduct(page=${currentPage + 1}, sortField=${sortField}, sortDirection=${sortDirection})}">Sau</a>
+    <!-- Nút "Trước" chỉ hiển thị khi currentPage > 1 -->
+    <a style="text-decoration: none"
+       th:if="${currentPage > 1}"
+       th:href="@{/product/listProduct(page=${currentPage - 2}, sortField=${sortField}, sortDirection=${sortDirection})}">
+      Trước
+    </a>
+
+    <span>Page <span th:text="${currentPage}"></span> of <span th:text="${totalPages}"></span></span>
+
+    <!-- Nút "Sau" chỉ hiển thị khi currentPage < totalPages -->
+    <a style="text-decoration: none"
+       th:if="${currentPage < totalPages}"
+       th:href="@{/product/listProduct(page=${currentPage}, sortField=${sortField}, sortDirection=${sortDirection})}">
+      Sau
+    </a>
   </div>
-
-
-
 </div>
 <footer>
   &copy; 2025 Rice Sales Management. All Rights Reserved.
@@ -211,14 +216,28 @@
     window.location.href ="/product/create";
   }
 
+  function importProduct(){
+    window.location.href="/product/import"
+  }
+
   function showCreatedSuccess() {
     alert("You are successfully created!");
   }
 
   function confirmDelete() {
-    if (confirm("Bạn có chắc chắn muốn xóa sản phẩm này không?")) {
-      window.location.href = "/deleteProduct?id=" + productId;
-    }
+    return confirm("Bạn có chắc muốn xóa sản phẩm này không?")
   }
+
+
+  function formatPrice(price) {
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+  }
+
+  document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll(".price").forEach(function(el) {
+      let price = parseFloat(el.getAttribute("data-price"));
+      el.innerText = formatPrice(price);
+    });
+  });
 </script>
 </html>

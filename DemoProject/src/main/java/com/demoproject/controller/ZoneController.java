@@ -65,8 +65,6 @@ public class ZoneController {
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
 
-
-
         if (search.isEmpty()) {
             zonePage = this.zoneService.getAllZonesByStoreID(pageable,user.getStoreId());
         } else {
@@ -232,6 +230,19 @@ public class ZoneController {
         this.zoneService.deleteById(Long.parseLong(id));
 
         return "redirect:/warehouse/listWarehouseZone";
+    }
+
+    @GetMapping("/getZones")
+    @ResponseBody
+    public List<Zone> getZones(@CookieValue(value = "token", required = false) String token) {
+        String username = jwtUtils.extractUsername(token);
+        Optional<Account> account = accountService.findByUsernameAndIsDeleteFalse(username);
+        Optional<Users> user = userService.getUserProfile(account.get().getUserId());
+        List<Zone> zones = null;
+        if (user.isPresent()) {
+            zones = zoneService.getZonesByStoreId(user.get().getStoreId());
+        }
+        return zones;
     }
 
 }
