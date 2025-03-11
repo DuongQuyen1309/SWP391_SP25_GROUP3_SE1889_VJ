@@ -3,6 +3,7 @@ package com.demoproject.controller;
 import com.demoproject.billqueue.BillQueueProcessor;
 import com.demoproject.billqueue.BillRequest;
 import com.demoproject.dto.CustomerDataDTO;
+import com.demoproject.dto.ProductDataDTO;
 import com.demoproject.dto.request.CustomerRequest;
 import com.demoproject.entity.*;
 import com.demoproject.jwt.JwtUtils;
@@ -23,7 +24,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/bill")
@@ -61,11 +64,29 @@ public class BillController {
 
     @GetMapping("/listBill")
     public String listBill(Model model, @RequestParam(defaultValue = "0") int page,
-                           @RequestParam(defaultValue = "2") int size, @RequestParam(defaultValue = "") String search,
+                           @RequestParam(defaultValue = "5") int size,
+                           @RequestParam(defaultValue = "") String search,
                            @RequestParam(defaultValue = "name") String searchBy,
+                           @RequestParam(defaultValue = "id") String sortField,
+                           @RequestParam(defaultValue = "asc") String sortOrder,
+                           @RequestParam(required = false) Double minValue,
+                           @RequestParam(required = false) Double maxValue,
                            @CookieValue(value = "token", required = false) String token,
                            RedirectAttributes redirectAttributes) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
+
+        Sort sort;
+        if (sortField.equals("debtMoney")) {
+            sort = sortOrder.equalsIgnoreCase("desc") ?
+                    Sort.by("debtMoney").descending() :
+                    Sort.by("debtMoney").ascending();
+        } else {
+            // Default sort by id
+            sort = sortOrder.equalsIgnoreCase("desc") ?
+                    Sort.by("id").descending() :
+                    Sort.by("id").ascending();
+        }
+
+        Pageable pageable = PageRequest.of(page, size, sort);
         Page<Bill> billPage;
         Account account = accountService.getAccountFromToken(token).orElse(null);
         Users user = userService.getUserProfile(account.getUserId()).orElse(null);
@@ -78,30 +99,39 @@ public class BillController {
             listHiddenPage.add("listStaff");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
-        if(search.isEmpty())
-        {
-            billPage = billService.getAllBillsByStoreId(pageable,user.getStoreId());
-        }
-        else
-        {
-            if(searchBy.equals("customerName")){
-                billPage = billService.getBillsByStoreIdAndCustomerName(search,user.getStoreId(),pageable);
-            }
-            else{
 
-                try{
+        // Add range values to model for form persistence
+        model.addAttribute("minValue", minValue);
+        model.addAttribute("maxValue", maxValue);
+
+        // Handle total money range search
+        if (searchBy.equals("totalMoneyRange") && minValue != null && maxValue != null) {
+            billPage = billService.getBillsByTotalMoneyRange(minValue, maxValue, user.getStoreId(), pageable);
+        } else if (search.isEmpty()) {
+            billPage = billService.getAllBillsByStoreId(pageable, user.getStoreId());
+        } else {
+            if (searchBy.equals("customerName")) {
+                billPage = billService.getBillsByStoreIdAndCustomerName(search, user.getStoreId(), pageable);
+            } else {
+                try {
                     Long billId = Long.parseLong(search);
                     billPage = billService.getBillsByStoreIdAndBillId(billId, user.getStoreId(), pageable);
-                }
-                catch(NumberFormatException e){
+                } catch (NumberFormatException e) {
                     model.addAttribute("error", "Invalid Invoice ID. Please enter a valid number.");
                     billPage = billService.getAllBillsByStoreId(pageable, user.getStoreId());
                 }
             }
         }
+
         model.addAttribute("bills", billPage);
         model.addAttribute("page", page);
         model.addAttribute("totalPages", billPage.getTotalPages());
+        model.addAttribute("sortOrder", sortOrder);
+        model.addAttribute("search", search);
+        model.addAttribute("searchBy", searchBy);
+        model.addAttribute("sortField", sortField);
+        model.addAttribute("sortOrder", sortOrder);
+
         return "bill/listBill";
     }
 
@@ -139,7 +169,7 @@ public class BillController {
         Optional<Account> optAccount = accountRepository.findByUsernameAndIsDeleteFalse(username);
         Optional<Users> userOpt= userService.getUserProfile(optAccount.get().getUserId());
         Users user = userOpt.orElse(new Users());
-        return productService.getProductsByNameAndCreatedBy(keyword,user.getStoreId());
+        return productService.getProductsByNameAndStoreIdAndQuantityGreaterThanZero(keyword, user.getStoreId());
     }
 
     @GetMapping("/searchCustomers")
@@ -191,17 +221,32 @@ public class BillController {
 
             String customerDataJson = objectMapper.writeValueAsString(customerData);
 
-            // 🔹 Lưu hóa đơn ngay lập tức vào database
+
             bill.setCreatedBy(user.getId());
+            bill.setCreatedAt(LocalDateTime.now());
+            System.out.println(bill.getCreatedAt());
             bill.setStoreId(user.getStoreId());
-            bill.setStatus(true); // ✅ Đánh dấu hóa đơn đã xử lý xong
-            bill = billRepository.save(bill); // ✅ Lưu và lấy `billId`
+
+            BillRequest billRequest = new BillRequest(
+                    bill.getTotalMoney(),
+                    bill.getPaidMoney(),
+                    bill.getDebtMoney(),
+                    bill.getProductData(),
+                    bill.getCustomerData(),
+                    user.getId(),
+                    bill.isPorted(),
+                    bill.isDebt(),
+                    user.getStoreId(),
+                    false,
+                    "Hóa đơn đang chờ xử lý",
+                    bill.getDiscount(),
+                    bill.getPortedMoney()
+            );
+
+            billQueueProcessor.addBill(billRequest);
 
 
-            List<Product> products = objectMapper.readValue(bill.getProductData(), objectMapper.getTypeFactory().constructCollectionType(List.class, Product.class));
 
-            // ✅ Đưa danh sách sản phẩm vào hàng đợi để giảm số lượng
-            productQueueProcessor.addProductsToQueue(products);
 
             response.put("success", true);
             response.put("message", "Hóa đơn đã được đưa vào hàng đợi để xử lý!");
@@ -212,6 +257,39 @@ public class BillController {
             response.put("message", "Lỗi khi gửi hóa đơn: " + e.getMessage());
         }
         return response;
+    }
+
+    @GetMapping("/bill/billDetail")
+    public String billDetail(@RequestParam Long id, @CookieValue(value = "token", required = false) String token, Model model) {
+        Account account = accountService.getAccountFromToken(token).orElse(null);
+        Users user = userService.getUserProfile(account.getUserId()).orElse(null);
+        model.addAttribute("user", user);
+        model.addAttribute("account", account);
+        String role = jwtUtils.extractRole(token);
+        List<String> listHiddenPage = new ArrayList<>();
+        listHiddenPage.add("");
+        if (role.equals("STAFF")) {
+            listHiddenPage.add("listStaff");
+        }
+        model.addAttribute("listHiddenPage", listHiddenPage);
+        Optional<Bill> billOpt = billService.getBillByIdAndStoreId(id, user.getStoreId());
+        if (billOpt.isPresent()) {
+            Bill bill = billOpt.get();
+            model.addAttribute("bill", bill);
+            model.addAttribute("customer", bill.getCustomer());
+            List<ProductDataDTO> productDTOs = bill.getProducts().stream().map(product -> {
+                ProductDataDTO dto = new ProductDataDTO();
+                dto.setName(product.getName());
+                dto.setQuantity(product.getQuantity());
+                dto.setPrice(product.getPrice());
+                dto.setTotal(product.getQuantity() * product.getPrice());
+                return dto;
+            }).collect(Collectors.toList());
+            model.addAttribute("products", productDTOs);
+        }else {
+            model.addAttribute("error", "Bill not found");
+        }
+        return "bill/billDetail";
     }
 
 

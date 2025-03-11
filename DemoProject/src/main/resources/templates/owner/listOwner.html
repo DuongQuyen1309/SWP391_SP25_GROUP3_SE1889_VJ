@@ -21,6 +21,11 @@
         cursor: pointer;
         transition: 0.3s;
     }
+
+    .add-owner:hover {
+        background-color: #e67e22;
+        transform: scale(1.05);
+    }
     .pagination {
         text-align: center;
         margin-top: 20px;
@@ -50,12 +55,11 @@
         box-shadow: 0 0 8px rgba(230, 126, 34, 0.5);
     }
     .twin-field {
-        background-color: #3c566e;
+
     }
 
     .twin-field input {
-        background-color: transparent; /* Giữ nền giống bảng */
-        border: 1px solid rgba(255, 255, 255, 0.3); /* Viền nhẹ */
+        border: 1px solid rgb(255, 255, 255); /* Viền nhẹ */
         transition: border 0.3s, background-color 0.3s;
         color: #ffffff; /* Màu chữ trắng để nổi bật */
         font-size: 14px;
@@ -63,13 +67,12 @@
     /* Placeholder màu sáng để dễ nhìn thấy */
     .twin-field input::placeholder {
         color: rgba(255, 255, 255, 0.7); /* Màu chữ nhạt hơn để không lẫn với dữ liệu */
-        font-style: italic;
+    font-style: italic;
     }
 
     /* Hiệu ứng khi focus */
     .twin-field input:focus {
         outline: none;
-        background-color: rgba(255, 255, 255, 0.1); /* Làm nổi bật ô nhập */
         border-color: #f39c12; /* Viền màu cam khi focus */
         box-shadow: 0px 0px 5px rgba(243, 156, 18, 0.8); /* Hiệu ứng sáng nhẹ */
     }

@@ -61,6 +61,10 @@
             cursor: pointer;
             transition: 0.3s;
         }
+        .add-bill:hover {
+            background-color: #e67e22;
+            transform: scale(1.05);
+        }
         .pagination {
             text-align: center;
             margin-top: 20px;
@@ -89,6 +93,11 @@
             box-shadow: 0 0 8px rgba(230, 126, 34, 0.5);
         }
     </style>
+    <script>
+        function callPage() {
+            window.location.href = "/bill/createBill";
+        }
+    </script>
 </head>
 <body>
 <!-- Header -->
@@ -129,17 +138,42 @@
         </select>
         <button type="submit" style="padding: 10px; background-color: #2c3e50; color: white; border: none; border-radius: 5px;">Search</button>
     </form>
+    <form class="filter-bar" action="/bill/listBill" method="get" style="margin-top: 10px;">
+        <!--        <select name="sortField" style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;">-->
+        <!--                        <option value="id" th:selected="${sortField == 'id' || sortField == null}"-->
+        <!--                                th:hidden="${sortField == 'id' || sortField == null}">Sort by Invoice ID</option>-->
+        <!--            <option value="debtMoney" th:selected="${sortField == 'debtMoney'}">Sort by Debt Money</option>-->
+        <!--        </select>-->
+        <!-- Hidden input to store sort field value -->
+        <input type="hidden" name="sortField" value="debtMoney" />
+        <!-- Regular button that submits the form -->
+        <button  style="width: 200px; padding: 10px; border: 1px solid #ccc; border-radius: 5px;" type="submit" class="btn btn-primary">Sort by Debt Money</button>
+        <select name="sortOrder" style="padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-left: 10px;">
+            <option value="asc" th:selected="${sortOrder == 'asc'}">Ascending</option>
+            <option value="desc" th:selected="${sortOrder == 'desc'}">Descending</option>
+        </select>
+        <button type="submit" style="padding: 10px; background-color: #2c3e50; color: white; border: none; border-radius: 5px;">Sort</button>
+    </form>
+    <!-- Add this form after the Sort form -->
+    <form class="filter-bar" action="/bill/listBill" method="get" style="margin-top: 10px;">
+        <input type="number" name="minValue" placeholder="Min Total Money" style="width: 20%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;" th:value="${minValue}">
+        <span style="margin: 0 10px;">to</span>
+        <input type="number" name="maxValue" placeholder="Max Total Money" style="width: 20%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;" th:value="${maxValue}">
+        <input type="hidden" name="searchBy" value="totalMoneyRange">
+        <button type="submit" style="padding: 10px; background-color: #2c3e50; color: white; border: none; border-radius: 5px;">Search</button>
+    </form>
     <div class="error-message" th:if="${error}" th:text="${error}"></div>
     <table class="styled-table">
         <thead>
         <tr>
-            <th>Invoice ID</th>
+            <th>Bill ID</th>
             <th>Customer Name</th>
             <th>Date of Purchase</th>
             <th>Total Money</th>
             <th>Paid Money</th>
             <th>Debt Money</th>
             <th>Status</th>
+            <th>Note</th>
             <th>Actions</th>
         </tr>
         </thead>
@@ -147,14 +181,19 @@
         <tr th:each="bill : ${bills}">
             <td th:text="${bill.id}"></td>
             <td th:text="${bill.customer.name}"></td>
-            <td th:text="${bill.createdAt}"></td>
+            <td th:text="${#temporals.format(bill.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
             <td th:text="${bill.totalMoney}"></td>
             <td th:text="${bill.paidMoney}"></td>
             <td th:text="${bill.debtMoney}"></td>
-            <td th:text="${bill.status}"></td>
+            <td th:text="${bill.status? '✅ Done':'🔄 Processing'}"></td>
+            <td th:text="${bill.note}"></td>
             <td>
-                <button class="btn btn-view">View</button>
+                <form th:action="@{bill/billDetail}" method="get">
+                    <input type="hidden" name="id" th:value="${bill.id}">
+                    <button type="submit" style="background-color: #06999c">View</button>
+                </form>
             </td>
+
         </tr>
         </tbody>
     </table>
@@ -172,6 +211,9 @@
 
     </div>
 </div>
+<footer>
+    &copy; 2025 Rice Sales Management. All Rights Reserved.
+</footer>
 <script src="/js/home.js"></script>
 </body>
 </html>

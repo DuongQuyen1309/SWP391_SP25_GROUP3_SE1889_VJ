@@ -41,4 +41,7 @@ public interface ZoneRepository extends JpaRepository<Zone, Long> {
 
     boolean existsByNameAndStoreId(String name, Long storeId);
 
+    List<Zone> findByStoreId(Long storeId);
+
+
 }

@@ -25,8 +25,9 @@ public class ZoneService {
         if (existingZone.isPresent() && !existingZone.get().getId().equals(zone.getId())) {
             throw new IllegalArgumentException("Zone with the same name already exists");
         }
-
+        System.out.println("zoneid: " + zone.getId());
         return this.zoneRepository.save(zone);
+
     }
 
     // public void save(Zone zone) {
@@ -95,5 +96,9 @@ public class ZoneService {
 
     public Page<Zone> getZonesByPosition(String position, Long storeID, Pageable pageable) {
         return this.zoneRepository.findByPositionAndStoreId(position, storeID, pageable);
+    }
+
+    public List<Zone> getZonesByStoreId(Long storeId) {
+        return zoneRepository.findByStoreId(storeId);
     }
 }

@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý bán hàng</title>
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/bill.css">
+    <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
+    <script src="/js/home.js"></script>
+</head>
+<body>
+<!-- Header -->
+<div class="header">
+    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+    <h2><a href="/home">RSMS</a></h2>
+    <div class="user-info">
+        <img th:src="${user.avatar}" alt="User Avatar" class="user-avatar"/>
+        <div class="dropdown">
+            <span th:text="${account.displayName}" class="user-name" onclick="toggleDropdown()"> ▼</span>
+            <div id="dropdown-menu" class="dropdown-content">
+                <a href="/user/userprofile">👤 View Profile</a>
+                <a href="/user/changepw" id="changepw">🔑 Change password</a>
+                <a href="/static#" id="logout">🚪 Logout</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar" style="height: 100%;">
+    <h2>Feature</h2>
+    <a href="/user/userprofile">Profile</a>
+    <a href="/account/listStaff" th:style="${#lists.contains(listHiddenPage, 'listStaff')} ? 'display: none;' : ''">Staff Account Management</a>
+    <a href="/product/listProduct">Rice Management</a>
+    <a href="/customer/listCustomer">Customer Management</a>
+    <a href="/warehouse/listWarehouseZone">Warehouse Management</a>
+    <a href="/bill/listBill">Invoice Management</a>
+</div>
+
+
+<!-- Content -->
+<div class="content">
+    <div>
+        <span style="margin-left: 250px; padding-left: 50px" class="tab active">Phiếu nhập gạo</span>
+
+    </div>
+
+    <div class="main-container">
+        <div class="left-panel">
+            <!-- Nút thêm sản phẩm -->
+            <div class="add-product" id="add-product" >
+                <span onclick="showProductModal()">+ Tên sản phẩm</span>
+                <label style="margin-left: 300px">Ngày nhập:
+                    <input type="date" name="importDate" id="importDate" />
+                </label>
+            </div>
+
+            <!-- Modal chứa danh sách sản phẩm -->
+            <div id="product-modal" class="modal">
+                <div class="modal-content">
+                    <span class="close" onclick="closeProductModal()">×</span>
+                    <h2>Chọn sản phẩm</h2>
+                    <input type="text" id="search-product" class="styled-input" placeholder="Nhập tên sản phẩm..." onkeyup="searchProduct()">
+                    <div id="product-list" class="product-list">
+                        <p>Nhập tên sản phẩm để tìm kiếm...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Danh sách sản phẩm -->
+            <div class="products-container">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Sản phẩm</th>
+                        <th class="quantity-cell">SL</th>
+                        <th style="width: 20px" class="price-cell">Đơn giá</th>
+                        <th class="price-cell">Thành tiền</th>
+                        <th>Zone</th>
+                        <th>Xóa</th>
+                    </tr>
+                    </thead>
+                    <tbody id="selected-products"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <!-- Thông tin khách hàng -->
+            <div class="section">
+                <div class="section-header">Thông tin khách hàng</div>
+                <div class="section-content">
+                    <div class="form-group">
+                        <div class="customer-buttons">
+                            <button id="search-customer-btn">🔍 Tìm</button>
+                            <button id="add-customer-btn">➕ Thêm</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="customer-name">Khách hàng</label>
+                        <input type="text" class="form-control" id="customer-name" style="width: 230px">
+                    </div>
+                    <div class="form-group">
+                        <label for="customer-address">Địa chỉ</label>
+                        <input type="text" class="form-control" id="customer-address" style="width: 90%">
+                    </div>
+                    <div class="form-group">
+                        <label for="customer-phone">Số điện thoại</label>
+                        <input type="text" class="form-control" id="customer-phone" style="width: 90%">
+                    </div>
+                    <div class="form-group">
+                        <label for="customer-gender">Gender</label>
+                        <input type="text" class="form-control" id="customer-gender" style="width: 90%">
+                    </div>
+                    <div class="form-group">
+                        <label for="customer-dob">Date Of Birth</label>
+                        <input type="text" class="form-control" id="customer-dob" style="width: 90%">
+                    </div>
+                    <div class="form-group">
+                        <label for="customer-moneystate">Nợ cũ</label>
+                        <input type="text" class="form-control" id="customer-moneystate" style="width: 90%">
+                    </div>
+                    <div class="form-group">
+                        <label for="customer-totaldebt">Tổng công nợ</label>
+                        <input type="text" class="form-control" id="customer-totaldebt" readonly style="width: 90%">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Popup tìm kiếm khách hàng -->
+            <div id="customer-search-modal" class="modal">
+                <div class="modal-content">
+                    <span class="close" onclick="closeCustomerSearchModal()">×</span>
+                    <h2>Tìm kiếm khách hàng</h2>
+                    <input type="text" id="search-customer-input" class="styled-input" placeholder="Nhập tên khách hàng..." onkeyup="searchCustomer()">
+                    <div id="customer-list" class="customer-list"></div>
+                </div>
+            </div>
+
+            <!-- Popup thêm khách hàng -->
+            <div id="add-customer-modal" class="modal">
+                <div class="modal-content">
+                    <span class="close" onclick="closeAddCustomerModal()">×</span>
+                    <h2>Thêm khách hàng mới</h2>
+                    <div class="form-group">
+                        <label for="new-customer-name">Tên khách hàng</label>
+                        <input type="text" class="form-control" id="new-customer-name">
+                    </div>
+                    <div class="form-group">
+                        <label for="new-customer-gender">Gender:</label>
+                        <select id="new-customer-gender">
+                            <option value="true">Male</option>
+                            <option value="false">Female</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="new-customer-address">Địa chỉ</label>
+                        <input type="text" class="form-control" id="new-customer-address">
+                    </div>
+                    <div class="form-group">
+                        <label for="new-customer-phone">Số điện thoại</label>
+                        <input type="text" class="form-control" id="new-customer-phone">
+                    </div>
+                    <div class="form-group">
+                        <label for="new-customer-dob">Date of birth</label>
+                        <input type="date" class="form-control" id="new-customer-dob">
+                    </div>
+                    <button id="save-customer-btn">Lưu khách hàng</button>
+                </div>
+            </div>
+
+            <!-- Tổng cộng -->
+            <div class="section">
+                <div class="section-header">Tổng cộng</div>
+                <div class="section-content">
+                    <div class="total-row">
+                        <span class="total-label">Tổng tiền hàng:</span>
+                        <span class="total-value" id="total-amount">0</span>
+                    </div>
+                    <div class="total-row">
+                        <span class="total-label">Cần phải trả:</span>
+                        <span class="total-value highlight" id="customer-pay">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thanh toán -->
+            <div class="section">
+                <div class="section-header">Thanh toán</div>
+                <div class="section-content">
+                    <div class="total-row">
+                        <span class="total-label">Đã trả cho khách:</span>
+                    </div>
+                    <div class="total-row" style="display:block">
+                        <input type="text" style="width: 90%" class="form-control" id="customer-payment" placeholder="Nhập số tiền đã thanh toán">
+                        <span id="customer-payment-error" class="error-message"></span>
+                    </div>
+                    <div class="payment-method" style="margin-top: 10px">
+                        <input type="checkbox" name="payment" id="loading">
+                        <label for="loading" class="total-label">Bốc hàng</label>
+                    </div>
+                    <div class="total-row" style="display: block">
+                        <span class="total-label">Tiền bốc hàng:</span>
+                        <input type="text" class="form-control" id="loading-amount" value="0" readonly style="width: 90%; margin-top: 5px">
+                        <span id="loading-amount-error" class="error-message"></span>
+                    </div>
+                </div>
+                <button class="checkout-button">THANH TOÁN</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    © 2025 Rice Sales Management. All Rights Reserved.
+</footer>
+
+<script src="/js/bill.js"></script>
+
+<script>
+    // Khai báo các biến toàn cục
+    let zones = [];
+    let customer = {};
+    let products = [];
+    let payment = { totalDebt: 0, customerPayment: 0, loading: false, loadingAmount: 0 };
+
+    // Lấy danh sách zone từ server
+    fetch('/warehouse/getZones')
+        .then(response => response.json())
+        .then(data => {
+            zones = data; // Lưu danh sách zone với id và name
+            renderProducts(); // Render lại nếu cần
+        })
+        .catch(error => console.error("Lỗi lấy danh sách zone:", error));
+
+    // Hàm định dạng giá
+    function formatPrice(price) {
+        return new Intl.NumberFormat('vi-VN').format(price);
+    }
+
+    // Hàm phân tích giá từ chuỗi
+    function parsePrice(priceStr) {
+        if (!priceStr) return 0;
+        if (priceStr === "0") return 0;
+        return parseInt(priceStr.replace(/,/g, '').replace(/[^\d-]/g, '')) || 0;
+    }
+
+    // Hiển thị và đóng modal sản phẩm
+    function showProductModal() {
+        document.getElementById("product-modal").style.display = "flex";
+    }
+
+    function closeProductModal() {
+        document.getElementById("product-modal").style.display = "none";
+    }
+
+    // Ngăn chỉnh sửa các trường khách hàng
+    document.getElementById("customer-name").readOnly = true;
+    document.getElementById("customer-address").readOnly = true;
+    document.getElementById("customer-phone").readOnly = true;
+    document.getElementById("customer-gender").readOnly = true;
+    document.getElementById("customer-dob").readOnly = true;
+    document.getElementById("customer-moneystate").readOnly = true;
+    document.getElementById("customer-totaldebt").readOnly = true;
+
+    ['customer-name', 'customer-address', 'customer-phone', 'customer-gender', 'customer-dob', 'customer-moneystate', 'customer-totaldebt'].forEach(id => {
+        document.getElementById(id).addEventListener("keydown", function(event) {
+            event.preventDefault();
+        });
+        document.getElementById(id).addEventListener("contextmenu", function(event) {
+            event.preventDefault();
+        });
+    });
+
+    // Chọn sản phẩm
+    function selectProduct(id, name, price) {
+        let existingProduct = products.find(p => p.id === id);
+        if (existingProduct) {
+            alert("Sản phẩm này đã được thêm!");
+            return;
+        }
+        products.push({ id, name, price, quantity: 1, zoneId: null });
+        document.getElementById("search-product").value = "";
+        document.getElementById("product-list").innerHTML = "<p>Nhập tên sản phẩm để tìm kiếm...</p>";
+        renderProducts();
+        updateOrderTotal();
+        updateTotalDebt();
+        closeProductModal();
+    }
+
+    // Sự kiện nút tìm kiếm và thêm khách hàng
+    document.getElementById("search-customer-btn").addEventListener("click", function () {
+        document.getElementById("customer-search-modal").style.display = "flex";
+    });
+
+    function closeCustomerSearchModal() {
+        document.getElementById("customer-search-modal").style.display = "none";
+    }
+
+    document.getElementById("add-customer-btn").addEventListener("click", function () {
+        document.getElementById("add-customer-modal").style.display = "flex";
+    });
+
+    function closeAddCustomerModal() {
+        document.getElementById("add-customer-modal").style.display = "none";
+    }
+
+    // Tìm kiếm khách hàng
+    function searchCustomer() {
+        let keyword = document.getElementById("search-customer-input").value.trim();
+        let customerList = document.getElementById("customer-list");
+        if (keyword.length >= 1) {
+            customerList.style.display = "block";
+            customerList.innerHTML = "<p>Đang tìm kiếm...</p>";
+            fetch(`/bill/searchCustomers?keyword=${keyword}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length === 0) {
+                        customerList.innerHTML = `<p>Không tìm thấy khách hàng.</p>`;
+                    } else {
+                        customerList.innerHTML = data.map(customer => `
+                        <div class="customer-item" onclick="selectCustomer(
+                            '${customer.name}',
+                            '${customer.phone}',
+                            '${customer.address}',
+                            '${customer.dob}',
+                            '${customer.gender}',
+                            '${customer.moneyState}'
+                        )">
+                            ${customer.name} - ${customer.phone}
+                        </div>
+                    `).join("");
+                    }
+                })
+                .catch(error => {
+                    console.error("Lỗi tìm kiếm:", error);
+                    customerList.innerHTML = "<p>Lỗi khi tìm kiếm</p>";
+                });
+        } else {
+            customerList.innerHTML = "";
+            customerList.style.display = "none";
+        }
+    }
+
+    // Chọn khách hàng
+    function selectCustomer(name, phone, address, dob, gender, moneystate) {
+        customer = { name, phone, address, dob, gender, moneystate };
+        document.getElementById("customer-name").value = name;
+        document.getElementById("customer-phone").value = phone;
+        document.getElementById("customer-address").value = address;
+        document.getElementById("customer-dob").value = dob;
+        document.getElementById("customer-gender").value = gender;
+        document.getElementById("customer-moneystate").value = moneystate;
+        document.getElementById("customer-totaldebt").value = moneystate;
+        closeCustomerSearchModal();
+        updateTotalDebt();
+    }
+
+    // Lưu khách hàng mới
+    document.getElementById("save-customer-btn").addEventListener("click", function () {
+        let name = document.getElementById("new-customer-name").value.trim();
+        let phone = document.getElementById("new-customer-phone").value.trim();
+        let address = document.getElementById("new-customer-address").value.trim();
+        let dob = document.getElementById("new-customer-dob").value.trim();
+        let gender = document.getElementById("new-customer-gender").value.trim();
+        if (!name || !phone || !address) {
+            alert("Vui lòng nhập đầy đủ thông tin khách hàng!");
+            return;
+        }
+        let requestData = { name, phone, address, dob, gender };
+        fetch("/bill/addCustomer", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(requestData)
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Thêm khách hàng thành công!");
+                    closeAddCustomerModal();
+                } else {
+                    alert("Lỗi khi thêm khách hàng: " + data.message);
+                }
+            })
+            .catch(error => {
+                console.error("Lỗi gửi dữ liệu:", error);
+                alert("Có lỗi xảy ra khi gửi dữ liệu.");
+            });
+    });
+
+    // Render danh sách sản phẩm
+    function renderProducts() {
+        let productTable = document.getElementById("selected-products");
+        productTable.innerHTML = "";
+        products.forEach((product, index) => {
+            let row = `
+            <tr id="product-${product.id}">
+                <td>${index + 1}</td>
+                <td>${product.name}</td>
+                <td class="quantity-cell">
+                    <span class="quantity-value">${product.quantity}</span>
+                    <div class="quantity-controls">
+                        <div class="quantity-btn minus" onclick="changeQuantity(${product.id}, -1)">-</div>
+                        <div class="quantity-btn plus" onclick="changeQuantity(${product.id}, 1)">+</div>
+                    </div>
+                </td>
+                <td class="price-cell">
+                    <input style="width: 60px" type="text" class="unit-price-input" value="${formatPrice(product.price)}"
+                    onchange="updateUnitPrice(${product.id}, this.value)"
+                    oninput="validateNumber(this)"
+                    >
+                </td>
+                <td style="text-align: center" class="price-cell total-price">${formatPrice(product.price * product.quantity)}</td>
+                <td>
+                    <select class="zone-select" onchange="updateProductZone(${product.id}, this.value)">
+                        <option value="">Chọn zone</option>
+                        ${zones.map(zone => `<option value="${zone.id}" ${product.zoneId === zone.id ? 'selected' : ''}>${zone.name}</option>`).join('')}
+                    </select>
+                </td>
+                <td><button onclick="removeProduct(${product.id})">✖</button></td>
+            </tr>
+        `;
+            productTable.insertAdjacentHTML("beforeend", row);
+        });
+    }
+
+    // Cập nhật đơn giá
+    function updateUnitPrice(productId, newPriceStr) {
+        let product = products.find(p => p.id === productId);
+        if (product) {
+            let newPrice = parsePrice(newPriceStr);
+            if (isNaN(newPrice) || newPrice < 0) {
+                alert("Giá không hợp lệ!");
+                return;
+            }
+            product.price = newPrice;
+            renderProducts();
+            updateOrderTotal();
+            updateTotalDebt();
+        }
+    }
+
+    function validateNumber(input) {
+        let value = input.value;
+
+        let quantity = parseInt(value, 10);
+
+        if (isNaN(quantity) || quantity < 1) {
+            alert("Đơn giá không hợp lệ!!!")
+        } else {
+            return;
+        }
+    }
+
+    // Cập nhật zone cho sản phẩm
+    function updateProductZone(productId, zoneId) {
+        let product = products.find(p => p.id === productId);
+        if (product) {
+            product.zoneId = zoneId ? parseInt(zoneId) : null;
+        }
+    }
+
+    // Thay đổi số lượng sản phẩm
+    function changeQuantity(id, change) {
+        let product = products.find(p => p.id === id);
+        if (product) {
+            product.quantity = Math.max(1, product.quantity + change);
+            renderProducts();
+            updateOrderTotal();
+            updateTotalDebt();
+        }
+    }
+
+    // Xóa sản phẩm
+    function removeProduct(id) {
+        products = products.filter(p => p.id !== id);
+        renderProducts();
+        updateOrderTotal();
+        updateTotalDebt();
+    }
+
+    // Sự kiện checkbox "Bốc hàng"
+    document.getElementById("loading").addEventListener("change", function () {
+        let loadingAmountInput = document.getElementById("loading-amount");
+        if (this.checked) {
+            loadingAmountInput.removeAttribute("readonly");
+        } else {
+            loadingAmountInput.setAttribute("readonly", true);
+            loadingAmountInput.value = "0";
+        }
+        updateOrderTotal();
+        updateTotalDebt();
+    });
+
+    // Cập nhật tổng công nợ khi nhập số tiền thanh toán
+    document.getElementById("customer-payment").addEventListener("input", function (event) {
+        let inputValue = event.target.value.trim();
+        let errorSpan = document.getElementById("customer-payment-error");
+        let oldDebt = parsePrice(customer.moneystate || "0");
+        if (inputValue === "") {
+            errorSpan.textContent = "";
+            event.target.classList.remove("input-error");
+            document.getElementById("customer-totaldebt").value = formatPrice(oldDebt);
+            return;
+        }
+        if (!/^\d+$/.test(inputValue)) {
+            errorSpan.textContent = "Vui lòng nhập số nguyên dương!";
+            event.target.classList.add("input-error");
+            return;
+        } else {
+            errorSpan.textContent = "";
+            event.target.classList.remove("input-error");
+        }
+        updateTotalDebt();
+    });
+
+    // Cập nhật tổng công nợ
+    function updateTotalDebt() {
+        let customerName = document.getElementById("customer-name").value.trim();
+        let oldDebt = parsePrice(customer.moneystate || "0");
+        let payment = parsePrice(document.getElementById("customer-payment").value);
+        let totalAmount = parsePrice(document.getElementById("total-amount").textContent) || 0;
+
+        if (customerName === "") {
+            document.getElementById("customer-totaldebt").value = "";
+            return;
+        }
+
+        if (payment >= 0) {
+            let totalDebt = oldDebt + (payment - totalAmount);
+            document.getElementById("customer-totaldebt").value = formatPrice(totalDebt);
+        } else {
+            document.getElementById("customer-totaldebt").value = formatPrice(oldDebt);
+        }
+    }
+
+    // Cập nhật tổng tiền
+    function updateOrderTotal() {
+        let productTotal = products.reduce((sum, product) => sum + product.price * product.quantity, 0);
+        let loadingFee = document.getElementById("loading").checked ? parsePrice(document.getElementById("loading-amount").value) : 0;
+        let finalTotal = productTotal + loadingFee;
+        document.getElementById("total-amount").textContent = formatPrice(finalTotal);
+        document.getElementById("customer-pay").textContent = formatPrice(finalTotal);
+    }
+
+    // Sự kiện nhập tiền bốc hàng
+    document.getElementById("loading-amount").addEventListener("input", function (event) {
+        if (document.getElementById("loading").checked) {
+            let inputValue = event.target.value;
+            let errorSpan = document.getElementById("loading-amount-error");
+            if (inputValue === "") {
+                errorSpan.textContent = "";
+                event.target.classList.remove("input-error");
+                updateOrderTotal();
+                updateTotalDebt();
+                return;
+            }
+            if (!/^\d+$/.test(inputValue)) {
+                errorSpan.textContent = "Vui lòng nhập số nguyên dương!";
+                event.target.classList.add("input-error");
+                return;
+            } else {
+                errorSpan.textContent = "";
+                event.target.classList.remove("input-error");
+            }
+            updateOrderTotal();
+            updateTotalDebt();
+        }
+    });
+
+    // Xử lý thanh toán
+    document.querySelector(".checkout-button").addEventListener("click", function () {
+        if (!customer.name || products.length === 0) {
+            alert("Vui lòng nhập thông tin khách hàng và thêm sản phẩm!");
+            return;
+        }
+
+        for (let product of products) {
+            if (isNaN(product.price) || product.price <= 0) {
+                alert("Giá sản phẩm không hợp lệ!");
+                return;
+            }
+            if (!product.zoneId) {
+                alert("Vui lòng chọn zone cho tất cả sản phẩm!");
+                return;
+            }
+        }
+
+        let productList = products.map(product => ({
+            id: product.id,
+            quantity: product.quantity,
+            price: product.price,
+            subtotal: product.price * product.quantity,
+            zone: product.zoneId
+        }));
+
+        let requestData = {
+            // customer: customer,
+            importDate: document.getElementById("importDate").value,
+            productData: productList
+        };
+
+        fetch("/product/import", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(requestData)
+        })
+            .then(response => {
+                // Kiểm tra nếu có chuyển hướng
+                if (response.redirected) {
+                    window.location.href = response.url; // Chuyển hướng thủ công
+                    return; // Dừng xử lý tiếp để tránh parse JSON
+                }
+                // Nếu không có chuyển hướng, parse JSON
+                if (!response.ok) {
+                    throw new Error(`Lỗi từ server: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data && data.success) { // Kiểm tra data tồn tại
+                    alert("Thanh toán thành công!");
+                    // Reset form
+                    customer = {};
+                    products = [];
+                    document.getElementById("customer-name").value = "";
+                    document.getElementById("customer-phone").value = "";
+                    document.getElementById("customer-address").value = "";
+                    document.getElementById("customer-dob").value = "";
+                    document.getElementById("customer-gender").value = "";
+                    document.getElementById("customer-moneystate").value = "";
+                    document.getElementById("customer-totaldebt").value = "";
+                    document.getElementById("customer-payment").value = "";
+                    document.getElementById("loading").checked = false;
+                    document.getElementById("loading-amount").value = "0";
+                    document.getElementById("loading-amount").setAttribute("readonly", true);
+                    renderProducts();
+                    updateOrderTotal();
+                } else if (data) {
+                    alert("Lỗi khi xử lý thanh toán: " + (data.message || "Không có thông tin lỗi"));
+                }
+            })
+            .catch(error => {
+                console.error("Lỗi chi tiết:", error);
+                alert("Có lỗi xảy ra khi gửi dữ liệu: " + error.message);
+            });
+
+    });
+</script>
+</body>
+</html>

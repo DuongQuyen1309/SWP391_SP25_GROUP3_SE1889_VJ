@@ -6,6 +6,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.Optional;
+
 public interface BillRepository extends JpaRepository<Bill, Long> {
     Page<Bill> findAll(Pageable pageable);
     @Query("SELECT b FROM Bill b WHERE b.storeId = :storeId")
@@ -16,4 +18,9 @@ public interface BillRepository extends JpaRepository<Bill, Long> {
 
     @Query(value = "SELECT * FROM Bill b WHERE LOWER(JSON_VALUE(b.customer_data, '$.name')) LIKE LOWER(CONCAT('%', :customerName, '%')) AND b.store_id = :storeId", nativeQuery = true)
     Page<Bill> findByNameAndStoreId(String customerName, Long storeId, Pageable pageable);
+
+    Optional<Bill> findByIdAndStoreId(Long id, Long storeId);
+
+    @Query("SELECT b FROM Bill b WHERE b.totalMoney BETWEEN :minValue AND :maxValue AND b.storeId = :storeId")
+    Page<Bill> findByTotalMoneyBetweenAndStoreId(Double minValue, Double maxValue, Long storeId, Pageable pageable);
 }

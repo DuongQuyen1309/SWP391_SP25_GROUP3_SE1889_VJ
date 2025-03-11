@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quản lý bán hàng</title>
+  <title>Create Bill</title>
   <link rel="stylesheet" href="/css/base.css">
   <link rel="stylesheet" href="/css/bill.css">
   <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
@@ -48,7 +48,7 @@
 <!--</div>-->
   <div class="tab-container">
     <div class="tab active" data-tab="tab-1" onclick="switchTab('tab-1')">
-      <span class="tab-title">Hóa đơn 1</span>
+      <span class="tab-title">Bill 1</span>
       <span class="tab-close">×</span>
     </div>
     <button class="add-tab">+</button>
@@ -59,21 +59,21 @@
   <div class="left-panel">
     <!-- Nút thêm sản phẩm (ban đầu hiển thị) -->
     <div class="add-product" id="add-product" onclick="showProductModal()">
-      <span>+ Tên sản phẩm</span>
+      <span>+ Add product</span>
     </div>
 
     <!-- Modal chứa danh sách sản phẩm -->
     <div id="product-modal" class="modal">
       <div class="modal-content">
         <span class="close" onclick="closeProductModal()">&times;</span>
-        <h2>Chọn sản phẩm</h2>
+        <h2>Choosing product</h2>
 
         <!-- Ô tìm kiếm sản phẩm -->
-        <input type="text" id="search-product" class="styled-input" placeholder="Nhập tên sản phẩm..." onkeyup="searchProduct()">
+        <input type="text" id="search-product" style="width: 95%" class="styled-input" placeholder="Enter product name..." onkeyup="searchProduct()">
 
         <!-- Danh sách sản phẩm -->
         <div id="product-list" class="product-list">
-          <p>Nhập tên sản phẩm để tìm kiếm...</p>
+          <p>Enter product name to search...</p>
         </div>
       </div>
     </div>
@@ -84,11 +84,11 @@
         <thead>
         <tr>
           <th>#</th>
-          <th>Sản phẩm</th>
-          <th class="quantity-cell">SL</th>
-          <th class="price-cell">Đơn giá</th>
-          <th class="price-cell">Thành tiền</th>
-          <th>Xóa</th>
+          <th>Product</th>
+          <th class="quantity-cell">Quantity</th>
+          <th class="price-cell">Unit Price</th>
+          <th class="price-cell">Total Money</th>
+          <th>Remove</th>
         </tr>
         </thead>
         <tbody id="selected-products">
@@ -104,24 +104,24 @@
 
   <div class="right-panel">
     <div class="section">
-      <div class="section-header">Thông tin khách hàng</div>
+      <div class="section-header">Customer Information</div>
       <div class="section-content">
         <div class="form-group">
            <div class="customer-buttons">
-            <button id="search-customer-btn">🔍 Tìm</button>
-            <button id="add-customer-btn">➕ Thêm</button>
+            <button id="search-customer-btn">🔍 Search</button>
+            <button id="add-customer-btn">➕ Add</button>
           </div>
         </div>
         <div class="form-group">
-          <label>Khách hàng</label>
-          <input type="text" class="form-control" id="customer-name" style="width: 230px" >
+          <label>Customer Name</label>
+          <input type="text" class="form-control" id="customer-name" style="width: 90%" >
         </div>
         <div class="form-group">
-          <label>Địa chỉ</label>
+          <label>Address</label>
           <input type="text" class="form-control" id="customer-address" style="width: 90%" >
         </div>
         <div class="form-group">
-          <label>Số điện thoại</label>
+          <label>Phone</label>
           <input type="text" class="form-control" id="customer-phone" style="width: 90%">
         </div>
         <div class="form-group">
@@ -133,7 +133,7 @@
           <input type="text" class="form-control" id="customer-dob" style="width: 90%">
         </div>
         <div class="form-group">
-          <label>Nợ cũ</label>
+          <label>Old Debt</label>
           <input type="text" class="form-control" id="customer-moneystate" style="width: 90%">
         </div>
 
@@ -143,8 +143,8 @@
     <div id="customer-search-modal" class="modal">
       <div class="modal-content">
         <span class="close" onclick="closeCustomerSearchModal()">&times;</span>
-        <h2>Tìm kiếm khách hàng</h2>
-        <input type="text" id="search-customer-input" class="styled-input" placeholder="Nhập tên khách hàng..." onkeyup="searchCustomer()">
+        <h2>Searching customer</h2>
+        <input type="text" id="search-customer-input" style="width: 95%" class="styled-input" placeholder="Enter customer name..." onkeyup="searchCustomer()">
         <div id="customer-list" class="customer-list"></div>
       </div>
     </div>
@@ -153,70 +153,77 @@
     <div id="add-customer-modal" class="modal">
       <div class="modal-content">
         <span class="close" onclick="closeAddCustomerModal()">&times;</span>
-        <h2>Thêm khách hàng mới</h2>
+        <h2>Add new customer</h2>
         <div class="form-group">
-          <label>Tên khách hàng</label>
-          <input type="text" class="form-control" id="new-customer-name">
+          <label>Customer Name</label>
+          <input type="text" style="width: 95%" class="form-control" id="new-customer-name">
         </div>
         <div class="form-group">
           <label>Gender:</label>
-          <select id="new-customer-gender">
+          <select id="new-customer-gender" style="width: 100%">
             <option value="true" >Male</option>
             <option value="false" >Female</option>
           </select>
         </div>
         <div class="form-group">
-          <label>Địa chỉ</label>
-          <input type="text" class="form-control" id="new-customer-address">
+          <label>Address</label>
+          <input type="text" style="width: 95%" class="form-control" id="new-customer-address">
         </div>
         <div class="form-group">
-          <label>Số điện thoại</label>
-          <input type="text" class="form-control" id="new-customer-phone">
+          <label>Phone</label>
+          <input type="text" style="width: 95%" class="form-control" id="new-customer-phone">
         </div>
         <div class="form-group">
           <label>Date of birth</label>
-          <input type="date" class="form-control" id="new-customer-dob">
+          <input type="date" style="width: 95%" class="form-control" id="new-customer-dob">
         </div>
 
 
-        <button id="save-customer-btn">Lưu khách hàng</button>
+        <button id="save-customer-btn">Save </button>
       </div>
     </div>
 
     <div class="section">
-      <div class="section-header">Tổng cộng</div>
+      <div class="section-header">Total</div>
       <div class="section-content">
         <div class="total-row">
-          <span class="total-label">Tổng tiền hàng:</span>
+          <span class="total-label">Total Money:</span>
           <span class="total-value" id="total-amount">0</span>
         </div>
         <div class="total-row">
-          <span class="total-label">Khách cần trả:</span>
+          <span class="total-label">Customer need to pay:</span>
           <span class="total-value highlight" id="customer-pay">0</span>
         </div>
       </div>
     </div>
 
     <div class="section">
-      <div class="section-header">Thanh toán</div>
+      <div class="section-header">Payment</div>
       <div class="section-content">
 
-        <div class="total-row">
-          <span class="total-label">Khách thanh toán:</span>
 
-        </div>
         <div class="total-row" style="display:block">
-          <input type="text" style="width: 90%" class="form-control" id="customer-payment" placeholder="Nhập số tiền khách thanh toán" >
+          <span class="total-label" >Customer pay:</span>
+          <input type="text" style="width: 90%; margin-top: 5px" class="form-control" id="customer-payment" placeholder="Enter customer payment money kVND" >
           <span id="customer-payment-error" class="error-message"></span>
         </div>
 
+
+        <div class="total-row" style="display:block">
+          <span class="total-label" >Discount:</span>
+          <input type="text" style="width: 90%; margin-top: 5px" class="form-control" id="discount" placeholder="Enter discount" >
+          <span id="discount-error" class="error-message"></span>
+        </div>
+
+
+
         <div class="payment-method" style="margin-top: 10px">
             <input type="checkbox" name="payment" id="loading">
-            <label for="loading" class="total-label">Bốc hàng</label>
+            <label for="loading" class="total-label">Ported</label>
         </div>
 
         <div class="total-row" style="display: block">
-          <span class="total-label">Tiền bốc hàng:</span>
+          <span class="total-label">Porter Money:</span>
 
           <input type="text" class="form-control" id="loading-amount" value="0" readonly style="width: 90%; margin-top: 5px">
           <span id="loading-amount-error" class="error-message"></span>
@@ -227,13 +234,12 @@
 
 
 
-        <button class="checkout-button">THANH TOÁN</button>
+        <button class="checkout-button">CHECK OUT</button>
       </div>
     </div>
   </div>
 </div>
 
-</div>
 <footer>
   &copy; 2025 Rice Sales Management. All Rights Reserved.
 </footer>
@@ -244,7 +250,7 @@
   let activeTabId = "tab-1"; // ID của tab đang được chọn
 
   function formatPrice(price) {
-    return new Intl.NumberFormat('vi-VN').format(price);
+    return new Intl.NumberFormat('vi-VN').format(price)+ " kVND";
   }
 
   function parsePrice(priceStr) {
@@ -319,11 +325,11 @@
               .then(response => response.json())
               .then(data => {
                 if (data.length === 0) {
-                  productList.innerHTML = "<p>Không tìm thấy sản phẩm</p>"; // Nếu không có kết quả
+                  productList.innerHTML = "<p>Not found product</p>"; // Nếu không có kết quả
                 } else {
                   productList.innerHTML = data.map(product => `
                         <div class="product-item" onclick="selectProduct(${product.id}, '${product.name}', ${product.price})">
-                            ${product.name} - ${product.price} VND
+                            ${product.name} - ${product.price} VND - ${product.quantity} products
                         </div>
                     `).join(""); // Tạo danh sách sản phẩm mới
                 }
@@ -341,13 +347,13 @@
 
     let existingProduct = tabData[activeTabId].products.find(p => p.id === id);
     if (existingProduct) {
-      alert("Sản phẩm này đã được thêm vào tab này!");
+      alert("This product has been added to this tab!");
       return;
     }
 
     tabData[activeTabId].products.push({ id, name, price, quantity: 1 });
     document.getElementById("search-product").value = ""; // Xóa nội dung tìm kiếm
-    document.getElementById("product-list").innerHTML = "<p>Nhập tên sản phẩm để tìm kiếm...</p>";
+    document.getElementById("product-list").innerHTML = "<p>Enter product name to search...</p>";
     renderProducts(activeTabId);
     updateOrderTotal(activeTabId);
     closeProductModal(); // Đóng modal sau khi chọn sản phẩm
@@ -410,13 +416,13 @@
 
     if (keyword.length >= 1) {
       customerList.style.display = "block";
-      customerList.innerHTML = "<p>Đang tìm kiếm...</p>";
+      customerList.innerHTML = "<p>Searching...</p>";
 
       fetch(`/bill/searchCustomers?keyword=${keyword}`)
               .then(response => response.json())
               .then(data => {
                 if (data.length === 0) {
-                  customerList.innerHTML = `<p>Không tìm thấy khách hàng.</p>`;
+                  customerList.innerHTML = `<p>Not found customer.</p>`;
                 } else {
                   customerList.innerHTML = data.map(customer => `
                         <div class="customer-item" onclick="selectCustomer(
@@ -436,7 +442,7 @@
               })
               .catch(error => {
                 console.error("Lỗi tìm kiếm:", error);
-                customerList.innerHTML = "<p>Lỗi khi tìm kiếm</p>";
+                customerList.innerHTML = "<p>Error while searching</p>";
               });
     } else {
       customerList.innerHTML = "";
@@ -501,17 +507,17 @@
             .then(response => response.json())
             .then(data => {
               if (data.success) {
-                alert("Thêm khách hàng thành công!");
+                alert("Add customer successfully!");
 
 
                 closeAddCustomerModal();
               } else {
-                alert("Lỗi khi thêm khách hàng: " + data.message);
+                alert("Error while adding customer: " + data.message);
               }
             })
             .catch(error => {
-              console.error("Lỗi gửi dữ liệu:", error);
-              alert("Có lỗi xảy ra khi gửi dữ liệu.");
+              console.error("Error sending data:", error);
+              alert("An error occurred while sending data.");
             });
   });
 
@@ -520,7 +526,7 @@
     productTable.innerHTML = "";
 
     if (!tabData[tabId] || !Array.isArray(tabData[tabId].products)) {
-      tabData[tabId] = { customer: {}, products: [] }; // Đảm bảo có mảng products
+      tabData[tabId] = { customer: {}, products: [] ,payment: []}; // Đảm bảo có mảng products
     }
 
     tabData[tabId].products.forEach((product, index) => {
@@ -563,12 +569,12 @@
                   renderProducts(tabId); // ✅ Cập nhật UI
                   updateOrderTotal(tabId); // ✅ Cập nhật tổng tiền hóa đơn
                 } else {
-                  alert("❌ Không đủ số lượng sản phẩm trong kho!");
+                  alert("❌ Insufficient quantity of product in inventory!");
                 }
               })
               .catch(error => {
-                console.error("Lỗi khi kiểm tra tồn kho:", error);
-                alert("❌ Lỗi khi kiểm tra số lượng sản phẩm!");
+                console.error("Error in inventory check:", error);
+                alert("❌ Error checking product quantity!");
               });
     } else {
       // ✅ Nếu giảm số lượng, cập nhật ngay lập tức
@@ -601,32 +607,38 @@
 
 
   document.getElementById("customer-payment").addEventListener("input", function (event) {
-    let inputValue = event.target.value.trim();
+    let input = event.target.value.replaceAll(".", ""); // Xóa dấu . cũ trước khi kiểm tra
+    let cleanNumber = input.replace(/\D/g, ""); // Loại bỏ ký tự không phải số
     let errorSpan = document.getElementById("customer-payment-error");
-    let oldDebt = parsePrice(document.getElementById("customer-moneystate").value);
-    if (inputValue === "") {
-      errorSpan.textContent = ""; // Nếu trống thì không hiển thị lỗi
+
+    if (cleanNumber === "") {
+      event.target.value = "";
+      errorSpan.textContent = ""; // Không hiển thị lỗi khi input rỗng
       event.target.classList.remove("input-error");
-      document.getElementById("customer-totaldebt").value = oldDebt;
       return;
     }
-    // Kiểm tra nếu nhập không phải số dương
-    if (!/^\d+$/.test(inputValue)) {
-      errorSpan.textContent = "Vui lòng nhập số nguyên dương!";
-      event.target.classList.add("input-error"); // Đánh dấu ô nhập bị lỗi
+
+    // Kiểm tra nếu giá trị nhập không phải số nguyên dương
+    if (!/^\d+$/.test(cleanNumber)) {
+      errorSpan.textContent = "Please enter a positive integer!";
+      event.target.classList.add("input-error");
       return;
     } else {
-      errorSpan.textContent = ""; // Xóa lỗi nếu nhập đúng
+      errorSpan.textContent = "";
       event.target.classList.remove("input-error");
     }
 
+    // Định dạng lại số tiền với dấu . mỗi 3 chữ số
+    let formattedNumber = cleanNumber.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    event.target.value = formattedNumber;
   });
 
 
 
 
 
-  function updateOrderTotal(tabId) {
+
+  function updateOrderTotal() {
     let productTotal = 0; // Mặc định tổng tiền sản phẩm là 0 nếu chưa có sản phẩm nào
     if (tabData[activeTabId] && tabData[activeTabId].products) {
       productTotal = tabData[activeTabId].products.reduce((sum, product) => sum + product.price * product.quantity, 0);
@@ -635,10 +647,16 @@
     // Lấy tiền bốc hàng nếu checkbox "Bốc hàng" được chọn
     let loadingFee = document.getElementById("loading").checked ? parsePrice(document.getElementById("loading-amount").value) : 0;
     console.log(document.getElementById("loading-amount").value);
-    let finalTotal = productTotal + loadingFee;
+    let discount = parsePrice(document.getElementById("discount").value);
 
-    document.getElementById("total-amount").textContent = formatPrice(finalTotal);
-    document.getElementById("customer-pay").textContent = formatPrice(finalTotal);
+    if(loadingFee<0|| isNaN(document.getElementById("loading-amount").value)) loadingFee = 0;
+    if(discount<0 || discount>100||isNaN(document.getElementById("discount").value)) discount = 0;
+
+
+    let finalTotal = (productTotal + loadingFee)- discount*(productTotal + loadingFee)/100;
+
+    document.getElementById("total-amount").textContent = formatPrice(Math.round(finalTotal));
+    document.getElementById("customer-pay").textContent = formatPrice(Math.round(finalTotal));
 
   }
   // Gán sự kiện khi nhập tiền bốc hàng sẽ cập nhật tổng tiền ngay lập tức
@@ -655,16 +673,37 @@
         if (tabData[activeTabId] && tabData[activeTabId].products) {
           productTotal = tabData[activeTabId].products.reduce((sum, product) => sum + product.price * product.quantity, 0);
         }
-        document.getElementById("total-amount").textContent = formatPrice(productTotal);
-        document.getElementById("customer-pay").textContent = formatPrice(productTotal);
+
+        // Lấy tiền bốc hàng nếu checkbox "Bốc hàng" được chọn
+        let loadingFee = document.getElementById("loading").checked ? parsePrice(document.getElementById("loading-amount").value) : 0;
+        console.log(document.getElementById("loading-amount").value);
+        let discount = parsePrice(document.getElementById("discount").value);
+
+        if(loadingFee<0|| isNaN(document.getElementById("loading-amount").value)) loadingFee = 0;
+        if(discount<0 || discount>100||isNaN(document.getElementById("discount").value)) discount = 0;
+
+
+        let finalTotal = (productTotal + loadingFee)- discount*(productTotal + loadingFee)/100;
+        document.getElementById("total-amount").textContent = formatPrice(Math.round(finalTotal));
+        document.getElementById("customer-pay").textContent = formatPrice(Math.round(finalTotal));
         return;
       }
       // Kiểm tra nếu nhập không phải số dương
       if (!/^\d+$/.test(inputValue)) {
-        errorSpan.textContent = "Vui lòng nhập số nguyên dương!";
+        errorSpan.textContent = "Please enter a positive integer!";
         event.target.classList.add("input-error");
+        updateOrderTotal();
+        event.preventDefault();
         return;
-      } else {
+      } else if(isNaN(inputValue)) {
+        errorSpan.textContent = "Please enter a number!";
+        event.target.classList.add("input-error");
+        event.preventDefault();
+        updateOrderTotal();
+        return;
+
+      }
+      else {
         errorSpan.textContent = "";
         event.target.classList.remove("input-error");
       }
@@ -674,10 +713,70 @@
     }
   });
 
+  // Gán sự kiện khi nhập tiền bốc hàng sẽ cập nhật tổng tiền ngay lập tức
+  document.getElementById("discount").addEventListener("input", function (event) {
+
+      let inputValue = event.target.value;
+      let errorSpan = document.getElementById("discount-error");
+
+
+      if (inputValue === "") {
+        errorSpan.textContent = ""; // Nếu trống thì không hiển thị lỗi
+        event.target.classList.remove("input-error");
+        let productTotal = 0; // Mặc định tổng tiền sản phẩm là 0 nếu chưa có sản phẩm nào
+        if (tabData[activeTabId] && tabData[activeTabId].products) {
+          productTotal = tabData[activeTabId].products.reduce((sum, product) => sum + product.price * product.quantity, 0);
+        }
+        // Lấy tiền bốc hàng nếu checkbox "Bốc hàng" được chọn
+        let loadingFee = document.getElementById("loading").checked ? parsePrice(document.getElementById("loading-amount").value) : 0;
+        console.log(document.getElementById("loading-amount").value);
+        let discount = parsePrice(document.getElementById("discount").value);
+
+        if(loadingFee<0|| isNaN(document.getElementById("loading-amount").value)) loadingFee = 0;
+        if(discount<0 || discount>100||isNaN(document.getElementById("discount").value)) discount = 0;
+
+
+        let finalTotal = (productTotal + loadingFee)- discount*(productTotal + loadingFee)/100;
+        document.getElementById("total-amount").textContent = formatPrice(Math.round(finalTotal));
+        document.getElementById("customer-pay").textContent = formatPrice(Math.round(finalTotal));
+        return;
+      }
+      console.log(inputValue)
+      // Kiểm tra nếu nhập không phải số dương
+      if (!/^\d+$/.test(inputValue)) {
+        errorSpan.textContent = "Please enter a positive integer!";
+        event.target.classList.add("input-error");
+        event.preventDefault();
+        updateOrderTotal();
+        return;
+
+      } else if(parseInt(inputValue) > 100) {
+        errorSpan.textContent = "Please enter a number less than 100!";
+        event.target.classList.add("input-error");
+        event.preventDefault();
+        updateOrderTotal();
+        return;
+      } else if(isNaN(inputValue)) {
+        errorSpan.textContent = "Please enter a number!";
+        event.target.classList.add("input-error");
+        event.preventDefault();
+        updateOrderTotal();
+        return;
+      }
+      else {
+        errorSpan.textContent = "";
+        event.target.classList.remove("input-error");
+      }
+
+      // Cập nhật tổng tiền ngay khi nhập tiền bốc hàng
+      updateOrderTotal();
+
+  });
+
   // Xử lý tạo và chuyển tab
   document.querySelector(".add-tab").addEventListener("click", function () {
     let existingNumbers = [...document.querySelectorAll(".tab")]
-            .map(tab => parseInt(tab.querySelector(".tab-title").textContent.replace("Hóa đơn ", "")))
+            .map(tab => parseInt(tab.querySelector(".tab-title").textContent.replace("Bill ", "")))
             .filter(n => !isNaN(n)); // Lấy danh sách các số hóa đơn hiện tại
 
     let newNumber = 1;
@@ -685,14 +784,14 @@
       newNumber++; // Tìm số nhỏ nhất chưa được dùng
     }
     let tabId = `tab-${Date.now()}`; // Sử dụng timestamp để tạo ID duy nhất
-    tabData[tabId] = { customer: {}, products: [], payment: { customerPayment: 0, loading: false, loadingAmount: 0 } };
+    tabData[tabId] = { customer: {}, products: [], payment: {discount: null, customerPayment: 0, loading: false, loadingAmount: 0 } };
 
 
     let newTab = document.createElement("div");
     newTab.className = "tab";
     newTab.setAttribute("data-tab", tabId);
     newTab.innerHTML = `
-        <span class="tab-title">Hóa đơn ${newNumber}</span>
+        <span class="tab-title">Bill ${newNumber}</span>
         <span class="tab-close">×</span>
     `;
 
@@ -716,7 +815,7 @@
 
     let inserted = false;
     for (let tab of tabs) {
-      let tabNumber = parseInt(tab.querySelector(".tab-title").textContent.replace("Hóa đơn ", ""));
+      let tabNumber = parseInt(tab.querySelector(".tab-title").textContent.replace("Bill ", ""));
       if (newNumber < tabNumber) {
         tabContainer.insertBefore(newTab, tab);
         inserted = true;
@@ -743,8 +842,9 @@
     console.log(activeTabId);
     console.log(tabData[tabId]);
     if (!tabData[tabId]) {
-      tabData[tabId] = { customer: {}, products: [], payment: {totalDebt: document.getElementById("customer-totaldebt").value, customerPayment: 0, loading: false, loadingAmount: 0 } };
+      tabData[tabId] = { customer: {}, products: [], payment: {discount: null, customerPayment: 0, loading: false, loadingAmount: 0 } };
     }
+    console.log(tabData[tabId].payment.discount);
 
     renderProducts(tabId);
     loadPaymentData(tabId);
@@ -760,10 +860,9 @@
     if (!tabData[tabId]) {
       tabData[tabId] = { customer: {}, products: [], payment: {} }; // Khởi tạo nếu chưa có
     }
-    console.log("aaaaa");
     console.log(document.getElementById("customer-payment").value)
     tabData[tabId].payment = {
-
+      discount: document.getElementById("discount").value,
       customerPayment: document.getElementById("customer-payment").value,
       loading: document.getElementById("loading").checked,
       loadingAmount: parsePrice(document.getElementById("loading-amount").value)
@@ -772,11 +871,13 @@
 
   function loadPaymentData(tabId) {
     let customer = tabData[tabId]?.customer || {};
-    let paymentData = tabData[tabId]?.payment || { totalDebt: document.getElementById("customer-totaldebt").value,customerPayment: 0, loading: false, loadingAmount: 0 };
+    let paymentData = tabData[tabId]?.payment || { discount: null,customerPayment: 0, loading: false, loadingAmount: 0 };
     let exist = typeof customer.name !== "undefined" && customer.name !== "";
     // Reset lại radio button và checkbox
     console.log(paymentData.method);
     document.getElementById("loading").checked = paymentData.loading;
+    console.log("discount: " + paymentData.discount);
+    document.getElementById("discount").value = paymentData.discount;
 
     // Hiển thị tiền bốc hàng
     let loadingAmountInput = document.getElementById("loading-amount");
@@ -796,8 +897,6 @@ console.log(tabData[tabId].payment.customerPayment);
   function loadCustomerData(tabId) {
     let customer = tabData[tabId]?.customer || {};
     let payment = tabData[tabId]?.payment || {};
-    console.log("aaaa");
-    console.log(customer.name)
     let exist = typeof customer.name !== "undefined" && customer.name !== "";
 
     document.getElementById("customer-name").value = customer.name || "";
@@ -817,33 +916,46 @@ console.log(tabData[tabId].payment.customerPayment);
       let customerPayment = parsePrice(document.getElementById("customer-payment").value);
       let loadingFee = parsePrice(document.getElementById("loading-amount").value);
       let isLoadingChecked = document.getElementById("loading").checked;
-
+      let discount= parsePrice(document.getElementById("discount").value)
+      console.log(parsePrice(document.getElementById("total-amount").textContent));
       if (!customerName || !customerPhone) {
-        alert("Vui lòng nhập thông tin khách hàng!");
+        alert("Please enter customer information!");
         return;
       }
 
       if (customerPayment <= 0 || isNaN(customerPayment)) {
-        alert("Vui lòng nhập số tiền thanh toán hợp lệ!");
+        alert("Please enter a valid payment amount!");
         return;
       }
 
       let products = tabData[activeTabId]?.products || [];
       if (products.length === 0) {
-        alert("Vui lòng thêm ít nhất một sản phẩm vào hóa đơn!");
+        alert("Please add at least one product to your order!");
         return;
       }
+
+      if(discount< 0||discount>100||isNaN(document.getElementById("discount").value)){
+        alert("Please enter a valid discount number!");
+        return;
+      }
+
+      if(loadingFee < 0||isNaN(document.getElementById("loading-amount").value)){
+        alert("Please enter a valid loading amount!");
+        return;
+      }
+
+      let debt= parsePrice(document.getElementById("total-amount").textContent) - customerPayment;
 
       let billData = {
         totalMoney: parsePrice(document.getElementById("total-amount").textContent),
         paidMoney: customerPayment,
-        debtMoney: customerDebt,
+        debtMoney: debt,
         productData: JSON.stringify(products),
-        customerData: JSON.stringify({name: customerName, phone: customerPhone, address: customerAddress}),
-        createdBy: 1, // ID người tạo (có thể lấy từ token)
-        createdAt: new Date().toISOString().split('T')[0], // Ngày tạo
+        customerData: JSON.stringify({name: customerName, phone: customerPhone, address: customerAddress, moneyState: customerDebt}),
         ported: isLoadingChecked,
-        isDebt: customerDebt > 0
+        isDebt: customerDebt > 0,
+        portedMoney: loadingFee,
+        discount: discount
       };
 
       fetch("/bill/checkout", {
@@ -854,15 +966,15 @@ console.log(tabData[tabId].payment.customerPayment);
               .then(response => response.json())
               .then(data => {
                 if (data.success) {
-                  alert("Hóa đơn đã được gửi đi để xử lý!");
+                  alert("Bill has been sent for processing.!");
                   closeTab(activeTabId)
                 } else {
-                  alert("Lỗi khi tạo hóa đơn: " + data.message);
+                  alert("Error creating bill: " + data.message);
                 }
               })
               .catch(error => {
-                console.error("Lỗi gửi dữ liệu:", error);
-                alert("Có lỗi xảy ra khi xử lý thanh toán.");
+                console.error("Error sending data:", error);
+                alert("An error occurred while processing payment.");
               });
     });
   function closeTab(tabId) {
@@ -877,8 +989,35 @@ console.log(tabData[tabId].payment.customerPayment);
       switchTab(remainingTabs[0].getAttribute("data-tab")); // Chuyển sang tab đầu tiên còn lại
     } else {
       // Nếu không còn tab nào, có thể hiển thị một màn hình trống hoặc reset UI
-      console.log("Không còn tab nào.");
+      createNewTab();
     }
+  }
+  function createNewTab() {
+    let newNumber = 1;
+    let tabId = `tab-${Date.now()}`; // Tạo ID duy nhất cho tab
+    tabData[tabId] = { customer: {}, products: [], payment: {discount: 0, customerPayment: 0, loading: false, loadingAmount: 0 } };
+
+    let newTab = document.createElement("div");
+    newTab.className = "tab active"; // Đặt tab mới là active
+    newTab.setAttribute("data-tab", tabId);
+    newTab.innerHTML = `
+        <span class="tab-title">Bill ${newNumber}</span>
+        <span class="tab-close">×</span>
+    `;
+
+    newTab.addEventListener("click", function () {
+      switchTab(tabId);
+    });
+
+    newTab.querySelector(".tab-close").addEventListener("click", function (e) {
+      e.stopPropagation();
+      closeTab(tabId);
+    });
+
+    let tabContainer = document.querySelector(".tab-container");
+    tabContainer.insertBefore(newTab, document.querySelector(".add-tab"));
+
+    switchTab(tabId);
   }
 
 

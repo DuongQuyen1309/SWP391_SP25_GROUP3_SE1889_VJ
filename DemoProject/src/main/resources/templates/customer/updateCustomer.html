@@ -27,7 +27,7 @@
     }
 
     .profile-form input {
-      width: 95%;
+      width: 100%;
       padding: 10px;
       border: 1px solid #ccc;
       border-radius: 5px;
@@ -96,60 +96,10 @@
       }, 3000);  // Thời gian chờ 3 giây
     }
   </script>
-  <!--  <script type="text/javascript">-->
-  <!--    function validateForm(event) {-->
-  <!--      var name = document.getElementById("name").value;-->
-  <!--      var address = document.getElementById("address").value;-->
-  <!--      var dob = document.getElementById("dob").value;-->
-  <!--      var phone = document.getElementById("phone").value;-->
-  <!--      var today = new Date().toISOString().split("T")[0]; // Lấy ngày hiện tại-->
 
-  <!--      var nameRegex = /^[a-zA-ZÀ-Ỹà-ỹ\s]+$/; // Chỉ chứa chữ cái và khoảng trắng-->
-  <!--      var phoneRegex = /^[0-9]{10,11}$/; // Chỉ chứa 10 hoặc 11 chữ số-->
-
-  <!--      // Kiểm tra Name-->
-  <!--      if (!name.match(nameRegex)) {-->
-  <!--        alert("Name must not contain numbers or special characters.");-->
-  <!--        event.preventDefault();-->
-  <!--        return false;-->
-  <!--      }-->
-  <!--      if (name.value.trim() === "") {-->
-  <!--        alert("Name cannot be empty.");-->
-  <!--        event.preventDefault();-->
-  <!--        return false;-->
-  <!--      }-->
-
-  <!--      // Kiểm tra Address-->
-  <!--      if (address.value.trim() === "") {-->
-  <!--        alert("Address cannot be empty.");-->
-  <!--        event.preventDefault();-->
-  <!--        return false;-->
-  <!--      }-->
-
-  <!--      // Kiểm tra Date of Birth-->
-  <!--      if (dob === "") {-->
-  <!--        alert("Date of Birth cannot be empty.");-->
-  <!--        event.preventDefault();-->
-  <!--        return false;-->
-  <!--      }-->
-  <!--      if (dob > today) {-->
-  <!--        alert("Date of Birth cannot be a future date.");-->
-  <!--        event.preventDefault();-->
-  <!--        return false;-->
-  <!--      }-->
-
-  <!--      // Kiểm tra Phone-->
-  <!--      if (!phone.match(phoneRegex)) {-->
-  <!--        alert("Phone number must be between 10 and 11 digits and contain only numbers.");-->
-  <!--        event.preventDefault();-->
-  <!--        return false;-->
-  <!--      }-->
-
-  <!--      return true;-->
-  <!--    }-->
-  <!--  </script>-->
-
-  <script>
+  <script th:inline="javascript">
+    var existingPhones = /*[[${phoneList}]]*/ [];
+    var pre_phone = /*[[${pre_phone}]]*/ "";
     var nameRegex = /^[a-zA-ZÀ-Ỹà-ỹ\s]+$/;
     var phoneRegex = /^[0-9]{10,11}$/;
     var today = new Date().toISOString().split("T")[0];
@@ -189,7 +139,10 @@
           errors.push("Phone is not empty");
         } else if (!phone.value.match(phoneRegex)) {
           errors.push("Phone number must be between 10 and 11 digits and contain only numbers.");
+        } else if(existingPhones.includes(phone.value) && (pre_phone !== phone.value) ){
+          errors.push("Phone is not duplicated");
         }
+
 
         // Nếu có lỗi, ngăn submit và hiển thị thông báo
         if (errors.length > 0) {
@@ -245,10 +198,7 @@
   <div th:if="${message != null}">
     <p th:text="${message}" th:class="${messageType == 'success' ? 'success' : 'error'}"></p>
   </div>
-  <form class="profile-form" action="/customer/updateCustomer" method="POST" accept-charset="UTF-8" >
-    <!-- onsubmit="return validateForm(event)" <form class="profile-form" action="/updateCustomer/{id}" method="POST" th:object="${customer}" onsubmit="return confirmUpdate(event, this)">-->
-    <!-- Name Field  -->
-    <input type="hidden" id="id" name="id" th:value="${customer.id}" required>
+  <form class="profile-form" th:action="@{/customer/updateCustomer/{id}(id=${customer.id})}" method="POST" accept-charset="UTF-8" >
 
     <label for="name">Name:</label>
     <input type="text" id="name" name="name" th:value="${customer.name}">
@@ -267,23 +217,16 @@
 
     <!-- Gender Field -->
     <label for="gender">Gender:</label>
-    <select name="gender" id="gender" >
-      <option th:attr="selected=${customer.gender == true ? 'selected' : ''}" value="true">Male</option>
-      <option th:attr="selected=${customer.gender == false ? 'selected' : ''}" value="false">Female</option>
+    <select name="gender" id="gender">
+      <option value="true" th:selected="${customer.gender == true}">Male</option>
+      <option value="false" th:selected="${customer.gender == false}">Female</option>
     </select>
-
 
     <p style="color: red;" th:if="${error}" th:text="${error}"></p>
     <button type="submit" id="applyBtn">Update Customer</button>
   </form>
 
 </div>
-<!--<div th:if="${message != null}" th:with="messageType=${messageType}">-->
-<!--    <script type="text/javascript">-->
-<!--        showMessage('[[${messageType}]]', '[[${message}]]');-->
-<!--    </script>-->
-<!--</div>-->
-
 <footer>
   &copy; 2025 Rice Sales Management. All Rights Reserved.
 </footer>

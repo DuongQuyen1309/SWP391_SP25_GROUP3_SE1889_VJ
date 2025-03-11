@@ -87,19 +87,100 @@
             }, 3000);  // Thời gian chờ 3 giây
         }
     </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("moneyState").value = "0";
+        });
+        function formatNumber(input) {
+            let moneyState = document.getElementById("moneyState").value.replace(/,/g, '');
+            let kindOfNote = document.getElementById("kindOfNote");
+            let kindOfNoteLabel = document.getElementById("kindOfNoteLabel");
+            let noteName = document.getElementById("noteName");
+            let noteNameLabel = document.getElementById("noteNameLabel");
+
+            if (moneyState !== "0" && moneyState.trim() !== "") {
+                kindOfNote.style.display = "block";
+                kindOfNoteLabel.style.display = "block";
+                noteName.style.display = "block";
+                noteNameLabel.style.display = "block";
+            } else {
+                kindOfNote.style.display = "none";
+                kindOfNoteLabel.style.display = "none";
+                noteName.style.display = "none";
+                noteNameLabel.style.display = "none";
+            }
+
+            let value = input.value.replace(/,/g, '');
+
+            if (!isNaN(value) && value !== "") {
+                input.value = Number(value).toLocaleString('en-US');
+
+                document.getElementById("numberInWords").innerText = numberToWords(value) + " VND";
+            } else {
+                document.getElementById("numberInWords").innerText = "";
+            }
+        }
+
+        function numberToWords(num) {
+            const units = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
+            const teens = ["Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+            const tens = ["", "Ten", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+            const thousands = ["", "Thousand", "Million", "Billion"];
+
+            if (num == 0) return "Zero";
+            let words = "";
+            let numStr = num.toString();
+            let numArr = [];
+
+            // Chia số thành nhóm ba chữ số
+            while (numStr.length > 0) {
+                numArr.unshift(numStr.slice(-3));
+                numStr = numStr.slice(0, -3);
+            }
+
+            numArr.forEach((part, index) => {
+                if (part != "000") {
+                    let word = "";
+                    let n = parseInt(part);
+
+                    if (n >= 100) {
+                        word += units[Math.floor(n / 100)] + " Hundred ";
+                        n %= 100;
+                    }
+
+                    if (n >= 11 && n <= 19) {
+                        word += teens[n - 11] + " ";
+                    } else {
+                        word += tens[Math.floor(n / 10)] + " ";
+                        word += units[n % 10] + " ";
+                    }
+
+                    if (thousands[numArr.length - 1 - index]) {
+                        word += thousands[numArr.length - 1 - index] + " ";
+                    }
+
+                    words += word;
+                }
+            });
+
+            return words.trim();
+        }
+    </script>
     <script th:inline="javascript">
         var existingPhones = /*[[${phoneList}]]*/ [];
         var nameRegex = /^[a-zA-ZÀ-Ỹà-ỹ\s]+$/;
         var phoneRegex = /^[0-9]{10,11}$/;
+        var moneyRegex = /^[0-9]+$/;
         var today = new Date().toISOString().split("T")[0];
         document.addEventListener("DOMContentLoaded", function () {
             const form = document.querySelector(".profile-form");
 
-            const firstname = document.getElementById("firstname");
-            const lastname = document.getElementById("lastname");
+            const name = document.getElementById("name");
             const address = document.getElementById("address");
             const dob = document.getElementById("dob");
             const phone = document.getElementById("phone");
+            const noteName = document.getElementById("noteName");
+            const moneyState = document.getElementById("moneyState");
             const errorMessage = document.createElement("p");
             errorMessage.style.color = "red";
             errorMessage.style.fontWeight = "bold";
@@ -108,17 +189,12 @@
                 let errors = [];
 
                 // Kiểm tra name
-                if (firstname.value.trim() === "") {
-                    errors.push("FirstName is not empty");
-                } else if (!firstname.value.match(nameRegex)) {
-                    errors.push("FirstName must not contain numbers or special characters.");
+                if (name.value.trim() === "") {
+                    errors.push("Full Name is not empty");
+                } else if (!name.value.match(nameRegex)) {
+                    errors.push("Full Name must not contain numbers or special characters.");
                 }
 
-                if (lastname.value.trim() === "") {
-                    errors.push("LastName is not empty");
-                } else if (!lastname.value.match(nameRegex)) {
-                    errors.push("LastName must not contain numbers or special characters.");
-                }
 
                 // Kiểm tra Address
                 if (address.value.trim() === "") {
@@ -138,6 +214,23 @@
                     errors.push("Phone number must be between 10 and 11 digits and contain only numbers.");
                 } else if(existingPhones.includes(phone.value)){
                     errors.push("Phone is not duplicated");
+                }
+
+                let value = moneyState.value.replace(/,/g, '');
+                moneyState.value = moneyState.value.replace(/,/g, '');
+
+                moneyState.value = value;  // Cập nhật lại giá trị đã loại bỏ dấu phẩy
+                // Chuyển đổi giá trị moneyState thành số nguyên
+                let moneyNumber = parseInt(value, 10);
+
+                if (moneyState.value.trim() !== "" && moneyNumber !== 0 && noteName.value.trim() === "") {
+                    errors.push("Note name is not empty");
+                }
+
+                if (moneyState.value.trim() === "") {
+                    errors.push("Money is not empty");
+                } else if (!/^\d+$/.test(value)) {
+                    errors.push("Money only contain number.");
                 }
 
 
@@ -193,21 +286,16 @@
     <h1>Customer Profile</h1>
     <form class="profile-form" action="/customer/createCustomer" method="POST" th:object="${customerRequest}">
 
-        <label for="firstname">First Name:</label>
-        <input type="text" id="firstname" name="firstname" th:field="*{name}" >
-<!--        <p style="color: red;" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></p>-->
-
-        <label for="lastname">Last Name:</label>
-        <input type="text" id="lastname" name="lastname" th:value="${lastname}">
-<!--        <p style="color:red;" th:if="${lastnamemessage != null and lastnamemessage != ''}" th:text="${lastnamemessage}"></p>-->
+        <label for="name">Full Name:</label>
+        <input type="text" id="name" name="name" th:field="*{name}" >
 
 
         <label for="address">Address:</label>
         <input type="text" id="address" name="address" th:field="*{address}">
-<!--        <p style="color: red;" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></p>-->
 
         <label for="dob">Date of Birth:</label>
         <input type="date" id="dob" name="dob" th:value="${customerRequest.dob}">
+
 
 
         <label for="phone">Phone:</label>
@@ -220,8 +308,22 @@
             <option value="false" th:selected="${param.gender == 'false'}">Female</option>
         </select>
 
+        <label for="moneyState">Money State:</label>
+        <input type="text" id="moneyState" name="moneyState" th:field="*{moneyState}" value="0" oninput="formatNumber(this)">
+        <p id="numberInWords" style="font-style: italic; color: #555;"></p>
 
+        <label for="kindOfNote" id="kindOfNoteLabel" style="display: none;">Note Type:</label>
+        <select id="kindOfNote" name="kindOfNote" style="display: none;">
+            <option value="customerOwe">Customer owes money</option>
+            <option value="customerPay">Customer pays money</option>
+            <option value="storeOwe">Store owes money</option>
+            <option value="storePay">Store pays money</option>
+        </select>
 
+        <label for="noteName" id="noteNameLabel" style="display: none;">Note Name:</label>
+        <input type="text" id="noteName" name="noteName" style="display: none;">
+
+        <p style="color: red;" th:if="${error}" th:text="${error}"></p>
         <button type="submit">Create Customer</button>
     </form>
 

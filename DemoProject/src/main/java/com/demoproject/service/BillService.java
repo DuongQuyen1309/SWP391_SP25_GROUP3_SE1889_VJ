@@ -10,6 +10,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 public class BillService {
@@ -29,11 +31,14 @@ public class BillService {
         bill.setProductData(request.getProductData());
         bill.setCustomerData(request.getCustomerData());
         bill.setCreatedBy(request.getCreatedBy());
-        bill.setCreatedAt(LocalDate.now());
+        bill.setCreatedAt(LocalDateTime.now());
         bill.setPorted(request.isPorted());
         bill.setDebt(request.isDebt());
         bill.setStoreId(request.getStoreId());
-        bill.setStatus(true);
+        bill.setStatus(request.isStatus());
+        bill.setNote(request.getNote());
+        bill.setDiscount(request.getDiscount());
+        bill.setPortedMoney(request.getPortedMoney());
         // Lưu vào database
         billRepository.save(bill);
     }
@@ -45,5 +50,12 @@ public class BillService {
     }
     public Page<Bill> getBillsByStoreIdAndCustomerName(String name,Long storeId,Pageable pageable) {
         return  this.billRepository.findByNameAndStoreId(name, storeId, pageable);
+    }
+
+    public Optional<Bill> getBillByIdAndStoreId(Long billId, Long storeId) {
+        return billRepository.findByIdAndStoreId(billId, storeId);
+    }
+    public Page<Bill> getBillsByTotalMoneyRange(Double minValue, Double maxValue, Long storeId, Pageable pageable) {
+        return billRepository.findByTotalMoneyBetweenAndStoreId(minValue, maxValue, storeId, pageable);
     }
 }

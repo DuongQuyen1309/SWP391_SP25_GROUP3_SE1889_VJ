@@ -46,4 +46,12 @@ public class UserService {
     public Long getOwnerID(Long staffID){
         return userRepository.getOwnerID(staffID);
     }
+
+    public List<Users> getUsers(List<Long> relateList){
+        return userRepository.getUser(relateList);
+    }
+
+    public List<Long> getStaffID1(Long ownerID){
+        return userRepository.getStaffID1(ownerID);
+    }
 }

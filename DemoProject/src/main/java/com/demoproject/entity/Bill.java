@@ -1,11 +1,14 @@
 package com.demoproject.entity;
 
 import com.demoproject.dto.CustomerDataDTO;
+import com.demoproject.dto.ProductDataDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.*;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "Bill")
@@ -33,7 +36,7 @@ public class Bill {
     @Column(name = "createdBy")
     private Long createdBy;
     @Column(name = "createdAt")
-    private LocalDate createdAt;
+    private LocalDateTime createdAt;
     @Column(name = "ported")
     private boolean ported;
     @Column(name = "isDebt")
@@ -42,9 +45,14 @@ public class Bill {
     private Long storeId;
     @Column(name = "status")
     private boolean status;
+    @Column(name = "portedMoney")
+    private int portedMoney;
 
     @Transient
     private CustomerDataDTO customer; // Dữ liệu JSON sẽ được chuyển thành Object
+    @Transient
+    private List<ProductDataDTO> products; // Dữ liệu JSON sẽ được chuyển thành list
+
     public Long getId() {
         return id;
     }
@@ -102,11 +110,11 @@ public class Bill {
         this.createdBy = createdBy;
     }
 
-    public LocalDate getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDate createdAt) {
+    public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
 
@@ -158,6 +166,14 @@ public class Bill {
         this.discount = discount;
     }
 
+    public int getPortedMoney() {
+        return portedMoney;
+    }
+
+    public void setPortedMoney(int portedMoney) {
+        this.portedMoney = portedMoney;
+    }
+
     public CustomerDataDTO getCustomer() {
         if (customer == null && customerData != null) {
             this.customer = parseCustomerData(customerData);
@@ -169,6 +185,22 @@ public class Bill {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             return objectMapper.readValue(json, CustomerDataDTO.class);
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    public List<ProductDataDTO> getProducts() {
+        if (products == null && productData != null) {
+            this.products = parseProductData(productData);
+        }
+        return products;
+    }
+
+    private List<ProductDataDTO> parseProductData(String json) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.readValue(json, objectMapper.getTypeFactory().constructCollectionType(List.class, ProductDataDTO.class));
         } catch (IOException e) {
             return null;
         }
