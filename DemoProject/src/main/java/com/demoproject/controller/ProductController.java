@@ -12,6 +12,7 @@ import com.demoproject.service.ProductService;
 import com.demoproject.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -278,5 +279,11 @@ public class ProductController {
 //    public List<Product> searchProduct(@RequestParam String query) {
 //        return productRepository.findByNameContainingIgnoreCase(query);
 //    }
+@GetMapping("/checkQuantity/{id}/{quantity}")
+public ResponseEntity<Boolean> checkQuantity(@PathVariable Long id, @PathVariable int quantity) {
+    Optional<Product> productOpt = productRepository.findById(id);
+    boolean isAvailable = productOpt.isPresent() && productOpt.get().getQuantity() >= quantity;
+    return ResponseEntity.ok(isAvailable); // ✅ Trả về ResponseEntity để Spring hiểu đây là JSON
+}
 }
 

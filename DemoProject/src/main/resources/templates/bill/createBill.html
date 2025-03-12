@@ -54,6 +54,9 @@
     <button class="add-tab">+</button>
   </div>
 
+  <div id="order-status-container">
+    <span id="order-status" style="display: none">💬 Trạng thái: Chưa thanh toán</span>
+  </div>
 
 <div class="main-container">
   <div class="left-panel">
@@ -204,7 +207,7 @@
 
         <div class="total-row" style="display:block">
           <span class="total-label" >Customer pay:</span>
-          <input type="text" style="width: 90%; margin-top: 5px" class="form-control" id="customer-payment" placeholder="Enter customer payment money kVND" >
+          <input type="text" style="width: 90%; margin-top: 5px" class="form-control" id="customer-payment" placeholder="Enter customer payment money" >
           <span id="customer-payment-error" class="error-message"></span>
         </div>
 
@@ -225,8 +228,16 @@
         <div class="total-row" style="display: block">
           <span class="total-label">Porter Money:</span>
 
+
           <input type="text" class="form-control" id="loading-amount" value="0" readonly style="width: 90%; margin-top: 5px">
           <span id="loading-amount-error" class="error-message"></span>
+        </div>
+
+        <div class="total-row" style="display:block">
+            <label class="total-label" for="order-note">📝 Note:</label>
+            <textarea id="order-note" class="form-control" style="width: 90%; height: 80px;margin-top: 5px" placeholder="Enter note here..."></textarea>
+
+
         </div>
       </div>
 
@@ -250,7 +261,7 @@
   let activeTabId = "tab-1"; // ID của tab đang được chọn
 
   function formatPrice(price) {
-    return new Intl.NumberFormat('vi-VN').format(price)+ " kVND";
+    return new Intl.NumberFormat('vi-VN').format(price);
   }
 
   function parsePrice(priceStr) {
@@ -541,7 +552,7 @@
                         <div class="quantity-btn plus" onclick="changeQuantity('${tabId}', ${product.id}, 1)">+</div>
                     </div>
                 </td>
-                <td class="price-cell">${formatPrice(product.price)}</td>
+                <td class="price-cell">${formatPrice(product.price)+"/kg"}</td>
                 <td class="price-cell total-price">${formatPrice(product.price * product.quantity)}</td>
                 <td><button onclick="removeProduct('${tabId}', ${product.id})">✖</button></td>
             </tr>
@@ -633,6 +644,12 @@
     event.target.value = formattedNumber;
   });
 
+  document.getElementById("order-note").addEventListener("input", function () {
+    if (!tabData[activeTabId]) {
+      tabData[activeTabId] = { customer: {}, products: [], payment: {}, note: "" };
+    }
+    tabData[activeTabId].note = this.value;
+  });
 
 
 
@@ -662,11 +679,13 @@
   // Gán sự kiện khi nhập tiền bốc hàng sẽ cập nhật tổng tiền ngay lập tức
   document.getElementById("loading-amount").addEventListener("input", function (event) {
     if (document.getElementById("loading").checked) {
-      let inputValue = event.target.value;
+      let input = event.target.value.replaceAll(".", ""); // Xóa dấu . cũ trước khi kiểm tra
+      let cleanNumber = input.replace(/\D/g, ""); // Loại bỏ ký tự không phải số
       let errorSpan = document.getElementById("loading-amount-error");
 
 
-      if (inputValue === "") {
+
+      if (input=== "") {
         errorSpan.textContent = ""; // Nếu trống thì không hiển thị lỗi
         event.target.classList.remove("input-error");
         let productTotal = 0; // Mặc định tổng tiền sản phẩm là 0 nếu chưa có sản phẩm nào
@@ -688,25 +707,19 @@
         document.getElementById("customer-pay").textContent = formatPrice(Math.round(finalTotal));
         return;
       }
-      // Kiểm tra nếu nhập không phải số dương
-      if (!/^\d+$/.test(inputValue)) {
+      // Kiểm tra nếu giá trị nhập không phải số nguyên dương
+      if (!/^\d+$/.test(cleanNumber)) {
         errorSpan.textContent = "Please enter a positive integer!";
         event.target.classList.add("input-error");
-        updateOrderTotal();
-        event.preventDefault();
         return;
-      } else if(isNaN(inputValue)) {
-        errorSpan.textContent = "Please enter a number!";
-        event.target.classList.add("input-error");
-        event.preventDefault();
-        updateOrderTotal();
-        return;
-
-      }
-      else {
+      } else {
         errorSpan.textContent = "";
         event.target.classList.remove("input-error");
       }
+
+      // Định dạng lại số tiền với dấu . mỗi 3 chữ số
+      let formattedNumber = cleanNumber.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+      event.target.value = formattedNumber;
 
       // Cập nhật tổng tiền ngay khi nhập tiền bốc hàng
       updateOrderTotal();
@@ -842,13 +855,15 @@
     console.log(activeTabId);
     console.log(tabData[tabId]);
     if (!tabData[tabId]) {
-      tabData[tabId] = { customer: {}, products: [], payment: {discount: null, customerPayment: 0, loading: false, loadingAmount: 0 } };
+      tabData[tabId] = { customer: {}, products: [], payment: {discount: null, customerPayment: 0, loading: false, loadingAmount: 0 } , status: null , note: "" };
     }
     console.log(tabData[tabId].payment.discount);
+    document.getElementById("order-note").value = tabData[tabId].note || ""; // Load ghi chú của tab
 
     renderProducts(tabId);
     loadPaymentData(tabId);
     updateOrderTotal(tabId);
+    updateOrderStatus(tabId);
 
     // Reset và cập nhật lựa chọn thanh toán
 
@@ -865,7 +880,7 @@
       discount: document.getElementById("discount").value,
       customerPayment: document.getElementById("customer-payment").value,
       loading: document.getElementById("loading").checked,
-      loadingAmount: parsePrice(document.getElementById("loading-amount").value)
+      loadingAmount: document.getElementById("loading-amount").value
     };
   }
 
@@ -946,16 +961,26 @@ console.log(tabData[tabId].payment.customerPayment);
 
       let debt= parsePrice(document.getElementById("total-amount").textContent) - customerPayment;
 
+
+      let statusEle =   "🕒 Processing...";
+
+      // Lưu trạng thái vào tabData
+      tabData[activeTabId].status = statusEle;
+
+      // Cập nhật hiển thị trạng thái
+      updateOrderStatus(activeTabId);
+
       let billData = {
-        totalMoney: parsePrice(document.getElementById("total-amount").textContent),
-        paidMoney: customerPayment,
+        totalMoney: parsePrice(document.getElementById("total-amount").textContent) ,
+        paidMoney: customerPayment ,
         debtMoney: debt,
         productData: JSON.stringify(products),
         customerData: JSON.stringify({name: customerName, phone: customerPhone, address: customerAddress, moneyState: customerDebt}),
         ported: isLoadingChecked,
         isDebt: customerDebt > 0,
-        portedMoney: loadingFee,
-        discount: discount
+        portedMoney: loadingFee ,
+        discount: discount,
+        note: tabData[activeTabId].note // Gửi ghi chú
       };
 
       fetch("/bill/checkout", {
@@ -965,11 +990,14 @@ console.log(tabData[tabId].payment.customerPayment);
       })
               .then(response => response.json())
               .then(data => {
+                console.log(data.trackingId);
                 if (data.success) {
-                  alert("Bill has been sent for processing.!");
-                  closeTab(activeTabId)
+
+                  checkBillStatus(data.trackingId, activeTabId); // ✅ Kiểm tra trạng thái xử lý
                 } else {
-                  alert("Error creating bill: " + data.message);
+                  alert("Lỗi khi tạo hóa đơn: " + data.message);
+                  tabData[activeTabId].status = "❌ Failed";
+                  updateOrderStatus(activeTabId);
                 }
               })
               .catch(error => {
@@ -1018,6 +1046,38 @@ console.log(tabData[tabId].payment.customerPayment);
     tabContainer.insertBefore(newTab, document.querySelector(".add-tab"));
 
     switchTab(tabId);
+  }
+
+  function checkBillStatus(trackingId, tabId) {
+    let interval = setInterval(() => {
+      fetch(`/bill/tracking/${trackingId}`)
+              .then(response => response.json())
+              .then(data => {
+                if (data.status === "processed") {
+                  tabData[tabId].status = "✅ Successful";
+                  updateOrderStatus(tabId);
+                  clearInterval(interval);
+                  // ✅ Sau 2 giây, đóng tab
+                  setTimeout(() => closeTab(tabId), 1000);
+                }
+              })
+              .catch(error => console.error("Lỗi kiểm tra trạng thái hóa đơn:", error));
+    }, 2000);
+  }
+
+
+  // Hàm cập nhật trạng thái hiển thị trên giao diện
+  function updateOrderStatus(tabId) {
+    console.log(tabData[tabId].status);
+    if(!tabData[tabId].status) {
+      document.getElementById("order-status").style.display = "none";
+    }
+    else{
+      let statusElement = document.getElementById("order-status");
+      statusElement.textContent = `💬 Status: ${tabData[tabId].status}`;
+      statusElement.style.display = "block";
+    }
+
   }
 
 

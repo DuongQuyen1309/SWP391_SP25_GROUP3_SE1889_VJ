@@ -11,12 +11,14 @@ import com.demoproject.productqueue.ProductQueueProcessor;
 import com.demoproject.repository.AccountRepository;
 import com.demoproject.repository.BillRepository;
 import com.demoproject.service.*;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -220,8 +222,23 @@ public class BillController {
             CustomerDataDTO customerData = objectMapper.readValue(bill.getCustomerData(), CustomerDataDTO.class);
 
             String customerDataJson = objectMapper.writeValueAsString(customerData);
+            List<ProductDataDTO> products = objectMapper.convertValue(
+                    objectMapper.readValue(bill.getProductData(), List.class),
+                    new TypeReference<List<ProductDataDTO>>() {}
+            );
+// ✅ Kiểm tra sản phẩm trong kho
+            for (ProductDataDTO product : products) {
+                Product productOpt = productService.getProductById(product.getId());
+                if (productOpt == null || productOpt.getQuantity() < product.getQuantity()) {
+                    response.put("success", false);
+                    System.out.println("Lỗi khi gửi hóa đơn: Sản phẩm '" + product.getName() + "' không đủ số lượng trong kho!");
+                    response.put("message", "❌ Sản phẩm '" + product.getName() + "' không đủ số lượng trong kho!");
+                    return response;
+                }
+            }
 
-
+            String trackingId = UUID.randomUUID().toString();
+            System.out.println(trackingId);
             bill.setCreatedBy(user.getId());
             bill.setCreatedAt(LocalDateTime.now());
             System.out.println(bill.getCreatedAt());
@@ -238,19 +255,21 @@ public class BillController {
                     bill.isDebt(),
                     user.getStoreId(),
                     false,
-                    "Hóa đơn đang chờ xử lý",
+                    bill.getNote(),
                     bill.getDiscount(),
-                    bill.getPortedMoney()
+                    bill.getPortedMoney(),
+                    trackingId
             );
 
-            billQueueProcessor.addBill(billRequest);
+            System.out.println("Trước add");
+            // ✅ Thêm hóa đơn vào hàng đợi để xử lý sau
+            billQueueProcessor.addBill(trackingId, billRequest);
 
-
-
-
-            response.put("success", true);
+            System.out.println("Sau add");
+            System.out.println(trackingId);
             response.put("message", "Hóa đơn đã được đưa vào hàng đợi để xử lý!");
-            response.put("billId", bill.getId());
+            response.put("success", true);
+            response.put("trackingId", trackingId);
 
         } catch (Exception e) {
             response.put("success", false);
@@ -290,6 +309,23 @@ public class BillController {
             model.addAttribute("error", "Bill not found");
         }
         return "bill/billDetail";
+    }
+
+    @GetMapping("/tracking/{trackingId}")
+    public ResponseEntity<Map<String, Object>> checkBillStatus(@PathVariable String trackingId) {
+        Long billId = billQueueProcessor.getBillIdByTrackingId(trackingId);
+        System.out.println(billId);
+
+        Map<String, Object> response = new HashMap<>();
+
+        if (billId != null) {
+            response.put("status", "processed");
+            response.put("billId", billId);
+        } else {
+            response.put("status", "pending");
+        }
+
+        return ResponseEntity.ok(response);
     }
 
 

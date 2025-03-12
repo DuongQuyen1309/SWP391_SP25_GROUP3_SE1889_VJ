@@ -75,12 +75,12 @@ public class NoteController {
         //khoi tao rong
         Page<Note> notePage ;
 
-        String username = jwtUtils.extractUsername(token);
-        Optional<Account> optAccount = accountService.findByUsernameAndIsDeleteFalse(username);
-        Account account = optAccount.orElse(null);
+        Account account = accountService.getAccountFromToken(token).orElse(null);
         model.addAttribute("account", account);
 
-        Optional<Users> user = userService.getUserProfile(optAccount.get().getId());
+
+        Users user = userService.getUserProfile(account.getUserId()).orElse(null);
+        model.addAttribute("user", user);
 
         String role= jwtUtils.extractRole(token);
         model.addAttribute("role",role);
@@ -147,7 +147,7 @@ public class NoteController {
             model.addAttribute("currentPage", page);
             model.addAttribute("totalPages", notePage.getTotalPages());
             model.addAttribute("size", size);
-            return "listNote";
+            return "note/listNote";
         }
         else {
 
@@ -213,12 +213,11 @@ public class NoteController {
     public String createNoteForm(@PathVariable("id") Long id,
                                  @CookieValue(value = "token", required = false) String token,
                                  Model model,  HttpServletResponse response) {
-        String username = jwtUtils.extractUsername(token);
-        Optional<Account> optAccount = accountService.findByUsernameAndIsDeleteFalse(username);
-        Account account = optAccount.orElse(null);
+        Account account = accountService.getAccountFromToken(token).orElse(null);
         model.addAttribute("account", account);
 
-        Optional<Users> user = userService.getUserProfile(optAccount.get().getId());
+        Users user = userService.getUserProfile(account.getUserId()).orElse(null);
+        model.addAttribute("user", user);
         String role= jwtUtils.extractRole(token);
         model.addAttribute("role",role);
         List<String> listHiddenPage = new ArrayList<>();
@@ -286,12 +285,11 @@ public class NoteController {
                              @RequestParam("money") String money,
                              RedirectAttributes redirectAttributes, HttpServletResponse response,
                              Model model,@CookieValue(value = "token", required = false) String token) {
-        String username = jwtUtils.extractUsername(token);
-        Optional<Account> optAccount = accountService.findByUsernameAndIsDeleteFalse(username);
-        Account account = optAccount.orElse(null);
+        Account account = accountService.getAccountFromToken(token).orElse(null);
         model.addAttribute("account", account);
 
-        Optional<Users> user = userService.getUserProfile(optAccount.get().getId());
+        Users user = userService.getUserProfile(account.getUserId()).orElse(null);
+        model.addAttribute("user", user);
         String role= jwtUtils.extractRole(token);
         model.addAttribute("role",role);
         List<String> listHiddenPage = new ArrayList<>();
@@ -302,10 +300,10 @@ public class NoteController {
 
         List<Long> relatedUserList = new ArrayList<>();
         if (role.equalsIgnoreCase("OWNER")) {
-            relatedUserList = userService.getStaffID(user.get().getId());
-            relatedUserList.add(user.get().getId());
+            relatedUserList = userService.getStaffID(user.getId());
+            relatedUserList.add(user.getId());
         } else if (role.equalsIgnoreCase("STAFF")) {
-            Long ownerId = userService.getOwnerID(user.get().getId());
+            Long ownerId = userService.getOwnerID(user.getId());
             relatedUserList = userService.getStaffID(ownerId);
             relatedUserList.add(ownerId);
         }
@@ -317,7 +315,7 @@ public class NoteController {
 
             Integer amount = Integer.parseInt(money);
             String isDebt = (kindOfNote != null && !kindOfNote.isBlank()) ? kindOfNote : null;
-            Long cID = user.get().getId();
+            Long cID = user.getId();
             String storeId = jwtUtils.extractStoreId(token);
             Long last_storedID = Long.parseLong(storeId);
 

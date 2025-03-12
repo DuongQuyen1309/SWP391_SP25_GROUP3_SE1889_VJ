@@ -118,14 +118,14 @@
                         <label for="customer-dob">Date Of Birth</label>
                         <input type="text" class="form-control" id="customer-dob" style="width: 90%">
                     </div>
-                    <div class="form-group">
-                        <label for="customer-moneystate">Nợ cũ</label>
-                        <input type="text" class="form-control" id="customer-moneystate" style="width: 90%">
-                    </div>
-                    <div class="form-group">
-                        <label for="customer-totaldebt">Tổng công nợ</label>
-                        <input type="text" class="form-control" id="customer-totaldebt" readonly style="width: 90%">
-                    </div>
+                    <!--                    <div class="form-group">-->
+                    <!--                        <label for="customer-moneystate">Nợ cũ</label>-->
+                    <!--                        <input type="text" class="form-control" id="customer-moneystate" style="width: 90%">-->
+                    <!--                    </div>-->
+                    <!--                    <div class="form-group">-->
+                    <!--                        <label for="customer-totaldebt">Tổng công nợ</label>-->
+                    <!--                        <input type="text" class="form-control" id="customer-totaldebt" readonly style="width: 90%">-->
+                    <!--                    </div>-->
                 </div>
             </div>
 
@@ -262,10 +262,10 @@
     document.getElementById("customer-phone").readOnly = true;
     document.getElementById("customer-gender").readOnly = true;
     document.getElementById("customer-dob").readOnly = true;
-    document.getElementById("customer-moneystate").readOnly = true;
-    document.getElementById("customer-totaldebt").readOnly = true;
+    // document.getElementById("customer-moneystate").readOnly = true;
+    // document.getElementById("customer-totaldebt").readOnly = true;
 
-    ['customer-name', 'customer-address', 'customer-phone', 'customer-gender', 'customer-dob', 'customer-moneystate', 'customer-totaldebt'].forEach(id => {
+    ['customer-name', 'customer-address', 'customer-phone', 'customer-gender', 'customer-dob'].forEach(id => {
         document.getElementById(id).addEventListener("keydown", function(event) {
             event.preventDefault();
         });
@@ -325,8 +325,8 @@
                             '${customer.name}',
                             '${customer.phone}',
                             '${customer.address}',
-                            '${customer.dob}',
-                            '${customer.gender}',
+                            '${formatDate(customer.dob)}',
+                            '${customer.gender ? "Male" : "Female"}',
                             '${customer.moneyState}'
                         )">
                             ${customer.name} - ${customer.phone}
@@ -342,6 +342,11 @@
             customerList.innerHTML = "";
             customerList.style.display = "none";
         }
+    }
+
+    function formatDate(dateStr) {
+        let parts = dateStr.split("-"); // Tách chuỗi theo dấu "-"
+        return `${parts[2]}-${parts[1]}-${parts[0]}`; // Đảo vị trí thành dd-mm-yyyy
     }
 
     // Chọn khách hàng
@@ -449,8 +454,6 @@
 
         if (isNaN(quantity) || quantity < 1) {
             alert("Đơn giá không hợp lệ!!!")
-        } else {
-            return;
         }
     }
 
@@ -519,7 +522,6 @@
     // Cập nhật tổng công nợ
     function updateTotalDebt() {
         let customerName = document.getElementById("customer-name").value.trim();
-        let oldDebt = parsePrice(customer.moneystate || "0");
         let payment = parsePrice(document.getElementById("customer-payment").value);
         let totalAmount = parsePrice(document.getElementById("total-amount").textContent) || 0;
 
@@ -528,12 +530,12 @@
             return;
         }
 
-        if (payment >= 0) {
-            let totalDebt = oldDebt + (payment - totalAmount);
-            document.getElementById("customer-totaldebt").value = formatPrice(totalDebt);
-        } else {
-            document.getElementById("customer-totaldebt").value = formatPrice(oldDebt);
-        }
+        // if (payment >= 0) {
+        //     let totalDebt = oldDebt + (payment - totalAmount);
+        //     document.getElementById("customer-totaldebt").value = formatPrice(totalDebt);
+        // } else {
+        //     document.getElementById("customer-totaldebt").value = formatPrice(oldDebt);
+        // }
     }
 
     // Cập nhật tổng tiền

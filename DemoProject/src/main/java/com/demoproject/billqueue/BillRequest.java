@@ -15,10 +15,11 @@ public class BillRequest {
     private String note;
     private int discount;
     private int portedMoney;
+    private String trackingId;
 
     public BillRequest(int totalMoney, int paidMoney, int debtMoney,
                        String productData, String customerData, Long createdBy, boolean ported, boolean isDebt, Long storeId,boolean status,String note,
-                       int discount,int portedMoney) {
+                       int discount,int portedMoney,String trackingId) {
 
         this.totalMoney = totalMoney;
         this.paidMoney = paidMoney;
@@ -33,6 +34,7 @@ public class BillRequest {
         this.note = note;
         this.discount = discount;
         this.portedMoney = portedMoney;
+        this.trackingId = trackingId;
     }
 
     // Getters
@@ -119,6 +121,14 @@ public class BillRequest {
 
     public void setPortedMoney(int portedMoney) {
         this.portedMoney = portedMoney;
+    }
+
+    public String getTrackingId() {
+        return trackingId;
+    }
+
+    public void setTrackingId(String trackingId) {
+        this.trackingId = trackingId;
     }
 }
 
