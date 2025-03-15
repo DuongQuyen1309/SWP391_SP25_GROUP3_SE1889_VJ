@@ -100,10 +100,6 @@ public class CustomerController {
             relatedUserList.add(ownerId);
         }
 
-        // bắt đầu đoạn code cần thay thế sau khi storeid//
-//        List<String> phoneList =  customerService.getAllPhoneNumbers(relatedUserList);
-//        model.addAttribute("phoneList", phoneList);
-        // kết thúc đoạn code cần thay thế sau khi storeid//
 
 
         //bắt đầu đoạn code thay thế//
@@ -162,10 +158,6 @@ public class CustomerController {
                 String req_address = (address == null || address.isEmpty())? null: address;
                 String req_name = (name == null || name.isEmpty()) ? null : name;
 
-                // bắt đầu đoạn code cần thay thế
-//                customerPage = customerService.searchCustomerByAttribute(relatedUserList, req_idFrom, req_idTo, req_moneyFrom,
-//                        req_moneyTo, req_phone, dobFrom, dobTo, req_createBy, req_address, req_name, pageable);
-                //kết thúc đoạn code cần thay thế
 
                 // bắt đầu đoạn code moi
                 customerPage = customerService.searchCustomerByAttribute(last_storedID, req_idFrom, req_idTo, req_moneyFrom,
@@ -176,9 +168,6 @@ public class CustomerController {
 
 
             } else {
-                // bắt đầu đoạn code cần thay thế
-//                customerPage = customerService.searchCustomerAll(relatedUserList, pageable);
-                //kết thúc đoạn code cần thay thế
 
                 // bắt đầu đoạn code moi
                 customerPage = customerService.searchCustomerAll(last_storedID, pageable);
@@ -239,11 +228,6 @@ public class CustomerController {
             relatedUserList = userService.getStaffID(ownerId);
             relatedUserList.add(ownerId);
         }
-        // bắt đầu đoạn code cần thay thế
-//        List<String> phoneList =  customerService.getAllPhoneNumbers(relatedUserList);
-//        model.addAttribute("phoneList", phoneList);
-        // kết thúc đoạn code cần thay thế
-
 
         //bắt đầu đoạn code thay thế//
         String storeId = jwtUtils.extractStoreID(token);
@@ -327,27 +311,6 @@ public class CustomerController {
             model.addAttribute("user", user.get());
             String role = jwtUtils.extractRole(token);
 
-            // bắt đầu đoạn code cần thay thế
-//            List<Long> relatedUserList = new ArrayList<>();
-//            if (role.equalsIgnoreCase("OWNER")) {
-//                relatedUserList = userService.getStaffID(user.get().getId());
-//                relatedUserList.add(user.get().getId());
-//            } else if (role.equalsIgnoreCase("STAFF")) {
-//                Long ownerId = userService.getOwnerID(user.get().getId());
-//                relatedUserList = userService.getStaffID(ownerId);
-//                relatedUserList.add(ownerId);
-//            }
-//            int check=0;
-//            for(int i=0; i<relatedUserList.size(); i++){
-//                if(relatedUserList.get(i).equals(customer.getCreatedBy())){
-//                    check=check+1;
-//                }
-//            }
-//            if(check==0) {
-//                return "redirect:/customer/listCustomer";
-//            }
-            // kết thúc đoạn code cần thay thế
-
             // bắt đầu đoạn code moi
             String storeId = jwtUtils.extractStoreID(token);
             Long last_storedID = Long.parseLong(storeId);
@@ -377,10 +340,6 @@ public class CustomerController {
                 model.addAttribute("customer", customer);
                 model.addAttribute("pre_phone", pre_phone);
 
-                // bắt đầu đoạn code cần thay thế
-//                List<String> phoneList = customerService.getAllPhoneNumbers(relatedUserList);
-//                model.addAttribute("phoneList", phoneList);
-                // kết thúc đoạn code cần thay thế
 
             //bắt đầu đoạn code thay thế//
             List<String> phoneList =  customerService.getAllPhones(last_storedID);

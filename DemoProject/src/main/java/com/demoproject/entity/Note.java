@@ -26,6 +26,8 @@ public class Note {
     private int money;
     @Column(name = "store_id")
     private Long storeId;
+    @Column(name = "image_path")
+    private String imagePath;
 
     public Note() {
     }
@@ -43,6 +45,15 @@ public class Note {
         this.customerId = customerId;
         this.note = note;
         this.money = money;
+    }
+    public Note(Long id, String isDebt, Long customerId, String note, int money, Long storeId, String imagePath) {
+        this.id = id;
+        this.isDebt = isDebt;
+        this.customerId = customerId;
+        this.note = note;
+        this.money = money;
+        this.storeId = storeId;
+        this.imagePath = imagePath;
     }
 
     public Long getId() {
@@ -107,5 +118,21 @@ public class Note {
 
     public void setStoreId(Long storeId) {
         this.storeId = storeId;
+    }
+
+    public String getIsDebt() {
+        return isDebt;
+    }
+
+    public void setIsDebt(String isDebt) {
+        this.isDebt = isDebt;
+    }
+
+    public String getImagePath() {
+        return imagePath;
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
     }
 }

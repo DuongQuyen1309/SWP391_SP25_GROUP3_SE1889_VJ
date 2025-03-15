@@ -144,6 +144,9 @@
     function callPage() {
       window.location.href ="/customer/createCustomer";
     }
+    function callUpdate() {
+      window.location.href ="/note/listUpdatedRecord";
+    }
     function showCreatedSuccess() {
       alert("You are successfully created!");
     }
@@ -232,6 +235,7 @@
 
   <!-- Modal Form -->
   <button class="add-customer" onclick="callPage()">Create New Customer</button>
+  <button class="list-updatedRecord" onclick="callUpdate()">History about updating customer</button>
 
   <div id="messageBox">
     <script type="text/javascript">

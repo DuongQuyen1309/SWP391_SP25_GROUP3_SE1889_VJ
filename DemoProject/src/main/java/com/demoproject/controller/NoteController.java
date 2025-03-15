@@ -1,9 +1,6 @@
 package com.demoproject.controller;
 
-import com.demoproject.entity.Account;
-import com.demoproject.entity.Customer;
-import com.demoproject.entity.Note;
-import com.demoproject.entity.Users;
+import com.demoproject.entity.*;
 import com.demoproject.jwt.JwtUtils;
 import com.demoproject.queuenotemoney.TransactionQueueProcessor;
 import com.demoproject.queuenotemoney.TransactionRequest;
@@ -14,21 +11,34 @@ import com.demoproject.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @RequestMapping("/note")
 @Controller
@@ -90,30 +100,6 @@ public class NoteController {
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
 
-        // bắt đầu đoạn code cần thay thế
-//        List<Long> relatedUserList = new ArrayList<>();
-//        if(role.equalsIgnoreCase("OWNER")){
-//            relatedUserList = userService.getStaffID1(user.get().getId());
-//            relatedUserList.add(user.get().getId());
-//        }else if(role.equalsIgnoreCase("STAFF")){
-//            Long ownerId = userService.getOwnerID(user.get().getId());
-//            relatedUserList = userService.getStaffID1(ownerId);
-//            relatedUserList.add(ownerId);
-//        }
-//
-//        Customer customercCheck = customerService.getCustomer(id);
-//
-//        int check=0;
-//        for(int i=0; i<relatedUserList.size(); i++){
-//            if(relatedUserList.get(i).equals(customercCheck.getCreatedBy())){
-//                check=check+1;
-//            }
-//        }
-//        if(check==0) {
-//            return "redirect:/customer/listCustomer";
-//        }
-        //ket thuc doan code can thay the
-
         // bắt đầu đoạn code moi
         String storeId = jwtUtils.extractStoreID(token);
         Long last_storedID = Long.parseLong(storeId);
@@ -168,10 +154,6 @@ public class NoteController {
 
                 String req_isDebt = (kindOfNote != null && !kindOfNote.isBlank()) ? kindOfNote : null;
 
-                // bắt đầu đoạn code cần thay thế
-//                notePage = noteService.searchNoteByAttribute(id, relatedUserList, req_idFrom, req_idTo, req_isDebt, createdDateFrom, createdDateTo, note_search,
-//                        req_moneyFrom, req_moneyTo, pageable);
-                // kết thúc đoạn code cần thay thế
 
                 // bắt đầu đoạn code moi
                 notePage = noteService.searchNoteByAttribute(id,last_storedID, req_idFrom, req_idTo, req_isDebt, createdDateFrom, createdDateTo, note_search,
@@ -179,9 +161,6 @@ public class NoteController {
                 // ket thuc đoạn code moi
 
             } else {
-                // bắt đầu đoạn code cần thay thế
-//                notePage = noteService.searchNoteAll(id, relatedUserList, pageable);
-                // ket thuc đoạn code cần thay thế
 
                 // bắt đầu đoạn code moi
                 notePage = noteService.searchNoteAll(id, last_storedID, pageable);
@@ -229,29 +208,6 @@ public class NoteController {
         Customer customer = customerService.getCustomer(id);
         model.addAttribute("customer",customer);
 
-        //bat dau doan code can thay the
-//        List<Long> relatedUserList = new ArrayList<>();
-//        if(role.equalsIgnoreCase("OWNER")){
-//            relatedUserList = userService.getStaffID1(user.get().getId());
-//            relatedUserList.add(user.get().getId());
-//        }else if(role.equalsIgnoreCase("STAFF")){
-//            Long ownerId = userService.getOwnerID(user.get().getId());
-//            relatedUserList = userService.getStaffID1(ownerId);
-//            relatedUserList.add(ownerId);
-//        }
-//
-//        Customer customercCheck = customerService.getCustomer(id);
-//
-//        int check=0;
-//        for(int i=0; i<relatedUserList.size(); i++){
-//            if(relatedUserList.get(i).equals(customercCheck.getCreatedBy())){
-//                check=check+1;
-//            }
-//        }
-//        if(check==0) {
-//            return "redirect:/customer/listCustomer";
-//        }
-        //ket thuc doan code can thay the
 
         //bắt đầu đoạn code mới
         String storeId = jwtUtils.extractStoreID(token);
@@ -284,6 +240,7 @@ public class NoteController {
                              @RequestParam("notename") String notename,
                              @RequestParam("kindOfNote") String kindOfNote,
                              @RequestParam("money") String money,
+                             @RequestParam("noteImage") MultipartFile noteImage,
                              RedirectAttributes redirectAttributes, HttpServletResponse response,
                            Model model,@CookieValue(value = "token", required = false) String token) {
         String username = jwtUtils.extractUsername(token);
@@ -315,13 +272,34 @@ public class NoteController {
             return "redirect:/customer/listCustomer"; // Nếu không đúng, chặn request
         }else {
 
+            String imagePath = null;
+            if (!noteImage.isEmpty()) {
+                try {
+                    String uploadDir = "uploads/notes/";
+                    Path uploadPath = Paths.get(uploadDir);
+                    if (!Files.exists(uploadPath)) {
+                        Files.createDirectories(uploadPath);
+                    }
+
+                    String fileName = UUID.randomUUID().toString().substring(0, 8) + "_" + noteImage.getOriginalFilename();
+                    Path filePath = uploadPath.resolve(fileName);
+                    Files.copy(noteImage.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+                    imagePath = fileName;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    redirectAttributes.addFlashAttribute("messageType", "fail");
+                    redirectAttributes.addFlashAttribute("message", "Error uploading image!");
+                    return "redirect:/note/createNote/" + id;
+                }
+            }
+
             Integer amount = Integer.parseInt(money);
             String isDebt = (kindOfNote != null && !kindOfNote.isBlank()) ? kindOfNote : null;
             Long cID = user.get().getId();
             String storeId = jwtUtils.extractStoreID(token);
             Long last_storedID = Long.parseLong(storeId);
 
-            TransactionRequest request = new TransactionRequest(tokenCustomerId, amount, isDebt, notename, cID, last_storedID);
+            TransactionRequest request = new TransactionRequest(tokenCustomerId, amount, isDebt, notename, cID, last_storedID,imagePath);
             transactionQueueProcessor.addTransaction(request);
             redirectAttributes.addFlashAttribute("messageType", "success");
             redirectAttributes.addFlashAttribute("message", "Note created successfully!");
@@ -337,5 +315,164 @@ public class NoteController {
         }
 
     }
+    @GetMapping("/image/{filename:.+}")
+    public ResponseEntity<Resource> getImage(@PathVariable String filename) {
+        try {
+            Path imagePath = Paths.get("uploads/notes/").resolve(filename);
+            Resource resource = new UrlResource(imagePath.toUri());
+
+            if (!resource.exists() || !resource.isReadable()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            String contentType = Files.probeContentType(imagePath);
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .body(resource);
+        } catch (MalformedURLException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+//    @GetMapping("/listUpdatedRecord")
+//    public String listUpdatedRecord(Model model,
+//                                    @CookieValue(value = "token", required = false) String token,
+//                                    @RequestParam(required = false) String customerName,
+//                                    @RequestParam(required = false) String customerPhone,
+//                                    @RequestParam(required = false) String updatedBy,
+//                                    @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime updatedDateFrom,
+//                                    @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime updatedDateTo,
+//                                    @RequestParam(required = false) String informationField,
+//                                    @RequestParam(required = false) String preValue,
+//                                    @RequestParam(required = false) String followValue,
+//                                    @RequestParam(defaultValue = "0") int page,
+//                                    @RequestParam(defaultValue = "5") int size) {
+//
+//        Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
+//        Page<CustomerUpdateLog> updateLogPage;
+//        Account account = accountService.getAccountFromToken(token).orElse(null);
+//        Users user = userService.getUserProfile(account.getUserId()).orElse(null);
+//        model.addAttribute("account", account);
+//        model.addAttribute("user", user);
+//
+//
+//        List<Users> usersList = new ArrayList<>();
+//        String storeId = jwtUtils.extractStoreID(token);
+//
+//        String role= jwtUtils.extractRole(token);
+//
+//        model.addAttribute("role", role);
+//
+//
+//        List<Long> relatedUserList = new ArrayList<>();
+//        if(role.equalsIgnoreCase("OWNER")){
+//            relatedUserList = userService.getStaffID1(user.getId());
+//            relatedUserList.add(user.getId());
+//        }else if(role.equalsIgnoreCase("STAFF")){
+//            Long ownerId = userService.getOwnerID(user.getId());
+//            relatedUserList = userService.getStaffID1(ownerId);
+//            relatedUserList.add(ownerId);
+//        }
+//
+//
+//
+//        //bắt đầu đoạn code thay thế//
+//        Long last_storedID = Long.parseLong(storeId);
+//        List<String> phoneList =  customerService.getAllPhones(last_storedID);
+//        model.addAttribute("phoneList", phoneList);
+//        //kết thúc đoạn code thay thế
+//
+//        List<String> listHiddenPage = new ArrayList<>();
+//        if(role.equals("STAFF")){
+//            listHiddenPage.add("listStaff");
+//        }
+//        model.addAttribute("listHiddenPage", listHiddenPage);
+//
+//        if ((idFrom != null && !idFrom.isEmpty() && !idFrom.matches("\\d+")) ||
+//                (idTo != null && !idTo.isEmpty() && !idTo.matches("\\d+")) ||
+//                (moneyFrom != null && !moneyFrom.isEmpty() && !moneyFrom.matches("-?\\d+")) ||
+//                (moneyTo != null && !moneyTo.isEmpty() && !moneyTo.matches("-?\\d+")) ||
+//                (phone != null && !phone.isEmpty() && !phone.matches("\\d+"))) {
+//
+//            model.addAttribute("errorMessage", "Id, Phone fields should be positive number. Money field should be negative number");
+//            customerPage = Page.empty();
+//            model.addAttribute("customers", customerPage.getContent());
+//
+//            model.addAttribute("idFrom", idFrom);
+//            model.addAttribute("idTo", idTo);
+//            model.addAttribute("name", name);
+//            model.addAttribute("dobFrom", dobFrom);
+//            model.addAttribute("dobTo", dobTo);
+//            model.addAttribute("address", address);
+//            model.addAttribute("phone", phone);
+//            model.addAttribute("moneyFrom", moneyFrom);
+//            model.addAttribute("moneyTo", moneyTo);
+//            model.addAttribute("createBy", createBy);
+//            model.addAttribute("currentPage", page);
+//            model.addAttribute("totalPages", customerPage.getTotalPages());
+//            model.addAttribute("size", size);
+//            return "customer/listCustomer";
+//        }
+//        else {
+//            if ((idFrom != null && !idFrom.isEmpty()) || (idTo != null && !idTo.isEmpty())
+//                    || (name != null && !name.isEmpty()) || (dobFrom != null)
+//                    || (dobTo != null) || (address != null && !address.isEmpty())
+//                    || (phone != null && !phone.isEmpty()) || (createBy != null && !createBy.isEmpty())
+//                    || (moneyFrom != null && !moneyFrom.isEmpty()) || (moneyTo != null && !moneyTo.isEmpty())) {
+//
+//
+//                Long req_idFrom = (idFrom != null && !idFrom.isBlank() && idFrom.matches("\\d+")) ? Long.valueOf(idFrom) : null;
+//                Long req_idTo = (idTo != null && !idTo.isBlank() && idTo.matches("\\d+")) ? Long.valueOf(idTo) : null;
+//
+//                Integer req_moneyFrom = (moneyFrom != null && !moneyFrom.isBlank() && moneyFrom.matches("\\d+")) ? Integer.valueOf(moneyFrom) : null;
+//                Integer req_moneyTo = (moneyTo != null && !moneyTo.isBlank() && moneyTo.matches("\\d+")) ? Integer.valueOf(moneyTo) : null;
+//
+//                String req_phone = (phone == null || phone.isEmpty())? null: phone;
+//                Long req_createBy = (createBy != null && !createBy.isBlank()) ? Long.valueOf(createBy) : null;
+//                String req_address = (address == null || address.isEmpty())? null: address;
+//                String req_name = (name == null || name.isEmpty()) ? null : name;
+//
+//
+//                // bắt đầu đoạn code moi
+//                customerPage = customerService.searchCustomerByAttribute(last_storedID, req_idFrom, req_idTo, req_moneyFrom,
+//                        req_moneyTo, req_phone, dobFrom, dobTo, req_createBy, req_address, req_name, pageable);
+//                // kết thúc đoạn code moi
+//
+//                usersList = userService.getUsers(relatedUserList);
+//
+//
+//            } else {
+//
+//                // bắt đầu đoạn code moi
+//                customerPage = customerService.searchCustomerAll(last_storedID, pageable);
+//                //kết thúc đoạn code moi
+//
+//                usersList = userService.getUsers(relatedUserList);
+//
+//            }
+//
+//            model.addAttribute("customers", customerPage.getContent());
+//            model.addAttribute("usersList", usersList);
+//            model.addAttribute("currentPage", page);
+//            model.addAttribute("totalPages", customerPage.getTotalPages());
+//            model.addAttribute("size", size);
+//
+//            model.addAttribute("idFrom", idFrom);
+//            model.addAttribute("idTo", idTo);
+//            model.addAttribute("name", name);
+//            model.addAttribute("dobFrom", dobFrom);
+//            model.addAttribute("dobTo", dobTo);
+//            model.addAttribute("address", address);
+//            model.addAttribute("phone", phone);
+//            model.addAttribute("createBy", createBy);
+//            model.addAttribute("moneyFrom", moneyFrom);
+//            model.addAttribute("moneyTo", moneyTo);
+//
+//            return "customer/listCustomer";
+//        }
+//    }
 
 }

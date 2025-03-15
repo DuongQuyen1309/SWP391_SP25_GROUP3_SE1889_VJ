@@ -112,6 +112,57 @@
             transform: scale(1.05);
         }
 
+        .thumbnail {
+            width: 100px;
+            height: auto;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .thumbnail:hover {
+            transform: scale(1.1);
+        }
+        /*luu ý*/
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            padding-top: 50px;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+
+        .modal-content {
+            margin: auto;
+            display: block;
+            max-width: 90%;
+            max-height: 80vh;
+        }
+
+        .close {
+            position: absolute;
+            top: 20px;
+            right: 35px;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .thumbnail {
+            width: 80px;
+            height: auto;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .thumbnail:hover {
+            transform: scale(1.1);
+        }
 
 
     </style>
@@ -279,6 +330,7 @@
             <td>Created Date</td>
             <td>Note</td>
             <td>Money</td>
+            <td>Image</td>
         </tr>
         <tr>
             <td>
@@ -305,16 +357,45 @@
                 <input type="text" class="filter-input" name="moneyFrom" onchange="filterNotes()" style="width: 120px;" step="1000">
                 <input type="text" class="filter-input" name="moneyTo" onchange="filterNotes()" style="width: 120px;" step="1000">
             </td>
+            <td></td>
         </tr>
         </thead>
         <tbody>
         <tr th:each="note : ${notes}">
             <td th:if="${note != null}" th:text="${note.id}"></td>
             <td th:if="${note != null}" th:text="${note.debt}"></td>
-            <td th:if="${note != null}" th:text="${note.createdAt}"></td>
+            <td th:if="${note != null}" th:text="${#temporals.format(note.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
             <td th:if="${note != null}" th:text="${note.note}"></td>
             <td th:if="${note != null}" th:text="${note.money}"></td>
+            <td>
+                <img th:if="${note.imagePath != null}"
+                     th:src="@{/note/image/{filename}(filename=${note.imagePath})}"
+                     alt="Note Image" class="thumbnail" onclick="openImageModal(this.src)">
+            </td>
         </tr>
+
+<!--        luu y cho anh-->
+        <div id="imageModal" class="modal">
+            <span class="close" onclick="closeImageModal()">&times;</span>
+            <img class="modal-content" id="modalImg">
+        </div>
+
+        <script>
+            function openImageModal(src) {
+                // document.getElementById("modalImg").src = src;
+                // document.getElementById("imageModal").style.display = "block";
+                let modal = document.getElementById("imageModal");
+                let modalImg = document.getElementById("modalImg");
+
+                modal.style.display = "flex"; // Hiển thị modal
+                modalImg.src = src;
+                modalImg.style.transform = "scale(3)";
+            }
+
+            function closeImageModal() {
+                document.getElementById("imageModal").style.display = "none";
+            }
+        </script>
         </tbody>
     </table>
     <!-- Phân trang -->
