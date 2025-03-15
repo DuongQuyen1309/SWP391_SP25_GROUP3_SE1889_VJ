@@ -2,6 +2,8 @@ package com.demoproject.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import java.util.List;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ProductDataDTO {
     private Long id;
@@ -11,6 +13,11 @@ public class ProductDataDTO {
     private double total;
     private String zone;
     private String note;
+    private Long packageTypeId; // ✅ ID của loại đóng gói (ví dụ: 1kg, 5kg)
+    private String packageTypeName; // ✅ Tên của loại đóng gói (ví dụ: "1kg", "5kg")
+    private List<PackageTypeDTO> packageType;
+    private Long selectedPackage;
+    private int selectedPackageSize;
 
     // Getters and Setters
 
@@ -69,5 +76,55 @@ public class ProductDataDTO {
 
     public void setNote(String note) {
         this.note = note;
+    }
+
+    public Long getPackageTypeId() {
+        return packageTypeId;
+    }
+
+    public void setPackageTypeId(Long packageTypeId) {
+        this.packageTypeId = packageTypeId;
+    }
+
+
+
+    public String getPackageTypeName() {
+        // ✅ Nếu `packageTypeName` bị null, tự động lấy từ `selectedPackage`
+        if (packageTypeName == null && packageType != null) {
+            packageTypeName = packageType.stream()
+                    .filter(pkg -> pkg.getId().equals(selectedPackage))
+                    .map(PackageTypeDTO::getName)
+                    .findFirst()
+                    .orElse(null);
+        }
+        return packageTypeName;
+    }
+
+    public void setPackageTypeName(String packageTypeName) {
+        this.packageTypeName = packageTypeName;
+    }
+
+    public List<PackageTypeDTO> getPackageType() {
+        return packageType;
+    }
+
+    public void setPackageType(List<PackageTypeDTO> packageType) {
+        this.packageType = packageType;
+    }
+
+    public Long getSelectedPackage() {
+        return selectedPackage;
+    }
+
+    public void setSelectedPackage(Long selectedPackage) {
+        this.selectedPackage = selectedPackage;
+    }
+
+    public int getSelectedPackageSize() {
+        return selectedPackageSize;
+    }
+
+    public void setSelectedPackageSize(int selectedPackageSize) {
+        this.selectedPackageSize = selectedPackageSize;
     }
 }

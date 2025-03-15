@@ -171,7 +171,25 @@ public class BillController {
         Optional<Account> optAccount = accountRepository.findByUsernameAndIsDeleteFalse(username);
         Optional<Users> userOpt= userService.getUserProfile(optAccount.get().getUserId());
         Users user = userOpt.orElse(new Users());
-        return productService.getProductsByNameAndStoreIdAndQuantityGreaterThanZero(keyword, user.getStoreId());
+        List<Product> products = productService.getProductsByNameAndStoreIdAndQuantityGreaterThanZero(keyword, user.getStoreId());
+        for(Product product : products){
+            System.out.println(product.getPackageType());
+        }
+        return products;
+    }
+
+    @GetMapping("/searchImportProducts")
+    @ResponseBody
+    public List<Product> searchImportProducts(@RequestParam String keyword,@CookieValue(value = "token", required = false) String token) {
+        String username = jwtUtils.extractUsername(token);
+        Optional<Account> optAccount = accountRepository.findByUsernameAndIsDeleteFalse(username);
+        Optional<Users> userOpt= userService.getUserProfile(optAccount.get().getUserId());
+        Users user = userOpt.orElse(new Users());
+        List<Product> products = productService.getProductsByNameAndStoreId(keyword, user.getStoreId());
+        for(Product product : products){
+            System.out.println(product.getPackageType());
+        }
+        return products;
     }
 
     @GetMapping("/searchCustomers")
@@ -222,21 +240,59 @@ public class BillController {
             CustomerDataDTO customerData = objectMapper.readValue(bill.getCustomerData(), CustomerDataDTO.class);
 
             String customerDataJson = objectMapper.writeValueAsString(customerData);
-            List<ProductDataDTO> products = objectMapper.convertValue(
-                    objectMapper.readValue(bill.getProductData(), List.class),
-                    new TypeReference<List<ProductDataDTO>>() {}
-            );
+            List<ProductDataDTO> products = objectMapper.readValue(bill.getProductData(), new TypeReference<List<ProductDataDTO>>() {});
+            System.out.println("String : "+ bill.getProductData());
+
 // ✅ Kiểm tra sản phẩm trong kho
+            // ✅ Tạo một Map để nhóm các sản phẩm theo ID và tính tổng số kg
+            Map<Long, Integer> totalKgPerProduct = new HashMap<>();
+
             for (ProductDataDTO product : products) {
-                Product productOpt = productService.getProductById(product.getId());
-                if (productOpt == null || productOpt.getQuantity() < product.getQuantity()) {
+                int packageSize = extractPackageSize(product.getPackageTypeName()); // Lấy số kg từ tên gói
+                int totalKg = product.getQuantity() * packageSize;
+                System.out.println(product);
+                System.out.println("totalKG: "+totalKg);
+                System.out.println("packageSize: "+packageSize);
+                System.out.println("product.getQuantity(): "+product.getQuantity());
+                System.out.println("sss: "+ extractPackageSize(product.getPackageTypeName()));
+                System.out.println("product.getPackageTypeName(): "+product.getPackageTypeName());
+
+                totalKgPerProduct.merge(product.getId(), totalKg, Integer::sum);
+            }
+            // ✅ Kiểm tra số kg với database
+            for (Map.Entry<Long, Integer> entry : totalKgPerProduct.entrySet()) {
+                Long productId = entry.getKey();
+                int totalKgRequired = entry.getValue();
+
+                Product product = productService.getProductById(productId);
+                if (product == null || product.getQuantity() < totalKgRequired) {
+                    System.out.println("❌ Không đủ hàng trong kho cho sản phẩm ID " + productId);
                     response.put("success", false);
-                    System.out.println("Lỗi khi gửi hóa đơn: Sản phẩm '" + product.getName() + "' không đủ số lượng trong kho!");
                     response.put("message", "❌ Sản phẩm '" + product.getName() + "' không đủ số lượng trong kho!");
                     return response;
                 }
             }
-
+//            Map<Long, Integer> totalQuantityByProductId = new HashMap<>();
+//            for(ProductDataDTO productDataDTO : products){
+//                System.out.println("Id: " + productDataDTO.getId());
+//                System.out.println("Quantity: " + productDataDTO.getQuantity());
+//                totalQuantityByProductId.put(productDataDTO.getId(), totalQuantityByProductId.getOrDefault(productDataDTO.getId(), 0) + productDataDTO.getQuantity());
+//            }
+//
+//            for(Map.Entry<Long, Integer> entry : totalQuantityByProductId.entrySet()){
+//                Long productId = entry.getKey();
+//                System.out.println("Id: " + productId);
+//                Integer quantity = entry.getValue();
+//                System.out.println("Quantity: " + quantity);
+//                Product product = productService.getProductById(productId);
+//                if(product == null || product.getQuantity() < quantity){
+//                    response.put("success", false);
+//                    response.put("message", "❌ Sản phẩm '" + product.getName() + "' không đủ số lượng trong kho!");
+//                    return response;
+//                }
+//            }
+            String updatedProductData = objectMapper.writeValueAsString(products);
+            bill.setProductData(updatedProductData);
             String trackingId = UUID.randomUUID().toString();
             System.out.println(trackingId);
             bill.setCreatedBy(user.getId());
@@ -278,6 +334,14 @@ public class BillController {
         return response;
     }
 
+    private int extractPackageSize(String packageTypeName) {
+        try {
+            return Integer.parseInt(packageTypeName.replaceAll("[^0-9]", "")); // Lấy số từ "1kg", "5kg"
+        } catch (Exception e) {
+            return 1; // Mặc định nếu không tìm thấy số
+        }
+    }
+
     @GetMapping("/bill/billDetail")
     public String billDetail(@RequestParam Long id, @CookieValue(value = "token", required = false) String token, Model model) {
         Account account = accountService.getAccountFromToken(token).orElse(null);
@@ -301,7 +365,12 @@ public class BillController {
                 dto.setName(product.getName());
                 dto.setQuantity(product.getQuantity());
                 dto.setPrice(product.getPrice());
-                dto.setTotal(product.getQuantity() * product.getPrice());
+                dto.setTotal(dto.getQuantity() * dto.getPrice()); // ✅ Tính tổng theo số kg
+                dto.setPackageTypeName(product.getPackageTypeName()); // ✅ Thêm thông tin đóng gói
+                dto.setSelectedPackageSize(product.getSelectedPackageSize());
+
+
+
                 return dto;
             }).collect(Collectors.toList());
             model.addAttribute("products", productDTOs);

@@ -175,6 +175,10 @@ public class ProductService {
         return productRepository.findByNameAndStoreIdAndQuantityGreaterThanZero(productName, storeId);
     }
 
+    public List<Product> getProductsByNameAndStoreId(String productName, Long storeId) {
+        return productRepository.findByNameAndStoreId(productName, storeId);
+    }
+
 
 
 
@@ -248,23 +252,41 @@ public class ProductService {
     @Transactional
     public void updateStockAfterBill(String productDataJson) {
         try {
-            // ✅ Chuyển đổi JSON thành danh sách `ProductOrder`
-            List<Product> products = objectMapper.readValue(productDataJson, new TypeReference<List<Product>>() {});
+            List<ProductDataDTO> productOrders = objectMapper.readValue(productDataJson, new TypeReference<List<ProductDataDTO>>() {});
 
-            for (Product productOrder : products) {
-                Product product = productRepository.findById(productOrder.getId())
-                        .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm ID: " + productOrder.getId()));
+            // ✅ Nhóm sản phẩm theo ID và tính tổng số kg cần trừ
+            Map<Long, Integer> totalKgPerProduct = new HashMap<>();
+            for (ProductDataDTO product : productOrders) {
+                System.out.println("Quantity: "+product.getQuantity());
+                int packageSize = extractPackageSize(product.getPackageTypeName());
+                int totalKg = product.getQuantity() * packageSize;
+                totalKgPerProduct.merge(product.getId(), totalKg, Integer::sum);
+            }
 
-                if (product.getQuantity() < productOrder.getQuantity()) {
-                    throw new RuntimeException("Không đủ hàng trong kho: " + productOrder.getId());
+            // ✅ Cập nhật tồn kho
+            for (Map.Entry<Long, Integer> entry : totalKgPerProduct.entrySet()) {
+                Long productId = entry.getKey();
+                int deductedKg = entry.getValue();
+                Product storedProduct = productRepository.findById(productId)
+                        .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm ID: " + productId));
+
+                if (storedProduct.getQuantity() < deductedKg) {
+                    throw new RuntimeException("Không đủ hàng trong kho: " + productId);
                 }
-
-                product.setQuantity(product.getQuantity() - productOrder.getQuantity());
-                productRepository.save(product);
+                storedProduct.setQuantity(storedProduct.getQuantity() - deductedKg);
+                productRepository.save(storedProduct);
             }
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Lỗi khi cập nhật số lượng sản phẩm: " + e.getMessage());
+        }
+    }
+
+    private int extractPackageSize(String packageTypeName) {
+        try {
+            return Integer.parseInt(packageTypeName.replaceAll("[^0-9]", ""));
+        } catch (Exception e) {
+            return 1;
         }
     }
 

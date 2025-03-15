@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -38,7 +38,7 @@
   <a href="/account/listStaff" th:style="${#lists.contains(listHiddenPage, 'listStaff')} ? 'display: none;' : ''">Staff Account Management</a>
   <a href="/product/listProduct">Rice Management</a>
   <a href="/customer/listCustomer">Customer Management</a>
-  <a href="/warehouse/listWarehouseZone">Warehouse Management</a>
+  <a href="/warehouse/listWarehouseZone">Zone Management</a>
   <a href="/bill/listBill">Invoice Management</a>
 </div>
 <div class="content">
@@ -55,7 +55,7 @@
   </div>
 
   <div id="order-status-container">
-    <span id="order-status" style="display: none">💬 Trạng thái: Chưa thanh toán</span>
+    <span id="order-status" style="display: none"></span>
   </div>
 
 <div class="main-container">
@@ -88,6 +88,7 @@
         <tr>
           <th>#</th>
           <th>Product</th>
+          <th class="quantity-cell">Packaging</th>
           <th class="quantity-cell">Quantity</th>
           <th class="price-cell">Unit Price</th>
           <th class="price-cell">Total Money</th>
@@ -196,6 +197,10 @@
         <div class="total-row">
           <span class="total-label">Customer need to pay:</span>
           <span class="total-value highlight" id="customer-pay">0</span>
+        </div>
+        <div class="total-row">
+          <span class="total-label">Excess cash:</span>
+          <span class="total-value highlight" id="cash">0</span>
         </div>
       </div>
     </div>
@@ -338,11 +343,21 @@
                 if (data.length === 0) {
                   productList.innerHTML = "<p>Not found product</p>"; // Nếu không có kết quả
                 } else {
+                  data.forEach(product => {
+                    // Nếu packageType là một chuỗi JSON, parse nó
+                    console.log("aaaa: "+product.packageType);
+                    console.log(product);
+
+                    console.log("aaaa: "+product.packageType);
+                  });
                   productList.innerHTML = data.map(product => `
-                        <div class="product-item" onclick="selectProduct(${product.id}, '${product.name}', ${product.price})">
-                            ${product.name} - ${product.price} VND - ${product.quantity} products
-                        </div>
-                    `).join(""); // Tạo danh sách sản phẩm mới
+  <div class="product-item"
+      onclick='selectProduct(${product.id}, "${product.name}", ${product.price}, ${JSON.stringify(product.packageType)})'>
+      <img width="100px" src="${product.image}"/> ${product.name} - ${product.price} VND
+  </div>
+`).join("");
+
+                  console.log(data);
                 }
               })
               .catch(error => console.error("Lỗi tìm kiếm:", error));
@@ -353,22 +368,61 @@
 
 
   /* Khi chọn sản phẩm, thêm vào hóa đơn và đóng modal */
-  function selectProduct(id, name, price) {
-    if (!tabData[activeTabId])tabData[activeTabId] = { customer: {}, products: [] };
+  function selectProduct(id, name, price, packageTypeJson) {
+    console.log("Dữ liệu nhận vào trước khi parse:", packageTypeJson);
 
-    let existingProduct = tabData[activeTabId].products.find(p => p.id === id);
-    if (existingProduct) {
-      alert("This product has been added to this tab!");
-      return;
+    let packageType;
+
+    try {
+      // Nếu packageTypeJson đã là mảng, không cần parse lại
+      if (typeof packageTypeJson === "string") {
+        packageType = JSON.parse(packageTypeJson);
+      } else {
+        packageType = packageTypeJson;
+      }
+
+      if (!Array.isArray(packageType)) {
+        console.error("Lỗi: packageType không phải là mảng hợp lệ!", packageTypeJson);
+        packageType = [];
+      }
+      console.log(packageType);
+    } catch (error) {
+      console.error("❌ Lỗi khi parse packageType:", error, "Giá trị nhận vào:", packageTypeJson);
+      packageType = [];
     }
 
-    tabData[activeTabId].products.push({ id, name, price, quantity: 1 });
-    document.getElementById("search-product").value = ""; // Xóa nội dung tìm kiếm
+    if (!tabData[activeTabId]) {
+      console.warn(`⚠️ tabData[${activeTabId}] chưa được khởi tạo!`);
+      tabData[activeTabId] = { customer: {}, products: [], payment: [] };
+    }
+
+    if (!Array.isArray(tabData[activeTabId].products)) {
+      console.warn(`⚠️ tabData[${activeTabId}].products không phải là mảng!`);
+      tabData[activeTabId].products = [];
+    }
+
+    let defaultPackage = packageType.length > 0 ? packageType[0] : { id: "", name: "1kg" };
+
+    tabData[activeTabId].products.push({
+      id,
+      name,
+      price,
+      quantity: 1,
+      packageType: packageType,
+      selectedPackage: packageType.length > 0 ? packageType[0].id : "" ,// Mặc định chọn package đầu tiên nếu có
+      selectedPackageSize: parseInt(defaultPackage.name) || 1
+    });
+    console.log(tabData[activeTabId].products);
+
+    document.getElementById("search-product").value = "";
     document.getElementById("product-list").innerHTML = "<p>Enter product name to search...</p>";
     renderProducts(activeTabId);
     updateOrderTotal(activeTabId);
-    closeProductModal(); // Đóng modal sau khi chọn sản phẩm
+    closeProductModal();
   }
+
+
+
 
   // Mở popup tìm kiếm khách hàng
   document.getElementById("search-customer-btn").addEventListener("click", function () {
@@ -537,71 +591,110 @@
     productTable.innerHTML = "";
 
     if (!tabData[tabId] || !Array.isArray(tabData[tabId].products)) {
-      tabData[tabId] = { customer: {}, products: [] ,payment: []}; // Đảm bảo có mảng products
+      console.warn(`⚠️ tabData[${tabId}].products không tồn tại hoặc không phải mảng!`);
+      tabData[tabId] = { customer: {}, products: [], payment: [] };
     }
 
+    console.log("Danh sách sản phẩm trước khi render:", tabData[tabId].products);
+
+
+    console.log("Danh sách sản phẩm:", tabData[tabId].products);
+
     tabData[tabId].products.forEach((product, index) => {
+      // Kiểm tra nếu product không có packageType thì gán mảng rỗng
+      let packageTypes = Array.isArray(product.packageType) ? product.packageType : [];
+      console.log("Danh sách packageType của sản phẩm:", packageTypes);
+      console.log(product.selectedPackage);
+      let packageOptions = packageTypes.map(pkg => `
+            <option value="${pkg.id}" ${pkg.id === product.selectedPackage ? "selected" : ""}>${pkg.name}</option>
+        `).join("");
+      packageTypes.forEach((type, index) => {
+        console.log(type.id );
+        console.log(product.selectedPackage);
+        console.log(type.id === product.selectedPackage);
+      });
+
       let row = `
-            <tr id="product-${product.id}">
+            <tr id="product-${index}">
                 <td>${index + 1}</td>
                 <td>${product.name}</td>
+                <td>
+                    <select onchange="changePackageType('${tabId}', ${index}, this.value)">
+                        ${packageOptions}
+                    </select>
+                </td>
                 <td class="quantity-cell">
                     <span class="quantity-value">${product.quantity}</span>
                     <div class="quantity-controls">
-                        <div class="quantity-btn minus" onclick="changeQuantity('${tabId}', ${product.id}, -1)">-</div>
-                        <div class="quantity-btn plus" onclick="changeQuantity('${tabId}', ${product.id}, 1)">+</div>
+                        <div class="quantity-btn minus" onclick="changeQuantity('${tabId}',${product.id}, ${product.selectedPackage}, -1)">-</div>
+                        <div class="quantity-btn plus" onclick="changeQuantity('${tabId}', ${product.id}, ${product.selectedPackage}, 1)">+</div>
                     </div>
                 </td>
-                <td class="price-cell">${formatPrice(product.price)+"/kg"}</td>
-                <td class="price-cell total-price">${formatPrice(product.price * product.quantity)}</td>
-                <td><button onclick="removeProduct('${tabId}', ${product.id})">✖</button></td>
+                <td class="price-cell">${formatPrice(product.price) + "/kg"}</td>
+                <td class="price-cell total-price">${formatPrice(product.price * product.quantity *(product.selectedPackageSize || 1))}</td>
+                <td><button onclick="removeProduct('${tabId}', ${index})">✖</button></td>
             </tr>
         `;
       productTable.insertAdjacentHTML("beforeend", row);
     });
   }
 
-  function changeQuantity(tabId, id, change) {
-    let product = tabData[tabId].products.find(p => p.id === id);
+
+  function changePackageType(tabId, index, selectedId) {
+    let product = tabData[tabId].products[index];
+    if (!product) return;
+
+    console.log(typeof product.packageType);
+    console.log(typeof selectedId);
+    let selectedPackage = product.packageType.find(pkg => parseInt(pkg.id) === parseInt(selectedId));
+
+    console.log(selectedPackage)
+    if (!selectedPackage) {
+      console.error(`❌ Không tìm thấy package với ID ${selectedId}`);
+      return;
+    }
+
+    product.selectedPackage = selectedPackage.id;
+    product.selectedPackageSize = parseFloat(selectedPackage.name.match(/\d+/)) || 1; // Lấy số từ tên package
+
+    console.log(`✅ Package đã chọn: ID = ${product.selectedPackage}, Size = ${product.selectedPackageSize}kg`);
+
+    renderProducts(tabId);
+    updateOrderTotal();
+  }
+
+
+
+
+  function changeQuantity(tabId, id,packageId, change) {
+    let product = tabData[tabId].products.find(p => p.id === id&& p.selectedPackage === packageId);
+    console.log(tabData[tabId].products);
+    console.log(id);
     console.log(product);
     if (!product) return;
 
     let newQuantity = product.quantity + change;
     if (newQuantity < 1) return; // Không cho số lượng âm
 
-    // ✅ Kiểm tra tồn kho trước khi tăng số lượng
-    if (change > 0) {
-      fetch(`/product/checkQuantity/${id}/${newQuantity}`)
-              .then(response => response.json()) // ✅ Chuyển ResponseEntity<Boolean> thành JSON
-              .then(isAvailable => {
-                if (isAvailable) {
-                  // ✅ Nếu còn hàng, cập nhật số lượng
-                  product.quantity = Math.max(1, newQuantity);
-                  renderProducts(tabId); // ✅ Cập nhật UI
-                  updateOrderTotal(tabId); // ✅ Cập nhật tổng tiền hóa đơn
-                } else {
-                  alert("❌ Insufficient quantity of product in inventory!");
-                }
-              })
-              .catch(error => {
-                console.error("Error in inventory check:", error);
-                alert("❌ Error checking product quantity!");
-              });
-    } else {
+
       // ✅ Nếu giảm số lượng, cập nhật ngay lập tức
       product.quantity = Math.max(1, newQuantity);
       renderProducts(tabId);
       updateOrderTotal(tabId);
-    }
+
   }
 
 
-  function removeProduct(tabId, id) {
+  function removeProduct(tabId, index) {
     if (!tabData[tabId] || !Array.isArray(tabData[tabId].products)) return;
-    tabData[tabId] = tabData[tabId].products.filter(p => p.id !== id);
+
+    // Chỉ xóa phần tử tại index cụ thể
+    tabData[tabId].products.splice(index, 1);
+
     renderProducts(tabId);
     updateOrderTotal(tabId);
   }
+
 
   document.getElementById("loading").addEventListener("change", function () {
     let loadingAmountInput = document.getElementById("loading-amount");
@@ -621,11 +714,34 @@
     let input = event.target.value.replaceAll(".", ""); // Xóa dấu . cũ trước khi kiểm tra
     let cleanNumber = input.replace(/\D/g, ""); // Loại bỏ ký tự không phải số
     let errorSpan = document.getElementById("customer-payment-error");
+    let customerPayment= parsePrice(document.getElementById("customer-payment").value) ;
+    let productTotal = 0; // Mặc định tổng tiền sản phẩm là 0 nếu chưa có sản phẩm nào
+    if (tabData[activeTabId] && tabData[activeTabId].products) {
+      productTotal = tabData[activeTabId].products.reduce((sum, product) =>
+              sum + (product.price * product.quantity * (product.selectedPackageSize || 1)), 0
+      );
+    }
+    console.log(productTotal);
+
+    // Lấy tiền bốc hàng nếu checkbox "Bốc hàng" được chọn
+    let loadingFee = document.getElementById("loading").checked ? parsePrice(document.getElementById("loading-amount").value) : 0;
+
+    let discount = parsePrice(document.getElementById("discount").value);
+    let loadingAmount= document.getElementById("loading-amount").value;
+    let numericLoadingAmount = Number(loadingAmount.replace(/\./g, "")); // Loại bỏ tất cả dấu "."
+
+    if(loadingFee<0|| isNaN(numericLoadingAmount)) loadingFee = 0;
+    if(discount<0 || discount>100||isNaN(document.getElementById("discount").value)) discount = 0
+    let finalTotal = (productTotal + loadingFee)- discount*(productTotal + loadingFee)/100;
+    console.log(finalTotal);
 
     if (cleanNumber === "") {
       event.target.value = "";
       errorSpan.textContent = ""; // Không hiển thị lỗi khi input rỗng
       event.target.classList.remove("input-error");
+      customerPayment = 0;
+      document.getElementById("cash").textContent = "0";
+      console.log(document.getElementById("customer-payment").value);
       return;
     }
 
@@ -637,11 +753,17 @@
     } else {
       errorSpan.textContent = "";
       event.target.classList.remove("input-error");
+      document.getElementById("cash").textContent = formatPrice(Math.round(customerPayment-finalTotal));
+
     }
 
     // Định dạng lại số tiền với dấu . mỗi 3 chữ số
     let formattedNumber = cleanNumber.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     event.target.value = formattedNumber;
+
+
+
+
   });
 
   document.getElementById("order-note").addEventListener("input", function () {
@@ -658,22 +780,47 @@
   function updateOrderTotal() {
     let productTotal = 0; // Mặc định tổng tiền sản phẩm là 0 nếu chưa có sản phẩm nào
     if (tabData[activeTabId] && tabData[activeTabId].products) {
-      productTotal = tabData[activeTabId].products.reduce((sum, product) => sum + product.price * product.quantity, 0);
+      productTotal = tabData[activeTabId].products.reduce((sum, product) =>
+              sum + (product.price * product.quantity * (product.selectedPackageSize || 1)), 0
+      );
     }
+    console.log(productTotal);
 
     // Lấy tiền bốc hàng nếu checkbox "Bốc hàng" được chọn
     let loadingFee = document.getElementById("loading").checked ? parsePrice(document.getElementById("loading-amount").value) : 0;
     console.log(document.getElementById("loading-amount").value);
+    console.log( isNaN(document.getElementById("loading-amount").value))
     let discount = parsePrice(document.getElementById("discount").value);
+    let loadingAmount= document.getElementById("loading-amount").value;
+    let numericLoadingAmount = Number(loadingAmount.replace(/\./g, "")); // Loại bỏ tất cả dấu "."
+    let numericCustomerPaymentAmount = Number(document.getElementById("customer-payment").value.replace(/\./g, ""));
 
-    if(loadingFee<0|| isNaN(document.getElementById("loading-amount").value)) loadingFee = 0;
+
+    if(loadingFee<0|| isNaN(numericLoadingAmount)) loadingFee = 0;
     if(discount<0 || discount>100||isNaN(document.getElementById("discount").value)) discount = 0;
-
-
+    let customerPayment= parsePrice(document.getElementById("customer-payment").value) ;
+console.log(!isNaN(customerPayment));
     let finalTotal = (productTotal + loadingFee)- discount*(productTotal + loadingFee)/100;
-
+    console.log("finalTotal "+ finalTotal);
+    console.log("customerpayment"+ customerPayment);
     document.getElementById("total-amount").textContent = formatPrice(Math.round(finalTotal));
     document.getElementById("customer-pay").textContent = formatPrice(Math.round(finalTotal));
+    if(isNaN(numericCustomerPaymentAmount)){
+      customerPayment = 0;
+    }
+    if(!document.getElementById("customer-payment").value){
+      customerPayment = 0;
+      document.getElementById("cash").textContent = "0";
+      console.log(document.getElementById("customer-payment").value);
+    }
+
+    else{
+      document.getElementById("cash").textContent = formatPrice(Math.round(customerPayment-finalTotal));
+
+    }
+
+
+
 
   }
   // Gán sự kiện khi nhập tiền bốc hàng sẽ cập nhật tổng tiền ngay lập tức
@@ -703,8 +850,21 @@
 
 
         let finalTotal = (productTotal + loadingFee)- discount*(productTotal + loadingFee)/100;
+        let customerPayment= parsePrice(document.getElementById("customer-payment").value);
+        let numericCustomerPaymentAmount = Number(document.getElementById("customer-payment").value.replace(/\./g, ""));
+        if(isNaN(numericCustomerPaymentAmount)) customerPayment = 0;
         document.getElementById("total-amount").textContent = formatPrice(Math.round(finalTotal));
         document.getElementById("customer-pay").textContent = formatPrice(Math.round(finalTotal));
+        if(!document.getElementById("customer-payment").value){
+          customerPayment = 0;
+          document.getElementById("cash").textContent = "0";
+          console.log(document.getElementById("customer-payment").value);
+        }
+
+        else{
+          document.getElementById("cash").textContent = formatPrice(Math.round(customerPayment-finalTotal));
+        }
+
         return;
       }
       // Kiểm tra nếu giá trị nhập không phải số nguyên dương
@@ -744,14 +904,30 @@
         let loadingFee = document.getElementById("loading").checked ? parsePrice(document.getElementById("loading-amount").value) : 0;
         console.log(document.getElementById("loading-amount").value);
         let discount = parsePrice(document.getElementById("discount").value);
+        let loadingAmount= document.getElementById("loading-amount").value;
+        let numericLoadingAmount = Number(loadingAmount.replace(/\./g, "")); // Loại bỏ tất cả dấu "."
 
-        if(loadingFee<0|| isNaN(document.getElementById("loading-amount").value)) loadingFee = 0;
+        if(loadingFee<0|| isNaN(numericLoadingAmount)) loadingFee = 0;
         if(discount<0 || discount>100||isNaN(document.getElementById("discount").value)) discount = 0;
 
 
         let finalTotal = (productTotal + loadingFee)- discount*(productTotal + loadingFee)/100;
         document.getElementById("total-amount").textContent = formatPrice(Math.round(finalTotal));
         document.getElementById("customer-pay").textContent = formatPrice(Math.round(finalTotal));
+        let customerPayment= parsePrice(document.getElementById("customer-payment").value);
+        let numericCustomerPaymentAmount = Number(document.getElementById("customer-payment").value.replace(/\./g, ""));
+        if(isNaN(numericCustomerPaymentAmount)) customerPayment = 0;
+        document.getElementById("total-amount").textContent = formatPrice(Math.round(finalTotal));
+        document.getElementById("customer-pay").textContent = formatPrice(Math.round(finalTotal));
+        if(!document.getElementById("customer-payment").value){
+          customerPayment = 0;
+          document.getElementById("cash").textContent = "0";
+          console.log(document.getElementById("customer-payment").value);
+        }
+
+        else{
+          document.getElementById("cash").textContent = formatPrice(Math.round(customerPayment-finalTotal));
+        }
         return;
       }
       console.log(inputValue)
@@ -954,7 +1130,10 @@ console.log(tabData[tabId].payment.customerPayment);
         return;
       }
 
-      if(loadingFee < 0||isNaN(document.getElementById("loading-amount").value)){
+      let loadingAmount= document.getElementById("loading-amount").value;
+      let numericLoadingAmount = Number(loadingAmount.replace(/\./g, "")); // Loại bỏ tất cả dấu "."
+
+      if(loadingFee < 0||isNaN(numericLoadingAmount)){
         alert("Please enter a valid loading amount!");
         return;
       }

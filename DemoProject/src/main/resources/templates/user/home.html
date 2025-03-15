@@ -7,6 +7,8 @@
     <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
     <!-- JavaScript -->
     <script src="/js/home.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 
 
 </head>
@@ -43,7 +45,7 @@
 
     <a href="/customer/listCustomer" th:style="${#lists.contains(listHiddenPage, 'listCustomer')} ? 'display: none;' : ''">Customer Management</a>
 
-    <a href="/warehouse/listWarehouseZone" th:style="${#lists.contains(listHiddenPage, 'listWarehouse')} ? 'display: none;' : ''">Warehouse Management</a>
+    <a href="/warehouse/listWarehouseZone" th:style="${#lists.contains(listHiddenPage, 'listWarehouse')} ? 'display: none;' : ''">Zone Management</a>
 
 
     <a href="/bill/listBill" th:style="${#lists.contains(listHiddenPage, 'listBill')} ? 'display: none;' : ''">Invoice Management</a>
@@ -74,6 +76,11 @@
         <p class="intro-text">
             <strong>Start today</strong> and enhance your rice business effortlessly!
         </p>
+
+        <div class="chart-container" style="width: 80%; margin: auto;">
+            <h3>📊 Sales Overview</h3>
+            <canvas id="salesChart"></canvas>
+        </div>
     </div>
 
 </div>
@@ -84,5 +91,33 @@
 <footer>
     &copy; 2025 Rice Sales Management. All Rights Reserved.
 </footer>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var ctx = document.getElementById('salesChart').getContext('2d');
+        var salesChart = new Chart(ctx, {
+            type: 'bar', // Loại biểu đồ
+            data: {
+                labels: ['January', 'February', 'March', 'April', 'May', 'June'],
+                datasets: [{
+                    label: 'Monthly Sales',
+                    data: [4000, 5500, 6800, 8200, 10300, 15000], // Dữ liệu doanh số
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    });
+</script>
+
 </body>
 </html>

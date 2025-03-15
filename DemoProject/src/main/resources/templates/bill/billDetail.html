@@ -14,7 +14,6 @@
             background: #f4f4f4;
         }
         .container {
-            max-width: 800px;
             margin: auto;
             background: white;
             padding: 20px;
@@ -55,11 +54,22 @@
         .btn:hover {
             background: #2980b9;
         }
-        .container{
-            margin-left: 600px;
-        }
     </style>
     <script src="/js/home.js"></script>
+    <script>
+        function formatPrice(price) {
+            return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            document.querySelectorAll(".format-price").forEach(function(element) {
+                let price = parseFloat(element.textContent.replace(/,/g, ''));
+                if (!isNaN(price)) {
+                    element.textContent = formatPrice(price);
+                }
+            });
+        });
+    </script>
 </head>
 <body>
 <!-- Header -->
@@ -85,43 +95,48 @@
     <a href="/account/listStaff" th:style="${#lists.contains(listHiddenPage, 'listStaff')} ? 'display: none;' : ''">Staff Account Management</a>
     <a href="/product/listProduct">Rice Management</a>
     <a href="/customer/listCustomer">Customer Management</a>
-    <a href="/warehouse/listWarehouseZone">Warehouse Management</a>
+    <a href="/warehouse/listWarehouseZone">Zone Management</a>
     <a href="/bill/listBill">Invoice Management</a>
 </div>
-<div class="container">
-    <h2>Invoice Details</h2>
-    <div class="details">
-        <p><strong>Invoice ID:</strong> <span th:text="${bill.id}"></span></p>
-        <p><strong>Customer Name:</strong> <span th:text="${bill.customer.name}"></span></p>
-        <p><strong>Customer Address:</strong> <span th:text="${bill.customer.address}"></span></p>
-        <p><strong>Customer Phone Number:</strong> <span th:text="${bill.customer.phone}"></span></p>
-        <p><strong>Date of Purchase:</strong> <span th:text="${bill.createdAt}"></span></p>
-        <p><strong>Discount:</strong> <span th:text="${(bill.discount != null ) ? bill.discount: 0}+'%'"></span></p>
-        <p><strong>Porter Money:</strong> <span th:text="${(bill.portedMoney != null) ? bill.portedMoney : 0}"></span></p>
-        <p><strong>Total Money:</strong> <span th:text="${bill.totalMoney}"></span></p>
-        <p><strong>Paid Money:</strong> <span th:text="${bill.paidMoney}"></span></p>
-        <p><strong>Debt Money:</strong> <span th:text="${bill.debtMoney}"></span></p>
+<div class="content">
+    <div class="container">
+        <h2>Invoice Details</h2>
+        <div class="details">
+            <p><strong>Invoice ID:</strong> <span th:text="${bill.id}"></span></p>
+            <p><strong>Customer Name:</strong> <span th:text="${bill.customer.name}"></span></p>
+            <p><strong>Customer Address:</strong> <span th:text="${bill.customer.address}"></span></p>
+            <p><strong>Customer Phone Number:</strong> <span th:text="${bill.customer.phone}"></span></p>
+            <p><strong>Date of Purchase:</strong> <span th:text="${#temporals.format(bill.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></span></p>
+            <p><strong>Discount:</strong> <span th:text="${(bill.discount != null ) ? bill.discount: 0}+'%'"></span></p>
+            <p><strong>Porter Money:</strong> <span  class="format-price" th:text="${(bill.portedMoney != null) ? bill.portedMoney : 0}"></span></p>
+            <p><strong>Total Money:</strong> <span  class="format-price" th:text="${bill.totalMoney}"></span></p>
+            <p><strong>Paid Money:</strong> <span  class="format-price" th:text="${bill.paidMoney}"></span></p>
+            <p><strong>Debt Money:</strong> <span  class="format-price" th:text="${bill.debtMoney}"></span></p>
+        </div>
+        <h3>Purchased Items</h3>
+        <table>
+            <thead>
+            <tr>
+                <th>Product Name</th>
+                <th>Packaging</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                <th>Total</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="product : ${products}">
+                <td th:text="${product.name}"></td>
+                <td th:text="${product.packageTypeName}"></td> <!-- ✅ Hiển thị loại đóng gói -->
+                <td th:text="${product.quantity}"></td> <!-- ✅ Hiển thị tổng số kg -->
+                <td class="format-price" th:text="${product.price}"></td>
+                <td class="format-price" th:text="${product.quantity * product.price * product.selectedPackageSize}"></td> <!-- ✅ Tính tổng tiền theo số kg -->
+            </tr>
+            </tbody>
+        </table>
+        <button class="btn" onclick="window.location.href='/bill/listBill'">Back to List</button>
     </div>
-    <h3>Purchased Items</h3>
-    <table>
-        <thead>
-        <tr>
-            <th>Product Name</th>
-            <th>Quantity</th>
-            <th>Unit Price</th>
-            <th>Total</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="product : ${products}">
-            <td th:text="${product.name}"></td>
-            <td th:text="${product.quantity}"></td>
-            <td th:text="${product.price}"></td>
-            <td th:text="${product.quantity * product.price}"></td>
-        </tr>
-        </tbody>
-    </table>
-    <button class="btn" onclick="window.location.href='/bill/listBill'">Back to List</button>
 </div>
+
 </body>
 </html>

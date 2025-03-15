@@ -2,6 +2,7 @@ package com.demoproject.productqueue;
 
 import com.demoproject.entity.Product;
 import com.demoproject.service.ProductService;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 import jakarta.annotation.PostConstruct;
@@ -28,6 +29,15 @@ public class ProductQueueProcessor {
             while (true) {
                 try {
                     String productDataJson = productQueue.take(); // ✅ Lấy JSON từ hàng đợi
+
+                    // ✅ Kiểm tra dữ liệu trước khi gửi sang ProductService
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    List<Product> products = objectMapper.readValue(productDataJson, new TypeReference<List<Product>>() {});
+
+                    for (Product product : products) {
+                        System.out.println("🔻 ProductQueueProcessor - Nhận Product ID: " + product.getId() + ", Quantity: " + product.getQuantity());
+                    }
+
                     productService.updateStockAfterBill(productDataJson); // ✅ Gửi JSON đến service
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -40,6 +50,13 @@ public class ProductQueueProcessor {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             String productDataJson = objectMapper.writeValueAsString(productList); // ✅ Chuyển `List<Product>` thành JSON
+
+            // ✅ Kiểm tra dữ liệu trước khi đưa vào hàng đợi
+            System.out.println("🎯 ProductQueueProcessor - Đưa vào hàng đợi:");
+            for (Product product : productList) {
+                System.out.println("  - ID: " + product.getId() + ", Quantity: " + product.getQuantity());
+            }
+
             productQueue.offer(productDataJson); // ✅ Đưa JSON vào hàng đợi
         } catch (Exception e) {
             e.printStackTrace();

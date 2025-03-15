@@ -37,6 +37,11 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "AND quantity > 0", nativeQuery = true)
     List<Product> findByNameAndStoreIdAndQuantityGreaterThanZero(String productName, Long storeId);
 
+    @Query(value = "SELECT * FROM Product " +
+            "WHERE LOWER(name) LIKE LOWER(CONCAT('%', :productName, '%')) " +
+            "AND store_id = :storeId " , nativeQuery = true)
+    List<Product> findByNameAndStoreId(String productName, Long storeId);
+
 
     Page<Product> findByStoreId(Long storeId, Pageable pageable);
 

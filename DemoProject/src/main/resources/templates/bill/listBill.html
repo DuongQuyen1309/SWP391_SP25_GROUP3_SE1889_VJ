@@ -97,6 +97,19 @@
         function callPage() {
             window.location.href = "/bill/createBill";
         }
+
+            function formatPrice(price) {
+            return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+            document.addEventListener("DOMContentLoaded", function() {
+            document.querySelectorAll(".format-price").forEach(function (element) {
+                let price = parseFloat(element.textContent.replace(/,/g, ''));
+                if (!isNaN(price)) {
+                    element.textContent = formatPrice(price);
+                }
+            });
+        });
     </script>
 </head>
 <body>
@@ -123,7 +136,7 @@
     <a href="/account/listStaff" th:style="${#lists.contains(listHiddenPage, 'listStaff')} ? 'display: none;' : ''">Staff Account Management</a>
     <a href="/product/listProduct">Rice Management</a>
     <a href="/customer/listCustomer">Customer Management</a>
-    <a href="/warehouse/listWarehouseZone">Warehouse Management</a>
+    <a href="/warehouse/listWarehouseZone">Zone Management</a>
     <a href="/bill/listBill">Invoice Management</a>
 </div>
 
@@ -173,7 +186,6 @@
             <th>Paid Money</th>
             <th>Debt Money</th>
             <th>Status</th>
-            <th>Note</th>
             <th>Actions</th>
         </tr>
         </thead>
@@ -182,11 +194,10 @@
             <td th:text="${bill.id}"></td>
             <td th:text="${bill.customer.name}"></td>
             <td th:text="${#temporals.format(bill.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
-            <td th:text="${bill.totalMoney}"></td>
-            <td th:text="${bill.paidMoney}"></td>
-            <td th:text="${bill.debtMoney}"></td>
-            <td th:text="${bill.status? '✅ Done':'🔄 Processing'}"></td>
-            <td th:text="${bill.note}"></td>
+            <td class="format-price" th:text="${bill.totalMoney}"></td>
+            <td class="format-price" th:text="${bill.paidMoney}"></td>
+            <td class="format-price" th:text="${bill.debtMoney}"></td>
+            <td th:text="${bill.status? '🚨 Remarkable':'✅ None'}"></td>
             <td>
                 <form th:action="@{bill/billDetail}" method="get">
                     <input type="hidden" name="id" th:value="${bill.id}">

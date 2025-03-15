@@ -24,7 +24,7 @@ function searchProduct() {
     let productList = document.getElementById("product-list");
     if (keyword.length >= 1) {
 
-        fetch(`/bill/searchProducts?keyword=${keyword}`)
+        fetch(`/bill/searchImportProducts?keyword=${keyword}`)
             .then(response => response.json())
             .then(data => {
                 if (data.length === 0) {
