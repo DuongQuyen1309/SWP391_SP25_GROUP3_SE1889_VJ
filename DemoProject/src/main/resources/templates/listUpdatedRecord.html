@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Rice Sales Management</title>
+    <link rel="stylesheet" href="/css/base.css">
+    <style>
+        .pagination {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .pagination a {
+            display: inline-block;
+            padding: 8px 16px;
+            margin: 4px;
+            text-decoration: none;
+            background-color: #2c3e50;
+            color: white;
+            border-radius: 5px;
+        }
+
+        .pagination a:hover {
+            background-color: #1a252f;
+        }
+
+        .pagination span {
+            font-size: 18px;
+            margin: 0 10px;
+        }
+        .add-customer {
+            position: absolute; /* Giữ vị trí cố định so với content */
+            right: 20px; /* Sát mép phải của content */
+            top: 50px; /* Đẩy xuống dưới một chút */
+            background-color: #d35400; /* Cam */
+            color: white;
+            font-size: 13px;
+            border: none;
+            width: 160px;
+            height: 40px;
+            border-radius: 20%;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .search-form {
+            display: flex;
+            justify-content: right;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 250px;
+            outline: none;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .search-input:focus {
+            border-color: #2980b9;
+            box-shadow: 0 0 5px rgba(41, 128, 185, 0.5);
+        }
+
+        .search-button {
+            padding: 10px 15px;
+            margin-left: 10px;
+            font-size: 16px;
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .search-button:hover {
+            background-color: #1a252f;
+        }
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0;
+        }
+        .add-note-button {
+            background-color: #d35400;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            text-decoration: none;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            padding: 10px 20px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .add-note-button:hover {
+            background-color: #e67e22;
+            transform: scale(1.05);
+        }
+
+    </style>
+    <script src="/js/home.js"></script>
+
+    <script>
+        function filterNotes() {
+            let params = new URLSearchParams();
+            document.querySelectorAll('.filter-input').forEach(input => {
+                if (input.value.trim() !== '') { // Chỉ thêm tham số nếu có giá trị
+                    params.append(input.name, input.value);
+                }
+            });
+            window.location.href = '/updateLog/listUpdatedRecord?' + params.toString();
+        }
+        document.addEventListener("DOMContentLoaded", function() {
+            updateInputFields(); // Gọi để cập nhật kiểu input ngay khi trang tải
+            restoreSearchFilters(); // Phục hồi giá trị lọc từ URL
+        });
+
+        /**
+         * Cập nhật kiểu input của Previous Value & Following Value dựa trên Information Field
+         */
+        function updateInputFields() {
+            let fieldType = document.getElementById("informationField").value;
+            let preValueContainer = document.getElementById("preValueContainer");
+            let followValueContainer = document.getElementById("followValueContainer");
+
+            let params = new URLSearchParams(window.location.search);
+            let preValue = params.get("preValue") || "";
+            let followValue = params.get("followValue") || "";
+
+            if (fieldType === "dob") {
+                preValueContainer.innerHTML = `<input type="date" class="filter-input" id="preValue" name="preValue" style="width: 100px;" onchange="filterNotes()">`;
+                followValueContainer.innerHTML = `<input type="date" class="filter-input" id="followValue" name="followValue" style="width: 100px;" onchange="filterNotes()">`;
+
+                // Phục hồi giá trị tìm kiếm
+                document.getElementById("preValue").value = preValue;
+                document.getElementById("followValue").value = followValue;
+            }
+            else if (fieldType === "gender") {
+                preValueContainer.innerHTML = `<select class="filter-input" id="preValue" name="preValue" style="width: 100px;" onchange="filterNotes()">
+                                        <option value="">All</option>
+                                        <option value="false">Female</option>
+                                        <option value="true">Male</option>
+                                      </select>`;
+                followValueContainer.innerHTML = `<select class="filter-input" id="followValue" name="followValue" style="width: 100px;" onchange="filterNotes()">
+                                        <option value="">All</option>
+                                        <option value="false">Female</option>
+                                        <option value="true">Male</option>
+                                      </select>`;
+
+                // Phục hồi giá trị tìm kiếm
+                document.getElementById("preValue").value = preValue;
+                document.getElementById("followValue").value = followValue;
+            }
+            else {
+                preValueContainer.innerHTML = `<input type="text" class="filter-input" id="preValue" name="preValue" style="width: 100px;" onchange="filterNotes()">`;
+                followValueContainer.innerHTML = `<input type="text" class="filter-input" id="followValue" name="followValue" style="width: 100px;" onchange="filterNotes()">`;
+
+                // Phục hồi giá trị tìm kiếm
+                document.getElementById("preValue").value = preValue;
+                document.getElementById("followValue").value = followValue;
+            }
+        }
+
+
+        /**
+         * Gọi khi người dùng thay đổi trường tìm kiếm
+         */
+        function handleFieldChange() {
+            console.log("Selected Field:", document.getElementById("informationField").value);
+            updateInputFields();
+            filterNotes(); // Tìm kiếm ngay sau khi đổi trường
+        }
+
+        /**
+         * Tự động phục hồi giá trị tìm kiếm từ URL khi tải lại trang
+         */
+        function restoreSearchFilters() {
+            let params = new URLSearchParams(window.location.search);
+
+            document.querySelectorAll('.filter-input').forEach(input => {
+                if (params.has(input.name)) {
+                    let value = params.get(input.name);
+                    console.log(`Khôi phục ${input.name}: ${value}`);
+
+                    if (input.type === "date") {
+                        input.value = value.substring(0, 10); // Định dạng YYYY-MM-DD
+                    } else if (input.tagName === "SELECT") {
+                        input.value = value; // Gán giá trị lại cho select
+                    } else {
+                        input.value = value;
+                    }
+                }
+            });
+
+            // Cập nhật lại kiểu input để đảm bảo UI đúng
+            updateInputFields();
+        }
+
+
+        // document.addEventListener("DOMContentLoaded", function() {
+        //     let params = new URLSearchParams(window.location.search);
+        //     document.querySelectorAll('.filter-input').forEach(input => {
+        //         if (params.has(input.name)) {
+        //             let value = params.get(input.name);
+        //             if (input.type === "date") {
+        //                 input.value = value.substring(0, 10); // Định dạng YYYY-MM-DD
+        //             } else {
+        //                 input.value = value;
+        //             }
+        //         }
+        //     });
+        // });
+        // function handleFieldChange() {
+        //     let fieldType = document.getElementById("informationField").value;
+        //     console.log("Selected Field:", fieldType); // Kiểm tra giá trị khi chọn
+        //     updateInputFields(); // Cập nhật loại input
+        //     filterNotes(); // Gửi request lọc ngay lập tức
+        // }
+        // function updateInputFields() {
+        //     let fieldType = document.getElementById("informationField").value;
+        //     console.log("Updating Input Fields for:", fieldType);
+        //     let preValueContainer = document.getElementById("preValueContainer");
+        //     let followValueContainer = document.getElementById("followValueContainer");
+        //
+        //     if (fieldType === "dob") {
+        //         console.log("Switching to Date Inputs");
+        //         preValueContainer.innerHTML = `<input type="date" class="filter-input" id="preValue" name="preValue" onchange="filterNotes()" style="width: 100px;">`;
+        //         followValueContainer.innerHTML = `<input type="date" class="filter-input" id="followValue" name="followValue" onchange="filterNotes()" style="width: 100px;">`;
+        //     } else if (fieldType === "gender") {
+        //         console.log("Switching to Gender Dropdown");
+        //         preValueContainer.innerHTML = `<select class="filter-input" id="preValue" name="preValue" onchange="filterNotes()" style="width: 100px;">
+        //                                     <option value="">All</option>
+        //                                     <option value="0">Female</option>
+        //                                     <option value="1">Male</option>
+        //                                   </select>`;
+        //         followValueContainer.innerHTML = `<select class="filter-input" id="followValue" name="followValue" onchange="filterNotes()" style="width: 100px;">
+        //                                     <option value="">All</option>
+        //                                     <option value="0">Female</option>
+        //                                     <option value="1">Male</option>
+        //                                   </select>`;
+        //     } else {
+        //         console.log("Switching to Text Inputs");
+        //         preValueContainer.innerHTML = `<input type="text" class="filter-input" id="preValue" name="preValue" onchange="filterNotes()" style="width: 100px;">`;
+        //         followValueContainer.innerHTML = `<input type="text" class="filter-input" id="followValue" name="followValue" onchange="filterNotes()" style="width: 100px;">`;
+        //     }
+        // }
+
+    </script>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+    <h2><a href="/home">RSMS</a></h2>
+    <div class="user-info">
+        <img src="/images/account.jpg" alt="User Avatar" class="user-avatar"/>
+        <div class="dropdown">
+            <span th:text="${account.displayName}" class="user-name" onclick="toggleDropdown()"> ▼</span>
+            <div id="dropdown-menu" class="dropdown-content">
+                <a href="/user/userprofile">👤 View Profile</a>
+                <a href="/#" id="logout">🚪 Logout</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+
+    <h2>Feature</h2>
+    <a href="/user/userprofile" >Profile</a>
+    <a href="/account/listStaff" th:style="${#lists.contains(listHiddenPage, 'listStaff')} ? 'display: none;' : ''">Staff Account Management</a>
+
+
+    <a href="/product/listProduct" >Rice Management</a>
+
+    <a href="/customer/listCustomer" >Customer Management</a>
+
+    <a href="/warehouse/listWarehouseZone" >WarehouseZone Management</a>
+
+
+    <a href="/listInvoice" >Invoice Management</a>
+
+</div>
+
+
+<!-- Content -->
+<div class="content" id="content">
+
+    <!-- Modal Form -->
+    <!--    <button class="add-customer" onclick="callPage()">Create New Note</button>-->
+
+
+    <div id="messageBox">
+        <script type="text/javascript">
+            // Gọi hàm showMessage với messageType và message từ flash attributes
+            /* Thymeleaf sẽ thay thế các giá trị này */
+            let messageType = '[[${messageType}]]';
+            let message = '[[${message}]]';
+
+            if (message && message.trim() !== '') {
+                showMessage(messageType, message);
+            }
+        </script>
+    </div>
+    <h1>History about Updated Customer Information</h1>
+    <div th:if="${errorMessage}" style="color: red; font-weight: bold;">
+        <p th:text="${errorMessage}"></p>
+    </div>
+    <table class="styled-table">
+        <thead>
+        <tr>
+            <td>Id</td>
+            <td>Customer Name</td>
+            <td>Customer Phone</td>
+            <td>Updated By</td>
+            <td>Updated At</td>
+            <td>Information Field</td>
+            <td>Previous Value</td>
+            <td>Following Value</td>
+            <td>Status</td>
+            <td>Action</td>
+        </tr>
+        <tr>
+            <td>
+            </td>
+            <td>
+            </td>
+            <td>
+            </td>
+            <td>
+                <select class="filter-input" name="updatedBy" onchange="filterNotes()" style="width: 100px;">
+                    <option value="">All</option>
+                    <!-- Sử dụng th:each để lặp qua userList và tạo các option -->
+                    <option th:each="user : ${usersList}" th:value="${user.id}" th:text="${user.name}"></option>
+                </select>
+            </td>
+            <td>
+                <input type="datetime-local" class="filter-input" name="updatedDateFrom" onchange="filterNotes()" style="width: 45%;">
+                <input type="datetime-local" class="filter-input" name="updatedDateTo" onchange="filterNotes()" style="width: 45%;">
+            </td>
+            <td>
+                <select class="filter-input" name="informationField" id="informationField" onchange="handleFieldChange()" style="width: 100px;">
+                    <option value="">All</option>
+                    <option value="name">Name</option>
+                    <option value="phone">Phone</option>
+                    <option value="address">Address</option>
+                    <option value="gender">Gender</option>
+                    <option value="dob">Date of Birth</option>
+                </select>
+            </td>
+            <td>
+                <span id="preValueContainer">
+                    <input type="text" class="filter-input" id="preValue" name="preValue" onchange="filterNotes()" style="width: 100px;">
+                </span>
+            </td>
+            <td>
+                <span id="followValueContainer">
+                    <input type="text" class="filter-input" id="followValue" name="followValue" onchange="filterNotes()" style="width: 100px;">
+                </span>
+            </td>
+
+            <td>
+                <select class="filter-input" name="status" onchange="filterNotes()" style="width: 100px;">
+                    <option value="">All</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Approved">Approved</option>
+                </select>
+            </td>
+            <td></td>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="log : ${updateLog}">
+            <td th:if="${log != null}" th:text="${log.id}"></td>
+            <td th:if="${log != null}">
+                <span th:each="customer : ${customerList}"
+                th:text="${customer.id == log.customerId ? customer.name : ''}"></span>
+            </td>
+            <td th:if="${log != null}">
+                <span th:each="customer : ${customerList}"
+                      th:text="${customer.id == log.customerId ? customer.phone : ''}"></span>
+            </td>
+            <td th:if="${log != null}">
+                <span th:each="user : ${usersList}"
+                      th:text="${user.id == log.updatedBy ? user.name : ''}"></span>
+            </td>
+            <td th:if="${log != null}" th:text="${#temporals.format(log.updatedAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
+            <td th:if="${log != null}" th:text="${log.fieldName}"></td>
+            <td th:if="${log != null}">
+                <span th:if="${log.fieldName == 'gender'}" th:text="${log.oldValue == 'false' ? 'female' : (log.oldValue == 'true' ? 'male' : log.oldValue)}"></span>
+                <span th:unless="${log.fieldName == 'gender'}" th:text="${log.oldValue}"></span>
+            </td>
+            <td th:if="${log != null}">
+                <span th:if="${log.fieldName == 'gender'}" th:text="${log.newValue == 'false' ? 'female' : (log.newValue == 'true' ? 'male' : log.newValue)}"></span>
+                <span th:unless="${log.fieldName == 'gender'}" th:text="${log.newValue}"></span>
+            </td>
+            <td th:if="${log != null}" th:text="${log.status}"></td>
+            <td>
+<!--                <span th:if="${log != null and log.updatedBy != ownerPreId}">-->
+<!--                    <a th:href="@{/}">Revert</a>-->
+<!--                </span>-->
+            </td>
+
+        </tr>
+        </tbody>
+    </table>
+    <div class="pagination">
+        <a th:if="${currentPage > 0}"
+           th:href="@{/updateLog/listUpdatedRecord(page=${currentPage - 1}, size=${size},
+       updatedBy=${updatedBy}, updatedDateFrom=${updatedDateFrom},
+       updatedDateTo=${updatedDateTo},
+       informationField=${informationField},
+       preValue=${preValue},
+       followValue=${followValue},
+       status=${status})}">
+            Previous
+        </a>
+
+        <span>Page <span th:text="${currentPage + 1}"></span> of <span th:text="${totalPages}"></span></span>
+
+        <a th:if="${currentPage + 1 < totalPages}"
+           th:href="@{/updateLog/listUpdatedRecord(page=${currentPage + 1}, size=${size},
+       updatedBy=${updatedBy}, updatedDateFrom=${updatedDateFrom},
+       updatedDateTo=${updatedDateTo},
+       informationField=${informationField},
+       preValue=${preValue},
+       followValue=${followValue},
+       status=${status})}">
+            Next
+        </a>
+    </div>
+</div>
+<footer>
+    &copy; 2025 Rice Sales Management. All Rights Reserved.
+</footer>
+
+</body>
+</html>
+

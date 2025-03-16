@@ -101,7 +101,6 @@ public class CustomerController {
         }
 
 
-
         //bắt đầu đoạn code thay thế//
         Long last_storedID = Long.parseLong(storeId);
         List<String> phoneList =  customerService.getAllPhones(last_storedID);
@@ -387,8 +386,17 @@ public class CustomerController {
         if (tokenCustomerId == null || !tokenCustomerId.equals(id)) {
             return "redirect:/customer/listCustomer"; // Nếu không đúng, chặn request
         }
+        String storeId = jwtUtils.extractStoreID(token);
+        Long last_storedID = Long.parseLong(storeId);
+        String role = jwtUtils.extractRole(token);
+        String status;
+        if(role.equals("STAFF")) {
+            status = "Pending";
+        }else {
+            status = "Approved";
+        }
         // Lưu vào database
-        customerService.updateCustomer(id, customer,user.get().getId());
+        customerService.updateCustomer(id, customer,user.get().getId(), status, last_storedID);
 
         redirectAttributes.addFlashAttribute("messageType", "success");
         redirectAttributes.addFlashAttribute("message", "Customer updated successfully!");

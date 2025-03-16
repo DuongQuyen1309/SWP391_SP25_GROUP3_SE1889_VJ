@@ -51,6 +51,7 @@ public class SecurityConfig {
                         .requestMatchers("/account/**").hasAnyAuthority("ADMIN", "OWNER")
                         .requestMatchers("/product/**","/customer/**","/note/**","/warehouse/**","/bill/**").hasAnyAuthority("STAFF", "OWNER")
                         .requestMatchers(("/warehouse"),"/product/create").hasAnyAuthority( "OWNER")
+                        .requestMatchers("/updateLog/listUpdatedRecord").hasAnyAuthority( "OWNER")
                         .requestMatchers("/uploads/**").permitAll()  // Cho phép truy cập ảnh
                         .requestMatchers("/note/image/**").permitAll()  // Cho phép API lấy ảnh
                         .anyRequest().authenticated()

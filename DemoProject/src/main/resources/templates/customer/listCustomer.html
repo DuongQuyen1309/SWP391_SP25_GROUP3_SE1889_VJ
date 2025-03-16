@@ -125,6 +125,35 @@
       transform: scale(1.1);
     }
 
+    .button-container {
+      display: flex;
+      justify-content: flex-end; /* Căn các nút về bên phải */
+      gap: 10px; /* Khoảng cách giữa các nút */
+      align-items: center; /* Căn nút theo chiều dọc với tiêu đề */
+      margin-bottom: 10px;
+      margin-top: 60px; /* Hạ nút xuống gần với tiêu đề */
+    }
+
+    .button-container button {
+      background-color: #d35400; /* Màu cam */
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      text-decoration: none;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease-in-out;
+      padding: 10px 20px;
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .button-container button:hover {
+      background-color: #e67e22;
+      transform: scale(1.05);
+    }
+
+
 
     /*.content{*/
     /*  margin-top: 4%;*/
@@ -145,7 +174,7 @@
       window.location.href ="/customer/createCustomer";
     }
     function callUpdate() {
-      window.location.href ="/note/listUpdatedRecord";
+      window.location.href ="/updateLog/listUpdatedRecord";
     }
     function showCreatedSuccess() {
       alert("You are successfully created!");
@@ -234,8 +263,15 @@
 <div class="content" id="content">
 
   <!-- Modal Form -->
-  <button class="add-customer" onclick="callPage()">Create New Customer</button>
-  <button class="list-updatedRecord" onclick="callUpdate()">History about updating customer</button>
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+    <h1>List of Customer Information</h1>
+    <div class="button-container">
+      <button onclick="callPage()">Create New Customer</button>
+      <button onclick="callUpdate()">History about updating customer</button>
+    </div>
+  </div>
+
+
 
   <div id="messageBox">
     <script type="text/javascript">
@@ -250,7 +286,7 @@
     </script>
   </div>
   <!-- List -->
-  <h1>List of Customer Information</h1>
+
 
   <div th:if="${errorMessage}" style="color: red; font-weight: bold;">
     <p th:text="${errorMessage}"></p>

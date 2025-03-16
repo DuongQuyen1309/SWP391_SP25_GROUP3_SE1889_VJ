@@ -29,9 +29,25 @@ public class CustomerUpdateLog {
     @Column(name = "new_value")
     private String newValue;
 
+    @Column(name = "status")
+    private String status;
+
+    @Column(name = "store_id")
+    private Long storeId;
+
     public CustomerUpdateLog() {
     }
 
+    public CustomerUpdateLog(Long customerId, Long updatedBy, LocalDateTime updatedAt, String fieldName, String oldValue, String newValue, String status, Long storeId) {
+        this.customerId = customerId;
+        this.updatedBy = updatedBy;
+        this.updatedAt = updatedAt;
+        this.fieldName = fieldName;
+        this.oldValue = oldValue;
+        this.newValue = newValue;
+        this.status = status;
+        this.storeId = storeId;
+    }
     public CustomerUpdateLog(Long customerId, Long updatedBy, LocalDateTime updatedAt, String fieldName, String oldValue, String newValue) {
         this.customerId = customerId;
         this.updatedBy = updatedBy;
@@ -39,6 +55,15 @@ public class CustomerUpdateLog {
         this.fieldName = fieldName;
         this.oldValue = oldValue;
         this.newValue = newValue;
+        this.status = status;
+    }
+
+    public Long getStoreId() {
+        return storeId;
+    }
+
+    public void setStoreId(Long storeId) {
+        this.storeId = storeId;
     }
 
     public Long getId() {
@@ -95,5 +120,13 @@ public class CustomerUpdateLog {
 
     public void setNewValue(String newValue) {
         this.newValue = newValue;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }
