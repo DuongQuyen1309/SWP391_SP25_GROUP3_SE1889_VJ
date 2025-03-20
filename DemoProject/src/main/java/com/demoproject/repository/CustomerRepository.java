@@ -90,4 +90,7 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
     @Query("SELECT c.phone FROM Customer c WHERE c.storeId = :storeID")
     List<String> getAllPhones(@Param("storeID") Long storeID );
+
+    @Query("SELECT c FROM Customer c WHERE c.storeId = :storeID")
+    List<Customer> getAllCustomerInStore(@Param("storeID") Long storeID );
 }

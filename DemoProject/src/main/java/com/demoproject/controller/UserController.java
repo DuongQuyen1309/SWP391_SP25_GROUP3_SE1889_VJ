@@ -67,6 +67,7 @@ public class UserController {
             listHiddenPage.add("listProduct");
             listHiddenPage.add("listWarehouse");
             listHiddenPage.add("listBill");
+            listHiddenPage.add("listPackage");
         }
         if(role.equals("ADMIN")||role.equals("STAFF")){
             listHiddenPage.add("listStaff");
@@ -111,6 +112,7 @@ public class UserController {
             listHiddenPage.add("listproduct");
             listHiddenPage.add("listWarehouse");
             listHiddenPage.add("listBill");
+            listHiddenPage.add("listPackage");
         }
         if(role.equals("ADMIN")||role.equals("STAFF")){
             listHiddenPage.add("listStaff");
@@ -159,6 +161,7 @@ public class UserController {
             listHiddenPage.add("listProduct");
             listHiddenPage.add("listWarehouse");
             listHiddenPage.add("listBill");
+            listHiddenPage.add("listPackage");
         }
         if(role.equals("ADMIN")||role.equals("STAFF")){
             listHiddenPage.add("listStaff");

@@ -49,7 +49,7 @@ public class SecurityConfig {
                         .requestMatchers("/account/listOwner").hasAuthority("ADMIN")
                         .requestMatchers(("/account/listStaff")).hasAuthority("OWNER")
                         .requestMatchers("/account/**").hasAnyAuthority("ADMIN", "OWNER")
-                        .requestMatchers("/product/**","/customer/**","/warehouse/**","/bill/**").hasAnyAuthority("STAFF", "OWNER")
+                        .requestMatchers("/product/**","/customer/**","/warehouse/**","/bill/**","/note/**","/package/**").hasAnyAuthority("STAFF", "OWNER")
                         .requestMatchers(("/warehouse"),"/product/create").hasAnyAuthority( "OWNER")
                         .anyRequest().authenticated()
                 )

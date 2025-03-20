@@ -40,6 +40,7 @@
   <a href="/customer/listCustomer">Customer Management</a>
   <a href="/warehouse/listWarehouseZone">Zone Management</a>
   <a href="/bill/listBill">Invoice Management</a>
+  <a href="/package/listPackage">Package Management</a>
 </div>
 <div class="content">
 <!--<div class="search-container">-->
@@ -353,7 +354,7 @@
                   productList.innerHTML = data.map(product => `
   <div class="product-item"
       onclick='selectProduct(${product.id}, "${product.name}", ${product.price}, ${JSON.stringify(product.packageType)})'>
-      <img width="100px" src="${product.image}"/> ${product.name} - ${product.price} VND
+      <img width="100px" src="${product.image}"/> ${product.name} - ${product.price} VND - ${product.quantity} kg
   </div>
 `).join("");
 
@@ -413,6 +414,7 @@
       selectedPackageSize: parseInt(defaultPackage.name) || 1
     });
     console.log(tabData[activeTabId].products);
+
 
     document.getElementById("search-product").value = "";
     document.getElementById("product-list").innerHTML = "<p>Enter product name to search...</p>";

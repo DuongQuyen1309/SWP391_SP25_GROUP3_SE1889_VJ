@@ -65,7 +65,7 @@ public class CustomerService {
         return customers;
     }
 
-    public void updateCustomer(Long id, Customer newCustomer, Long updatedBy) {
+    public void updateCustomer(Long id, Customer newCustomer, Long updatedBy, String status, Long storeID) {
         Optional<Customer> optionalCustomer = customerRepository.findById(id);
         if (optionalCustomer.isEmpty()) {
             return;
@@ -75,11 +75,11 @@ public class CustomerService {
         LocalDateTime now = LocalDateTime.now();
 
         // Kiểm tra từng trường dữ liệu xem có thay đổi không, nếu có thì log lại
-        logChange(existingCustomer, newCustomer, "name", existingCustomer.getName(), newCustomer.getName(), updatedBy, now);
-        logChange(existingCustomer, newCustomer, "address", existingCustomer.getAddress(), newCustomer.getAddress(), updatedBy, now);
-        logChange(existingCustomer, newCustomer, "phone", existingCustomer.getPhone(), newCustomer.getPhone(), updatedBy, now);
-        logChange(existingCustomer, newCustomer, "dob", existingCustomer.getDob().toString(), newCustomer.getDob().toString(), updatedBy, now);
-        logChange(existingCustomer, newCustomer, "gender", existingCustomer.getGender().toString(), newCustomer.getGender().toString(), updatedBy, now);
+        logChange(existingCustomer, newCustomer, "name", existingCustomer.getName(), newCustomer.getName(), updatedBy, now, status, storeID);
+        logChange(existingCustomer, newCustomer, "address", existingCustomer.getAddress(), newCustomer.getAddress(), updatedBy, now, status, storeID);
+        logChange(existingCustomer, newCustomer, "phone", existingCustomer.getPhone(), newCustomer.getPhone(), updatedBy, now, status, storeID);
+        logChange(existingCustomer, newCustomer, "dob", existingCustomer.getDob().toString(), newCustomer.getDob().toString(), updatedBy, now, status, storeID);
+        logChange(existingCustomer, newCustomer, "gender", existingCustomer.getGender().toString(), newCustomer.getGender().toString(), updatedBy, now, status, storeID);
 
         // Cập nhật thông tin mới
         existingCustomer.setName(newCustomer.getName());
@@ -143,10 +143,15 @@ public class CustomerService {
         return customerRepository.findByPhoneAttribute(phone);
     }
 
-    private void logChange(Customer existingCustomer, Customer newCustomer, String fieldName, String oldValue, String newValue, Long updatedBy, LocalDateTime updatedAt) {
+    private void logChange(Customer existingCustomer, Customer newCustomer, String fieldName,
+                           String oldValue, String newValue, Long updatedBy, LocalDateTime updatedAt,String status, Long storeID) {
         if (oldValue != null && !oldValue.equals(newValue)) {
-            CustomerUpdateLog log = new CustomerUpdateLog(existingCustomer.getId(), updatedBy, updatedAt, fieldName, oldValue, newValue);
+            CustomerUpdateLog log = new CustomerUpdateLog(existingCustomer.getId(), updatedBy, updatedAt, fieldName, oldValue, newValue,status, storeID);
             customerUpdateLogRepository.save(log);
         }
+    }
+
+    public List<Customer> getAllCustomerInStore(Long storeID){
+        return customerRepository.getAllCustomerInStore(storeID);
     }
 }

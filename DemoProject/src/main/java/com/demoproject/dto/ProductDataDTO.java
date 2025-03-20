@@ -18,6 +18,16 @@ public class ProductDataDTO {
     private List<PackageTypeDTO> packageType;
     private Long selectedPackage;
     private int selectedPackageSize;
+    private String packageTypeJson; // Lưu dưới dạng JSON
+
+    public String getPackageTypeJson() {
+        return packageTypeJson;
+    }
+
+    public void setPackageTypeJson(String packageTypeJson) {
+        this.packageTypeJson = packageTypeJson;
+    }
+
 
     // Getters and Setters
 
@@ -89,16 +99,20 @@ public class ProductDataDTO {
 
 
     public String getPackageTypeName() {
-        // ✅ Nếu `packageTypeName` bị null, tự động lấy từ `selectedPackage`
-        if (packageTypeName == null && packageType != null) {
+
+        if (packageTypeName == null && packageType != null && selectedPackage != null) {
             packageTypeName = packageType.stream()
                     .filter(pkg -> pkg.getId().equals(selectedPackage))
                     .map(PackageTypeDTO::getName)
                     .findFirst()
-                    .orElse(null);
+                    .orElse("Unknown");
         }
+
+        System.out.println("📌 packageTypeName sau khi xử lý: " + packageTypeName);
         return packageTypeName;
     }
+
+
 
     public void setPackageTypeName(String packageTypeName) {
         this.packageTypeName = packageTypeName;
@@ -119,6 +133,7 @@ public class ProductDataDTO {
     public void setSelectedPackage(Long selectedPackage) {
         this.selectedPackage = selectedPackage;
     }
+
 
     public int getSelectedPackageSize() {
         return selectedPackageSize;

@@ -1,24 +1,109 @@
 package com.demoproject.entity;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.FieldDefaults;
 
 @Entity
+
 @Table(name = "Package")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Package {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    Long id;
+    @Column(name = "id", nullable = false, columnDefinition = "Numeric(18)")
+    private Long id;
+    @Column(name = "name")
+    private String name;
+    @Column(name = "color")
+    private String color;
+    @Column(name = "description")
+    private String description;
+    @Column(name = "store_id")
+    private Long storeId;
+    @Column(name = "createdBy")
+    private Long createdBy;
+    @Column(name = "createdAt")
+    private LocalDate createdAt;
+    @Column(name = "updatedAt")
+    private LocalDate updatedAt;
 
-    @Column(name = "name", nullable = false)
-    String name;
+    public LocalDate getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDate updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public Package() {
+    }
+
+    public Package(Long id, String name, String color, String description, Long storeId, Long createdBy,
+                   LocalDate createdAt) {
+        this.id = id;
+        this.name = name;
+        this.color = color;
+        this.description = description;
+        this.storeId = storeId;
+        this.createdBy = createdBy;
+        this.createdAt = createdAt;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Long getStoreId() {
+        return storeId;
+    }
+
+    public void setStoreId(Long storeId) {
+        this.storeId = storeId;
+    }
+
+    public Long getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(Long createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public LocalDate getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDate createdAt) {
+        this.createdAt = createdAt;
+    }
+
 }

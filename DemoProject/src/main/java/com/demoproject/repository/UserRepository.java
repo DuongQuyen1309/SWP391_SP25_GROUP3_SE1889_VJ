@@ -35,4 +35,7 @@ public interface UserRepository extends JpaRepository<Users, Long> {
 
     @Query("SELECT u.id FROM Users u WHERE u.createdBy = :ownerID ")
     List<Long> getStaffID1(Long ownerID);
+
+    @Query("SELECT u FROM Users u WHERE u.storeId = :storeID")
+    List<Users> getUserInStore(Long storeID);
 }

@@ -54,4 +54,7 @@ public class UserService {
     public List<Long> getStaffID1(Long ownerID){
         return userRepository.getStaffID1(ownerID);
     }
+
+    public List<Users> getUsersInStore(Long storeID){
+        return userRepository.getUserInStore(storeID);}
 }

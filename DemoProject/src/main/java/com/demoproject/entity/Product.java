@@ -113,5 +113,17 @@ public class Product {
             return 1; // ✅ Mặc định nếu không tìm thấy số
         }
     }
+
+    @Transient
+    private Long selectedPackage; // ✅ ID của loại đóng gói đang chọn
+
+    public Long getSelectedPackage() {
+        return selectedPackage;
+    }
+
+    public void setSelectedPackage(Long selectedPackage) {
+        this.selectedPackage = selectedPackage;
+        System.out.println("📌 setSelectedPackage: " + selectedPackage);
+    }
 }
 

@@ -55,6 +55,7 @@ public class ProductQueueProcessor {
             System.out.println("🎯 ProductQueueProcessor - Đưa vào hàng đợi:");
             for (Product product : productList) {
                 System.out.println("  - ID: " + product.getId() + ", Quantity: " + product.getQuantity());
+                System.out.println("abc "+product.getPackageType());
             }
 
             productQueue.offer(productDataJson); // ✅ Đưa JSON vào hàng đợi

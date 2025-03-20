@@ -1,5 +1,6 @@
 package com.demoproject.billqueue;
 
+import com.demoproject.dto.ProductSummaryDTO;
 import com.demoproject.entity.Bill;
 import com.demoproject.entity.Product;
 import com.demoproject.productqueue.ProductQueueProcessor;
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 @Component
 public class BillQueueProcessor {
@@ -65,16 +67,27 @@ public class BillQueueProcessor {
                     }
 
                     List<Product> products = objectMapper.readValue(request.getProductData(), new TypeReference<List<Product>>() {});
+                    for (Product product : products) {
+                        System.out.println("📌 BillQueueProcessor - Product ID: " + product.getId() +
+                                ", selectedPackage: " + product.getSelectedPackage());
+                    }
 
                     // ✅ Cập nhật số lượng sản phẩm theo kg trước khi lưu vào bill
                     for (Product product : products) {
                         int totalKg = product.getQuantity() * product.getSelectedPackageSize();
-                        System.out.println("🔍 Số lượng sản phẩm: " + totalKg + "kg");
                         product.setQuantity(totalKg); // ✅ Chuyển số lượng về tổng số kg thực tế
-                        System.out.println("🔹 BillQueueProcessor - Trước khi gửi: Product ID: " + product.getId() + ", Quantity: " + product.getQuantity());
+
                     }
 
-                    String updatedProductData = objectMapper.writeValueAsString(products); // ✅ Chuyển lại thành JSON
+
+                    // ✅ Chỉ lưu các thông tin cần thiết của sản phẩm vào bill
+                    List<ProductSummaryDTO> filteredProducts = products.stream()
+                            .map(ProductSummaryDTO::new)
+                            .collect(Collectors.toList());
+
+                    String updatedProductData = objectMapper.writeValueAsString(filteredProducts); // ✅ Chỉ lưu các thông tin cần thiết
+
+                    System.out.println("📌 BillQueueProcessor - updatedProductData: " + updatedProductData);
 
                     Bill bill = new Bill();
                     bill.setTotalMoney(request.getTotalMoney());

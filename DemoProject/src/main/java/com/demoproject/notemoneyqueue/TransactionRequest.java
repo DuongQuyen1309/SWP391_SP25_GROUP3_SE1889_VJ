@@ -9,6 +9,17 @@ public class TransactionRequest {
     private String notename;
     private Long createdByID;
     private Long storeId;
+    private String imagePath;
+    public TransactionRequest(Long customerId, Integer amount, String isDebt, String notename, Long createdByID, Long storeId, String imagePath) {
+        this.customerId = customerId;
+        this.amount = amount;
+        this.isDebt = isDebt;
+        this.notename = notename;
+        this.createdByID = createdByID;
+        this.storeId = storeId;
+        this.imagePath = imagePath;
+    }
+
     public TransactionRequest(Long customerId, Integer amount, String isDebt, String notename, Long createdByID, Long storeId) {
         this.customerId = customerId;
         this.amount = amount;
@@ -63,6 +74,14 @@ public class TransactionRequest {
 
     public void setCreatedByID(Long createdByID) {
         this.createdByID = createdByID;
+    }
+
+    public String getImagePath() {
+        return imagePath;
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
     }
 }
 

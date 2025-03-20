@@ -114,24 +114,24 @@
         }
     </style>
     <script src="/js/home.js"></script>
-    <script type="text/javascript">
-        function showMessage(messageType, message) {
-            // Kiểm tra loại thông báo và hiển thị theo màu sắc tương ứng
-            var messageBox = document.getElementById("messageBox");
-            if (messageType === 'success') {
-                messageBox.style.color = 'green';
-            } else if (messageType === 'fail') {
-                messageBox.style.color = 'red';
-            }
-            messageBox.innerHTML = message;  // Hiển thị thông báo
-            messageBox.style.display = 'block';  // Hiển thị thông báo
+    <!--    <script type="text/javascript">-->
+    <!--        function showMessage(messageType, message) {-->
+    <!--            // Kiểm tra loại thông báo và hiển thị theo màu sắc tương ứng-->
+    <!--            var messageBox = document.getElementById("messageBox");-->
+    <!--            if (messageType === 'success') {-->
+    <!--                messageBox.style.color = 'green';-->
+    <!--            } else if (messageType === 'fail') {-->
+    <!--                messageBox.style.color = 'red';-->
+    <!--            }-->
+    <!--            messageBox.innerHTML = message;  // Hiển thị thông báo-->
+    <!--            messageBox.style.display = 'block';  // Hiển thị thông báo-->
 
-            // Điều hướng đến trang listcustomer sau khi hiển thị thông báo
-            setTimeout(function() {
-                window.location.href = "/note/listNote/" + [[${customerId}]];  // Điều hướng sau 3 giây
-            }, 3000);  // Thời gian chờ 3 giây
-        }
-    </script>
+    <!--            // Điều hướng đến trang listcustomer sau khi hiển thị thông báo-->
+    <!--            setTimeout(function() {-->
+    <!--                window.location.href = "/note/listNote/" + [[${customerId}]];  // Điều hướng sau 3 giây-->
+    <!--            }, 3000);  // Thời gian chờ 3 giây-->
+    <!--        }-->
+    <!--    </script>-->
     <script>
         function formatNumber(input) {
             // Lấy giá trị từ input và loại bỏ dấu phẩy
@@ -225,6 +225,8 @@
 
             const notename = document.getElementById("notename");
             const money = document.getElementById("money");
+            const imageInput = document.getElementById("noteImage");
+
             const errorMessage = document.createElement("p");
             errorMessage.style.color = "red";
             errorMessage.style.fontWeight = "bold";
@@ -241,6 +243,10 @@
                     errors.push("Money is not empty");
                 } else if (!/^\d+$/.test(value)) {
                     errors.push("Money only contain number.");
+                }
+
+                if(imageInput.value.trim() === ""){
+                    errors.push("Image is not empty")
                 }
 
                 // Nếu có lỗi, ngăn submit và hiển thị thông báo
@@ -260,12 +266,11 @@
     <button class="menu-btn" onclick="toggleSidebar()">☰</button>
     <h2><a href="/home">RSMS</a></h2>
     <div class="user-info">
-        <img th:src="${user.avatar}" alt="User Avatar" class="user-avatar"/>
+        <img  th:src="${user.avatar}" alt="User Avatar" class="user-avatar"/>
         <div class="dropdown">
             <span th:text="${account.displayName}" class="user-name" onclick="toggleDropdown()"> ▼</span>
             <div id="dropdown-menu" class="dropdown-content">
                 <a href="/user/userprofile">👤 View Profile</a>
-                <a href="/user/changepw" id="changepw">🔑 Change password</a>
                 <a href="/#" id="logout">🚪 Logout</a>
             </div>
         </div>
@@ -288,6 +293,7 @@
 
 
     <a href="/bill/listBill" >Invoice Management</a>
+    <a href="/package/listPackage">Package Management</a>
 
 </div>
 
@@ -300,7 +306,7 @@
     <div class="container">
         <aside class="section note-section">
             <h3>Create Note</h3>
-            <form class="profile-form" th:action="@{/note/createNote/{id}(id=${customer.id})}" method="POST">
+            <form class="profile-form" th:action="@{/note/createNote/{id}(id=${customer.id})}" method="POST" enctype="multipart/form-data">
                 <label for="notename">Note Name:</label>
                 <input type="text" id="notename" name="notename">
 
@@ -315,7 +321,11 @@
                 <label for="money">Money:</label>
                 <input type="text" id="money" name="money" oninput="formatNumber(this)">
                 <p id="numberInWords" style="font-style: italic; color: #555;"></p>
-                <p style="color: red;" th:if="${error}" th:text="${error}"></p>
+
+                <label for="noteImage">Upload Image:</label>
+                <input type="file" id="noteImage" name="noteImage" accept="image/*">
+
+                <!--                <p style="color: red;" th:if="${error}" th:text="${error}"></p>-->
                 <button class="create-note" type="submit">Create Note</button>
 
             </form>

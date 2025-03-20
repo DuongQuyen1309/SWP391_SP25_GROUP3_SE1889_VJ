@@ -1,6 +1,7 @@
 package com.demoproject.entity;
 
 import com.demoproject.dto.CustomerDataDTO;
+import com.demoproject.dto.PackageTypeDTO;
 import com.demoproject.dto.ProductDataDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.*;
@@ -194,15 +195,30 @@ public class Bill {
         if (products == null && productData != null) {
             this.products = parseProductData(productData);
         }
+        System.out.println("cdf: "+productData);
         return products;
     }
 
     private List<ProductDataDTO> parseProductData(String json) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            return objectMapper.readValue(json, objectMapper.getTypeFactory().constructCollectionType(List.class, ProductDataDTO.class));
+            List<ProductDataDTO> products = objectMapper.readValue(json,
+                    objectMapper.getTypeFactory().constructCollectionType(List.class, ProductDataDTO.class));
+
+            // ✅ Đảm bảo `packageType` được set từ `packageTypeJson`
+            for (ProductDataDTO product : products) {
+                if (product.getPackageType() == null && product.getPackageTypeJson() != null) {
+                    List<PackageTypeDTO> packageTypes = objectMapper.readValue(product.getPackageTypeJson(),
+                            objectMapper.getTypeFactory().constructCollectionType(List.class, PackageTypeDTO.class));
+                    product.setPackageType(packageTypes);
+                }
+            }
+
+            return products;
         } catch (IOException e) {
+            e.printStackTrace();
             return null;
         }
     }
+
 }

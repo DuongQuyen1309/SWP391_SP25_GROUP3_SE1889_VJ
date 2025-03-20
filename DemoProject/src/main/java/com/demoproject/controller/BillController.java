@@ -239,8 +239,13 @@ public class BillController {
             ObjectMapper objectMapper = new ObjectMapper();
             CustomerDataDTO customerData = objectMapper.readValue(bill.getCustomerData(), CustomerDataDTO.class);
 
+
             String customerDataJson = objectMapper.writeValueAsString(customerData);
             List<ProductDataDTO> products = objectMapper.readValue(bill.getProductData(), new TypeReference<List<ProductDataDTO>>() {});
+            for (ProductDataDTO product : products) {
+                System.out.println("📌 Backend nhận Product ID: " + product.getId() +
+                        ", selectedPackage: " + product.getSelectedPackage());
+            }
             System.out.println("String : "+ bill.getProductData());
 
 // ✅ Kiểm tra sản phẩm trong kho
@@ -360,11 +365,18 @@ public class BillController {
             Bill bill = billOpt.get();
             model.addAttribute("bill", bill);
             model.addAttribute("customer", bill.getCustomer());
+            System.out.println(bill.getProducts());
+            List<ProductDataDTO> products = bill.getProducts();
+            for (ProductDataDTO product : products) {
+                System.out.println("🔍 Product ID: " + product.getId());
+                System.out.println("🔍 packageType: " + product.getPackageType());
+            }
             List<ProductDataDTO> productDTOs = bill.getProducts().stream().map(product -> {
                 ProductDataDTO dto = new ProductDataDTO();
                 dto.setName(product.getName());
                 dto.setQuantity(product.getQuantity());
                 dto.setPrice(product.getPrice());
+
                 dto.setTotal(dto.getQuantity() * dto.getPrice()); // ✅ Tính tổng theo số kg
                 dto.setPackageTypeName(product.getPackageTypeName()); // ✅ Thêm thông tin đóng gói
                 dto.setSelectedPackageSize(product.getSelectedPackageSize());
@@ -373,6 +385,7 @@ public class BillController {
 
                 return dto;
             }).collect(Collectors.toList());
+
             model.addAttribute("products", productDTOs);
         }else {
             model.addAttribute("error", "Bill not found");
