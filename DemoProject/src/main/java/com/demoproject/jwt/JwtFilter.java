@@ -48,22 +48,21 @@ public class JwtFilter extends OncePerRequestFilter {
         if (token != null) {
             try {
                 String username = jwtUtils.extractUsername(token);
-                String role = jwtUtils.extractRole(token); // ✅ Lấy role dạng String
+                String role = jwtUtils.extractRole(token); // "OWNER"
 
-
-                // ✅ Chuyển đổi role thành `GrantedAuthority`
                 List<SimpleGrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(role));
 
-                UserDetails userDetails = new User(username, "", authorities);
-
+                // ✅ Không cần UserDetails
                 UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
+                        new UsernamePasswordAuthenticationToken(username, null, authorities);
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+                System.out.println("✅ [JwtFilter] Set auth for user: " + username + " with role: " + role);
             } catch (JwtException e) {
                 System.out.println("🚨 [JwtFilter] Lỗi khi giải mã token: " + e.getMessage());
             }
         }
+
 
         filterChain.doFilter(request, response);
     }

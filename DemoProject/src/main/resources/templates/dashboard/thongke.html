@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Staff Management</title>
+    <link rel="stylesheet" href="/css/base.css">
+    <script src="/js/home.js"></script>
+    <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
+    <link rel="stylesheet" href="/css/thongke.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById("sidebar");
+            const content = document.getElementById("content");
+
+            if (sidebar.style.width === "0px") {
+                sidebar.style.width = "";
+                content.style.marginLeft = "";
+            } else {
+                sidebar.style.width = "0px";
+                content.style.marginLeft = "0px";
+            }
+        }
+
+        function toggleDropdown() {
+            document.getElementById("dropdown-menu").classList.toggle("show");
+        }
+
+        window.onclick = function(event) {
+            if (!event.target.matches('.user-name')) {
+                var dropdowns = document.getElementsByClassName("dropdown-content");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
+        }
+
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            const periodSelect = document.getElementById('periodSelect');
+            const monthPicker = document.getElementById('monthPicker');
+            let chartInstance = null;
+
+            // Hàm lấy dữ liệu doanh thu
+            function fetchRevenueData(period = 'daily') {
+                const month = monthPicker.value;  // Lấy giá trị tháng (yyyy-MM)
+                const year = month ? month.slice(0, 4) : null;  // Lấy năm từ tháng (yyyy-MM)
+                let url = `/dashboard/api/revenue?period=${period}`;
+
+                // Chỉ gửi tháng khi chọn 'daily', gửi cả tháng và năm khi chọn 'monthly'
+                if (period === 'daily' && month) {
+                    url += `&month=${month}`;
+                } else if (period === 'monthly' && year) {
+                    url += `&year=${year}`;  // Thêm tham số năm cho kiểu "monthly"
+                }
+
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        renderRevenueChart(data, period);
+                    })
+                    .catch(error => {
+                        console.error('Lỗi khi lấy dữ liệu doanh thu:', error);
+                    });
+            }
+
+            // Hàm render biểu đồ
+            function renderRevenueChart(data, period) {
+                const labels = data.labels;
+                const revenues = data.revenues;
+                const chartTitle = data.monthTitle || 'Doanh thu';
+
+                if (chartInstance) {
+                    chartInstance.destroy();
+                }
+
+                chartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Doanh thu (VNĐ)',
+                            data: revenues,
+                            backgroundColor: 'rgba(26, 188, 156, 0.6)',
+                            borderColor: '#16a085',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: chartTitle,
+                                font: {
+                                    size: 18
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return new Intl.NumberFormat('vi-VN').format(context.parsed.y) + ' VNĐ';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return new Intl.NumberFormat('vi-VN').format(value);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Khi thay đổi chọn kiểu xem
+            periodSelect.addEventListener('change', function() {
+                fetchRevenueData(this.value);
+            });
+
+            // Khi thay đổi chọn tháng (chỉ áp dụng cho kiểu xem 'daily' hoặc 'monthly')
+            monthPicker.addEventListener('change', function() {
+                if (periodSelect.value === 'daily') {
+                    fetchRevenueData('daily');
+                } else if (periodSelect.value === 'monthly') {
+                    fetchRevenueData('monthly');
+                }
+            });
+
+            // Khởi tạo tháng mặc định
+            const today = new Date();
+            const monthStr = today.toISOString().slice(0, 7); // yyyy-MM
+            monthPicker.value = monthStr;
+
+            fetchRevenueData();  // Mặc định là kiểu xem daily
+        });
+
+    </script>
+
+
+    <!--top san pham-->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let chartInstance = null;
+            let productData = [];
+
+            const monthSelect = document.getElementById('monthSelect');
+            const yearSelect = document.getElementById('yearSelect');
+            const viewOption = document.getElementById('viewOption');
+            const exportBtn = document.getElementById('exportExcelBtn');
+            const chartCanvas = document.getElementById('topProductChart').getContext('2d');
+
+            // Tải dữ liệu khi chọn tháng/năm
+            function loadTopProducts() {
+                const month = monthSelect.value;
+                const year = yearSelect.value;
+
+                fetch(`/dashboard/top-products?month=${month}&year=${year}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const filteredData = data.filter(p => p.productName !== null);
+
+                        if (filteredData.length === 0) {
+                            alert(`Không có dữ liệu cho tháng ${month}/${year}.`);
+                            productData = [];
+                            exportBtn.disabled = true;
+                            if (chartInstance) chartInstance.destroy();
+                        } else {
+                            productData = filteredData;
+                            exportBtn.disabled = false;
+                            renderChart(viewOption.value);
+                        }
+                    }).catch(error => {
+                    alert("Lỗi tải dữ liệu.");
+                    console.error("Fetch error:", error);
+                });
+            }
+
+            // Render biểu đồ theo lựa chọn
+            function renderChart(viewType) {
+                const labels = productData.map(p => p.productName);
+                const dataset = viewType === 'quantity'
+                    ? productData.map(p => p.totalQuantity)
+                    : productData.map(p => p.totalRevenue);
+
+                const labelText = viewType === 'quantity' ? 'Số lượng bán' : 'Doanh thu (VNĐ)';
+                const bgColor = viewType === 'quantity' ? 'rgba(75, 192, 192, 0.6)' : 'rgba(255, 99, 132, 0.6)';
+
+                if (chartInstance) {
+                    chartInstance.destroy();
+                }
+
+                chartInstance = new Chart(chartCanvas, {
+                    type: 'bar',  // vẫn là bar nhưng đổi trục
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: labelText,
+                            data: dataset,
+                            backgroundColor: bgColor
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',  // <-- Đây là điểm quan trọng để hiển thị ngang
+                        responsive: true,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: viewType === 'quantity' ? 'Top sản phẩm theo lượt bán' : 'Top sản phẩm theo doanh thu'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.parsed.x} - ${context.label}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+
+
+            // Xuất Excel
+            exportBtn.addEventListener('click', () => {
+                if (productData.length === 0) {
+                    alert("Không có dữ liệu để xuất Excel.");
+                    return;
+                }
+
+                const month = monthSelect.value;
+                const year = yearSelect.value;
+
+                const worksheetData = [
+                    ["Tên sản phẩm", "Số lượng bán", "Doanh thu (VNĐ)"],
+                    ...productData.map(p => [p.productName, p.totalQuantity, p.totalRevenue])
+                ];
+
+                const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "Top Products");
+
+                const fileName = `TopProducts_${month}_${year}.xlsx`;
+                XLSX.writeFile(workbook, fileName);
+            });
+
+            // Sự kiện thay đổi tháng/năm/view
+            monthSelect.addEventListener('change', loadTopProducts);
+            yearSelect.addEventListener('change', loadTopProducts);
+            viewOption.addEventListener('change', () => {
+                if (productData.length > 0) {
+                    renderChart(viewOption.value);
+                }
+            });
+
+            // Tải dữ liệu ban đầu (tháng hiện tại)
+            const currentMonth = new Date().getMonth() + 1;
+            const currentYear = new Date().getFullYear();
+            monthSelect.value = currentMonth;
+            yearSelect.value = currentYear;
+            loadTopProducts();
+        });
+    </script>
+
+
+
+
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+    <h2><a href="/home">RSMS</a></h2>
+    <div class="user-info">
+        <!--        <img  th:src="${user.avatar}" alt="User Avatar" class="user-avatar"/>-->
+        <div class="dropdown">
+            <!--            <span th:text="${account.displayName}" class="user-name" onclick="toggleDropdown()"> ▼</span>-->
+            <div id="dropdown-menu" class="dropdown-content">
+                <a href="/user/userprofile">👤 View Profile</a>
+                <a href="/user/changepw" id="changepw">🔑 Change password</a>
+                <a href="/static#" id="logout">🚪 Logout</a>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <h2>Feature</h2>
+    <a href="/user/userprofile">Profile</a>
+    <a href="/account/listStaff">Staff Account Management</a>
+    <a href="/product/listProduct">Rice Management</a>
+    <a href="/customer/listCustomer">Customer Management</a>
+    <a href="/warehouse/listWarehouseZone">Zone Management</a>
+    <a href="" class="active">Dashboard</a>
+    <a href="/bill/listBill">Invoice Management</a>
+</div>
+<!-- Content -->
+<div class="content" id="content">
+    <h1 class="dashboard-title">Rice Sales Dashboard</h1>
+    <!-- Search Box -->
+
+    <form class="form-search" action="/dashboard" method="get">
+        <input type="text" name="search" placeholder="Search by product, customer, or order..." style="width: 80%;">
+        <button type="submit">Search</button>
+    </form>
+    <!-- Dashboard Cards -->
+    <div class="cards-container">
+        <div class="card primary-card">
+            <div class="card-header">
+                <div class="card-title">Doanh thu hôm nay</div>
+                <div class="card-icon">📅</div>
+            </div>
+            <div class="card-value">
+                ₫<span th:text="${#numbers.formatInteger(dashboardData.todayRevenue, 0, 'COMMA')}"></span>
+
+
+            </div>
+            <div class="card-footer">
+                <span th:text="${dashboardData.todayBillCount}"></span> hóa đơn hôm nay
+
+            </div>
+        </div>
+
+        <div class="card warning-card">
+            <div class="card-header">
+                <div class="card-title">Doanh thu hôm nay</div>
+                <div class="card-icon">💰</div>
+            </div>
+            <div class="card-value">
+                <span th:classappend="${dashboardData.revenueChangePercentage >= 0} ? 'card-up text-green' : 'card-down text-red'">
+            <span th:if="${dashboardData.revenueChangePercentage > 0}" th:text="'↑ '"></span>
+            <span th:if="${dashboardData.revenueChangePercentage < 0}" th:text="'↓ '"></span>
+            <span th:text="${#numbers.formatDecimal(dashboardData.revenueChangePercentage, 1, 2)}"></span>%
+        </span>
+            </div>
+            <div class="card-footer">
+         so với hôm qua ₫<span th:text="${#numbers.formatInteger(dashboardData.yesterdayRevenue, 0, 'COMMA')}"></span>
+            </div>
+        </div>
+
+        <div class="card success-card">
+            <div class="card-header">
+                <div class="card-title">Total Inventory</div>
+                <div class="card-icon">📦</div>
+            </div>
+            <div class="card-value">12,540 kg</div>
+            <div class="card-footer">
+                <span class="card-down">↓ 3.8%</span> from last month
+            </div>
+        </div>
+
+        <div class="card danger-card">
+            <div class="card-header">
+                <div class="card-title">Low Stock Items</div>
+                <div class="card-icon">⚠️</div>
+            </div>
+            <div class="card-value">3</div>
+            <div class="card-footer">
+                <span>Action required</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sales Chart -->
+    <div class="chart-container">
+        <div class="chart-header">
+            <div class="chart-title">Sales Overview</div>
+
+            <div class="chart-options">
+                <div>
+                    <label for="periodSelect">Chọn kiểu xem: </label>
+                    <select id="periodSelect">
+                        <option value="daily">Theo ngày</option>
+                        <option value="weekly">Theo tuần</option>
+                        <option value="monthly">Theo tháng</option>
+                        <option value="yearly">Theo năm</option>
+                    </select>
+                </div>
+
+                <!-- Phần chọn tháng, chỉ hiển thị khi chọn kiểu xem 'daily' -->
+                <div>
+                    <label for="monthPicker">Chọn tháng: </label>
+                    <input type="month" id="monthPicker" />
+                </div>
+            </div>
+        </div>
+        <div class="chart">
+            <canvas id="revenueChart" width="1400" height="300"></canvas>
+        </div>
+    </div>
+    <!-- Rice Types Chart -->
+    <div class="chart-container">
+    <div class="chart-header">
+        <div class="chart-title">Top sản phẩm</div>
+        <div class="chart-options">
+            <span>Tháng:</span>
+            <select id="monthSelect">
+                <!-- Tạo 12 option tháng -->
+                <script>
+                    for (let m = 1; m <= 12; m++) {
+                        document.write(`<option value="${m}">${m}</option>`);
+                    }
+                </script>
+            </select>
+            <span>Năm:</span>
+            <select id="yearSelect">
+                <script>
+                    const currentYear = new Date().getFullYear();
+                    for (let y = currentYear - 2; y <= currentYear; y++) {
+                        document.write(`<option value="${y}">${y}</option>`);
+                    }
+                </script>
+            </select>
+
+            <span>Xem:</span>
+            <select id="viewOption">
+                <option value="quantity">Theo số lượng</option>
+                <option value="revenue" selected>Theo doanh thu</option>
+            </select>
+            <button id="exportExcelBtn">Export Excel</button>
+
+        </div>
+
+    </div>
+    <canvas id="topProductChart" width="400" height="200"></canvas>
+    </div>
+
+
+
+    <!-- Inventory Table -->
+    <h1>Inventory Status</h1>
+    <table class="styled-table">
+        <thead>
+        <tr>
+            <th>Rice Type</th>
+            <th>Quantity (kg)</th>
+            <th>Last Update</th>
+            <th>Status</th>
+            <th>Retail Price (₫/kg)</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>Jasmine Rice</td>
+            <td>3,450</td>
+            <td>15/03/2025</td>
+            <td><span class="status status-in-stock">In Stock</span></td>
+            <td>22,000</td>
+            <td>
+                <div style="display: flex; gap: 5px;">
+                    <button style="background-color: #06999c">Edit</button>
+                    <button style="background-color: #c0392b">Delete</button>
+                </div>
+            </td>
+        </tr>
+
+        </tbody>
+    </table>
+    <!-- Pagination -->
+    <div class="pagination">
+        <a href="#">Previous</a>
+        <span>Page 1 of 3</span>
+        <a href="#">Next</a>
+    </div>
+    <!-- Recent Orders -->
+    <h1>Recent Orders</h1>
+    <table class="styled-table">
+        <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Date</th>
+            <th>Rice Type</th>
+            <th>Quantity (kg)</th>
+            <th>Total (₫)</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>#ORD-2025-1203</td>
+            <td>Công ty TNHH Thực phẩm ABC</td>
+            <td>18/03/2025</td>
+            <td>Gạo ST25</td>
+            <td>500</td>
+            <td>19,000,000</td>
+            <td><span class="status status-in-stock">Delivered</span></td>
+            <td>
+                <div style="display: flex; gap: 5px;">
+                    <button style="background-color: #06999c">View</button>
+                    <button style="background-color: #c0392b">Cancel</button>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td>#ORD-2025-1202</td>
+            <td>Nhà hàng Sài Gòn</td>
+            <td>18/03/2025</td>
+            <td>Jasmine Rice</td>
+            <td>200</td>
+            <td>4,400,000</td>
+            <td><span class="status status-low">Processing</span></td>
+            <td>
+                <div style="display: flex; gap: 5px;">
+                    <button style="background-color: #06999c">View</button>
+                    <button style="background-color: #c0392b">Cancel</button>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td>#ORD-2025-1201</td>
+            <td>Nguyễn Văn A</td>
+            <td>17/03/2025</td>
+            <td>Gạo Lứt</td>
+            <td>50</td>
+            <td>1,500,000</td>
+            <td><span class="status status-in-stock">Delivered</span></td>
+            <td>
+                <div style="display: flex; gap: 5px;">
+                    <button style="background-color: #06999c">View</button>
+                    <button style="background-color: #c0392b">Cancel</button>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <!-- Pagination -->
+    <div class="pagination">
+        <a href="#">Previous</a>
+        <span>Page 1 of 5</span>
+        <a href="#">Next</a>
+    </div>
+</div>
+<footer>
+    &copy; 2025 Rice Sales Management. All Rights Reserved.
+</footer>
+
+<script>
+    document.getElementById('exportExcelBtn').addEventListener('click', function() {
+        if (productData.length === 0) {
+            alert("Không có dữ liệu để xuất Excel.");
+            return;
+        }
+
+        const dataForExcel = productData.map(p => ({
+            "Tên sản phẩm": p.productName,
+            "Số lượng bán": p.totalQuantity,
+            "Doanh thu (VNĐ)": p.totalRevenue
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(dataForExcel);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Top Products");
+
+        const month = document.getElementById('monthSelect').value;
+        const year = document.getElementById('yearSelect').value;
+        const filename = `top_products_${month}_${year}.xlsx`;
+
+        XLSX.writeFile(workbook, filename);
+    });
+
+</script>
+<script>
+    document.getElementById('periodSelect').addEventListener('change', function() {
+        var period = this.value;
+        var monthPicker = document.getElementById('monthPicker');
+
+        // Hiển thị phần chọn tháng chỉ khi chọn kiểu xem 'daily'
+        if (period === 'daily') {
+            monthPicker.parentElement.style.display = 'block';
+        } else {
+            monthPicker.parentElement.style.display = 'none';
+        }
+    });
+</script>
+
+</body>
+</html>
