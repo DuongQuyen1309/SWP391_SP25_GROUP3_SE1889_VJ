@@ -20,4 +20,6 @@ public interface StoreRepository extends JpaRepository<Store, Long>, JpaSpecific
     @Query("SELECT a.displayName FROM Account a WHERE a.id = (SELECT s.storeId FROM Store s WHERE s.id = :storeId)")
     String findOwnerNameByStoreId(@Param("storeId") Long storeId);
 
+    Store findByStoreId(Long storeId); // Tìm store theo storeId
+
 }

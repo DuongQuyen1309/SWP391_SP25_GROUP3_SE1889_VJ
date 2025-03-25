@@ -48,6 +48,7 @@ public class SecurityConfig {
                         .requestMatchers("/register","/login","/changepw","/api/**","/user/**","/forgotpw","/resetpw", "/css/**","/auth/**", "/js/**", "/images/**").permitAll() // Cho phép truy cập trang đăng ký
                         .requestMatchers("/account/listOwner").hasAuthority("ADMIN")
                         .requestMatchers("/dashboard", "/dashboard/").hasAuthority("OWNER")
+                        .requestMatchers("/store/**").hasAuthority("OWNER") // 👈 Thêm dòng này
 
                         .requestMatchers(("/account/listStaff")).hasAuthority("OWNER")
 
