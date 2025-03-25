@@ -256,29 +256,40 @@ public class AccountController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
             @RequestParam(required = false, name = "search") String search,
+            @RequestParam(defaultValue = "id") String sort,
+            @RequestParam(defaultValue = "asc") String order,
             RedirectAttributes redirectAttributes) {
 
         // Lấy thông tin người dùng từ token
         Account account = accountService.getAccountFromToken(token).orElse(null);
+        if (account == null) {
+            redirectAttributes.addFlashAttribute("error", "Bạn cần đăng nhập!");
+            return "redirect:/login";
+        }
+
         Optional<Users> user = userService.getUserProfile(account.getUserId());
         model.addAttribute("user", user.orElse(null));
-
         model.addAttribute("account", account);
+
+        // Xử lý sắp xếp
+        Sort.Direction direction = order.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sort));
 
         // Tìm kiếm hoặc lấy danh sách Staff
         Page<Map<String, Object>> staffPage;
         if (search != null && !search.isEmpty()) {
-            staffPage = accountService.searchStaffAccounts(account,search, page, size);
+            staffPage = accountService.searchStaffAccounts(account, search, pageable);
         } else {
-            staffPage = accountService.getStaffAccounts(account,page, size);
+            staffPage = accountService.getStaffAccounts(account, pageable);
         }
-
 
         // Đưa dữ liệu vào model
         model.addAttribute("accounts", staffPage.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", staffPage.getTotalPages());
         model.addAttribute("search", search);
+        model.addAttribute("sort", sort);
+        model.addAttribute("order", order);
 
         return "staff/listStaff";
     }

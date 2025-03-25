@@ -30,7 +30,8 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
 
     Optional<Account> findById(Long id);
     Page<Account> findByUserIdInAndIsDeleteFalse(List<Long> userIds, Pageable pageable); // Chỉ lấy tài khoản chưa xóa
-
+    @Query("SELECT a FROM Account a WHERE a.storeId = :storeId")
+    Optional<Account> getOwnerNameByStoreId(@Param("storeId") Long storeId);
     @Query("SELECT a FROM Account a WHERE (LOWER(a.username) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(a.displayName) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(a.email) LIKE LOWER(CONCAT('%', :keyword, '%')))"+
@@ -45,6 +46,7 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
             "OR LOWER(u.phone) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
             "AND a.userId IN :userIds AND a.isDelete = false")
     Page<Account> searchStaffAccounts(@Param("keyword") String keyword, @Param("userIds") List<Long> userIds, Pageable pageable);
+
 
     Optional<Account> findByResetTokenAndIsDeleteFalse(String resetToken);
 
