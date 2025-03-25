@@ -6,6 +6,8 @@ import com.demoproject.dto.TopProductDTO;
 import com.demoproject.entity.Bill;
 import com.demoproject.repository.DashboardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -17,21 +19,21 @@ public class DashboardService {
     @Autowired
     private DashboardRepository dashboardRepository;
 
-    public DashboardDTO getDashboardData() {
+    public DashboardDTO getDashboardData(Long storeId) {
         DashboardDTO dto = new DashboardDTO();
-        dto.setTotalRevenue(dashboardRepository.getTotalRevenue());
+        dto.setTotalRevenue(dashboardRepository.getTotalRevenue(storeId));
 
         // Doanh thu hôm nay
-        dto.setTodayRevenue(dashboardRepository.getTodayRevenue());
-        dto.setTodayBillCount(dashboardRepository.getTodayBillCount());
+        dto.setTodayRevenue(dashboardRepository.getTodayRevenue(storeId));
+        dto.setTodayBillCount(dashboardRepository.getTodayBillCount(storeId));
 
         LocalDate today = LocalDate.now();
         LocalDate yesterday = today.minusDays(1); // Lấy ngày hôm qua
 
-        dto.setYesterdayRevenue(dashboardRepository.getRevenueByDate(yesterday));
-        dto.setYesterdayBillCount(dashboardRepository.getBillCountByDate(yesterday));
-        Long todayRevenue = dashboardRepository.getRevenueByDate(today);
-        Long yesterdayRevenue = dashboardRepository.getRevenueByDate(yesterday);
+        dto.setYesterdayRevenue(dashboardRepository.getRevenueByDate(yesterday,storeId));
+        dto.setYesterdayBillCount(dashboardRepository.getBillCountByDate(yesterday,storeId));
+        Long todayRevenue = dashboardRepository.getRevenueByDate(today,storeId);
+        Long yesterdayRevenue = dashboardRepository.getRevenueByDate(yesterday,storeId);
         // Tính % thay đổi doanh thu
         if (yesterdayRevenue != null && yesterdayRevenue > 0) {
             double revenueChange = ((double) (todayRevenue - yesterdayRevenue) / yesterdayRevenue) * 100;
@@ -152,8 +154,8 @@ public class DashboardService {
 
 
 
-    public List<TopProductDTO> getTopProductsByQuantity(int month, int year) {
-        List<Bill> bills = dashboardRepository.findBillsByMonthAndYear(month, year);
+    public List<TopProductDTO> getTopProductsByQuantity(int month, int year,long storeId) {
+        List<Bill> bills = dashboardRepository.findBillsByMonthAndYear(month, year,storeId);
         Map<String, TopProductDTO> productMap = new HashMap<>();
 
         for (Bill bill : bills) {
@@ -183,12 +185,21 @@ public class DashboardService {
         return result.size() > 10 ? result.subList(0, 10) : result;
     }
 
-    public List<Object[]> getRevenueByDayInMonth(int month, int year) {
-        return dashboardRepository.getRevenueByDayInMonth(month, year);
+    public List<Object[]> getRevenueByDayInMonth(Long storeId,int month, int year) {
+        return dashboardRepository.getRevenueByDayInMonth(storeId,month, year);
     }
 
-    public List<Object[]> getRevenueByMonthInYear(int year) {
-        return dashboardRepository.getRevenueByMonthInYear(year);
+    public List<Object[]> getRevenueByMonthInYear(int year,long storeId) {
+        return dashboardRepository.getRevenueByMonthInYear(year,storeId);
+    }
+
+    public List<Object[]> getRevenueByYearRange(int startYear, int endYear) {
+        return dashboardRepository.getRevenueByYearRange(startYear, endYear);
+    }
+
+
+    public Page<Bill> getBillsToday(Long storeId, Pageable pageable) {
+        return dashboardRepository.findTodayBills(storeId, pageable);
     }
 
 

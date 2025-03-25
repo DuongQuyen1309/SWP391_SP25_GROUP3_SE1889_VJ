@@ -40,5 +40,8 @@ public class CustomerDataDTO {
 
     public int getMoneyState() { return moneyState; }
     public void setMoneyState(int moneyState) { this.moneyState = moneyState; }
+
+
+
 }
 

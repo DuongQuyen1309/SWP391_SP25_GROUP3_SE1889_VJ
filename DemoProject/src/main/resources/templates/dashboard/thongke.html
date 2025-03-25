@@ -9,7 +9,114 @@
     <link rel="stylesheet" href="/css/thongke.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        .view-icon {
+            text-decoration: none; /* Bỏ gạch chân */
 
+            display: inline-block; /* Đảm bảo không bị ảnh hưởng bởi dòng */
+            color: deepskyblue; /* Giữ nguyên màu chữ */
+        }
+
+        .view-icon:hover {
+            color: #007bff; /* Màu khi hover */
+        }
+
+        /* Hiển thị popup dạng overlay */
+        .success-card {
+            cursor: pointer; /* Biến card thành dạng có thể bấm */
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .success-card:hover {
+            transform: scale(1.02); /* Hiệu ứng phóng to nhẹ */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Hiệu ứng đổ bóng */
+        }
+        .popup-container {
+            display: none; /* Mặc định ẩn */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5); /* Màn hình tối mờ */
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Nội dung popup */
+        .popup-content {
+            position: relative;
+            background: white;
+            padding: 20px;
+            width: 600px;
+            max-width: 90%;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Nút đóng popup */
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close-btn:hover {
+            color: red;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background: #f4f4f4;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .pagination button {
+            padding: 5px 10px;
+            margin: 0 5px;
+            cursor: pointer;
+            border: none;
+            background: deepskyblue;
+            color: white;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+
+        .pagination button:hover {
+            background: #0056b3;
+        }
+
+        .pagination span {
+            line-height: 30px;
+        }
+
+    </style>
     <script>
         function toggleSidebar() {
             const sidebar = document.getElementById("sidebar");
@@ -42,113 +149,113 @@
 
     </script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const ctx = document.getElementById('revenueChart').getContext('2d');
-            const periodSelect = document.getElementById('periodSelect');
-            const monthPicker = document.getElementById('monthPicker');
-            let chartInstance = null;
+<!--    <script>-->
+<!--        document.addEventListener('DOMContentLoaded', function() {-->
+<!--            const ctx = document.getElementById('revenueChart').getContext('2d');-->
+<!--            const periodSelect = document.getElementById('periodSelect');-->
+<!--            const monthPicker = document.getElementById('monthPicker');-->
+<!--            let chartInstance = null;-->
 
-            // Hàm lấy dữ liệu doanh thu
-            function fetchRevenueData(period = 'daily') {
-                const month = monthPicker.value;  // Lấy giá trị tháng (yyyy-MM)
-                const year = month ? month.slice(0, 4) : null;  // Lấy năm từ tháng (yyyy-MM)
-                let url = `/dashboard/api/revenue?period=${period}`;
+<!--            // Hàm lấy dữ liệu doanh thu-->
+<!--            function fetchRevenueData(period = 'daily') {-->
+<!--                const month = monthPicker.value;  // Lấy giá trị tháng (yyyy-MM)-->
+<!--                const year = month ? month.slice(0, 4) : null;  // Lấy năm từ tháng (yyyy-MM)-->
+<!--                let url = `/dashboard/api/revenue?period=${period}`;-->
 
-                // Chỉ gửi tháng khi chọn 'daily', gửi cả tháng và năm khi chọn 'monthly'
-                if (period === 'daily' && month) {
-                    url += `&month=${month}`;
-                } else if (period === 'monthly' && year) {
-                    url += `&year=${year}`;  // Thêm tham số năm cho kiểu "monthly"
-                }
+<!--                // Chỉ gửi tháng khi chọn 'daily', gửi cả tháng và năm khi chọn 'monthly'-->
+<!--                if (period === 'daily' && month) {-->
+<!--                    url += `&month=${month}`;-->
+<!--                } else if (period === 'monthly' && year) {-->
+<!--                    url += `&year=${year}`;  // Thêm tham số năm cho kiểu "monthly"-->
+<!--                }-->
 
-                fetch(url)
-                    .then(response => response.json())
-                    .then(data => {
-                        renderRevenueChart(data, period);
-                    })
-                    .catch(error => {
-                        console.error('Lỗi khi lấy dữ liệu doanh thu:', error);
-                    });
-            }
+<!--                fetch(url)-->
+<!--                    .then(response => response.json())-->
+<!--                    .then(data => {-->
+<!--                        renderRevenueChart(data, period);-->
+<!--                    })-->
+<!--                    .catch(error => {-->
+<!--                        console.error('Lỗi khi lấy dữ liệu doanh thu:', error);-->
+<!--                    });-->
+<!--            }-->
 
-            // Hàm render biểu đồ
-            function renderRevenueChart(data, period) {
-                const labels = data.labels;
-                const revenues = data.revenues;
-                const chartTitle = data.monthTitle || 'Doanh thu';
+<!--            // Hàm render biểu đồ-->
+<!--            function renderRevenueChart(data, period) {-->
+<!--                const labels = data.labels;-->
+<!--                const revenues = data.revenues;-->
+<!--                const chartTitle = data.monthTitle || 'Doanh thu';-->
 
-                if (chartInstance) {
-                    chartInstance.destroy();
-                }
+<!--                if (chartInstance) {-->
+<!--                    chartInstance.destroy();-->
+<!--                }-->
 
-                chartInstance = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'Doanh thu (VNĐ)',
-                            data: revenues,
-                            backgroundColor: 'rgba(26, 188, 156, 0.6)',
-                            borderColor: '#16a085',
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            title: {
-                                display: true,
-                                text: chartTitle,
-                                font: {
-                                    size: 18
-                                }
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        return new Intl.NumberFormat('vi-VN').format(context.parsed.y) + ' VNĐ';
-                                    }
-                                }
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    callback: function(value) {
-                                        return new Intl.NumberFormat('vi-VN').format(value);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-            }
+<!--                chartInstance = new Chart(ctx, {-->
+<!--                    type: 'bar',-->
+<!--                    data: {-->
+<!--                        labels: labels,-->
+<!--                        datasets: [{-->
+<!--                            label: 'Doanh thu (VNĐ)',-->
+<!--                            data: revenues,-->
+<!--                            backgroundColor: 'rgba(26, 188, 156, 0.6)',-->
+<!--                            borderColor: '#16a085',-->
+<!--                            borderWidth: 1-->
+<!--                        }]-->
+<!--                    },-->
+<!--                    options: {-->
+<!--                        responsive: true,-->
+<!--                        plugins: {-->
+<!--                            title: {-->
+<!--                                display: true,-->
+<!--                                text: chartTitle,-->
+<!--                                font: {-->
+<!--                                    size: 18-->
+<!--                                }-->
+<!--                            },-->
+<!--                            tooltip: {-->
+<!--                                callbacks: {-->
+<!--                                    label: function(context) {-->
+<!--                                        return new Intl.NumberFormat('vi-VN').format(context.parsed.y) + ' VNĐ';-->
+<!--                                    }-->
+<!--                                }-->
+<!--                            }-->
+<!--                        },-->
+<!--                        scales: {-->
+<!--                            y: {-->
+<!--                                beginAtZero: true,-->
+<!--                                ticks: {-->
+<!--                                    callback: function(value) {-->
+<!--                                        return new Intl.NumberFormat('vi-VN').format(value);-->
+<!--                                    }-->
+<!--                                }-->
+<!--                            }-->
+<!--                        }-->
+<!--                    }-->
+<!--                });-->
+<!--            }-->
 
-            // Khi thay đổi chọn kiểu xem
-            periodSelect.addEventListener('change', function() {
-                fetchRevenueData(this.value);
-            });
+<!--            // Khi thay đổi chọn kiểu xem-->
+<!--            periodSelect.addEventListener('change', function() {-->
+<!--                fetchRevenueData(this.value);-->
+<!--            });-->
 
-            // Khi thay đổi chọn tháng (chỉ áp dụng cho kiểu xem 'daily' hoặc 'monthly')
-            monthPicker.addEventListener('change', function() {
-                if (periodSelect.value === 'daily') {
-                    fetchRevenueData('daily');
-                } else if (periodSelect.value === 'monthly') {
-                    fetchRevenueData('monthly');
-                }
-            });
+<!--            // Khi thay đổi chọn tháng (chỉ áp dụng cho kiểu xem 'daily' hoặc 'monthly')-->
+<!--            monthPicker.addEventListener('change', function() {-->
+<!--                if (periodSelect.value === 'daily') {-->
+<!--                    fetchRevenueData('daily');-->
+<!--                } else if (periodSelect.value === 'monthly') {-->
+<!--                    fetchRevenueData('monthly');-->
+<!--                }-->
+<!--            });-->
 
-            // Khởi tạo tháng mặc định
-            const today = new Date();
-            const monthStr = today.toISOString().slice(0, 7); // yyyy-MM
-            monthPicker.value = monthStr;
+<!--            // Khởi tạo tháng mặc định-->
+<!--            const today = new Date();-->
+<!--            const monthStr = today.toISOString().slice(0, 7); // yyyy-MM-->
+<!--            monthPicker.value = monthStr;-->
 
-            fetchRevenueData();  // Mặc định là kiểu xem daily
-        });
+<!--            fetchRevenueData();  // Mặc định là kiểu xem daily-->
+<!--        });-->
 
-    </script>
+<!--    </script>-->
 
 
     <!--top san pham-->
@@ -280,6 +387,198 @@
             loadTopProducts();
         });
     </script>
+<!--    chart doanh thu-->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const today = new Date();
+            const periodSelect = document.getElementById("revenuePeriodSelect");
+            const monthSelect = document.getElementById("revenueMonthSelect");
+            const yearSelect = document.getElementById("revenueYearSelect");
+            const monthLabel = document.getElementById("monthLabel");
+            const yearLabel = document.getElementById("yearLabel");
+            let revenueChart = null;
+
+            // Tạo danh sách năm (5 năm gần nhất)
+            const currentYear = today.getFullYear();
+            for (let i = currentYear; i >= currentYear - 4; i--) {
+                const option = document.createElement("option");
+                option.value = i;
+                option.textContent = i;
+                yearSelect.appendChild(option);
+            }
+
+            // Tạo danh sách tháng (1 - 12)
+            for (let i = 1; i <= 12; i++) {
+                const option = document.createElement("option");
+                option.value = i;
+                option.textContent = `Tháng ${i}`;
+                monthSelect.appendChild(option);
+            }
+
+            // Chọn mặc định là tháng và năm hiện tại
+            monthSelect.value = today.getMonth() + 1;
+            yearSelect.value = currentYear;
+
+            function fetchAndRenderChart() {
+                const period = periodSelect.value;
+                const month = monthSelect.value;
+                const year = yearSelect.value;
+                let url = `/dashboard/revenue/${period}?year=${year}`;
+
+                if (period === "daily") {
+                    url += `&month=${month}`;
+                }
+
+                fetch(url)
+                    .then(response => response.json())
+                    .then(responseData => {
+                        const data = responseData.data;
+                        let labels, values;
+
+                        if (period === "daily") {
+                            labels = data.map(item => `Ngày ${item.day}`);
+                            values = data.map(item => item.revenue);
+                            document.getElementById("chartTitle").innerText = `Doanh thu theo ngày - Tháng ${month}, ${year}`;
+                        } else if (period === "monthly") {
+                            labels = Array.from({ length: 12 }, (_, i) => `Tháng ${i + 1}`);
+                            values = Array(12).fill(0);
+                            data.forEach(item => values[item.month - 1] = item.revenue || 0);
+                            document.getElementById("chartTitle").innerText = `Doanh thu theo tháng - Năm ${year}`;
+                        } else if (period === "yearly") {
+                            labels = Array.from({ length: 5 }, (_, i) => `${currentYear - i}`);
+                            values = Array(5).fill(0);
+                            data.forEach(item => {
+                                const index = labels.indexOf(`${item.year}`);
+                                if (index !== -1) values[index] = item.revenue || 0;
+                            });
+                            document.getElementById("chartTitle").innerText = `Doanh thu 5 năm gần nhất`;
+                        }
+
+                        if (revenueChart) {
+                            revenueChart.destroy();
+                        }
+
+                        revenueChart = new Chart(document.getElementById('salesOverviewChart').getContext('2d'), {
+                            type: 'bar',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: 'Doanh thu (VNĐ)',
+                                    data: values,
+                                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                                    borderColor: 'rgba(54, 162, 235, 1)',
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                scales: {
+                                    x: { title: { display: true, text: period === 'daily' ? 'Ngày' : (period === 'monthly' ? 'Tháng' : 'Năm') } },
+                                    y: { title: { display: true, text: 'Doanh thu' } }
+                                }
+                            }
+                        });
+                    });
+            }
+
+            function updateDropdownVisibility() {
+                const period = periodSelect.value;
+                if (period === "daily") {
+                    monthLabel.style.display = "inline-block";
+                    monthSelect.style.display = "inline-block";
+                    yearLabel.style.display = "inline-block";
+                    yearSelect.style.display = "inline-block";
+                } else if (period === "monthly") {
+                    monthLabel.style.display = "none";
+                    monthSelect.style.display = "none";
+                    yearLabel.style.display = "inline-block";
+                    yearSelect.style.display = "inline-block";
+                } else {
+                    monthLabel.style.display = "none";
+                    monthSelect.style.display = "none";
+                    yearLabel.style.display = "none";
+                    yearSelect.style.display = "none";
+                }
+                fetchAndRenderChart();
+            }
+
+            periodSelect.addEventListener("change", updateDropdownVisibility);
+            monthSelect.addEventListener("change", fetchAndRenderChart);
+            yearSelect.addEventListener("change", fetchAndRenderChart);
+
+            updateDropdownVisibility();
+        });
+
+    </script>
+
+    <script>
+        let currentPage = 0;
+        const rowsPerPage = 5;
+
+        function openBillPopup() {
+            document.getElementById("billPopup").style.display = "flex";
+            fetchBillsToday();
+        }
+
+        function closeBillPopup() {
+            document.getElementById("billPopup").style.display = "none";
+        }
+
+        // Gọi API để lấy danh sách hóa đơn hôm nay (có phân trang)
+        function fetchBillsToday(page = 0, searchKeyword = "") {
+            fetch(`/dashboard/bills/today?page=${page}&size=${rowsPerPage}&search=${searchKeyword}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (!data || !data.content) {
+                        console.error("API không trả về danh sách hóa đơn");
+                        return;
+                    }
+
+                    let billTableBody = document.getElementById("billTableBody");
+                    billTableBody.innerHTML = "";
+
+                    data.content.forEach(bill => {
+                        let row = `<tr>
+                        <td>${bill.id}</td>
+                        <td>${bill.customerName || 'Khách lẻ'}</td>
+                        <td>${bill.totalMoney.toLocaleString()} đ</td>
+                        <td>${new Date(bill.createdAt).toLocaleString()}</td>
+                        <td>
+                        <a href="/bill/bill/billDetail?id=${bill.id}" class="view-icon">
+                            Chi tiết
+                        </a>
+                    </td>
+
+                    </tr>`;
+                        billTableBody.innerHTML += row;
+                    });
+
+                    // Cập nhật thông tin phân trang
+                    currentPage = page;
+                    document.getElementById("pageInfo").innerText = `Trang ${page + 1} / ${data.totalPages}`;
+                    document.getElementById("prevBtn").disabled = page === 0;
+                    document.getElementById("nextBtn").disabled = page >= data.totalPages - 1;
+                })
+                .catch(error => console.error("Lỗi khi gọi API:", error));
+        }
+
+        // Chuyển về trang trước
+        function prevPage() {
+            if (currentPage > 0) {
+                fetchBillsToday(currentPage - 1, document.getElementById("searchBill").value);
+            }
+        }
+
+        // Chuyển sang trang tiếp theo
+        function nextPage() {
+            fetchBillsToday(currentPage + 1, document.getElementById("searchBill").value);
+        }
+
+        // Tìm kiếm hóa đơn
+        function searchBills() {
+            fetchBillsToday(0, document.getElementById("searchBill").value);
+        }
+    </script>
 
 
 
@@ -287,21 +586,23 @@
 </head>
 <body>
 
-<!-- Header -->
+<<!-- Header -->
 <div class="header">
     <button class="menu-btn" onclick="toggleSidebar()">☰</button>
     <h2><a href="/home">RSMS</a></h2>
     <div class="user-info">
-        <!--        <img  th:src="${user.avatar}" alt="User Avatar" class="user-avatar"/>-->
+        <img   th:src="${user.avatar} + '?t=' + ${#dates.createNow().getTime()}" alt="User Avatar" class="user-avatar"/>
         <div class="dropdown">
-            <!--            <span th:text="${account.displayName}" class="user-name" onclick="toggleDropdown()"> ▼</span>-->
+            <span th:text="${account.displayName}" class="user-name" onclick="toggleDropdown()"> ▼</span>
             <div id="dropdown-menu" class="dropdown-content">
                 <a href="/user/userprofile">👤 View Profile</a>
                 <a href="/user/changepw" id="changepw">🔑 Change password</a>
                 <a href="/static#" id="logout">🚪 Logout</a>
+
             </div>
         </div>
     </div>
+
 </div>
 <!-- Sidebar -->
 <div class="sidebar" id="sidebar">
@@ -358,16 +659,17 @@
             </div>
         </div>
 
-        <div class="card success-card">
+        <div class="card success-card" onclick="openBillPopup()">
             <div class="card-header">
                 <div class="card-title">Total Inventory</div>
                 <div class="card-icon">📦</div>
             </div>
-            <div class="card-value">12,540 kg</div>
+            <span th:text="${dashboardData.todayBillCount}" class="card-value"></span> hóa đơn hôm nay
             <div class="card-footer">
                 <span class="card-down">↓ 3.8%</span> from last month
             </div>
         </div>
+
 
         <div class="card danger-card">
             <div class="card-header">
@@ -380,32 +682,67 @@
             </div>
         </div>
     </div>
+    <!-- Popup -->
+    <!-- Popup -->
+    <div id="billPopup" class="popup-container">
+        <div class="popup-content">
+            <span class="close-btn" onclick="closeBillPopup()">&times;</span>
 
+            <h3>Danh sách hóa đơn hôm nay</h3>
+            <input type="text" id="searchBill" placeholder="Tìm kiếm hóa đơn..." onkeyup="searchBills()">
+            <table>
+                <thead>
+                <tr>
+                    <th>Mã HĐ</th>
+                    <th>Khách hàng</th>
+                    <th>Tổng tiền</th>
+                    <th>Ngày tạo</th>
+                    <th>Action</th>
+
+                </tr>
+                </thead>
+                <tbody id="billTableBody">
+                <!-- Dữ liệu sẽ được thêm bằng JS -->
+                </tbody>
+            </table>
+
+            <!-- Pagination -->
+            <div class="pagination">
+                <button onclick="prevPage()">Trước</button>
+                <span id="pageInfo">1 / 1</span>
+                <button onclick="nextPage()">Sau</button>
+            </div>
+        </div>
+    </div>
     <!-- Sales Chart -->
     <div class="chart-container">
         <div class="chart-header">
             <div class="chart-title">Sales Overview</div>
 
             <div class="chart-options">
-                <div>
-                    <label for="periodSelect">Chọn kiểu xem: </label>
-                    <select id="periodSelect">
-                        <option value="daily">Theo ngày</option>
-                        <option value="weekly">Theo tuần</option>
-                        <option value="monthly">Theo tháng</option>
-                        <option value="yearly">Theo năm</option>
-                    </select>
-                </div>
+                <label for="revenuePeriodSelect">Chọn kiểu xem: </label>
+                <select id="revenuePeriodSelect">
+                    <option value="daily">Theo ngày</option>
+                    <option value="monthly">Theo tháng</option>
+<!--                    <option value="yearly">Theo năm</option>-->
+                </select>
 
-                <!-- Phần chọn tháng, chỉ hiển thị khi chọn kiểu xem 'daily' -->
-                <div>
-                    <label for="monthPicker">Chọn tháng: </label>
-                    <input type="month" id="monthPicker" />
-                </div>
+                <label for="revenueMonthSelect" id="monthLabel">Chọn tháng:</label>
+                <select id="revenueMonthSelect"></select>
+
+                <label for="revenueYearSelect" id="yearLabel">Chọn năm:</label>
+                <select id="revenueYearSelect"></select>
+                <button id="exportRevenueExcelBtn">Xuất Excel Doanh Thu</button>
+
             </div>
         </div>
         <div class="chart">
-            <canvas id="revenueChart" width="1400" height="300"></canvas>
+<!--            <canvas id="revenueChart" width="1400" height="300"></canvas>-->
+            <h2 id="chartTitle">Doanh thu theo ngày</h2>
+<!--            <canvas id="dailyRevenueChart"></canvas>-->
+
+            <canvas id="salesOverviewChart"></canvas>
+
         </div>
     </div>
     <!-- Rice Types Chart -->
@@ -564,24 +901,63 @@
             return;
         }
 
-        const dataForExcel = productData.map(p => ({
-            "Tên sản phẩm": p.productName,
-            "Số lượng bán": p.totalQuantity,
-            "Doanh thu (VNĐ)": p.totalRevenue
-        }));
+        // Lấy ngày hiện tại
+        const today = new Date();
+        const day = String(today.getDate()).padStart(2, '0');
+        const monthNow = String(today.getMonth() + 1).padStart(2, '0');
+        const yearNow = today.getFullYear();
+        const exportDate = `${day}-${monthNow}-${yearNow}`; // Định dạng: dd-mm-yyyy
 
-        const worksheet = XLSX.utils.json_to_sheet(dataForExcel);
+        // Lấy option đang chọn
+        const periodSelect = document.getElementById('periodSelect').value; // daily, monthly, quarterly
+        const monthSelect = document.getElementById('monthSelect');
+        const year = document.getElementById('yearSelect').value;
+
+        let periodText = ""; // Tên file theo loại thời gian
+        let titleText = ""; // Tiêu đề trong file Excel
+
+        if (periodSelect === "daily") {
+            const monthText = monthSelect.options[monthSelect.selectedIndex].text;
+            periodText = `Tháng_${monthText}_${year}`;
+            titleText = `Báo cáo doanh thu theo ngày - ${monthText} ${year}`;
+        } else if (periodSelect === "monthly") {
+            periodText = `Năm_${year}`;
+            titleText = `Báo cáo doanh thu theo tháng - Năm ${year}`;
+        } else if (periodSelect === "quarterly") {
+            const quarter = Math.ceil(parseInt(monthSelect.value) / 3);
+            periodText = `Quý_${quarter}_${year}`;
+            titleText = `Báo cáo doanh thu theo quý - Quý ${quarter} Năm ${year}`;
+        }
+
+        // Định dạng tên file
+        const filename = `top_products_${periodText}_${exportDate}.xlsx`;
+
+        // Dữ liệu xuất Excel
+        const dataForExcel = productData.map(p => ([
+            p.productName, p.totalQuantity, p.totalRevenue
+        ]));
+
+        // Tạo worksheet với ngày xuất dữ liệu và tiêu đề báo cáo
+        const worksheet = XLSX.utils.aoa_to_sheet([
+            [`Ngày xuất dữ liệu: ${exportDate}`], // Dòng ngày xuất dữ liệu
+            [titleText], // Dòng tiêu đề báo cáo
+            [], // Dòng trống
+            ["Tên sản phẩm", "Số lượng bán", "Doanh thu (VNĐ)"], // Tiêu đề cột
+            ...dataForExcel
+        ]);
+
+        // Căn chỉnh tiêu đề giữa
+        worksheet['A2'].s = { alignment: { horizontal: "center" }, font: { bold: true, sz: 14 } };
+
+        // Tạo workbook và ghi dữ liệu
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Top Products");
 
-        const month = document.getElementById('monthSelect').value;
-        const year = document.getElementById('yearSelect').value;
-        const filename = `top_products_${month}_${year}.xlsx`;
-
+        // Xuất file Excel
         XLSX.writeFile(workbook, filename);
     });
-
 </script>
+
 <script>
     document.getElementById('periodSelect').addEventListener('change', function() {
         var period = this.value;
@@ -593,6 +969,73 @@
         } else {
             monthPicker.parentElement.style.display = 'none';
         }
+    });
+</script>
+<script>
+    document.getElementById("exportRevenueExcelBtn").addEventListener("click", function () {
+        const period = document.getElementById("revenuePeriodSelect").value;
+        const month = document.getElementById("revenueMonthSelect").value;
+        const year = document.getElementById("revenueYearSelect").value;
+        let url = `/dashboard/revenue/${period}?year=${year}`;
+        if (period === "daily") url += `&month=${month}`;
+
+        // Lấy ngày hiện tại (ngày xuất file)
+        const today = new Date();
+        const day = String(today.getDate()).padStart(2, '0');
+        const monthNow = String(today.getMonth() + 1).padStart(2, '0');
+        const yearNow = today.getFullYear();
+        const exportDate = `${day}-${monthNow}-${yearNow}`; // Định dạng: dd-mm-yyyy
+
+        fetch(url)
+            .then(response => response.json())
+            .then(responseData => {
+                const data = responseData.data;
+                let sheetData = [];
+
+                // Lấy tên tháng bằng tiếng Việt
+                const monthNames = [
+                    "", "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6",
+                    "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"
+                ];
+                const monthText = monthNames[parseInt(month)];
+
+                // Định dạng tên file
+                let fileName = `doanh_thu_${period}_${year}_${exportDate}.xlsx`;
+                if (period === "daily") {
+                    fileName = `doanh_thu_${monthText}_${year}_${exportDate}.xlsx`;
+                }
+
+                // Thêm dòng "Ngày xuất dữ liệu"
+                sheetData.push([`Ngày xuất dữ liệu: ${exportDate}`]);
+                sheetData.push([]); // Dòng trống để tách biệt tiêu đề
+
+                // Thêm tiêu đề cột
+                if (period === "daily") {
+                    sheetData.push(["STT", "Ngày", "Doanh thu"]);
+                    data.forEach((item, index) => sheetData.push([index + 1, `Ngày ${item.day}`, item.revenue]));
+                } else if (period === "monthly") {
+                    sheetData.push(["STT", "Tháng", "Doanh thu"]);
+                    for (let i = 1; i <= 12; i++) {
+                        const revenue = data.find(item => item.month === i)?.revenue || 0;
+                        sheetData.push([i, `Tháng ${i}`, revenue]);
+                    }
+                } else if (period === "yearly") {
+                    sheetData.push(["STT", "Năm", "Doanh thu"]);
+                    for (let i = 0; i < 5; i++) {
+                        const revenue = data.find(item => item.year === year - i)?.revenue || 0;
+                        sheetData.push([i + 1, year - i, revenue]);
+                    }
+                }
+
+                // Tạo workbook và worksheet
+                const ws = XLSX.utils.aoa_to_sheet(sheetData);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Doanh thu");
+
+                // Xuất file Excel
+                XLSX.writeFile(wb, fileName);
+            })
+            .catch(error => console.error("Lỗi tải dữ liệu:", error));
     });
 </script>
 

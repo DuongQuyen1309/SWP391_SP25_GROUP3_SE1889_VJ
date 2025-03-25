@@ -205,4 +205,16 @@ public class Bill {
             return null;
         }
     }
+
+    @Transient
+    public String getCustomerName() {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            CustomerDataDTO customer = objectMapper.readValue(this.customerData, CustomerDataDTO.class);
+            return customer.getName();
+        } catch (Exception e) {
+            return "N/A";
+        }
+    }
+
 }
