@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>RSMS</title>
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
+    <Link rel="stylesheet" href="/css/importednote.css">
+    <style>
+        .pagination {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .pagination a {
+            display: inline-block;
+            padding: 8px 16px;
+            margin: 4px;
+            text-decoration: none;
+            background-color: #2c3e50;
+            color: white;
+            border-radius: 5px;
+        }
+
+        .pagination a:hover {
+            background-color: #1a252f;
+        }
+
+        .pagination span {
+            font-size: 18px;
+            margin: 0 10px;
+        }
+
+    </style>
+
+    <script src="/js/home.js"></script>
+    <script>
+        window.onclick = function (event) {
+            const modal = document.getElementById("studentFormModal");
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        };
+
+        function filterImportedNote() {
+            let params = new URLSearchParams();
+            document.querySelectorAll('.filter-input').forEach(input => {
+                if (input.value.trim() !== '') { // Chỉ thêm tham số nếu có giá trị
+                    params.append(input.name, input.value);
+                }
+            });
+
+            window.location.href = '/importednote/list' + '?' + params.toString();
+        }
+        document.addEventListener("DOMContentLoaded", function() {
+            let params = new URLSearchParams(window.location.search);
+            document.querySelectorAll('.filter-input').forEach(input => {
+                if (params.has(input.name)) {
+                    let value = params.get(input.name);
+                    if (input.type === "date") {
+                        input.value = value.substring(0, 10); // Định dạng YYYY-MM-DD
+                    } else {
+                        input.value = value;
+                    }
+                }
+            });
+        });
+    </script>
+
+</head>
+<body>
+
+<div th:insert="~{layout/header :: header}"></div>
+
+<div th:insert="~{layout/sidebar :: sidebar}"></div>
+
+
+<!-- Content -->
+<div class="content" id="content">
+
+    <button class="add-btn" onclick="ImportProductForm()"
+            th:style="${#lists.contains(listHiddenPage, 'createProduct')} ? 'display: none;' : ''">+
+    </button>
+
+    <!-- List -->
+    <h1>List of Imported Note</h1>
+
+    <table class="styled-table">
+        <thead>
+        <tr>
+            <td>#No</td>
+            <td>Imported Date</td>
+            <td>Supplier</td>
+            <td>Total Money</td>
+            <td>Action</td>
+        </tr>
+        <tr>
+            <td class="twin-field">
+                <input type="number" class="filter-input" name="idFrom" onchange="filterImportedNote()" style="width: 50px;">
+                <input type="number" class="filter-input" name="idTo" onchange="filterImportedNote()" style="width: 50px;">
+            </td>
+            <td class="twin-field">
+                <input type="date" class="filter-input" name="dateFrom" onchange="filterImportedNote()" style="width: 40%;">
+                <input type="date" class="filter-input" name="dateTo" onchange="filterImportedNote()" style="width: 40%;">
+            </td>
+            <td>
+                <input type="text" class="filter-input" name="supplier" onchange="filterImportedNote()" style="width: 100%;">
+            </td>
+            <td class="twin-field">
+                <input type="number" class="filter-input" name="moneyFrom" onchange="filterImportedNote()" style="width: 90px;" step="100000">
+                <input type="number" class="filter-input" name="moneyTo" onchange="filterImportedNote()" style="width: 90px;" step="100000">
+            </td>
+            <td></td>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="importednote,stat : ${importedNotes}">
+            <td th:text="${stat.index+1}"></td>
+            <td th:text="${#temporals.format(importednote.createdAt, 'dd-MM-yyyy')}"></td>
+            <td th:text="${importednote.customer.name}"></td>
+            <td th:attr="data-price=${importednote.totalCost}" class="price-cell"></td>
+            <td>
+                <button class="view-details" th:attr="data-id=${importednote.id}">View details</button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Chi Tiết Phiếu Nhập Kho</h2>
+                <p>Thông tin sản phẩm trong phiếu nhập kho</p>
+                <span class="close" id="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="summary-details">
+                    <div class="column">
+                        <div class="detail-item">
+                            <span class="label">Ngày Nhập:</span>
+                            <span class="value" id="importedDate"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Tổng Tiền:</span>
+                            <span class="value" id="totalMoney"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Số Tiền Đã Trả:</span>
+                            <span class="value" id="paidMoney"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Số Tiền Nợ:</span>
+                            <span class="value" id="debtMoney"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Tiền vận chuyển :</span>
+                            <span class="value" id="portedMoney"></span>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <div class="detail-item">
+                            <span class="label">Tên Khách Hàng:</span>
+                            <span class="value" id="customerName"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Số Điện Thoại:</span>
+                            <span class="value" id="customerPhoneNumber"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Địa Chỉ:</span>
+                            <span class="value" id="customerAddress"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="items-table">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Hình Ảnh</th>
+                            <th>Tên Sản Phẩm</th>
+                            <th>Giá</th>
+                            <th>Số Lượng</th>
+                            <th>Tổng Cộng</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="pagination">
+        <!-- Nút "Trước" chỉ hiển thị khi currentPage > 1 -->
+        <a style="text-decoration: none"
+           th:if="${currentPage > 1}"
+           th:href="@{/importednote/list(page=${currentPage - 2}, sortField=${sortField}, sortDirection=${sortDirection})}">
+            Trước
+        </a>
+
+        <span>Page <span th:text="${currentPage}"></span> of <span th:text="${totalPages}"></span></span>
+
+        <!-- Nút "Sau" chỉ hiển thị khi currentPage < totalPages -->
+        <a style="text-decoration: none"
+           th:if="${currentPage < totalPages}"
+           th:href="@{/importednote/list(page=${currentPage}, sortField=${sortField}, sortDirection=${sortDirection})}">
+            Sau
+        </a>
+    </div>
+</div>
+<footer>
+    &copy; 2025 Rice Sales Management. All Rights Reserved.
+</footer>
+
+</body>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const buttons = document.querySelectorAll(".view-details");
+        const modal = document.getElementById("modal");
+        const closeModal = document.getElementById("close");
+
+        buttons.forEach(button => {
+            button.addEventListener("click", function () {
+                const id = this.getAttribute("data-id");
+
+                fetch(`/importednote/list/${id}`)
+                    .then(response => {
+                        return response.json();
+                    })
+                    .then(data => {
+
+                        console.log(data)
+                        if (!data || Object.keys(data).length === 0) {
+                            throw new Error("Dữ liệu JSON trống hoặc không hợp lệ");
+                        }
+
+                        // Cập nhật modal
+                        document.getElementById("importedDate").textContent = formatDate(data.createdAt);
+                        document.getElementById("totalMoney").textContent = formatPrice(data.totalCost) ;
+                        document.getElementById("paidMoney").textContent = formatPrice(data.paidMoney) ;
+                        document.getElementById("debtMoney").textContent = formatPrice(data.debtMoney);
+                        document.getElementById("portedMoney").textContent = formatPrice(data.portedMoney);
+                        document.getElementById("customerName").textContent = data.customerName;
+                        document.getElementById("customerPhoneNumber").textContent = data.customerPhone;
+                        document.getElementById("customerAddress").textContent = data.customerAddress;
+
+                        // Hiển thị danh sách sản phẩm
+                        const tableBody = document.querySelector(".items-table tbody");
+                        tableBody.innerHTML = "";
+
+                        const products = JSON.parse(data.productData || "[]");
+                        products.forEach(product => {
+                            let row = `
+                                    <tr>
+                                        <td><img src="${product.image}" alt="Hình ảnh" width="50"></td>
+                                        <td>${product.name}</td>
+                                        <td>${formatPrice(product.price)}</td>
+                                        <td>${product.quantity}</td>
+                                        <td>${formatPrice(product.subtotal)}</td>
+                                    </tr>
+                                `;
+                            tableBody.innerHTML += row;
+                        });
+
+                        document.getElementById("modal").style.display = "block";
+                    })
+                    .catch(error => {
+                        console.error("Lỗi khi lấy dữ liệu:", error);
+                        alert("Không thể tải dữ liệu. Vui lòng thử lại!");
+                    });
+            });
+
+            // Đóng modal
+            closeModal.addEventListener("click", function () {
+                modal.style.display = "none";
+            });
+
+            window.addEventListener("click", function (event) {
+                if (event.target === modal) {
+                    modal.style.display = "none";
+                }
+            });
+        });
+
+    });
+
+    function ImportProductForm() {
+        window.location.href = "/product/import";
+    }
+
+    function formatPrice(price) {
+        return new Intl.NumberFormat('vi-VN', {style: 'currency', currency: 'VND'}).format(price);
+    }
+
+    function formatDate(dateStr) {
+        let temp = dateStr.substring(0,10);
+        let parts = temp.split("-");
+        return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".price").forEach(function (el) {
+            let price = parseFloat(el.getAttribute("data-price"));
+            el.innerText = formatPrice(price);
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const priceCells = document.querySelectorAll('.price-cell');
+        priceCells.forEach(cell => {
+            const price = cell.getAttribute('data-price');
+            if (price !== null && !isNaN(price)) {
+                cell.textContent = formatPrice(Number(price));
+            } else {
+                cell.textContent = '0 đ';
+            }
+        });
+    });
+
+</script>
+</html>

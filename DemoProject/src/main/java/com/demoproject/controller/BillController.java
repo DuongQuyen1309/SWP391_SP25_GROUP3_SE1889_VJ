@@ -65,29 +65,26 @@ public class BillController {
     private JwtUtils jwtUtils;
 
     @GetMapping("/listBill")
-    public String listBill(Model model, @RequestParam(defaultValue = "0") int page,
+    public String listBill(Model model,
+                           @RequestParam(defaultValue = "0") int page,
                            @RequestParam(defaultValue = "5") int size,
-                           @RequestParam(defaultValue = "") String search,
-                           @RequestParam(defaultValue = "name") String searchBy,
-                           @RequestParam(defaultValue = "id") String sortField,
-                           @RequestParam(defaultValue = "asc") String sortOrder,
-                           @RequestParam(required = false) Double minValue,
-                           @RequestParam(required = false) Double maxValue,
+                           @RequestParam(required = false) String idFrom,
+                           @RequestParam(required = false) String idTo,
+                           @RequestParam(required = false) String customerName,
+                           @RequestParam(required = false) String startDate,
+                           @RequestParam(required = false) String endDate,
+                           @RequestParam(required = false) Double totalMoneyFrom,
+                           @RequestParam(required = false) Double totalMoneyTo,
+                           @RequestParam(required = false) Double paidMoneyFrom,
+                           @RequestParam(required = false) Double paidMoneyTo,
+                           @RequestParam(required = false) Double debtMoneyFrom,
+                           @RequestParam(required = false) Double debtMoneyTo,
+                           @RequestParam(required = false) String status,
+                           @RequestParam(required = false) String note,
                            @CookieValue(value = "token", required = false) String token,
                            RedirectAttributes redirectAttributes) {
 
-        Sort sort;
-        if (sortField.equals("debtMoney")) {
-            sort = sortOrder.equalsIgnoreCase("desc") ?
-                    Sort.by("debtMoney").descending() :
-                    Sort.by("debtMoney").ascending();
-        } else {
-            // Default sort by id
-            sort = sortOrder.equalsIgnoreCase("desc") ?
-                    Sort.by("id").descending() :
-                    Sort.by("id").ascending();
-        }
-
+        Sort sort = Sort.by("id").ascending(); // Mặc định sắp xếp theo id
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<Bill> billPage;
         Account account = accountService.getAccountFromToken(token).orElse(null);
@@ -99,40 +96,53 @@ public class BillController {
         listHiddenPage.add("");
         if (role.equals("STAFF")) {
             listHiddenPage.add("listStaff");
+            listHiddenPage.add("Store");
+            listHiddenPage.add("listOwner");
+            listHiddenPage.add("Dashboard");
+        }
+        if(role.equals("OWNER")){
+            listHiddenPage.add("listOwner");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
 
-        // Add range values to model for form persistence
-        model.addAttribute("minValue", minValue);
-        model.addAttribute("maxValue", maxValue);
+        // Thêm các giá trị filter vào model để hiển thị lại trên form
+        model.addAttribute("idFrom", idFrom);
+        model.addAttribute("idTo", idTo);
+        model.addAttribute("customerName", customerName);
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
+        model.addAttribute("totalMoneyFrom", totalMoneyFrom);
+        model.addAttribute("totalMoneyTo", totalMoneyTo);
+        model.addAttribute("paidMoneyFrom", paidMoneyFrom);
+        model.addAttribute("paidMoneyTo", paidMoneyTo);
+        model.addAttribute("debtMoneyFrom", debtMoneyFrom);
+        model.addAttribute("debtMoneyTo", debtMoneyTo);
+        model.addAttribute("status", status);
+        model.addAttribute("note", note);
 
-        // Handle total money range search
-        if (searchBy.equals("totalMoneyRange") && minValue != null && maxValue != null) {
-            billPage = billService.getBillsByTotalMoneyRange(minValue, maxValue, user.getStoreId(), pageable);
-        } else if (search.isEmpty()) {
-            billPage = billService.getAllBillsByStoreId(pageable, user.getStoreId());
+        // Xử lý filter
+        if (idFrom != null || idTo != null || customerName != null || startDate != null || endDate != null ||
+                totalMoneyFrom != null || totalMoneyTo != null || paidMoneyFrom != null || paidMoneyTo != null ||
+                debtMoneyFrom != null || debtMoneyTo != null || status != null || note != null) {
+
+            Long fromId = idFrom != null && !idFrom.isEmpty() ? Long.parseLong(idFrom) : null;
+            Long toId = idTo != null && !idTo.isEmpty() ? Long.parseLong(idTo) : null;
+            LocalDate start = startDate != null && !startDate.isEmpty() ? LocalDate.parse(startDate) : null;
+            LocalDate end = endDate != null && !endDate.isEmpty() ? LocalDate.parse(endDate) : null;
+            Boolean statusValue = status != null && !status.isEmpty() ? Boolean.parseBoolean(status) : null;
+
+            billPage = billService.getBillsWithFilters(
+                    fromId, toId, customerName, start, end,
+                    totalMoneyFrom, totalMoneyTo, paidMoneyFrom, paidMoneyTo,
+                    debtMoneyFrom, debtMoneyTo, statusValue, note,
+                    user.getStoreId(), pageable);
         } else {
-            if (searchBy.equals("customerName")) {
-                billPage = billService.getBillsByStoreIdAndCustomerName(search, user.getStoreId(), pageable);
-            } else {
-                try {
-                    Long billId = Long.parseLong(search);
-                    billPage = billService.getBillsByStoreIdAndBillId(billId, user.getStoreId(), pageable);
-                } catch (NumberFormatException e) {
-                    model.addAttribute("error", "Invalid Invoice ID. Please enter a valid number.");
-                    billPage = billService.getAllBillsByStoreId(pageable, user.getStoreId());
-                }
-            }
+            billPage = billService.getAllBillsByStoreId(pageable, user.getStoreId());
         }
-
+        System.out.println(billPage);
         model.addAttribute("bills", billPage);
         model.addAttribute("page", page);
         model.addAttribute("totalPages", billPage.getTotalPages());
-        model.addAttribute("sortOrder", sortOrder);
-        model.addAttribute("search", search);
-        model.addAttribute("searchBy", searchBy);
-        model.addAttribute("sortField", sortField);
-        model.addAttribute("sortOrder", sortOrder);
 
         return "bill/listBill";
     }
@@ -157,7 +167,13 @@ public class BillController {
         List<String> listHiddenPage = new ArrayList<>();
         listHiddenPage.add("");
         if(role.equals("STAFF")){
+            listHiddenPage.add("Store");
+            listHiddenPage.add("listOwner");
             listHiddenPage.add("listStaff");
+            listHiddenPage.add("Dashboard");
+        }
+        if(role.equals("OWNER")){
+            listHiddenPage.add("listOwner");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
         return "bill/createBill";
@@ -357,7 +373,14 @@ public class BillController {
         List<String> listHiddenPage = new ArrayList<>();
         listHiddenPage.add("");
         if (role.equals("STAFF")) {
+            listHiddenPage.add("Store");
             listHiddenPage.add("listStaff");
+            listHiddenPage.add("Store");
+            listHiddenPage.add("listOwner");
+            listHiddenPage.add("Dashboard");
+        }
+        if(role.equals("OWNER")){
+            listHiddenPage.add("listOwner");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
         Optional<Bill> billOpt = billService.getBillByIdAndStoreId(id, user.getStoreId());

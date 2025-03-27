@@ -39,18 +39,24 @@ public class ProductController {
     @GetMapping("/create")
     public String createProductForm(
             @CookieValue(value = "token", required = false) String token,
-            Model model){
+            Model model) {
         String username = jwtUtils.extractUsername(token);
         Optional<Account> account = accountService.findByUsernameAndIsDeleteFalse(username);
-        if (account.isPresent()){
+        if (account.isPresent()) {
             Optional<Users> user = userService.getUserProfile(account.get().getUserId());
             model.addAttribute("account", account.get());
             user.ifPresent(users -> model.addAttribute("user", users));
         }
-        String role= jwtUtils.extractRole(token);
+        String role = jwtUtils.extractRole(token);
         List<String> listHiddenPage = new ArrayList<>();
-        if(role.equals(STAFF)){
+        if (role.equals(STAFF)) {
+            listHiddenPage.add("Store");
             listHiddenPage.add(LISTSTAFF);
+            listHiddenPage.add("Dashboard");
+            listHiddenPage.add("listOwner");
+        }
+        if (role.equals("OWNER")) {
+            listHiddenPage.add("listOwner");
         }
         model.addAttribute(LISTHIDDENPAGE, listHiddenPage);
         return "product/createProduct";
@@ -65,21 +71,27 @@ public class ProductController {
             @RequestParam("image") MultipartFile imageFile,
             @CookieValue(value = "token", required = false) String token,
             Model model
-    )throws IOException {
+    ) throws IOException {
         String username = jwtUtils.extractUsername(token);
         Optional<Account> account = accountService.findByUsernameAndIsDeleteFalse(username);
-        if (account.isPresent()){
+        if (account.isPresent()) {
             Optional<Users> user = userService.getUserProfile(account.get().getUserId());
             model.addAttribute("account", account.get());
-            if (user.isPresent()){
+            if (user.isPresent()) {
                 model.addAttribute("user", user.get());
-                productService.createProduct(user,name,description,price,imageFile);
+                productService.createProduct(user, name, description, price, imageFile);
             }
         }
-        String role= jwtUtils.extractRole(token);
+        String role = jwtUtils.extractRole(token);
         List<String> listHiddenPage = new ArrayList<>();
-        if(role.equals("STAFF")){
+        if (role.equals("STAFF")) {
+            listHiddenPage.add("Store");
             listHiddenPage.add("listStaff");
+            listHiddenPage.add("Dashboard");
+            listHiddenPage.add("listOwner");
+        }
+        if (role.equals("OWNER")) {
+            listHiddenPage.add("listOwner");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
 
@@ -93,6 +105,8 @@ public class ProductController {
             @RequestParam(defaultValue = "id") String sortField,
             @RequestParam(defaultValue = "asc") String sortDirection,
             @CookieValue(value = "token", required = false) String token,
+            @RequestParam(defaultValue = "") String searchKeyWord,
+            @RequestParam(defaultValue = "") String searchBy,
             Model model) {
         String username = jwtUtils.extractUsername(token);
         Optional<Account> optAccount = accountService.findByUsernameAndIsDeleteFalse(username);
@@ -100,25 +114,36 @@ public class ProductController {
         Optional<Users> optUser = userService.getUserProfile(account.getUserId());
         model.addAttribute("user", optUser.get());
         model.addAttribute("account", account);
-        String role= jwtUtils.extractRole(token);
+        String role = jwtUtils.extractRole(token);
         List<String> listHiddenPage = new ArrayList<>();
         listHiddenPage.add("");
-        if(role.equals("STAFF")){
+        if (role.equals("STAFF")) {
             listHiddenPage.add("listStaff");
             listHiddenPage.add("createProduct");
+            listHiddenPage.add("Store");
+            listHiddenPage.add("Dashboard");
+            listHiddenPage.add("listOwner");
         }
+        if (role.equals("OWNER")) {
+            listHiddenPage.add("listOwner");
+        }
+        Page<Product> productPage = productService.getAllProductByPage(searchKeyWord, searchBy, optUser.get().getStoreId(), page, size, sortField, sortDirection);
         model.addAttribute("listHiddenPage", listHiddenPage);
-        Page<Product> productPage = productService.getAllProductByPage(optUser.get().getStoreId(),page, size, sortField, sortDirection);
         model.addAttribute("account", account);
         model.addAttribute("products", productPage.stream().toList());
-        model.addAttribute("currentPage", page+1);
+        model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", productPage.getTotalPages());
         model.addAttribute("sortField", sortField);
         model.addAttribute("sortDirection", sortDirection);
-        model.addAttribute("reverseSortDirection", sortDirection.equals("asc") ? "desc" : "asc");
 
+        String reverseSortDirection = sortDirection.equals("asc") ? "desc" : "asc";
+        model.addAttribute("reverseSortDirection", reverseSortDirection);
+
+        model.addAttribute("searchKeyWord", searchKeyWord);
+        model.addAttribute("searchBy", searchBy);
         return "product/listProduct";
     }
+
 
     @PostMapping("/delete")
     public String deleteProduct(
@@ -137,15 +162,21 @@ public class ProductController {
     ) {
         String username = jwtUtils.extractUsername(token);
         Optional<Account> account = accountService.findByUsernameAndIsDeleteFalse(username);
-        if (account.isPresent()){
+        if (account.isPresent()) {
             Optional<Users> user = userService.getUserProfile(account.get().getUserId());
             model.addAttribute("account", account.get());
             user.ifPresent(users -> model.addAttribute("user", users));
         }
-        String role= jwtUtils.extractRole(token);
+        String role = jwtUtils.extractRole(token);
         List<String> listHiddenPage = new ArrayList<>();
-        if(role.equals("STAFF")){
+        if (role.equals("STAFF")) {
             listHiddenPage.add("listStaff");
+            listHiddenPage.add("Store");
+            listHiddenPage.add("Dashboard");
+            listHiddenPage.add("listOwner");
+        }
+        if (role.equals("OWNER")) {
+            listHiddenPage.add("listOwner");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
         Product product = productService.getProductById(id);
@@ -162,10 +193,10 @@ public class ProductController {
             @RequestParam("image") MultipartFile imageFile,
             @CookieValue(value = "token", required = false) String token,
             Model model
-    )throws IOException {
+    ) throws IOException {
         String username = jwtUtils.extractUsername(token);
         Optional<Account> account = accountService.findByUsernameAndIsDeleteFalse(username);
-        if (account.isPresent()){
+        if (account.isPresent()) {
             Optional<Users> user = userService.getUserProfile(account.get().getUserId());
             model.addAttribute("account", account.get());
             if (user.isPresent()) {
@@ -173,63 +204,30 @@ public class ProductController {
                 productService.updateProduct(user.get().getStoreId(), productID, name, description, price, imageFile);
             }
         }
-        String role= jwtUtils.extractRole(token);
+        String role = jwtUtils.extractRole(token);
         List<String> listHiddenPage = new ArrayList<>();
-        if(role.equals("STAFF")){
+        if (role.equals("STAFF")) {
+            listHiddenPage.add("Store");
             listHiddenPage.add("listStaff");
+            listHiddenPage.add("Dashboard");
+            listHiddenPage.add("listOwner");
+        }
+        if (role.equals("OWNER")) {
+            listHiddenPage.add("listOwner");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
 
         return "redirect:/product/listProduct";
     }
 
-    @GetMapping("/search")
-    public String showSearchListProducts(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size,
-            @RequestParam(defaultValue = "id") String sortField,
-            @RequestParam(defaultValue = "asc") String sortDirection,
-            @RequestParam("searchKeyWord") String keyword,
-            @RequestParam("searchBy") String searchBy,
-            @CookieValue(value = "token", required = false) String token,
-            Model model) {
-        Page<Product> productPage = null;
 
-        String username = jwtUtils.extractUsername(token);
-        Optional<Account> account = accountService.findByUsernameAndIsDeleteFalse(username);
-        if (account.isPresent()){
-            Optional<Users> user = userService.getUserProfile(account.get().getUserId());
-            model.addAttribute("account", account.get());
-            user.ifPresent(users -> model.addAttribute("user", users));
-        }
-        String role= jwtUtils.extractRole(token);
-        List<String> listHiddenPage = new ArrayList<>();
-        listHiddenPage.add("");
-        if(role.equals("STAFF")){
-            listHiddenPage.add("listStaff");
-        }
-        model.addAttribute("listHiddenPage", listHiddenPage);
-        if(searchBy.equalsIgnoreCase("name")){
-            productPage = productService.getProductByKeyWordName(page, size, sortField, sortDirection, keyword);
-        }else {
-            productPage = productService.getProductByKeyWordDescription(page, size, sortField, sortDirection, keyword);
-        }
-        model.addAttribute("products", productPage);
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", productPage.getTotalPages());
-        model.addAttribute("sortField", sortField);
-        model.addAttribute("sortDirection", sortDirection);
-        model.addAttribute("reverseSortDirection", sortDirection.equals("asc") ? "desc" : "asc");
-
-        return "product/listProduct";
-    }
 
     @GetMapping("/import")
     public String showImportPage(@CookieValue(value = "token", required = false) String token,
-                                 Model model){
+                                 Model model) {
         String username = jwtUtils.extractUsername(token);
         Optional<Account> account = accountService.findByUsernameAndIsDeleteFalse(username);
-        if (account.isPresent()){
+        if (account.isPresent()) {
             Optional<Users> user = userService.getUserProfile(account.get().getUserId());
             model.addAttribute(ACCOUNT, account.get());
             if (user.isPresent()) {
@@ -238,10 +236,16 @@ public class ProductController {
                 model.addAttribute("listZones", zoneRepository.findByStoreId(user.get().getStoreId()));
             }
         }
-        String role= jwtUtils.extractRole(token);
+        String role = jwtUtils.extractRole(token);
         List<String> listHiddenPage = new ArrayList<>();
-        if(role.equals(STAFF)){
+        if (role.equals(STAFF)) {
             listHiddenPage.add(LISTSTAFF);
+            listHiddenPage.add("Dashboard");
+            listHiddenPage.add("listOwner");
+            listHiddenPage.add("Store");
+        }
+        if (role.equals("OWNER")) {
+            listHiddenPage.add("listOwner");
         }
         model.addAttribute(LISTHIDDENPAGE, listHiddenPage);
         model.addAttribute("listHiddenPage", listHiddenPage);
@@ -254,10 +258,10 @@ public class ProductController {
             @RequestBody ImportProductDTO importProductDTO,
             @CookieValue(value = "token", required = false) String token,
             Model model
-    ){
+    ) {
         String username = jwtUtils.extractUsername(token);
         Optional<Account> account = accountService.findByUsernameAndIsDeleteFalse(username);
-        if (account.isPresent()){
+        if (account.isPresent()) {
             Optional<Users> user = userService.getUserProfile(account.get().getUserId());
             model.addAttribute(ACCOUNT, account.get());
             if (user.isPresent()) {
@@ -265,25 +269,44 @@ public class ProductController {
                 productService.importProduct(user.get(), importProductDTO);
             }
         }
-        String role= jwtUtils.extractRole(token);
+        String role = jwtUtils.extractRole(token);
         List<String> listHiddenPage = new ArrayList<>();
-        if(role.equals(STAFF)){
+        if (role.equals(STAFF)) {
             listHiddenPage.add(LISTSTAFF);
+            listHiddenPage.add("Dashboard");
+            listHiddenPage.add("listOwner");
+            listHiddenPage.add("Store");
+        }
+        if (role.equals("OWNER")) {
+            listHiddenPage.add("listOwner");
         }
         model.addAttribute(LISTHIDDENPAGE, listHiddenPage);
         return "redirect:/product/listProduct";
     }
 
-//    @GetMapping("/search-product")
-//    @ResponseBody
-//    public List<Product> searchProduct(@RequestParam String query) {
-//        return productRepository.findByNameContainingIgnoreCase(query);
-//    }
-@GetMapping("/checkQuantity/{id}/{quantity}")
-public ResponseEntity<Boolean> checkQuantity(@PathVariable Long id, @PathVariable int quantity) {
-    Optional<Product> productOpt = productRepository.findById(id);
-    boolean isAvailable = productOpt.isPresent() && productOpt.get().getQuantity() >= quantity;
-    return ResponseEntity.ok(isAvailable); // ✅ Trả về ResponseEntity để Spring hiểu đây là JSON
-}
+    @GetMapping("/checkQuantity/{id}/{quantity}")
+    public ResponseEntity<Boolean> checkQuantity(@PathVariable Long id, @PathVariable int quantity) {
+        Optional<Product> productOpt = productRepository.findById(id);
+        boolean isAvailable = productOpt.isPresent() && productOpt.get().getQuantity() >= quantity;
+        return ResponseEntity.ok(isAvailable); // ✅ Trả về ResponseEntity để Spring hiểu đây là JSON
+    }
+
+    //Ham search product cua importedProduct.html (importedProduct.css call)
+    @GetMapping("/searchProducts")
+    @ResponseBody
+    public List<Product> searchProducts(
+            @RequestParam String keyword,
+            @CookieValue(value = "token", required = false) String token
+    ) {
+        String username = jwtUtils.extractUsername(token);
+        Optional<Account> optAccount = accountService.findByUsernameAndIsDeleteFalse(username);
+        Optional<Users> userOpt= userService.getUserProfile(optAccount.get().getUserId());
+        Users user = userOpt.orElse(new Users());
+        List<Product> products = productService.getProductsByNameAndStoreId(keyword, user.getStoreId());
+        for(Product product : products){
+            System.out.println(product.getPackageType());
+        }
+        return products;
+    }
 }
 

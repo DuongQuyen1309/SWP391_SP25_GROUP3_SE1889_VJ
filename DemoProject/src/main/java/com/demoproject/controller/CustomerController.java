@@ -109,7 +109,13 @@ public class CustomerController {
 
         List<String> listHiddenPage = new ArrayList<>();
         if(role.equals("STAFF")){
+            listHiddenPage.add("Dashboard");
+            listHiddenPage.add("Store");
             listHiddenPage.add("listStaff");
+            listHiddenPage.add("listOwner");
+        }
+        if (role.equals("OWNER")) {
+            listHiddenPage.add("listOwner");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
 
@@ -214,7 +220,13 @@ public class CustomerController {
         model.addAttribute("role",role);
         List<String> listHiddenPage = new ArrayList<>();
         if(role.equals("STAFF")){
+            listHiddenPage.add("Store");
+            listHiddenPage.add("Dashboard");
             listHiddenPage.add("listStaff");
+            listHiddenPage.add("listOwner");
+        }
+        if (role.equals("OWNER")) {
+            listHiddenPage.add("listOwner");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
 
@@ -257,7 +269,13 @@ public class CustomerController {
 
         List<String> listHiddenPage = new ArrayList<>();
         if(role.equals("STAFF")){
+            listHiddenPage.add("Dashboard");
+            listHiddenPage.add("Store");
             listHiddenPage.add("listStaff");
+            listHiddenPage.add("listOwner");
+        }
+        if (role.equals("OWNER")) {
+            listHiddenPage.add("listOwner");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
 
@@ -332,7 +350,13 @@ public class CustomerController {
 
         List<String> listHiddenPage = new ArrayList<>();
         if (role.equals("STAFF")) {
+            listHiddenPage.add("Dashboard");
+            listHiddenPage.add("Store");
             listHiddenPage.add("listStaff");
+            listHiddenPage.add("listOwner");
+        }
+        if (role.equals("OWNER")) {
+            listHiddenPage.add("listOwner");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
         model.addAttribute("account", account);

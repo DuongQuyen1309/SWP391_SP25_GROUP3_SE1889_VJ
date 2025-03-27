@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<div class="sidebar" id="sidebar" th:fragment="sidebar">
+
+    <h2>Feature</h2>
+
+    <a href="/store/mystore" th:style="${#lists.contains(listHiddenPage, 'Store')} ? 'display: none;' : ''">My Store</a>
+    <a href="/dashboard/view" th:style="${#lists.contains(listHiddenPage, 'Dashboard')} ? 'display: none;' : ''">DashBoard</a>
+    <a href="/account/listOwner" th:style="${#lists.contains(listHiddenPage, 'listOwner')} ? 'display: none;' : ''" >Owner Account Management</a>
+
+    <a href="/account/listStaff" th:style="${#lists.contains(listHiddenPage, 'listStaff')} ? 'display: none;' : ''">Staff Account Management</a>
+
+    <a href="/product/listProduct" th:style="${#lists.contains(listHiddenPage, 'listProduct')} ? 'display: none;' : ''" >Rice Management</a>
+
+    <a href="/customer/listCustomer" th:style="${#lists.contains(listHiddenPage, 'listCustomer')} ? 'display: none;' : ''">Customer Management</a>
+
+    <a href="/warehouse/listWarehouseZone" th:style="${#lists.contains(listHiddenPage, 'listWarehouse')} ? 'display: none;' : ''" >Zone Management</a>
+
+    <a href="/bill/listBill" th:style="${#lists.contains(listHiddenPage, 'listBill')} ? 'display: none;' : ''" >Invoice Management </a>
+
+    <a href="/package/listPackage" th:style="${#lists.contains(listHiddenPage, 'listPackage')} ? 'display: none;' : ''" >Package Management</a>
+
+    <a href="/importednote/list" th:style="${#lists.contains(listHiddenPage, 'listImportedNote')} ? 'display: none;' : ''" >Imported Note Management</a>
+
+
+
+</div>
+</body>
+</html>

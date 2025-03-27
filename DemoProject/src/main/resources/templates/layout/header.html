@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<!-- Header -->
+<div class="header" th:fragment="header">
+  <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+  <h2><a href="/home">RSMS</a></h2>
+  <div class="user-info">
+    <img th:src="${user.avatar} != null ? ${user.avatar} + '?t=' + ${#dates.createNow().getTime()} : '/images/default.png'" alt="User Avatar" class="user-avatar"/>
+
+    <div class="dropdown">
+      <span th:text="${account.displayName}" class="user-name" onclick="toggleDropdown()"> ▼</span>
+      <div id="dropdown-menu" class="dropdown-content">
+        <a href="/user/userprofile">👤 View Profile</a>
+        <a href="/user/changepw" id="changepw">🔑 Change password</a>
+        <a href="/static#" id="logout">🚪 Logout</a>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

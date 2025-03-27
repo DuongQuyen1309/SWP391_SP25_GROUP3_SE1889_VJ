@@ -80,6 +80,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 function toggleDropdown() {
     document.getElementById("dropdown-menu").classList.toggle("show");
+
 }
 
 // Ẩn dropdown khi nhấn ra ngoài

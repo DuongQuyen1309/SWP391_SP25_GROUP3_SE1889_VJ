@@ -150,48 +150,10 @@
 </head>
 <body>
 
-<!-- Header -->
-<div class="header">
-    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-    <h2><a href="/home">RSMS</a></h2>
-    <div class="user-info">
-        <img  th:src="${user.avatar}" alt="User Avatar" class="user-avatar"/>
-        <div class="dropdown">
-            <span th:text="${account.displayName}" class="user-name" onclick="toggleDropdown()"> ▼</span>
-            <div id="dropdown-menu" class="dropdown-content">
-                <a href="/user/userprofile">👤 View Profile</a>
-                <a href="/user/changepw" id="changepw">🔑 Change password</a>
-                <a href="/static#" id="logout">🚪 Logout</a>
+<div th:insert="~{layout/header :: header}"></div>
 
-            </div>
-        </div>
-    </div>
+<div th:insert="~{layout/sidebar :: sidebar}"></div>
 
-</div>
-
-<!-- Sidebar -->
-<div class="sidebar" id="sidebar">
-
-    <h2>Feature</h2>
-    <a href="/user/userprofile">Profile</a>
-    <a href="/account/listOwner" th:style="${#lists.contains(listHiddenPage, 'listOwner')} ? 'display: none;' : ''" >Owner Account Management</a>
-
-    <a href="/account/listStaff" th:style="${#lists.contains(listHiddenPage, 'listStaff')} ? 'display: none;' : ''">Staff Account Management</a>
-
-    <a href="/product/listProduct" th:style="${#lists.contains(listHiddenPage, 'listProduct')} ? 'display: none;' : ''" >Rice Management</a>
-
-    <a href="/customer/listCustomer" th:style="${#lists.contains(listHiddenPage, 'listCustomer')} ? 'display: none;' : ''">Customer Management</a>
-
-    <a href="/warehouse/listWarehouseZone" th:style="${#lists.contains(listHiddenPage, 'listWarehouse')} ? 'display: none;' : ''" >Zone Management</a>
-
-    <a href="/bill/listBill" th:style="${#lists.contains(listHiddenPage, 'listBill')} ? 'display: none;' : ''" >Invoice Management </a>
-
-    <a href="/package/listPackage" th:style="${#lists.contains(listHiddenPage, 'listPackage')} ? 'display: none;' : ''" >Package Management</a>
-
-
-</div>
-
-</div>
 
 
 <!-- Content -->

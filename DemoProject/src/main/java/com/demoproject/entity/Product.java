@@ -2,6 +2,7 @@ package com.demoproject.entity;
 
 
 import com.demoproject.dto.PackageTypeDTO;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.*;
@@ -13,6 +14,7 @@ import lombok.experimental.FieldDefaults;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -58,11 +60,13 @@ public class Product {
     @Column(name = "store_id", nullable = false)
     Long storeId;
 
-    @Column(name = "zone_id", nullable = false)
-    Long zoneId;
 
     @Column(name = "quantity")
     int quantity;
+
+    @OneToMany(cascade = { CascadeType.MERGE, CascadeType.PERSIST }, mappedBy = "product")
+    @JsonManagedReference
+    List<Zone> zones = new ArrayList<>();
 
     @Column(name = "package_type", columnDefinition = "nvarchar(MAX)")
     String packageTypeJson; // Lưu dưới dạng chuỗi JSON

@@ -62,15 +62,19 @@ public class UserController {
             listHiddenPage.add("listOwner");
         }
         if(role.equals("ADMIN")){
-
+            listHiddenPage.add("Store");
             listHiddenPage.add("listCustomer");
             listHiddenPage.add("listProduct");
             listHiddenPage.add("listWarehouse");
             listHiddenPage.add("listBill");
             listHiddenPage.add("listPackage");
+            listHiddenPage.add("listImportedNote");
+            listHiddenPage.add("Dashboard");
         }
         if(role.equals("ADMIN")||role.equals("STAFF")){
+            listHiddenPage.add("Store");
             listHiddenPage.add("listStaff");
+            listHiddenPage.add("Dashboard");
         }
         model.addAttribute("listHiddenPage",listHiddenPage);
 
@@ -107,16 +111,21 @@ public class UserController {
             listHiddenPage.add("listOwner");
         }
         if(role.equals("ADMIN")){
-
+            listHiddenPage.add("Store");
             listHiddenPage.add("listCustomer");
             listHiddenPage.add("listproduct");
             listHiddenPage.add("listWarehouse");
             listHiddenPage.add("listBill");
             listHiddenPage.add("listPackage");
+            listHiddenPage.add("listImportedNote");
+            listHiddenPage.add("Dashboard");
         }
         if(role.equals("ADMIN")||role.equals("STAFF")){
+            listHiddenPage.add("Store");
             listHiddenPage.add("listStaff");
+            listHiddenPage.add("Dashboard");
         }
+
         model.addAttribute("listHiddenPage",listHiddenPage);
         model.addAttribute("user", user);
 
@@ -156,15 +165,19 @@ public class UserController {
             listHiddenPage.add("listOwner");
         }
         if(role.equals("ADMIN")){
-
+            listHiddenPage.add("Store");
             listHiddenPage.add("listCustomer");
             listHiddenPage.add("listProduct");
             listHiddenPage.add("listWarehouse");
             listHiddenPage.add("listBill");
             listHiddenPage.add("listPackage");
+            listHiddenPage.add("listImportedNote");
+            listHiddenPage.add("Dashboard");
         }
         if(role.equals("ADMIN")||role.equals("STAFF")){
+            listHiddenPage.add("Store");
             listHiddenPage.add("listStaff");
+            listHiddenPage.add("Dashboard");
         }
         model.addAttribute("listHiddenPage",listHiddenPage);
         model.addAttribute("user", user);
@@ -188,14 +201,18 @@ public class UserController {
             listHiddenPage.add("listOwner");
         }
         if(role.equals("ADMIN")){
-
+            listHiddenPage.add("Store");
             listHiddenPage.add("listCustomer");
             listHiddenPage.add("listProduct");
             listHiddenPage.add("listWarehouse");
             listHiddenPage.add("listBill");
+            listHiddenPage.add("listImportedNote");
+            listHiddenPage.add("Dashboard");
         }
         if(role.equals("ADMIN")||role.equals("STAFF")){
+            listHiddenPage.add("Store");
             listHiddenPage.add("listStaff");
+            listHiddenPage.add("Dashboard");
         }
         model.addAttribute("listHiddenPage",listHiddenPage);
 

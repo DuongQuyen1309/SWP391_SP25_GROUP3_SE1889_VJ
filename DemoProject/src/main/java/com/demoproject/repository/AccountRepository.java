@@ -64,4 +64,7 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
                                    @Param("req_email") String req_email,
                                    @Param("req_fullname") String req_fullname, Pageable pageable);
 
+    @Query("SELECT a FROM Account a WHERE a.storeId = :storeId")
+    Optional<Account> getOwnerNameByStoreId(@Param("storeId") Long storeId);
+
 }

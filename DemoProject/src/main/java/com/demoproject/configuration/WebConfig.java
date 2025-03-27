@@ -1,6 +1,5 @@
 package com.demoproject.configuration;
 
-import com.demoproject.interceptor.UserProfileInterceptor;
 import com.demoproject.service.AccountService;
 import com.demoproject.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,12 +20,7 @@ public class WebConfig implements WebMvcConfigurer {
         this.accountService = accountService;
     }
 
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new UserProfileInterceptor(userService, accountService))
-                .addPathPatterns("/product/**","/account/**","/customer/**","/warehouse/**","/home","/warehouse","/zone/**","/user/changepw")
-                .excludePathPatterns("/user/userprofile"); // Không áp dụng cho user profile
-    }
+
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {

@@ -93,21 +93,24 @@ public class HomeController {
             listHiddenPage.add("listProduct");
             listHiddenPage.add("listWarehouse");
             listHiddenPage.add("listBill");
+            listHiddenPage.add("Store");
+            listHiddenPage.add("listPackage");
+            listHiddenPage.add("listImportedNote");
         }
         if(role.equals("ADMIN")||role.equals("STAFF")){
+            listHiddenPage.add("Dashboard");
             listHiddenPage.add("listStaff");
+            listHiddenPage.add("Store");
         }
         model.addAttribute("listHiddenPage",listHiddenPage);
 
         Optional<Account> optAccount= accountService.findByUsernameAndIsDeleteFalse(username);
         Optional<Users> user= userService.getUserProfile(optAccount.get().getUserId());
-        if(user.get().getName()==null|| user.get().getPhone()==null|| user.get().getGender()==null|| user.get().getAddress()==null|| user.get().getDateOfBirth()==null){
-            redirectAttributes.addFlashAttribute("alertMessage", "Bạn phải nhập thông tin cá nhân đã");
-            return "redirect:/user/userprofile";
-        }
         Account account= optAccount.orElse(null);
         model.addAttribute("account", account);
         model.addAttribute("user",user.get());
+
+
         return "user/home";
     }
 

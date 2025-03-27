@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
@@ -23,13 +24,11 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     Page<Product> findByDescriptionContaining(String name, Pageable pageable);
 
-    List<Product> findByNameContainingAndStoreId(String name, Long storeId);
+    Page<Product> findByDescriptionContainingAndStoreId(String name, Long storeId, Pageable pageable);
 
-    List<Product> findByZoneId(Long zoneId);
+    Page<Product> findByNameContainingAndStoreId(String name, Long storeId, Pageable pageable);
 
-    List<Product> findByZoneIdAndNameContaining(Long zoneId, String name);
 
-    List<Product> findByZoneIdAndPriceBetween(Long zoneId, Double minPrice, Double maxPrice);
 
     @Query(value = "SELECT * FROM Product " +
             "WHERE LOWER(name) LIKE LOWER(CONCAT('%', :productName, '%')) " +
@@ -48,4 +47,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Optional<Product> findByIdAndStoreId(Long productId, Long storeId);
 
     List<Product> findByStoreId(Long storeId);
+
+    @Query("SELECT COUNT(p) FROM Product p WHERE p.quantity < 10 AND p.storeId = :storeId AND p.isDeleted = 0")
+    Long countLowStockProducts(@Param("storeId") Long storeId);
+
+
+
 }

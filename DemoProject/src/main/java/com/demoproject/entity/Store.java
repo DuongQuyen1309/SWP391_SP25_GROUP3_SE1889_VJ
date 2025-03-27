@@ -11,14 +11,36 @@ public class Store {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID", nullable = false, columnDefinition = "Numeric(18)")
     private Long id;
-    @Column(name = "PHONE", length = 10, nullable = false, unique = true)
+    @Column(name = "NAME", length = 50)
+    private String name;
+    @Column(name = "PHONE", length = 10, unique = true)
     private String phone;
     @Column(name = "ADDRESS", length = 50)
+
     private String address;
     @Column(name = "CREATED_BY")
     private Long createdBy;
     @Column(name = "CREATED_AT")
     private LocalDateTime createdAt;
+    @Column(name = "TAX_CODE", length = 20, unique = true)
+    private String taxCode; // Thêm tax_code
+
+    public String getTaxCode() {
+        return taxCode;
+    }
+
+    public void setTaxCode(String taxCode) {
+        this.taxCode = taxCode;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
 
     public Long getId() {
         return id;

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,38 +16,22 @@
             border-radius: 10px;
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
         }
-        /*h2 {*/
-        /*    text-align: center;*/
-        /*}*/
-        /*.filter-bar {*/
-        /*    display: flex;*/
-        /*    justify-content: space-between;*/
-        /*    margin-bottom: 20px;*/
-        /*}*/
-        /*.filter-bar input, .filter-bar select {*/
-        /*    padding: 10px;*/
-        /*    width: 30%;*/
-        /*    border: 1px solid #ccc;*/
-        /*    border-radius: 5px;*/
-        /*}*/
-        /*.btn {*/
-        /*    padding: 5px 10px;*/
-        /*    border: none;*/
-        /*    border-radius: 5px;*/
-        /*    cursor: pointer;*/
-        /*}*/
+
         .btn-view {
             background: #3498db;
             color: white;
         }
+
         .btn-download {
             background: #2ecc71;
             color: white;
         }
+
         .btn-print {
             background: #e67e22;
             color: white;
         }
+
         .add-bill {
             position: absolute;
             right: 20px;
@@ -61,10 +46,12 @@
             cursor: pointer;
             transition: 0.3s;
         }
+
         .add-bill:hover {
             background-color: #e67e22;
             transform: scale(1.05);
         }
+
         .pagination {
             text-align: center;
             margin-top: 20px;
@@ -88,21 +75,53 @@
             font-size: 18px;
             margin: 0 10px;
         }
+
         .filter-bar input:focus {
             border-color: #e67e22;
             box-shadow: 0 0 8px rgba(230, 126, 34, 0.5);
+        }
+        .twin-field input{
+            border-radius: 5px;
         }
     </style>
     <script>
         function callPage() {
             window.location.href = "/bill/createBill";
         }
+        function filterBills() {
+            let params = new URLSearchParams();
+            document.querySelectorAll('.filter-input').forEach(input => {
+                if (input.value.trim() !== '') { // Chỉ thêm tham số nếu có giá trị
+                    params.append(input.name, input.value);
+                }
+            });
 
-            function formatPrice(price) {
+            window.location.href = '/bill/listBill' + '?' + params.toString();
+        }
+
+        // Khôi phục giá trị filter từ URL khi tải trang
+        document.addEventListener("DOMContentLoaded", function () {
+            let params = new URLSearchParams(window.location.search);
+            document.querySelectorAll('.filter-input').forEach(input => {
+                if (params.has(input.name)) {
+                    let value = params.get(input.name);
+                    if (input.type === "date") {
+                        input.value = value.substring(0, 10); // Định dạng YYYY-MM-DD
+                    } else {
+                        input.value = value;
+                    }
+                }
+            });
+        });
+        function callPage() {
+            window.location.href = "/bill/createBill";
+        }
+
+        function formatPrice(price) {
             return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         }
 
-            document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", function() {
             document.querySelectorAll(".format-price").forEach(function (element) {
                 let price = parseFloat(element.textContent.replace(/,/g, ''));
                 if (!isNaN(price)) {
@@ -112,70 +131,17 @@
         });
     </script>
 </head>
+
 <body>
-<!-- Header -->
-<div class="header">
-    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-    <h2><a href="/home">RSMS</a></h2>
-    <div class="user-info">
-        <img th:src="${user.avatar}" alt="User Avatar" class="user-avatar"/>
-        <div class="dropdown">
-            <span th:text="${account.displayName}" class="user-name" onclick="toggleDropdown()"> ▼</span>
-            <div id="dropdown-menu" class="dropdown-content">
-                <a href="/user/userprofile">👤 View Profile</a>
-                <a href="/user/changepw" id="changepw">🔑 Change password</a>
-                <a href="/static#" id="logout">🚪 Logout</a>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- Sidebar -->
-<div class="sidebar" id="sidebar" style="height: 100%;">
-    <h2>Feature</h2>
-    <a href="/user/userprofile">Profile</a>
-    <a href="/account/listStaff" th:style="${#lists.contains(listHiddenPage, 'listStaff')} ? 'display: none;' : ''">Staff Account Management</a>
-    <a href="/product/listProduct">Rice Management</a>
-    <a href="/customer/listCustomer">Customer Management</a>
-    <a href="/warehouse/listWarehouseZone">Zone Management</a>
-    <a href="/bill/listBill">Invoice Management</a>
-    <a href="/package/listPackage">Package Management</a>
-</div>
+<div th:insert="~{layout/header :: header}"></div>
+<div th:insert="~{layout/sidebar :: sidebar}"></div>
 
 <div class="content">
     <h2>List of Customer Bills</h2>
-    <button style="margin-top: 70px" class="add-bill" onclick="callPage()">Create New Bill</button>
-    <form class="filter-bar" action="/bill/listBill" method="get">
-        <input type="search" name="search" placeholder="Enter search value" style="width: 30%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
-        <select name="searchBy" style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
-            <option value="invoiceId" th:selected="${searchBy == 'invoiceId'}">Invoice ID</option>
-            <option value="customerName" th:selected="${searchBy == 'customerName'}">Customer Name</option>
-        </select>
-        <button type="submit" style="padding: 10px; background-color: #2c3e50; color: white; border: none; border-radius: 5px;">Search</button>
-    </form>
-    <form class="filter-bar" action="/bill/listBill" method="get" style="margin-top: 10px;">
-        <!--        <select name="sortField" style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;">-->
-        <!--                        <option value="id" th:selected="${sortField == 'id' || sortField == null}"-->
-        <!--                                th:hidden="${sortField == 'id' || sortField == null}">Sort by Invoice ID</option>-->
-        <!--            <option value="debtMoney" th:selected="${sortField == 'debtMoney'}">Sort by Debt Money</option>-->
-        <!--        </select>-->
-        <!-- Hidden input to store sort field value -->
-        <input type="hidden" name="sortField" value="debtMoney" />
-        <!-- Regular button that submits the form -->
-        <button  style="width: 200px; padding: 10px; border: 1px solid #ccc; border-radius: 5px;" type="submit" class="btn btn-primary">Sort by Debt Money</button>
-        <select name="sortOrder" style="padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-left: 10px;">
-            <option value="asc" th:selected="${sortOrder == 'asc'}">Ascending</option>
-            <option value="desc" th:selected="${sortOrder == 'desc'}">Descending</option>
-        </select>
-        <button type="submit" style="padding: 10px; background-color: #2c3e50; color: white; border: none; border-radius: 5px;">Sort</button>
-    </form>
-    <!-- Add this form after the Sort form -->
-    <form class="filter-bar" action="/bill/listBill" method="get" style="margin-top: 10px;">
-        <input type="number" name="minValue" placeholder="Min Total Money" style="width: 20%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;" th:value="${minValue}">
-        <span style="margin: 0 10px;">to</span>
-        <input type="number" name="maxValue" placeholder="Max Total Money" style="width: 20%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;" th:value="${maxValue}">
-        <input type="hidden" name="searchBy" value="totalMoneyRange">
-        <button type="submit" style="padding: 10px; background-color: #2c3e50; color: white; border: none; border-radius: 5px;">Search</button>
-    </form>
+    <button style="margin-top: 15px" class="add-bill" onclick="callPage()">Create New Bill</button>
+
+
+
     <div class="error-message" th:if="${error}" th:text="${error}"></div>
     <table class="styled-table">
         <thead>
@@ -187,10 +153,58 @@
             <th>Paid Money</th>
             <th>Debt Money</th>
             <th>Status</th>
+            <th>Note</th>
             <th>Actions</th>
         </tr>
         </thead>
         <tbody>
+        <tr>
+            <td class="twin-field">
+                <input type="text" class="filter-input" name="idFrom" onchange="filterBills()"
+                       style="width: 20px;">
+                <input type="text" class="filter-input" name="idTo" onchange="filterBills()"
+                       style="width: 20px;">
+            </td>
+            <td>
+                <input type="text" class="filter-input" name="customerName" onchange="filterBills()"
+                       style="width: 100%;">
+            </td>
+            <td class="twin-field">
+                <input type="date" class="filter-input" name="startDate" onchange="filterBills()"
+                       style="width: 100px;">
+                <input type="date" class="filter-input" name="endDate" onchange="filterBills()"
+                       style="width: 100px;">
+            </td>
+            <td class="twin-field">
+                <input type="number" class="filter-input" name="totalMoneyFrom" onchange="filterBills()"
+                       style="width: 45%;" step="1000">
+                <input type="number" class="filter-input" name="totalMoneyTo" onchange="filterBills()"
+                       style="width: 45%;" step="1000">
+            </td>
+            <td class="twin-field">
+                <input type="number" class="filter-input" name="paidMoneyFrom" onchange="filterBills()"
+                       style="width: 45%;" step="1000">
+                <input type="number" class="filter-input" name="paidMoneyTo" onchange="filterBills()"
+                       style="width: 45%;" step="1000">
+            </td>
+            <td class="twin-field">
+                <input type="number" class="filter-input" name="debtMoneyFrom" onchange="filterBills()"
+                       style="width: 45%;" step="1000">
+                <input type="number" class="filter-input" name="debtMoneyTo" onchange="filterBills()"
+                       style="width: 45%;" step="1000">
+            </td>
+            <td>
+                <select class="filter-input" name="status" onchange="filterBills()" style="width: 85px">
+                    <option value="">All</option>
+                    <option value="true">⚠️ Notice</option>
+                    <option value="false">✅ Safe</option>
+                </select>
+            </td>
+            <td>
+                <input type="text" class="filter-input" name="note" onchange="filterBills()"
+                       style="width: 100%;">
+            </td>
+        </tr>
         <tr th:each="bill : ${bills}">
             <td th:text="${bill.id}"></td>
             <td th:text="${bill.customer.name}"></td>
@@ -198,7 +212,8 @@
             <td class="format-price" th:text="${bill.totalMoney}"></td>
             <td class="format-price" th:text="${bill.paidMoney}"></td>
             <td class="format-price" th:text="${bill.debtMoney}"></td>
-            <td th:text="${bill.status? '🚨 Remarkable':'✅ None'}"></td>
+            <td th:text="${bill.status? '⚠️ Notice':'✅ Safe'}"></td>
+            <td th:text="${bill.note}"></td>
             <td>
                 <form th:action="@{bill/billDetail}" method="get">
                     <input type="hidden" name="id" th:value="${bill.id}">
@@ -211,21 +226,20 @@
     </table>
 
     <div class="pagination">
-
-
         <a th:if="${bills.hasPrevious()}"
-           th:href="@{/bill/listBill(page=${bills.number - 1}, size=${bills.size})}"
+           th:href="@{/bill/listBill(page=${bills.number - 1}, size=${bills.size}, sortField=${sortField}, sortOrder=${sortOrder}, search=${search}, searchBy=${searchBy}, minValue=${minValue}, maxValue=${maxValue}, status=${param.status},startDate=${startDate},endDate=${endDate})}"
            class="pagination-button">Previous</a>
         <span th:text="'Page ' + ${bills.number + 1} + ' of ' + ${bills.totalPages}"></span>
         <a th:if="${bills.hasNext()}"
-           th:href="@{/bill/listBill(page=${bills.number + 1}, size=${bills.size})}"
+           th:href="@{/bill/listBill(page=${bills.number + 1}, size=${bills.size}, sortField=${sortField}, sortOrder=${sortOrder}, search=${search}, searchBy=${searchBy}, minValue=${minValue}, maxValue=${maxValue}, status=${param.status},startDate=${startDate},endDate=${endDate})}"
            class="pagination-button">Next</a>
-
     </div>
+
 </div>
 <footer>
     &copy; 2025 Rice Sales Management. All Rights Reserved.
 </footer>
 <script src="/js/home.js"></script>
 </body>
+
 </html>

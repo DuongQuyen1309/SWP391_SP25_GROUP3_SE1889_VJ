@@ -47,56 +47,78 @@ public class PackageController {
     }
 
     @GetMapping("/listPackage")
-    public String getAllPackage(Model model, @RequestParam(defaultValue = "0") int page,
-                                @RequestParam(defaultValue = "5") int size,
-                                @RequestParam(defaultValue = "") String name,
-                                @RequestParam(defaultValue = "") String color,
-                                @RequestParam(defaultValue = "") String description,
+    public String getAllPackage(Model model,
+                                @RequestParam(defaultValue = "0") int page,
+                                @RequestParam(defaultValue = "3") int size,
+                                @RequestParam(required = false) String idFrom,
+                                @RequestParam(required = false) String idTo,
+                                @RequestParam(required = false) String packageName,
+                                @RequestParam(required = false) String color,
+                                @RequestParam(required = false) String description,
                                 @RequestParam(required = false) String startDate,
                                 @RequestParam(required = false) String endDate,
                                 @CookieValue(value = "token", required = false) String token,
                                 RedirectAttributes redirectAttributes) {
-        // Lấy thông tin người dùng từ token
+
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
+        Page<Package> packagePage;
 
         Account account = accountService.getAccountFromToken(token).orElse(null);
-        Optional<Users> userOpt = userService.getUserProfile(account.getUserId());
-        Users user= userOpt.orElse(null);
-
+        Users user = userService.getUserProfile(account.getUserId()).orElse(null);
         model.addAttribute("user", user);
         model.addAttribute("account", account);
         String role = jwtUtils.extractRole(token);
         List<String> listHiddenPage = new ArrayList<>();
         listHiddenPage.add("");
         if (role.equals("STAFF")) {
+            listHiddenPage.add("Store");
             listHiddenPage.add("listStaff");
+            listHiddenPage.add("Dashboard");
+            listHiddenPage.add("listOwner");
+        }
+        if (role.equals("OWNER")) {
+            listHiddenPage.add("listOwner");
+        }
+        model.addAttribute("listHiddenPage", listHiddenPage);
+
+        // Thêm các giá trị filter vào model
+        model.addAttribute("idFrom", idFrom);
+        model.addAttribute("idTo", idTo);
+        model.addAttribute("packageName", packageName);
+        model.addAttribute("color", color);
+        model.addAttribute("description", description);
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
+
+        // Xử lý filter
+        Long fromId = null;
+        Long toId = null;
+        LocalDate start = null;
+        LocalDate end = null;
+
+        try {
+            if (idFrom != null && !idFrom.trim().isEmpty())
+                fromId = Long.parseLong(idFrom);
+            if (idTo != null && !idTo.trim().isEmpty())
+                toId = Long.parseLong(idTo);
+            if (startDate != null && !startDate.trim().isEmpty())
+                start = LocalDate.parse(startDate);
+            if (endDate != null && !endDate.trim().isEmpty())
+                end = LocalDate.parse(endDate);
+        } catch (Exception e) {
+            model.addAttribute("error", "Invalid filter input: " + e.getMessage());
+            packagePage = packageService.getAllPackageByStoreId(pageable, user.getStoreId());
         }
 
-        Page<Package> packagePage;
-        if (startDate != null && !startDate.isEmpty() && endDate != null && !endDate.isEmpty()) {
-            // Convert string dates to LocalDate
-            LocalDate start = LocalDate.parse(startDate);
-            LocalDate end = LocalDate.parse(endDate);
-
-            // Search by date range
-            packagePage = packageService.getAllPackageByStoreIdAndDateRange(start, end, user.getStoreId(), pageable);
-        } else if (!name.isEmpty()) {
-            packagePage = packageService.getAllPackageByStoreIdAndName(name, user.getStoreId(), pageable);
-        } else if (!color.isEmpty()) {
-            packagePage = packageService.getAllPackageByStoreIdAndColor(color, user.getStoreId(), pageable);
-        } else if (!description.isEmpty()) {
-            packagePage = packageService.getAllPackageByStoreIdAndDescription(description, user.getStoreId(), pageable);
+        if (fromId != null || toId != null || packageName != null || color != null || description != null
+                || start != null || end != null) {
+            packagePage = packageService.getPackagesWithFilters(fromId, toId, packageName, color, description, start,
+                    end, user.getStoreId(), pageable);
         } else {
             packagePage = packageService.getAllPackageByStoreId(pageable, user.getStoreId());
         }
 
-        model.addAttribute("listHiddenPage", listHiddenPage);
         model.addAttribute("packagePage", packagePage);
-        model.addAttribute("name", name);
-        model.addAttribute("color", color);
-        model.addAttribute("startDate", startDate);
-        model.addAttribute("endDate", endDate);
-        model.addAttribute("description", description);
         return "package/listPackage";
     }
 
@@ -104,15 +126,21 @@ public class PackageController {
     public String getCreatePackage(Model model, @CookieValue(value = "token", required = false) String token) {
         model.addAttribute("newPackage", new Package());
         String role = jwtUtils.extractRole(token);
-        Account account = accountService.getAccountFromToken(token).orElse(null);
-        Optional<Users> userOpt = userService.getUserProfile(account.getUserId());
-        Users user= userOpt.orElse(null);
-        model.addAttribute("user", user);
-        model.addAttribute("account", account);
+        String username = jwtUtils.extractUsername(token);
+        Optional<Account> account = accountService.findByUsernameAndIsDeleteFalse(username);
+        Optional<Users> user = userService.getUserProfile(account.get().getUserId());
+        model.addAttribute("user", user.get());
+        model.addAttribute("account", account.get());
         List<String> listHiddenPage = new ArrayList<>();
         listHiddenPage.add("");
         if (role.equals("STAFF")) {
+            listHiddenPage.add("Store");
             listHiddenPage.add("listStaff");
+            listHiddenPage.add("Dashboard");
+            listHiddenPage.add("listOwner");
+        }
+        if(role.equals("OWNER")){
+            listHiddenPage.add("listOwner");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
         return "package/createPackage";
@@ -129,13 +157,17 @@ public class PackageController {
             listHiddenPage.add("");
             if (role.equals("STAFF")) {
                 listHiddenPage.add("listStaff");
+                listHiddenPage.add("Dashboard");
+                listHiddenPage.add("Store");
+                listHiddenPage.add("listOwner");
+            }
+            if (role.equals("OWNER")) {
+                listHiddenPage.add("listOwner");
             }
             model.addAttribute("listHiddenPage", listHiddenPage);
-            Account account = accountService.getAccountFromToken(token).orElse(null);
-            Optional<Users> userOpt = userService.getUserProfile(account.getUserId());
-            Users user= userOpt.orElse(null);
-            model.addAttribute("account", account);
-            model.addAttribute("user", user);
+            String username = jwtUtils.extractUsername(token);
+            Optional<Account> account = accountService.findByUsernameAndIsDeleteFalse(username);
+            Users user = userService.getUserProfile(account.get().getUserId()).orElse(null);
             newPackage.setStoreId(user.getStoreId());
             newPackage.setCreatedBy(user.getId());
             model.addAttribute("newPackage", newPackage);
@@ -175,7 +207,13 @@ public class PackageController {
         List<String> listHiddenPage = new ArrayList<>();
         listHiddenPage.add("");
         if (role.equals("STAFF")) {
+            listHiddenPage.add("Store");
             listHiddenPage.add("listStaff");
+            listHiddenPage.add("Dashboard");
+            listHiddenPage.add("listOwner");
+        }
+        if (role.equals("OWNER")) {
+            listHiddenPage.add("listOwner");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
         model.addAttribute("currentPackage", currentPackage);
@@ -199,7 +237,13 @@ public class PackageController {
         List<String> listHiddenPage = new ArrayList<>();
         listHiddenPage.add("");
         if (role.equals("STAFF")) {
+            listHiddenPage.add("Store");
             listHiddenPage.add("listStaff");
+            listHiddenPage.add("Dashboard");
+            listHiddenPage.add("listOwner");
+        }
+        if (role.equals("OWNER")) {
+            listHiddenPage.add("listOwner");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
         if (currentPackage == null) {
@@ -217,6 +261,7 @@ public class PackageController {
         currentPackage.setColor(package1.getColor());
         currentPackage.setDescription(package1.getDescription());
         currentPackage.setUpdatedAt(LocalDate.now());
+        currentPackage.setUpdatedBy(user.getId());
         try {
 
             this.packageService.updatePackage(currentPackage);

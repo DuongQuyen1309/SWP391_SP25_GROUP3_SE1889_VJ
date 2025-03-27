@@ -12,36 +12,8 @@
 
 </head>
 <body>
-<!-- Header -->
-<div class="header">
-  <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-  <h2><a href="/home">RSMS</a></h2>
-  <div class="user-info">
-    <img  th:src="${user.avatar}" alt="User Avatar" class="user-avatar"/>
-    <div class="dropdown">
-      <span th:text="${account.displayName}" class="user-name" onclick="toggleDropdown()"> ▼</span>
-      <div id="dropdown-menu" class="dropdown-content">
-        <a href="/user/userprofile">👤 View Profile</a>
-        <a href="/user/changepw" id="changepw">🔑 Change password</a>
-        <a href="/static#" id="logout">🚪 Logout</a>
-
-      </div>
-    </div>
-  </div>
-
-</div>
-
-<!-- Sidebar -->
-<div class="sidebar" id="sidebar" style="height: 100%;">
-  <h2>Feature</h2>
-  <a href="/user/userprofile">Profile</a>
-  <a href="/account/listStaff" th:style="${#lists.contains(listHiddenPage, 'listStaff')} ? 'display: none;' : ''">Staff Account Management</a>
-  <a href="/product/listProduct">Rice Management</a>
-  <a href="/customer/listCustomer">Customer Management</a>
-  <a href="/warehouse/listWarehouseZone">Zone Management</a>
-  <a href="/bill/listBill">Invoice Management</a>
-  <a href="/package/listPackage">Package Management</a>
-</div>
+<div th:insert="~{layout/header :: header}"></div>
+<div th:insert="~{layout/sidebar :: sidebar}"></div>
 <div class="content">
 <!--<div class="search-container">-->
 <!--  <span class="search-icon">🔍</span>-->
@@ -100,6 +72,13 @@
         <!-- Các sản phẩm đã chọn sẽ hiển thị ở đây -->
         </tbody>
       </table>
+
+      <div id="product-total-container" style="border-top: 2px solid #ccc; margin-top: 10px; padding-top: 10px;display: none">
+        <div id="product-total-money" style="font-weight: bold; font-size: 18px; text-align: right; padding-right: 10px;">
+          Total: <span id="product-total-value">0</span> VND
+        </div>
+      </div>
+
 
     </div>
 
@@ -188,23 +167,7 @@
       </div>
     </div>
 
-    <div class="section">
-      <div class="section-header">Total</div>
-      <div class="section-content">
-        <div class="total-row">
-          <span class="total-label">Total Money:</span>
-          <span class="total-value" id="total-amount">0</span>
-        </div>
-        <div class="total-row">
-          <span class="total-label">Customer need to pay:</span>
-          <span class="total-value highlight" id="customer-pay">0</span>
-        </div>
-        <div class="total-row">
-          <span class="total-label">Excess cash:</span>
-          <span class="total-value highlight" id="cash">0</span>
-        </div>
-      </div>
-    </div>
+
 
     <div class="section">
       <div class="section-header">Payment</div>
@@ -245,14 +208,25 @@
 
 
         </div>
+
+    <div class="section">
+      <div class="section-header">Total</div>
+      <div class="section-content">
+        <div class="total-row">
+          <span class="total-label">Total Money To Pay:</span>
+          <span class="total-value" id="total-amount">0</span>
+        </div>
+        <div class="total-row">
+          <span class="total-label">Excess cash:</span>
+          <span class="total-value highlight" id="cash">0</span>
+        </div>
+
       </div>
-
-
-
-
+    </div>
 
         <button class="checkout-button">CHECK OUT</button>
       </div>
+    </div>
     </div>
   </div>
 </div>
@@ -418,9 +392,9 @@
 
     document.getElementById("search-product").value = "";
     document.getElementById("product-list").innerHTML = "<p>Enter product name to search...</p>";
+    closeProductModal();
     renderProducts(activeTabId);
     updateOrderTotal(activeTabId);
-    closeProductModal();
   }
 
 
@@ -515,6 +489,7 @@
       customerList.innerHTML = "";
       customerList.style.display = "none";
     }
+
   }
 
   // Chọn khách hàng từ danh sách
@@ -523,7 +498,7 @@
     document.getElementById("customer-phone").value = phone;
     document.getElementById("customer-address").value = address;
     document.getElementById("customer-dob").value = dob;
-    document.getElementById("customer-gender").value = gender;
+    document.getElementById("customer-gender").value = (gender === "true") ? "male" : "female";
     document.getElementById("customer-moneystate").value = moneystate;
     console.log(gender)
     if (!tabData[activeTabId]) {
@@ -535,6 +510,7 @@
 
     tabData[activeTabId].customer = { name, phone, address ,dob,gender ,moneystate };
     // Đặt readonly
+
     document.getElementById("customer-name").readOnly = true;
     document.getElementById("customer-phone").readOnly = true;
     document.getElementById("customer-address").readOnly = true;
@@ -544,6 +520,7 @@
 
     // Đóng popup
     closeCustomerSearchModal();
+    saveCustomerData(activeTabId);
   }
   document.getElementById("save-customer-btn").addEventListener("click", function () {
     let name = document.getElementById("new-customer-name").value.trim();
@@ -786,6 +763,15 @@
               sum + (product.price * product.quantity * (product.selectedPackageSize || 1)), 0
       );
     }
+    // ✅ Hiển thị hoặc ẩn dòng Total dưới bảng sản phẩm
+    const productTotalContainer = document.getElementById("product-total-container");
+    if (tabData[activeTabId].products.length > 0) {
+      productTotalContainer.style.display = "block";
+      document.getElementById("product-total-value").textContent = formatPrice(productTotal);
+    } else {
+      productTotalContainer.style.display = "none";
+    }
+
     console.log(productTotal);
 
     // Lấy tiền bốc hàng nếu checkbox "Bốc hàng" được chọn
@@ -806,7 +792,6 @@ console.log(!isNaN(customerPayment));
     console.log("finalTotal "+ finalTotal);
     console.log("customerpayment"+ customerPayment);
     document.getElementById("total-amount").textContent = formatPrice(Math.round(finalTotal));
-    document.getElementById("customer-pay").textContent = formatPrice(Math.round(finalTotal));
     if(isNaN(numericCustomerPaymentAmount)){
       customerPayment = 0;
     }
@@ -1021,21 +1006,34 @@ console.log(!isNaN(customerPayment));
     switchTab(tabId);
   });
 
+  function saveCustomerData(tabId) {
+    if (!tabData[tabId]) tabData[tabId] = { customer: {}, products: [] };
+
+    tabData[tabId].customer = {
+      name: document.getElementById("customer-name").value.trim(),
+      phone: document.getElementById("customer-phone").value.trim(),
+      address: document.getElementById("customer-address").value.trim(),
+      dob: document.getElementById("customer-dob").value.trim(),
+      gender: document.getElementById("customer-gender").value.trim(),
+      moneystate: document.getElementById("customer-moneystate").value.trim()
+    };
+    console.log(tabData[tabId].customer);
+  }
+
+
   function switchTab(tabId) {
     savePaymentData(activeTabId);
-    console.log(tabData[activeTabId]?.payment.loadingAmount);
+    saveCustomerData(activeTabId);
     // Nếu tab chưa có dữ liệu, khởi tạo mới
 
     activeTabId = tabId;
     document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
     document.querySelector(`[data-tab="${tabId}"]`).classList.add("active");
 
-    console.log(activeTabId);
-    console.log(tabData[tabId]);
+
     if (!tabData[tabId]) {
       tabData[tabId] = { customer: {}, products: [], payment: {discount: null, customerPayment: 0, loading: false, loadingAmount: 0 } , status: null , note: "" };
     }
-    console.log(tabData[tabId].payment.discount);
     document.getElementById("order-note").value = tabData[tabId].note || ""; // Load ghi chú của tab
 
     renderProducts(tabId);
@@ -1044,7 +1042,6 @@ console.log(!isNaN(customerPayment));
     updateOrderStatus(tabId);
 
     // Reset và cập nhật lựa chọn thanh toán
-
     // Reset thông tin khách hàng khi chuyển tab
     loadCustomerData(tabId);
   }
@@ -1089,6 +1086,7 @@ console.log(tabData[tabId].payment.customerPayment);
 
   function loadCustomerData(tabId) {
     let customer = tabData[tabId]?.customer || {};
+    console.log(customer+" bccccc");
     let payment = tabData[tabId]?.payment || {};
     let exist = typeof customer.name !== "undefined" && customer.name !== "";
 
@@ -1096,7 +1094,15 @@ console.log(tabData[tabId].payment.customerPayment);
     document.getElementById("customer-phone").value = customer.phone || "";
     document.getElementById("customer-address").value = customer.address || "";
     document.getElementById("customer-dob").value = customer.dob || "";
-    document.getElementById("customer-gender").value = customer.gender || "";
+    console.log(customer.gender === "male");
+
+    if(customer.gender){
+      document.getElementById("customer-gender").value= (customer.gender==="male") ? "male" : "female";
+    }
+    else{
+      document.getElementById("customer-gender").value =  "";
+    }
+
     document.getElementById("customer-moneystate").value = customer.moneystate || "";
   }
 

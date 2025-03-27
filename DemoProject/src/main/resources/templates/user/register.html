@@ -13,9 +13,6 @@
             const passwordInput = document.getElementById("password");
             const displaynameInput = document.getElementById("displayname");
             const emailInput = document.getElementById("email");
-            const errorContainer = document.createElement("div");
-            errorContainer.style.color = "red";
-            errorContainer.style.fontWeight = "bold";
 
             // ✅ Hàm gửi request AJAX kiểm tra username có tồn tại không
             async function checkUsernameExists(username) {
@@ -40,54 +37,59 @@
             }
             form.addEventListener("submit", async function (event) {
                 event.preventDefault();
-                let errors = [];
+                // Xóa lỗi cũ trước khi kiểm tra lại
+                document.querySelectorAll('.error-message').forEach(el => el.textContent = "");
+
+                let hasError = false;
 
 
 
                 // ✅ Kiểm tra username không rỗng
                 if (username.value.trim() === "") {
-                    errors.push("Username must be not empty.");
+                    document.getElementById("username-error").textContent = "Username must not be empty.";
+                    hasError = true;
                 } else if (!/^[A-Za-z0-9]+$/.test(username.value)) {
-                    errors.push("Username must only contain letters (A-Z, a-z) or numbers, no special characters.");
+                    document.getElementById("username-error").textContent = "Username must only contain letters (A-Z, a-z) or numbers, no special characters.";
+                    hasError=true;
                 } else {
                     // 🔍 Gửi AJAX kiểm tra username có tồn tại không
                     let isUsernameExists = await checkUsernameExists(usernameInput.value);
                     console.log(isUsernameExists);
                     if (isUsernameExists) {
-                        errors.push("This username already exists, please enter another username.");
+                        document.getElementById("username-error").textContent ="This username already exists, please enter another username.";
+                        hasError=true;
                     }
                 }
 
                 // ✅ Kiểm tra password không rỗng và có đủ điều kiện
                 if (passwordInput.value.trim() === "") {
-                    errors.push("Password must be not empty.");
+                    document.getElementById("password-error").textContent ="Password must be not empty.";
+                    hasError=true;
                 }
 
                 // ✅ Kiểm tra display name không rỗng
                 if (displaynameInput.value.trim() === "") {
-                    errors.push("Display Name must be not empty.");
+                    document.getElementById("displayname-error").textContent ="Display Name must be not empty.";
+                    hasError=true;
                 }
 
                 if (emailInput.value.trim() === "" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value)) {
-                    errors.push("Invalid email format.");
+                    document.getElementById("email-error").textContent ="Invalid email format.";
+                    hasError=true;
                 } else{
                     let isEmailExists = await checkEmailExists(emailInput.value);
                     console.log(isEmailExists);
                     if (isEmailExists) {
-                        errors.push("This email already exists, please enter another email.");
+                        document.getElementById("email-error").textContent ="This email already exists, please enter another email.";
+                        hasError=true;
                     }
                 }
 
-                // ✅ Nếu có lỗi, hiển thị lỗi và ngăn form submit
-                if (errors.length > 0) {
+                if (hasError) {
                     event.preventDefault();
-                    errorContainer.innerHTML = errors.join("<br>");
-                    form.insertBefore(errorContainer, form.querySelector("button"));
-                }
-                else {
-                    alert("Register successfully!");
-
-                    // ✅ Đợi 500ms để alert hiển thị, sau đó gửi form
+                    return;
+                } else {
+                    alert("Registered successfully!");
                     setTimeout(() => {
                         form.submit();
                     }, 500);
@@ -114,18 +116,22 @@
             <div class="input-group">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username" >
+                <span class="error-message" id="username-error"></span>
             </div>
             <div class="input-group">
                 <label for="password">Password</label>
                 <input type="password" id="password" name="password" >
+                <span class="error-message" id="password-error"></span>
             </div>
             <div class="input-group">
                 <label for="displayname">Displayname</label>
                 <input type="text" id="displayname" name="displayname" >
+                <span class="error-message" id="displayname-error"></span>
             </div>
             <div class="input-group">
                 <label for="email">Email</label>
                 <input type="email" id="email" name="email" >
+                <span class="error-message" id="email-error"></span>
             </div>
 
             <button type="submit" class="btn">Register</button>

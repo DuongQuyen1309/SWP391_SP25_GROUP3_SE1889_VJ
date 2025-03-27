@@ -1,10 +1,14 @@
 package com.demoproject.service;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.demoproject.entity.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -100,5 +104,35 @@ public class ZoneService {
 
     public List<Zone> getZonesByStoreId(Long storeId) {
         return zoneRepository.findByStoreId(storeId);
+    }
+    public Page<Zone> getZonesWithFilters(Long idFrom, Long idTo, String name, String position,
+                                          LocalDate startDate, LocalDate endDate, Long storeId, Pageable pageable) {
+
+        Specification<Zone> spec = (root, query, cb) -> {
+            List<jakarta.persistence.criteria.Predicate> predicates = new ArrayList<>();
+
+            if (idFrom != null)
+                predicates.add(cb.greaterThanOrEqualTo(root.get("id"), idFrom));
+            if (idTo != null)
+                predicates.add(cb.lessThanOrEqualTo(root.get("id"), idTo));
+            if (name != null && !name.isEmpty())
+                predicates.add(cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%"));
+            if (position != null && !position.isEmpty())
+                predicates.add(cb.like(cb.lower(root.get("position")), "%" + position.toLowerCase() + "%"));
+            if (startDate != null)
+                predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"), startDate));
+            if (endDate != null)
+                predicates.add(cb.lessThanOrEqualTo(root.get("createdAt"), endDate));
+            predicates.add(cb.equal(root.get("storeId"), storeId));
+
+            return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+        };
+
+        return zoneRepository.findAll(spec, pageable);
+    }
+
+    @Transactional
+    public Product getProductByZoneId(Long zoneId) {
+        return zoneRepository.findProductByZoneId(zoneId);
     }
 }

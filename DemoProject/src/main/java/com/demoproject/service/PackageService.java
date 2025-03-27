@@ -1,12 +1,14 @@
 package com.demoproject.service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -82,5 +84,32 @@ public class PackageService {
                                                             Long storeId, Pageable pageable) {
 
         return packageRepository.findByStoreIdAndCreatedAtBetween(storeId, startDate, endDate, pageable);
+    }
+    public Page<Package> getPackagesWithFilters(Long idFrom, Long idTo, String packageName, String color,
+                                                String description, LocalDate startDate, LocalDate endDate, Long storeId, Pageable pageable) {
+
+        Specification<Package> spec = (root, query, cb) -> {
+            List<jakarta.persistence.criteria.Predicate> predicates = new ArrayList<>();
+
+            if (idFrom != null)
+                predicates.add(cb.greaterThanOrEqualTo(root.get("id"), idFrom));
+            if (idTo != null)
+                predicates.add(cb.lessThanOrEqualTo(root.get("id"), idTo));
+            if (packageName != null && !packageName.isEmpty())
+                predicates.add(cb.like(cb.lower(root.get("name")), "%" + packageName.toLowerCase() + "%"));
+            if (color != null && !color.isEmpty())
+                predicates.add(cb.like(cb.lower(root.get("color")), "%" + color.toLowerCase() + "%"));
+            if (description != null && !description.isEmpty())
+                predicates.add(cb.like(cb.lower(root.get("description")), "%" + description.toLowerCase() + "%"));
+            if (startDate != null)
+                predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"), startDate));
+            if (endDate != null)
+                predicates.add(cb.lessThanOrEqualTo(root.get("createdAt"), endDate));
+            predicates.add(cb.equal(root.get("storeId"), storeId));
+
+            return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+        };
+
+        return packageRepository.findAll(spec, pageable);
     }
 }

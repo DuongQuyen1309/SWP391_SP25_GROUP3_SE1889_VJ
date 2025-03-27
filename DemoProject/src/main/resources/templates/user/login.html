@@ -6,33 +6,47 @@
     <title>Rice Sales Management</title>
     <link rel="stylesheet" href="/css/login.css">
     <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
+    <style>
+        #general-error {
+            color: red;
+            font-size: 15px;
+            font-weight: bold;
+            margin-top: 8px;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+    </style>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             let form = document.getElementById("loginForm");
             let usernameInput = document.getElementById("username");
             let passwordInput = document.getElementById("password");
-            const errorContainer = document.createElement("p");
-            errorContainer.style.color = "red";
-            errorContainer.style.fontWeight = "bold";
+
+            const generalError = document.getElementById("general-error");
 
             form.addEventListener("submit", async function (event) {
                 event.preventDefault(); // Ngăn form submit mặc định
-                let errors = [];
+                document.querySelectorAll('.error-message').forEach(el => el.textContent = "");
+                generalError.textContent = "";
+
+                let hasError = false;
 
                 // ✅ Kiểm tra username không rỗng
                 if (usernameInput.value.trim() === "") {
-                    errors.push("Username không được để trống.");
+                    document.getElementById("username-error").textContent = "Username must not be empty.";
+                    hasError = true;
+
                 }
 
                 // ✅ Kiểm tra password không rỗng
                 if (passwordInput.value.trim() === "") {
-                    errors.push("Password không được để trống.");
+                    document.getElementById("password-error").textContent = "Password must not be empty.";
+                    hasError = true;
                 }
 
                 // ✅ Nếu có lỗi, hiển thị lỗi và ngăn form submit
-                if (errors.length > 0) {
-                    errorContainer.innerHTML = errors.join("<br>");
-                    form.insertBefore(errorContainer, form.querySelector("button"));
+                if (hasError) {
+                    event.preventDefault();
                     return;
                 }
 
@@ -49,19 +63,19 @@
 
                     if (!response.ok) {
                         let errorData = await response.json();
-                        throw new Error(errorData.error || "Sai tài khoản hoặc mật khẩu!");
+                        throw new Error(errorData.error || "Wrong username or password!");
                     }
 
                     let data = await response.json();
                     console.log("✅ Đăng nhập thành công!", data);
 
-                    // ✅ Chuyển hướng sau khi đăng nhập thành công
-                    window.location.href = "/user/userprofile";
+
+                        window.location.href = "/home"; // hoặc đường dẫn chính của hệ thống
+
 
                 } catch (error) {
-                    console.error("❌ Lỗi đăng nhập:", error);
-                    errorContainer.innerHTML = error.message;
-                    form.insertBefore(errorContainer, form.querySelector("button"));
+                    console.error("❌ Login failed:", error);
+                    generalError.textContent = error.message || "An unexpected error occurred.";
                 }
             });
         });
@@ -85,11 +99,15 @@
             <div class="input-group">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username" >
+                <span class="error-message" id="username-error"></span>
             </div>
             <div class="input-group">
                 <label for="password">Password</label>
                 <input type="password" id="password" name="password" >
+                <span class="error-message" id="password-error"></span>
             </div>
+            <!-- ⚠️ Lỗi tổng quát ở đây -->
+            <div id="general-error"></div>
             <button type="submit" class="btn">Login</button>
             <p class="register-link">Don't have an account? <a href="/register">Register</a></p>
             <p class="register-link">You forgot password? <a href="/forgotpw">Forgot password</a></p>

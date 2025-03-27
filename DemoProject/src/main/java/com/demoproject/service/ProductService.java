@@ -6,8 +6,10 @@ import com.demoproject.dto.ProductDataDTO;
 import com.demoproject.entity.ImportedNote;
 import com.demoproject.entity.Product;
 import com.demoproject.entity.Users;
+import com.demoproject.entity.Zone;
 import com.demoproject.repository.ImportedNoteRepository;
 import com.demoproject.repository.ProductRepository;
+import com.demoproject.repository.ZoneRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,6 +40,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ObjectMapper objectMapper;
     private final ImportedNoteRepository importedNoteRepository;
+    private final ZoneRepository zoneRepository;
 
     public void createProduct(Optional<Users> users, String name, String description, double price, MultipartFile imageFile) throws IOException {
         Product product = new Product();
@@ -139,8 +142,12 @@ public class ProductService {
             if(productDataDTO.getId()!=null){
                 Optional<Product> product = productRepository.findById(productDataDTO.getId());
                 if (product.isPresent()) {
+                    System.out.println(productDataDTO.getZone());
                     product.get().setQuantity(product.get().getQuantity() + productDataDTO.getQuantity());
-                    product.get().setZoneId(Long.parseLong(productDataDTO.getZone()));
+                    Zone newZone = zoneRepository.getZoneById(Long.parseLong(productDataDTO.getZone()));
+                    newZone.setProduct(product.get());
+                    zoneRepository.save(newZone);
+                    product.get().getZones().add(newZone);
                     productRepository.save(product.get());
                 }
             }
@@ -156,11 +163,12 @@ public class ProductService {
         ImportedNote importedNote = new ImportedNote();
         importedNote.setTotalCost(totalPrice);
         importedNote.setProductData(productDataJson);
-        importedNote.setCreatedAt(lcdate.atStartOfDay());
+        importedNote.setCreatedAt(lcdate);
         importedNote.setCreatedBy(users.getId());
         importedNote.setStoreId(users.getStoreId());
-        importedNote.setWarehouseName(users.getName());
+        importedNote.setCustomerId(users.getId());
         importedNoteRepository.save(importedNote);
+
     }
 
     public Product getProductById(Long id) {
@@ -186,11 +194,21 @@ public class ProductService {
         return productRepository.getProductByIsDeleted(0);
     }
 
-    public Page<Product> getAllProductByPage(Long storeID,int page, int size, String sortFiled, String sortDirection){
+    public Page<Product> getAllProductByPage(String searchKeyWord,String searchBy,Long storeID,int page, int size, String sortFiled, String sortDirection){
         Sort sort = sortDirection.equalsIgnoreCase("asc")
                 ? Sort.by(sortFiled).ascending() :
                 Sort.by(sortFiled).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
+        if (searchKeyWord == null || searchKeyWord.isEmpty()) {
+            return productRepository.findAll(pageable);
+        }
+        if ("name".equals(searchBy)) {
+            return productRepository.findByNameContainingAndStoreId(searchKeyWord,storeID, pageable);
+        }
+
+        if ("description".equals(searchBy)) {
+            return productRepository.findByDescriptionContainingAndStoreId(searchKeyWord,storeID, pageable);
+        }
         return productRepository.findByStoreId(storeID,pageable);
     }
 
@@ -217,16 +235,7 @@ public class ProductService {
 
     }
 
-    public List<Product> getProductsByZoneId(Long zoneId) {
-        return productRepository.findByZoneId(zoneId);
-    }
-    public List<Product> searchProductsByZoneIdAndName(Long zoneId, String name) {
-        return productRepository.findByZoneIdAndNameContaining(zoneId, name);
-    }
 
-    public List<Product> searchProductsByZoneIdAndPrice(Long zoneId, Double minPrice, Double maxPrice) {
-        return productRepository.findByZoneIdAndPriceBetween(zoneId, minPrice, maxPrice);
-    }
 
     @Transactional
     public boolean checkStockBeforeProcessing(String productDataJson) {

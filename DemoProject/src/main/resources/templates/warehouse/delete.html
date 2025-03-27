@@ -68,35 +68,8 @@
 </head>
 
 <body>
-<!-- Header -->
-<div class="header">
-  <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-  <h2><a href="/home">RSMS</a></h2>
-  <div class="user-info">
-    <img  th:src="${user.avatar}" alt="User Avatar" class="user-avatar"/>
-    <div class="dropdown">
-      <span th:text="${account.displayName}" class="user-name" onclick="toggleDropdown()"> ▼</span>
-      <div id="dropdown-menu" class="dropdown-content">
-        <a href="/user/userprofile">👤 View Profile</a>
-        <a href="/user/changepw" id="changepw">🔑 Change password</a>
-        <a href="/static#" id="logout">🚪 Logout</a>
-
-      </div>
-    </div>
-  </div>
-
-</div>
-<!-- Sidebar -->
-<div class="sidebar" id="sidebar" style="height: 100%;">
-  <h2>Feature</h2>
-  <a href="/user/userprofile">Profile</a>
-  <a href="/account/listStaff" th:style="${#lists.contains(listHiddenPage, 'listStaff')} ? 'display: none;' : ''">Staff Account Management</a>
-  <a href="/product/listProduct">Rice Management</a>
-  <a href="/customer/listCustomer">Customer Management</a>
-  <a href="/warehouse/listWarehouseZone">Zone Management</a>
-  <a href="/bill/listBill">Invoice Management</a>
-  <a href="/package/listPackage">Package Management</a>
-</div>
+<div th:insert="~{layout/header :: header}"></div>
+<div th:insert="~{layout/sidebar :: sidebar}"></div>
 
 <!-- Content -->
 <div class="content" id="content">

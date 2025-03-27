@@ -3,10 +3,10 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>List of Rice</title>
+  <title></title>
   <link rel="stylesheet" href="/css/base.css">
   <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
-  <script src="/js/importProduct.js"></script>
+
   <style>
     .pagination {
       text-align: center;
@@ -39,39 +39,12 @@
 
     .importBtn{
       position: absolute;
-      right: 10px;
+      margin-left: 940px;
       top: 50px;
-      background-color: #d35400;
+      background-color: #D67C2C;
       color: white;
       padding: 10px;
       border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .add-product {
-      position: absolute; /* Giữ vị trí cố định so với content */
-      right: 20px; /* Sát mép phải của content */
-      top: 110px; /* Đẩy xuống dưới một chút */
-      background-color: #d35400; /* Cam */
-      color: white;
-      font-size: 24px;
-      border: none;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    .add-product:hover,.importBtn:hover, .submit-button-product:hover {
-      background-color: #e67e22;
-      transform: scale(1.05);
-    }
-    .submit-button-product {
-      background-color: #d35400;
-      color: white;
-      padding: 10px;
-      border: none;
-      margin-top: 15px;
       border-radius: 5px;
       cursor: pointer;
     }
@@ -107,67 +80,34 @@
 </head>
 <body>
 
-<!-- Header -->
-<div class="header">
-  <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-  <h2><a href="/home">RSMS</a></h2>
-  <div class="user-info">
-    <img  th:src="${user.avatar}" alt="User Avatar" class="user-avatar"/>
-    <div class="dropdown">
-      <span th:text="${account.displayName}" class="user-name" onclick="toggleDropdown()"> ▼</span>
-      <div id="dropdown-menu" class="dropdown-content">
-        <a href="/user/userprofile">👤 View Profile</a>
-        <a href="/user/changepw" id="changepw">🔑 Change password</a>
-        <a href="/static#" id="logout">🚪 Logout</a>
+<div th:insert="~{layout/header :: header}"></div>
 
-      </div>
-    </div>
-  </div>
-
-</div>
-
-<!-- Sidebar -->
-<div class="sidebar" id="sidebar">
-
-  <h2>Feature</h2>
-  <a href="/user/userprofile" >Profile</a>
-  <a href="/account/listStaff" th:style="${#lists.contains(listHiddenPage, 'listStaff')} ? 'display: none;' : ''">Staff Account Management</a>
-
-  <a href="/product/listProduct" >Rice Management</a>
-
-  <a href="/customer/listCustomer">Customer Management</a>
-
-  <a href="/warehouse/listWarehouseZone" >Zone Management</a>
-
-
-  <a href="/bill/listBill" >Invoice Management</a>
-  <a href="/package/listPackage">Package Management</a>
-
-</div>
+<div th:insert="~{layout/sidebar :: sidebar}"></div>
 
 
 
 <!-- Content -->
 <div class="content" id="content">
 
-  <button class="add-product" onclick="createProductForm()" th:style="${#lists.contains(listHiddenPage, 'createProduct')} ? 'display: none;' : ''">+</button>
+  <button class="add-btn" onclick="createProductForm()" th:style="${#lists.contains(listHiddenPage, 'createProduct')} ? 'display: none;' : ''">+</button>
 
   <!-- List -->
   <h1>List of Products</h1>
   <button class="importBtn" onclick="importProduct()">Import product</button>
-  <form class="form-search" th:action="@{/product/search}" method="get">
+  <form class="form-search" th:action="@{/product/listProduct}" method="get">
     <label for="search"></label>
     <input
             style="height: 30px; width: 750px"
             type="text" id="search" name="searchKeyWord"
             placeholder="Search by product name or description..."
     >
-    <select name="searchBy" style="height: 35px">
+    <select name="searchBy">
       <option value="name" th:selected="${sortField == 'name'}">Name</option>
       <option value="description" th:selected="${sortField == 'description'}">Description</option>
     </select>
-
-    <button type="submit" class="submit-button-product">Search</button>
+    <input type="hidden" name="sortField" th:value="${sortField}">
+    <input type="hidden" name="sortDirection" th:value="${sortDirection}">
+    <button type="submit" class="submit-button">Search</button>
   </form>
   <table class="styled-table">
     <thead>
@@ -175,21 +115,23 @@
       <td>Image</td>
       <td>
         <a style="text-decoration: none; color: inherit"
-           th:href="@{/product/listProduct(page=${currentPage}, sortField='name', sortDirection=${reverseSortDirection})}">Name
+           th:href="@{/product/listProduct(page=${currentPage}, sortField='name', sortDirection=${reverseSortDirection}, searchKeyWord=${searchKeyWord}, searchBy=${searchBy})}">
+          Name
         </a>
       </td>
       <td>
         <a style="text-decoration: none; color: inherit"
-           th:href="@{/product/listProduct(page=${currentPage}, sortField='price', sortDirection=${reverseSortDirection})}">Price
+           th:href="@{/product/listProduct(page=${currentPage}, sortField='price', sortDirection=${reverseSortDirection}, searchKeyWord=${searchKeyWord}, searchBy=${searchBy})}">
+          Price
         </a>
       </td>
       <td>
         <a style="text-decoration: none; color: inherit"
-           th:href="@{/product/listProduct(page=${currentPage}, sortField='quantity', sortDirection=${reverseSortDirection})}">Quantity(kg)
+           th:href="@{/product/listProduct(page=${currentPage}, sortField='quantity', sortDirection=${reverseSortDirection}, searchKeyWord=${searchKeyWord}, searchBy=${searchBy})}">
+          Quantity(kg)
         </a>
       </td>
       <td>Description</td>
-      <td>Zones</td>
       <td>Action</td>
     </tr>
     </thead>
@@ -200,8 +142,8 @@
       <td class="price" th:attr="data-price=${product.price}"></td>
       <td th:text="${product.quantity}"></td>
       <td th:text="${product.description}"></td>
-      <td th:text="${product.zoneId}"></td>
-      <td >
+      <td>
+        <button type="button" th:attr="data-modal-id='productModal' + ${product.id}" class="open-modal">View</button>
         <form th:action="@{/product/update}" method="get">
           <input type="hidden" name="id" th:value="${product.id}">
           <button type="submit">Update</button>
@@ -215,20 +157,39 @@
     </tbody>
   </table>
 
+  <div th:each="product : ${products}" th:if="${product.isDeleted == 0}" th:id="'productModal' + ${product.id}" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>List of product storage areas</h2>
+      <table>
+        <thead>
+        <tr>
+          <td>ID</td>
+          <td>Name</td>
+          <td>Position</td>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="zone : ${product.getZones()}">
+          <td th:text="${zone.getId()}"></td>
+          <td th:text="${zone.getName()}"></td>
+          <td th:text="${zone.getPosition()}"></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
   <div class="pagination">
-    <!-- Nút "Trước" chỉ hiển thị khi currentPage > 1 -->
     <a style="text-decoration: none"
-       th:if="${currentPage > 1}"
-       th:href="@{/product/listProduct(page=${currentPage - 2}, sortField=${sortField}, sortDirection=${sortDirection})}">
+       th:if="${currentPage > 0}"
+       th:href="@{/product/listProduct(page=${currentPage - 1}, sortField=${sortField}, sortDirection=${sortDirection}, searchKeyWord=${searchKeyWord}, searchBy=${searchBy})}">
       Trước
     </a>
-
-    <span>Page <span th:text="${currentPage}"></span> of <span th:text="${totalPages}"></span></span>
-
-    <!-- Nút "Sau" chỉ hiển thị khi currentPage < totalPages -->
+    <span>Page <span th:text="${currentPage + 1}"></span> of <span th:text="${totalPages}"></span></span>
     <a style="text-decoration: none"
-       th:if="${currentPage < totalPages}"
-       th:href="@{/product/listProduct(page=${currentPage}, sortField=${sortField}, sortDirection=${sortDirection})}">
+       th:if="${currentPage < totalPages - 1}"[
+       th:href="@{/product/listProduct(page=${currentPage + 1}, sortField=${sortField}, sortDirection=${sortDirection}, searchKeyWord=${searchKeyWord}, searchBy=${searchBy})}">
       Sau
     </a>
   </div>
@@ -265,6 +226,38 @@
     document.querySelectorAll(".price").forEach(function(el) {
       let price = parseFloat(el.getAttribute("data-price"));
       el.innerText = formatPrice(price);
+    });
+  });
+
+  document.addEventListener("DOMContentLoaded", function () {
+    // Lấy tất cả các nút mở modal
+    let openModalButtons = document.querySelectorAll(".open-modal");
+
+    openModalButtons.forEach(button => {
+      button.addEventListener("click", function () {
+        let modalId = this.getAttribute("data-modal-id");
+        let modal = document.getElementById(modalId);
+        if (modal) {
+          modal.style.display = "block";
+        }
+      });
+    });
+
+    // Lấy tất cả các nút đóng modal
+    let closeButtons = document.querySelectorAll(".close");
+    closeButtons.forEach(button => {
+      button.addEventListener("click", function () {
+        this.closest(".modal").style.display = "none";
+      });
+    });
+
+    // Đóng modal khi nhấn bên ngoài vùng modal-content
+    window.addEventListener("click", function (event) {
+      document.querySelectorAll(".modal").forEach(modal => {
+        if (event.target === modal) {
+          modal.style.display = "none";
+        }
+      });
     });
   });
 </script>

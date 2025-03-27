@@ -61,8 +61,9 @@
     .twin-field input {
         border: 1px solid rgb(255, 255, 255); /* Viền nhẹ */
         transition: border 0.3s, background-color 0.3s;
-        color: #ffffff; /* Màu chữ trắng để nổi bật */
+        color: #040404; /* Màu chữ trắng để nổi bật */
         font-size: 14px;
+        border-radius: 5px;
     }
     /* Placeholder màu sáng để dễ nhìn thấy */
     .twin-field input::placeholder {
@@ -136,30 +137,12 @@
 </head>
 <body>
 
-<!-- Header -->
-<div class="header">
-    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-    <h2><a href="/home">RSMS</a></h2>
-    <div class="user-info">
-        <img  th:src="${user.avatar}" alt="User Avatar" class="user-avatar"/>
-        <div class="dropdown">
-            <span th:text="${account.displayName}" class="user-name" onclick="toggleDropdown()"> ▼</span>
-            <div id="dropdown-menu" class="dropdown-content">
-                <a href="/user/userprofile">👤 View Profile</a>
-                <a href="/user/changepw" id="changepw">🔑 Change password</a>
-                <a href="/static#" id="logout">🚪 Logout</a>
-
-            </div>
-        </div>
-    </div>
-
-</div>
+<div th:insert="~{layout/header :: header}"></div>
 
 <!-- Sidebar -->
 <div class="sidebar" id="sidebar">
 
     <h2>Feature</h2>
-    <a href="/user/userprofile" >Profile</a>
     <a href="/account/listOwner" >Owner Account Management</a>
 
     <div id="accountMenu" class="submenu" style="display: none;">

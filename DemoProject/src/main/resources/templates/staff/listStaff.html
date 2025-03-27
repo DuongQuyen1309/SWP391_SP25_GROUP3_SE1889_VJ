@@ -28,6 +28,16 @@
             border-color: #e67e22;
             box-shadow: 0 0 8px rgba(230, 126, 34, 0.5);
         }
+        .styled-table thead input {
+            width: 100%; /* Chiếm toàn bộ ô nhưng không vượt quá cột */
+            max-width: 120px; /* Giới hạn độ rộng tối đa */
+            padding: 5px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            outline: none;
+            box-sizing: border-box;
+        }
     </style>
     <script>
         function callPage() {
@@ -37,30 +47,14 @@
 </head>
 <body>
 
-<!-- Header -->
-<div class="header">
-    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-    <h2><a href="/home">RSMS</a></h2>
-    <div class="user-info">
-        <img  th:src="${user.avatar}" alt="User Avatar" class="user-avatar"/>
-        <div class="dropdown">
-            <span th:text="${account.displayName}" class="user-name" onclick="toggleDropdown()"> ▼</span>
-            <div id="dropdown-menu" class="dropdown-content">
-                <a href="/user/userprofile">👤 View Profile</a>
-                <a href="/user/changepw" id="changepw">🔑 Change password</a>
-                <a href="/static#" id="logout">🚪 Logout</a>
-
-            </div>
-        </div>
-    </div>
-
-</div>
+<div th:insert="~{layout/header :: header}"></div>
 
 <!-- Sidebar -->
 <div class="sidebar" id="sidebar">
     <h2>Feature</h2>
-    <a href="/user/userprofile" >Profile</a>
 
+    <a href="/store/mystore">My Store</a>
+    <a href="/dashboard/view" >DashBoard</a>
 
     <a href="/account/listStaff" >Staff Account Management</a>
 
@@ -73,6 +67,8 @@
 
     <a href="/bill/listBill" >Invoice Management</a>
     <a href="/package/listPackage">Package Management</a>
+
+    <a href="/importednote/list">Imported Note Management</a>
 
 </div>
 
@@ -117,6 +113,17 @@
             <td>Phone</td>
             <td>Gender</td>
             <td>Address</td>
+            <td>Action</td>
+        </tr>
+        <tr>
+            <td><input type="text" placeholder="Search ID" onkeyup="filterTable(0)"></td>
+            <td><input type="text" placeholder="Search Username" onkeyup="filterTable(1)"></td>
+            <td><input type="text" placeholder="Search Display Name" onkeyup="filterTable(2)"></td>
+            <td><input type="text" placeholder="Search Email" onkeyup="filterTable(3)"></td>
+            <td><input type="text" placeholder="Search Full Name" onkeyup="filterTable(4)"></td>
+            <td><input type="text" placeholder="Search Phone" onkeyup="filterTable(5)"></td>
+            <td><input type="text" placeholder="Search Gender" onkeyup="filterTable(6)"></td>
+            <td><input type="text" placeholder="Search Address" onkeyup="filterTable(7)"></td>
             <td>Action</td>
         </tr>
         </thead>

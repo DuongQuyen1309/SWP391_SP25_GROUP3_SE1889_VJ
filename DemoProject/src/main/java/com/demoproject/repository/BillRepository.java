@@ -4,11 +4,13 @@ import com.demoproject.entity.Bill;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
-public interface BillRepository extends JpaRepository<Bill, Long> {
+public interface BillRepository extends JpaRepository<Bill, Long>, JpaSpecificationExecutor {
     Page<Bill> findAll(Pageable pageable);
     @Query("SELECT b FROM Bill b WHERE b.storeId = :storeId")
     Page<Bill> findAllByStoreId(Long storeId, Pageable pageable);
@@ -23,4 +25,7 @@ public interface BillRepository extends JpaRepository<Bill, Long> {
 
     @Query("SELECT b FROM Bill b WHERE b.totalMoney BETWEEN :minValue AND :maxValue AND b.storeId = :storeId")
     Page<Bill> findByTotalMoneyBetweenAndStoreId(Double minValue, Double maxValue, Long storeId, Pageable pageable);
+
+    Page<Bill> findByStoreIdAndCreatedAtBetween(Long storeId, LocalDateTime startDate, LocalDateTime endDate,
+                                                Pageable pageable);
 }

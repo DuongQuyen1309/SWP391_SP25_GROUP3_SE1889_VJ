@@ -122,6 +122,7 @@
 
 
 
+
     </style>
     <script src="/js/home.js"></script>
     <script>
@@ -202,10 +203,7 @@
             const address = document.getElementById("address");
 
 
-            const errorMessage = document.createElement("p");
-            errorMessage.id = "error-message";
-            errorMessage.style.color = "red";
-            errorMessage.style.fontWeight = "bold";
+
 
             async function checkPhoneExists(phone) {
                 try {
@@ -220,22 +218,35 @@
             }
 
             form.addEventListener("submit", async function (event) {
-                let errors = [];
+                // Xóa lỗi cũ trước khi kiểm tra lại
+                document.querySelectorAll('.error-message').forEach(el => el.textContent = "");
+
+                let hasError = false;
                 event.preventDefault();
                 if (!name.value || name.value.length <= 0) {
-                    errors.push("Full Name must be not empty.");
+                    document.getElementById("name-error").textContent = "Full Name must not be empty.";
+                    document.getElementById("name-error").style.display = "block";
+                    hasError = true;
                 } else if (!/^[A-Za-zÀ-ỹ\s]+$/.test(name.value)) {
-                    errors.push("Full Name must only contain letters and spaces (with or without accents).");
+                    document.getElementById("name-error").textContent = "Full Name must only contain letters and spaces.";
+                    document.getElementById("name-error").style.display = "block";
+                    hasError = true;
                 }
 
                 if (!phone.value || phone.value.length <= 0) {
-                    errors.push("Phone must be not empty.");
+                    document.getElementById("phone-error").textContent = "Phone must not be empty.";
+                    document.getElementById("phone-error").style.display = "block";
+                    hasError = true;
                 } else if (!/^0\d{9}$/.test(phone.value)) {
-                    errors.push("Phone must start with 0 and have exactly 10 digits.");
+                    document.getElementById("phone-error").textContent = "Phone must start with 0 and have exactly 10 digits.";
+                    document.getElementById("phone-error").style.display = "block";
+                    hasError = true;
                 } else {
                     let isPhoneExists = await checkPhoneExists(phone.value);
                     if (isPhoneExists) {
-                        errors.push("This phone number already exists, please enter another number.");
+                        document.getElementById("phone-error").textContent = "This phone number already exists.";
+                        document.getElementById("phone-error").style.display = "block";
+                        hasError = true;
                     }
                 }
 
@@ -244,14 +255,15 @@
                     const today = new Date();
                     today.setHours(0, 0, 0, 0);
                     if (dobDate >= today) {
-                        errors.push("Date of Birth must be in the past.");
+                        document.getElementById("dob-error").textContent = "Date of Birth must be in the past.";
+                        document.getElementById("dob-error").style.display = "block";
+                        hasError = true;
                     }
 
 
-                if (errors.length > 0) {
+                if (hasError) {
                     event.preventDefault();
-                    errorMessage.innerHTML = errors.join("<br>");
-                    form.insertBefore(errorMessage, form.querySelector(".button-group"));
+                    return;
                 } else {
                     alert("Profile updated successfully!");
                     setTimeout(() => {
@@ -288,6 +300,8 @@
 
         function cancelEditing() {
             let originalData = JSON.parse(sessionStorage.getItem('originalData'));
+            document.querySelectorAll('.error-message').forEach(el => el.textContent = "");
+
 
             document.getElementById('name').value = originalData.name;
             document.getElementById('phone').value = originalData.phone;
@@ -312,7 +326,6 @@
 
             document.querySelectorAll('.profile-form input, .profile-form select').forEach(element => element.disabled = true);
 
-
             document.getElementById('editBtn').style.display = 'inline-block';
             document.getElementById('cancelBtn').style.display = 'none';
             document.getElementById('applyBtn').style.display = 'none';
@@ -326,44 +339,9 @@
 </head>
 <body>
 
-<!-- Header -->
-<div class="header">
-    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-    <h2><a href="/home">RSMS</a></h2>
-    <div class="user-info">
-        <img   th:src="${user.avatar} + '?t=' + ${#dates.createNow().getTime()}" alt="User Avatar" class="user-avatar"/>
-        <div class="dropdown">
-            <span th:text="${account.displayName}" class="user-name" onclick="toggleDropdown()"> ▼</span>
-            <div id="dropdown-menu" class="dropdown-content">
-                <a href="/user/userprofile">👤 View Profile</a>
-                <a href="/user/changepw" id="changepw">🔑 Change password</a>
-                <a href="/static#" id="logout">🚪 Logout</a>
+<div th:insert="~{layout/header :: header}"></div>
 
-            </div>
-        </div>
-    </div>
-
-</div>
-
-<!-- Sidebar -->
-<div class="sidebar" id="sidebar">
-    <h2>Feature</h2>
-    <a href="/user/userprofile">Profile</a>
-    <a href="/account/listOwner" th:style="${#lists.contains(listHiddenPage, 'listOwner')} ? 'display: none;' : ''" >Owner Account Management</a>
-
-    <a href="/account/listStaff" th:style="${#lists.contains(listHiddenPage, 'listStaff')} ? 'display: none;' : ''">Staff Account Management</a>
-
-    <a href="/product/listProduct" th:style="${#lists.contains(listHiddenPage, 'listProduct')} ? 'display: none;' : ''" >Rice Management</a>
-
-    <a href="/customer/listCustomer" th:style="${#lists.contains(listHiddenPage, 'listCustomer')} ? 'display: none;' : ''">Customer Management</a>
-
-    <a href="/warehouse/listWarehouseZone" th:style="${#lists.contains(listHiddenPage, 'listWarehouse')} ? 'display: none;' : ''" >Zone Management</a>
-
-    <a href="/bill/listBill" th:style="${#lists.contains(listHiddenPage, 'listBill')} ? 'display: none;' : ''" >Invoice Management </a>
-
-    <a href="/package/listPackage" th:style="${#lists.contains(listHiddenPage, 'listPackage')} ? 'display: none;' : ''" >Package Management</a>
-
-</div>
+<div th:insert="~{layout/sidebar :: sidebar}"></div>
 
 
 <!-- Content -->
@@ -372,22 +350,27 @@
     <div class="profile-container">
         <div class="avatar-container">
             <h1 class="avatar-header">Avatar</h1>
-            <img class="user-avatar-large" th:src="${user.avatar}" alt="User Avatar"/>
+            <img class="user-avatar-large" th:src="${user.avatar} != null ? ${user.avatar} : '/images/default.png'" alt="User Avatar"/>
+
         </div>
     <div class="profile-form-container">
     <form class="profile-form" action="/user/userprofile" method="POST">
         <label for="name">Full Name:</label>
         <input type="text" id="name" name="name" th:value="${user.name}" disabled>
+        <span class="error-message" id="name-error" style="display: none"></span>
 
 
         <label for="phone">Phone:</label>
         <input type="text" id="phone" name="phone" th:value="${user.phone}" disabled>
+        <span class="error-message" id="phone-error" style="display: none"></span>
 
         <label for="address">Address:</label>
         <input type="text" id="address" name="address" th:value="${user.address}" disabled>
+        <span class="error-message" id="address-error" style="display: none"></span>
 
         <label for="dob">Date of Birth:</label>
         <input type="date" id="dob" name="dob" th:value="${user.dateOfBirth}" disabled>
+        <span class="error-message" id="dob-error" style="display: none"></span>
 
 
         <label for="gender">Gender:</label>

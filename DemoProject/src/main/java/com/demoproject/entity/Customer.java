@@ -1,8 +1,10 @@
 package com.demoproject.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 
 @Entity
@@ -38,6 +40,9 @@ public class Customer {
     @Column(name = "store_id")
     private Long storeId;
 
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
+    private List<ImportedNote> importedNotes;
 
 
     public Long getId() {

@@ -47,14 +47,21 @@ public class ZoneController {
     }
 
     @GetMapping("/listWarehouseZone")
-    public String getAllZone(Model model, @RequestParam(defaultValue = "0") int page,
-                             @RequestParam(defaultValue = "3") int size, @RequestParam(defaultValue = "") String search,
-                             @RequestParam(defaultValue = "name") String searchBy,
+    public String getAllZone(Model model,
+                             @RequestParam(defaultValue = "0") int page,
+                             @RequestParam(defaultValue = "3") int size,
+                             @RequestParam(required = false) String idFrom,
+                             @RequestParam(required = false) String idTo,
+                             @RequestParam(required = false) String name,
+                             @RequestParam(required = false) String position,
+                             @RequestParam(required = false) String startDate,
+                             @RequestParam(required = false) String endDate,
                              @CookieValue(value = "token", required = false) String token,
                              RedirectAttributes redirectAttributes) {
+
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
         Page<Zone> zonePage;
-        // Lấy thông tin người dùng từ token
+
         Account account = accountService.getAccountFromToken(token).orElse(null);
         Users user = userService.getUserProfile(account.getUserId()).orElse(null);
         model.addAttribute("user", user);
@@ -63,22 +70,54 @@ public class ZoneController {
         List<String> listHiddenPage = new ArrayList<>();
         listHiddenPage.add("");
         if (role.equals("STAFF")) {
+            listHiddenPage.add("Store");
             listHiddenPage.add("listStaff");
+            listHiddenPage.add("createZone");
+            listHiddenPage.add("deleteZone");
+            listHiddenPage.add("Dashboard");
+            listHiddenPage.add("listOwner");
+        }
+        if (role.equals("OWNER")) {
+            listHiddenPage.add("listOwner");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
 
-        if (search.isEmpty()) {
-            zonePage = this.zoneService.getAllZonesByStoreID(pageable, user.getStoreId());
-        } else {
-            if (searchBy.equals("name")) {
-                zonePage = this.zoneService.getZonesByName(search, user.getStoreId(), pageable);
-            } else {
-                zonePage = this.zoneService.getZonesByPosition(search, user.getStoreId(), pageable);
-            }
+        // Thêm các giá trị filter vào model
+        model.addAttribute("idFrom", idFrom);
+        model.addAttribute("idTo", idTo);
+        model.addAttribute("name", name);
+        model.addAttribute("position", position);
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
+
+        // Xử lý filter
+        Long fromId = null;
+        Long toId = null;
+        LocalDate start = null;
+        LocalDate end = null;
+
+        try {
+            if (idFrom != null && !idFrom.trim().isEmpty())
+                fromId = Long.parseLong(idFrom);
+            if (idTo != null && !idTo.trim().isEmpty())
+                toId = Long.parseLong(idTo);
+            if (startDate != null && !startDate.trim().isEmpty())
+                start = LocalDate.parse(startDate);
+            if (endDate != null && !endDate.trim().isEmpty())
+                end = LocalDate.parse(endDate);
+        } catch (Exception e) {
+            model.addAttribute("error", "Invalid filter input: " + e.getMessage());
+            zonePage = zoneService.getAllZonesByStoreID(pageable, user.getStoreId());
         }
+
+        if (fromId != null || toId != null || name != null || position != null || start != null || end != null) {
+            zonePage = zoneService.getZonesWithFilters(fromId, toId, name, position, start, end, user.getStoreId(),
+                    pageable);
+        } else {
+            zonePage = zoneService.getAllZonesByStoreID(pageable, user.getStoreId());
+        }
+
         model.addAttribute("zonePage", zonePage);
-        model.addAttribute("search", search);
-        model.addAttribute("searchBy", searchBy);
         return "warehouse/zone";
     }
 
@@ -94,7 +133,13 @@ public class ZoneController {
         List<String> listHiddenPage = new ArrayList<>();
         listHiddenPage.add("");
         if (role.equals("STAFF")) {
+            listHiddenPage.add("Store");
             listHiddenPage.add("listStaff");
+            listHiddenPage.add("listOwner");
+            listHiddenPage.add("Dashboard");
+        }
+        if (role.equals("OWNER")) {
+            listHiddenPage.add("listOwner");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
         return "warehouse/create";
@@ -109,7 +154,13 @@ public class ZoneController {
             List<String> listHiddenPage = new ArrayList<>();
             listHiddenPage.add("");
             if (role.equals("STAFF")) {
+                listHiddenPage.add("Store");
                 listHiddenPage.add("listStaff");
+                listHiddenPage.add("Dashboard");
+                listHiddenPage.add("listOwner");
+            }
+            if (role.equals("OWNER")) {
+                listHiddenPage.add("listOwner");
             }
             model.addAttribute("listHiddenPage", listHiddenPage);
             String username = jwtUtils.extractUsername(token);
@@ -136,8 +187,7 @@ public class ZoneController {
 
     @GetMapping("/zone")
     public String getZoneDetail(Model model, @RequestParam String id,
-                                @RequestParam(required = false) String search,
-                                @RequestParam(required = false) String searchBy,
+
                                 @CookieValue(value = "token", required = false) String token) {
         Zone zone = this.zoneService.getZoneById(Long.parseLong(id));
         String role = jwtUtils.extractRole(token);
@@ -149,26 +199,21 @@ public class ZoneController {
         List<String> listHiddenPage = new ArrayList<>();
         listHiddenPage.add("");
         if (role.equals("STAFF")) {
+            listHiddenPage.add("Store");
             listHiddenPage.add("listStaff");
+            listHiddenPage.add("Dashboard");
+            listHiddenPage.add("listOwner");
+        }
+        if(role.equals("OWNER")) {
+            listHiddenPage.add("listOwner");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
         model.addAttribute("zone", zone);
         model.addAttribute("id", id);
-
-        // Fetch products by zone ID and filter by search query if provided
-        List<Product> products;
-        if (search != null && !search.isEmpty()) {
-            if ("price".equals(searchBy)) {
-                Double price  = Double.parseDouble(search);
-                products = productService.searchProductsByZoneIdAndPrice(Long.parseLong(id),
-                        price,price);
-            } else {
-                products = productService.searchProductsByZoneIdAndName(Long.parseLong(id), search);
-            }
-        } else {
-            products = productService.getProductsByZoneId(Long.parseLong(id));
-        }
-        model.addAttribute("products", products);
+        System.out.println("id: "+id);
+        Product product = zoneService.getProductByZoneId(Long.parseLong(id));
+        System.out.println("product: "+product.getName());
+        model.addAttribute("product", product);
 
         return "warehouse/zoneDetail";
     }
@@ -187,7 +232,13 @@ public class ZoneController {
         List<String> listHiddenPage = new ArrayList<>();
         listHiddenPage.add("");
         if (role.equals("STAFF")) {
+            listHiddenPage.add("Store");
             listHiddenPage.add("listStaff");
+            listHiddenPage.add("listOwner");
+            listHiddenPage.add("Dashboard");
+        }
+        if (role.equals("OWNER")) {
+            listHiddenPage.add("listOwner");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
         return "warehouse/updateZone";
@@ -201,7 +252,13 @@ public class ZoneController {
         List<String> listHiddenPage = new ArrayList<>();
         listHiddenPage.add("");
         if (role.equals("STAFF")) {
+            listHiddenPage.add("Store");
             listHiddenPage.add("listStaff");
+            listHiddenPage.add("Dashboard");
+            listHiddenPage.add("listOwner");
+        }
+        if (role.equals("OWNER")) {
+            listHiddenPage.add("listOwner");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
         if (currentZone == null) {
@@ -240,7 +297,13 @@ public class ZoneController {
         List<String> listHiddenPage = new ArrayList<>();
         listHiddenPage.add("");
         if (role.equals("STAFF")) {
+            listHiddenPage.add("Store");
             listHiddenPage.add("listStaff");
+            listHiddenPage.add("listOwner");
+            listHiddenPage.add("Dashboard");
+        }
+        if (role.equals("OWNER")) {
+            listHiddenPage.add("listOwner");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
         model.addAttribute("user", user.get());
@@ -270,5 +333,7 @@ public class ZoneController {
         }
         return zones;
     }
+
+
 
 }

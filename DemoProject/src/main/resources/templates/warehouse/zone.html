@@ -13,7 +13,7 @@
       /* Giữ vị trí cố định so với content */
       right: 20px;
       /* Sát mép phải của content */
-      top: 140px;
+      top: 30px;
       /* Đẩy xuống dưới một chút */
       background-color: #d35400;
       /* Cam */
@@ -60,64 +60,46 @@
     function callPage() {
       window.location.href = "/warehouse/createWarehouseZone";
     }
+    function filterZones() {
+      let params = new URLSearchParams();
+      document.querySelectorAll('.filter-input').forEach(input => {
+        if (input.value.trim() !== '') { // Chỉ thêm tham số nếu có giá trị
+          params.append(input.name, input.value);
+        }
+      });
+
+      window.location.href = '/warehouse/listWarehouseZone' + '?' + params.toString();
+    }
+
+    // Khôi phục giá trị filter từ URL khi tải trang
+    document.addEventListener("DOMContentLoaded", function () {
+      let params = new URLSearchParams(window.location.search);
+      document.querySelectorAll('.filter-input').forEach(input => {
+        if (params.has(input.name)) {
+          let value = params.get(input.name);
+          if (input.type === "date") {
+            input.value = value.substring(0, 10); // Định dạng YYYY-MM-DD
+          } else {
+            input.value = value;
+          }
+        }
+      });
+    });
   </script>
 </head>
 
 <body>
-<!-- Header -->
-<div class="header">
-  <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-  <h2><a href="/home">RSMS</a></h2>
-  <div class="user-info">
-    <img th:src="${user.avatar}" alt="User Avatar" class="user-avatar" />
-    <div class="dropdown">
-      <span th:text="${account.displayName}" class="user-name" onclick="toggleDropdown()"> ▼</span>
-      <div id="dropdown-menu" class="dropdown-content">
-        <a href="/user/userprofile">👤 View Profile</a>
-        <a href="/user/changepw" id="changepw">🔑 Change password</a>
-        <a href="/static#" id="logout">🚪 Logout</a>
+<div th:insert="~{layout/header :: header}"></div>
 
-      </div>
-    </div>
-  </div>
-
-</div>
-
-<div class="sidebar" id="sidebar">
-  <h2>Feature</h2>
-  <a href="/user/userprofile">Profile</a>
-
-
-  <a href="/account/listStaff"
-     th:style="${#lists.contains(listHiddenPage, 'listStaff')} ? 'display: none;' : ''">Staff Account Management</a>
-
-  <a href="/product/listProduct">Rice Management</a>
-
-  <a href="/customer/listCustomer">Customer Management</a>
-
-  <a href="/warehouse/listWarehouseZone">Zone Management</a>
-
-
-  <a href="/bill/listBill">Invoice Management</a>
-  <a href="/package/listPackage">Package Management</a>
-</div>
+<div th:insert="~{layout/sidebar :: sidebar}"></div>
 
 <!-- Content -->
 <div class="content" id="content">
 
   <h2>Warehouse Zones</h2>
 
-  <button class="add-zone" onclick="callPage()">Create New Zone</button>
-  <form class="search-form" action="/warehouse/listWarehouseZone" method="get">
-    <input type="search" name="search" placeholder="Search by name or position"
-           style="width: 70%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
-    <select name="searchBy" style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
-      <option value="name" th:selected="${searchBy == 'name'}">Name</option>
-      <option value="position" th:selected="${searchBy == 'position'}">Position</option>
-    </select>
-    <button type="submit"
-            style="padding: 10px; background-color: #2c3e50; color: white; border: none; border-radius: 5px;">Search</button>
-  </form>
+  <button class="add-zone" onclick="callPage()" th:style="${#lists.contains(listHiddenPage, 'createZone')} ? 'display: none;' : ''">Create New Zone</button>
+
 
   <table class="styled-table" style="margin-top: 70px">
     <thead>
@@ -125,27 +107,42 @@
       <th>ID</th>
       <th>Name</th>
       <th>Position</th>
+      <th>Created at</th>
       <th>Action</th>
     </tr>
     </thead>
     <tbody>
+    <tr>
+      <td class="twin-field">
+        <input type="text" class="filter-input" name="idFrom" onchange="filterZones()" style="width: 20px;">
+        <input type="text" class="filter-input" name="idTo" onchange="filterZones()" style="width: 20px;">
+      </td>
+      <td>
+        <input type="text" class="filter-input" name="name" onchange="filterZones()" style="width: 30%;">
+      </td>
+      <td>
+        <input type="text" class="filter-input" name="position" onchange="filterZones()" style="width: 30%;">
+      </td>
+      <td class="twin-field">
+        <input type="date" class="filter-input" name="startDate" onchange="filterZones()" style="width: 100px;">
+        <input type="date" class="filter-input" name="endDate" onchange="filterZones()" style="width: 100px;">
+      </td>
+    </tr>
     <tr th:each="zone : ${zonePage.content}">
       <td th:text="${zone.id}"></td>
       <td th:text="${zone.name}"></td>
 
+
       <td th:text="${zone.position}"></td>
+      <td th:text="${zone.createdAt}"></td>
       <td>
         <form th:action="@{/warehouse/zone}" method="get">
           <input type="hidden" name="id" th:value="${zone.id}">
           <button type="submit" style="background-color: #06999c">View</button>
         </form>
-        <!-- <form th:action="@{/warehouse/zone/update}" method="get">
-          <input type="hidden" name="id" th:value="${zone.id}">
-          <button type="submit" style="background-color: #076fe4">Update</button>
-        </form> -->
         <form th:action="@{/warehouse/zone/delete}" method="get">
           <input type="hidden" name="id" th:value="${zone.id}">
-          <button type="submit" style="background-color: #fb0202">Delete</button>
+          <button th:style="${#lists.contains(listHiddenPage, 'deleteZone')} ? 'display: none;' : ''" type="submit" style="background-color: #fb0202">Delete</button>
         </form>
 
 
@@ -153,17 +150,27 @@
     </tr>
     </tbody>
   </table>
+
   <div class="pagination">
-
-
     <a th:if="${zonePage.hasPrevious()}"
-       th:href="@{/warehouse/listWarehouseZone(page=${zonePage.number - 1}, size=${zonePage.size})}"
+       th:href="@{/warehouse/listWarehouseZone(page=${zonePage.number - 1}, size=${zonePage.size}, idFrom=${param.idFrom}, idTo=${param.idTo}, name=${param.name}, position=${param.position}, startDate=${param.startDate}, endDate=${param.endDate})}"
        class="pagination-button">Previous</a>
     <span th:text="'Page ' + ${zonePage.number + 1} + ' of ' + ${zonePage.totalPages}"></span>
     <a th:if="${zonePage.hasNext()}"
-       th:href="@{/warehouse/listWarehouseZone(page=${zonePage.number + 1}, size=${zonePage.size})}"
+       th:href="@{/warehouse/listWarehouseZone(page=${zonePage.number + 1}, size=${zonePage.size}, idFrom=${param.idFrom}, idTo=${param.idTo}, name=${param.name}, position=${param.position}, startDate=${param.startDate}, endDate=${param.endDate})}"
        class="pagination-button">Next</a>
+  </div>
+</div>
+  <div class="pagination">
+    <a th:if="${zonePage.hasPrevious()}"
+       th:href="@{/warehouse/listWarehouseZone(page=${zonePage.number - 1}, size=${zonePage.size}, search=${search}, searchBy=${searchBy}, startDate=${startDate}, endDate=${endDate})}"
+       class="pagination-button">Previous</a>
 
+    <span th:text="'Page ' + ${zonePage.number + 1} + ' of ' + ${zonePage.totalPages}"></span>
+
+    <a th:if="${zonePage.hasNext()}"
+       th:href="@{/warehouse/listWarehouseZone(page=${zonePage.number + 1}, size=${zonePage.size}, search=${search}, searchBy=${searchBy}, startDate=${startDate}, endDate=${endDate})}"
+       class="pagination-button">Next</a>
   </div>
 </div>
 

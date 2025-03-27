@@ -78,7 +78,12 @@ public class AuthController {
             cookie.setMaxAge(24 * 60 * 60); // 1 ngày
             response.addCookie(cookie);
 
-            return ResponseEntity.ok(Map.of("message", "Đăng nhập thành công!"));
+            boolean isProfileComplete = user.getName() != null && user.getPhone() != null && user.getDateOfBirth() != null;
+
+            return ResponseEntity.ok(Map.of(
+                    "message", "Đăng nhập thành công!",
+                    "isProfileComplete", isProfileComplete
+            ));
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(401).body(Map.of("error", "Sai tài khoản hoặc mật khẩu!"));
         }

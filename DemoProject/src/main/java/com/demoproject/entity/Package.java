@@ -27,6 +27,8 @@ public class Package {
     private LocalDate createdAt;
     @Column(name = "updatedAt")
     private LocalDate updatedAt;
+    @Column(name = "updatedBy")
+    private Long updatedBy;
 
     public LocalDate getUpdatedAt() {
         return updatedAt;
@@ -104,6 +106,14 @@ public class Package {
 
     public void setCreatedAt(LocalDate createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Long getUpdatedBy() {
+        return updatedBy;
+    }
+
+    public void setUpdatedBy(Long updatedBy) {
+        this.updatedBy = updatedBy;
     }
 
 }

@@ -27,15 +27,9 @@ public class CustomerBalanceService {
 
         // Nếu là nợ, trừ tiền từ tài khoản khách hàng
         if (request.isDebt().equalsIgnoreCase("customerOwe") || request.isDebt().equalsIgnoreCase("storePay")) {
-            System.out.println("TIEN TRANG THAI1"+ customer.getMoneyState());
             customer.setMoneyState(customer.getMoneyState()-(request.getAmount()));
-            System.out.println("TIEN no 1"+ request.getAmount());
-            System.out.println("TIEN TRANG THAI1"+ customer.getMoneyState());
         } else { // Nếu là thanh toán, cộng tiền vào tài khoản khách hàng
-            System.out.println("TIEN TRANG THAI2"+ customer.getMoneyState());
             customer.setMoneyState(customer.getMoneyState()+(request.getAmount()));
-            System.out.println("TIEN no 2"+ request.getAmount());
-            System.out.println("TIEN TRANG THAI2"+ customer.getMoneyState());
         }
         customerRepository.save(customer);
         Note note = new Note();
@@ -46,6 +40,7 @@ public class CustomerBalanceService {
         note.setNote(request.getNotename());
         note.setCreatedAt(LocalDateTime.now());
         note.setStoreId(request.getStoreId());
+        note.setImagePath(request.getImagePath());
         noteRepository.save(note);
     }
 }

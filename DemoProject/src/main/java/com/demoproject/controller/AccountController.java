@@ -63,7 +63,13 @@ public class AccountController {
         model.addAttribute("account", account);
         model.addAttribute("user", user.orElse(null));
 
-
+        String role = jwtUtils.extractRole(token);
+        List<String> listHiddenPage = new ArrayList<>();
+        listHiddenPage.add("");
+        if (role.equals("OWNER")) {
+            listHiddenPage.add("listOwner");
+        }
+        model.addAttribute("listHiddenPage", listHiddenPage);
 
 
         // ✅ Gọi phương thức tìm kiếm nếu có từ khóa, ngược lại lấy toàn bộ danh sách Owner
@@ -155,6 +161,13 @@ public class AccountController {
         Optional<Users> user = userService.getUserProfile(account.getUserId());
         model.addAttribute("user",user.orElse(null));
         model.addAttribute("account", account);
+        String role = jwtUtils.extractRole(token);
+        List<String> listHiddenPage = new ArrayList<>();
+        listHiddenPage.add("");
+        if (role.equals("OWNER")) {
+            listHiddenPage.add("listOwner");
+        }
+        model.addAttribute("listHiddenPage", listHiddenPage);
         return "owner/createOwner";
     }
 
@@ -192,6 +205,13 @@ public class AccountController {
         Optional<Users> userOpt= userService.getUserProfile(account.getUserId());
         model.addAttribute("accountOwner", accountOwner.get());
         model.addAttribute("account", account);
+        String role = jwtUtils.extractRole(token);
+        List<String> listHiddenPage = new ArrayList<>();
+        listHiddenPage.add("");
+        if (role.equals("OWNER")) {
+            listHiddenPage.add("listOwner");
+        }
+        model.addAttribute("listHiddenPage",listHiddenPage);
         model.addAttribute("userCurrent", userOpt.get());
         model.addAttribute("user", user);
         return "owner/viewOwner";
@@ -277,6 +297,13 @@ public class AccountController {
         // Đưa dữ liệu vào model
         model.addAttribute("accounts", staffPage.getContent());
         model.addAttribute("currentPage", page);
+        String role = jwtUtils.extractRole(token);
+        List<String> listHiddenPage = new ArrayList<>();
+        listHiddenPage.add("");
+        if (role.equals("OWNER")) {
+            listHiddenPage.add("listOwner");
+        }
+        model.addAttribute("listHiddenPage", listHiddenPage);
         model.addAttribute("totalPages", staffPage.getTotalPages());
         model.addAttribute("search", search);
 
@@ -300,6 +327,13 @@ public class AccountController {
         Optional<Users> user = userService.getUserProfile(account.getUserId());
         model.addAttribute("user", user.orElse(null));
         model.addAttribute("account", account);
+        String role = jwtUtils.extractRole(token);
+        List<String> listHiddenPage = new ArrayList<>();
+        listHiddenPage.add("");
+        if (role.equals("OWNER")) {
+            listHiddenPage.add("listOwner");
+        }
+        model.addAttribute("listHiddenPage", listHiddenPage);
         return "staff/createStaff"; // Hiển thị trang createStaff.html
     }
 
@@ -346,6 +380,13 @@ public class AccountController {
         Users user = userOpt.orElse(new Users());
         model.addAttribute("account", account);
         model.addAttribute("userCurrent", userCurrent.get());
+        String role = jwtUtils.extractRole(token);
+        List<String> listHiddenPage = new ArrayList<>();
+        listHiddenPage.add("");
+        if (role.equals("OWNER")) {
+            listHiddenPage.add("listOwner");
+        }
+        model.addAttribute("listHiddenPage", listHiddenPage);
         model.addAttribute("accountStaff", accountStaff.get());
         model.addAttribute("user", user);
         return "staff/updateStaff";
@@ -387,6 +428,13 @@ public class AccountController {
 
         model.addAttribute("account", account);
         model.addAttribute("accountStaff", accountStaff.get());
+        String role = jwtUtils.extractRole(token);
+        List<String> listHiddenPage = new ArrayList<>();
+        listHiddenPage.add("");
+        if (role.equals("OWNER")) {
+            listHiddenPage.add("listOwner");
+        }
+        model.addAttribute("listHiddenPage", listHiddenPage);
 
         return "staff/resetpwStaff";
     }

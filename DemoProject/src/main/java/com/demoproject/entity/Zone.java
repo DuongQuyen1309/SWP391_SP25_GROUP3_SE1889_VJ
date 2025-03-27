@@ -1,16 +1,10 @@
 package com.demoproject.entity;
 
-
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "Warehousezone")
@@ -34,6 +28,10 @@ public class Zone {
     @Column(name = "POSITION")
     private String position;
 
+    @ManyToOne(cascade = { CascadeType.MERGE, CascadeType.PERSIST}, fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
+    @JsonBackReference
+    Product product;
 
     public Long getId() {
         return id;
@@ -50,8 +48,6 @@ public class Zone {
     public void setName(String name) {
         this.name = name;
     }
-
-
 
     public LocalDate getCreatedAt() {
         return createdAt;
@@ -83,5 +79,13 @@ public class Zone {
 
     public void setPosition(String position) {
         this.position = position;
+    }
+
+    public Product getProduct() {
+        return product;
+    }
+
+    public void setProduct(Product product) {
+        this.product = product;
     }
 }

@@ -448,3 +448,10 @@ footer {
 .dropdown-content a:hover {
     background-color: #f1f1f1;
 }
+
+.error-message {
+    color: red;
+    font-size: 14px;
+    font-weight: bold;
+
+}

@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Staff Management</title>
+    <script src="/js/home.js"></script>
+    <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
+    <link rel="stylesheet" href="/css/thongke.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        #exportExcelBtn {
+            background-color: #28a745; /* Màu xanh lá */
+            color: white; /* Chữ trắng */
+            border: none;
+            padding: 10px ;
+
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+
+        }
+
+        #exportExcelBtn:hover {
+            background-color: #218838; /* Màu xanh đậm hơn khi hover */
+            transform: scale(1.05);
+        }
+
+        #exportExcelBtn:active {
+            background-color: #1e7e34; /* Màu nhấn */
+            transform: scale(0.98);
+        }
+
+
+
+        #exportRevenueExcelBtn {
+            background-color: #28a745; /* Màu xanh lá */
+            color: white; /* Chữ trắng */
+            border: none;
+            padding: 10px ;
+
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        #exportRevenueExcelBtn:hover {
+            background-color: #218838; /* Màu xanh đậm hơn khi hover */
+            transform: scale(1.05);
+        }
+
+        #exportRevenueExcelBtn:active {
+            background-color: #1e7e34; /* Màu nhấn */
+            transform: scale(0.98);
+        }
+
+        .view-icon {
+            text-decoration: none; /* Bỏ gạch chân */
+
+            display: inline-block; /* Đảm bảo không bị ảnh hưởng bởi dòng */
+            color: deepskyblue; /* Giữ nguyên màu chữ */
+        }
+
+        .view-icon:hover {
+            color: #007bff; /* Màu khi hover */
+        }
+
+        /* Hiển thị popup dạng overlay */
+        .success-card {
+            cursor: pointer; /* Biến card thành dạng có thể bấm */
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .success-card:hover {
+            transform: scale(1.02); /* Hiệu ứng phóng to nhẹ */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Hiệu ứng đổ bóng */
+        }
+        .popup-container {
+            display: none; /* Mặc định ẩn */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5); /* Màn hình tối mờ */
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Nội dung popup */
+        .popup-content {
+            position: relative;
+            background: white;
+            padding: 20px;
+            width: 600px;
+            max-width: 90%;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Nút đóng popup */
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close-btn:hover {
+            color: red;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background: #f4f4f4;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .pagination button {
+            padding: 5px 10px;
+            margin: 0 5px;
+            cursor: pointer;
+            border: none;
+            background: deepskyblue;
+            color: white;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+
+        .pagination button:hover {
+            background: #0056b3;
+        }
+
+        .pagination span {
+            line-height: 30px;
+        }
+
+    </style>
+
+
+
+
+
+    <!--top san pham-->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let chartInstance = null;
+            let productData = [];
+
+            const monthSelect = document.getElementById('monthSelect');
+            const yearSelect = document.getElementById('yearSelect');
+            const viewOption = document.getElementById('viewOption');
+            const exportBtn = document.getElementById('exportExcelBtn');
+            const chartCanvas = document.getElementById('topProductChart').getContext('2d');
+
+            // Tải dữ liệu khi chọn tháng/năm
+            function loadTopProducts() {
+                const month = monthSelect.value;
+                const year = yearSelect.value;
+
+                fetch(`/dashboard/top-products?month=${month}&year=${year}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const filteredData = data.filter(p => p.productName !== null);
+
+                        if (filteredData.length === 0) {
+                            alert(`Không có dữ liệu cho tháng ${month}/${year}.`);
+                            productData = [];
+                            exportBtn.disabled = true;
+                            if (chartInstance) chartInstance.destroy();
+                        } else {
+                            productData = filteredData;
+                            exportBtn.disabled = false;
+                            renderChart(viewOption.value);
+                        }
+                    }).catch(error => {
+                    alert("Lỗi tải dữ liệu.");
+                    console.error("Fetch error:", error);
+                });
+            }
+
+            // Render biểu đồ theo lựa chọn
+            function renderChart(viewType) {
+                const labels = productData.map(p => p.productName);
+                const dataset = viewType === 'quantity'
+                    ? productData.map(p => p.totalQuantity)
+                    : productData.map(p => p.totalRevenue);
+
+                const labelText = viewType === 'quantity' ? 'Quantity' : 'Quantity (VNĐ)';
+                const bgColor = viewType === 'quantity' ? 'rgba(75, 192, 192, 0.6)' : 'rgba(255, 99, 132, 0.6)';
+
+                if (chartInstance) {
+                    chartInstance.destroy();
+                }
+
+                chartInstance = new Chart(chartCanvas, {
+                    type: 'bar',  // vẫn là bar nhưng đổi trục
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: labelText,
+                            data: dataset,
+                            backgroundColor: bgColor
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',  // <-- Đây là điểm quan trọng để hiển thị ngang
+                        responsive: true,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: viewType === 'quantity' ? 'Top product by quantity' : 'Top product by revenue'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.parsed.x} - ${context.label}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+
+
+            // Xuất Excel
+            exportBtn.addEventListener('click', () => {
+                if (productData.length === 0) {
+                    alert("Không có dữ liệu để xuất Excel.");
+                    return;
+                }
+
+                const month = monthSelect.value;
+                const year = yearSelect.value;
+
+                const worksheetData = [
+                    ["Tên sản phẩm", "Số lượng bán", "Doanh thu (VNĐ)"],
+                    ...productData.map(p => [p.productName, p.totalQuantity, p.totalRevenue])
+                ];
+
+                const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "Top Products");
+
+                const fileName = `TopProducts_${month}_${year}.xlsx`;
+                XLSX.writeFile(workbook, fileName);
+            });
+
+            // Sự kiện thay đổi tháng/năm/view
+            monthSelect.addEventListener('change', loadTopProducts);
+            yearSelect.addEventListener('change', loadTopProducts);
+            viewOption.addEventListener('change', () => {
+                if (productData.length > 0) {
+                    renderChart(viewOption.value);
+                }
+            });
+
+            // Tải dữ liệu ban đầu (tháng hiện tại)
+            const currentMonth = new Date().getMonth() + 1;
+            const currentYear = new Date().getFullYear();
+            monthSelect.value = currentMonth;
+            yearSelect.value = currentYear;
+            loadTopProducts();
+        });
+    </script>
+    <!--    chart doanh thu-->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const today = new Date();
+            const periodSelect = document.getElementById("revenuePeriodSelect");
+            const monthSelect = document.getElementById("revenueMonthSelect");
+            const yearSelect = document.getElementById("revenueYearSelect");
+            const monthLabel = document.getElementById("monthLabel");
+            const yearLabel = document.getElementById("yearLabel");
+            let revenueChart = null;
+
+            // Tạo danh sách năm (5 năm gần nhất)
+            const currentYear = today.getFullYear();
+            for (let i = currentYear; i >= currentYear - 4; i--) {
+                const option = document.createElement("option");
+                option.value = i;
+                option.textContent = i;
+                yearSelect.appendChild(option);
+            }
+
+            // Tạo danh sách tháng (1 - 12)
+            for (let i = 1; i <= 12; i++) {
+                const option = document.createElement("option");
+                option.value = i;
+                option.textContent = ` ${i}`;
+                monthSelect.appendChild(option);
+            }
+
+            // Chọn mặc định là tháng và năm hiện tại
+            monthSelect.value = today.getMonth() + 1;
+            yearSelect.value = currentYear;
+
+            function fetchAndRenderChart() {
+                const period = periodSelect.value;
+                const month = monthSelect.value;
+                const year = yearSelect.value;
+                let url = `/dashboard/revenue/${period}?year=${year}`;
+
+                if (period === "daily") {
+                    url += `&month=${month}`;
+                }
+
+                fetch(url)
+                    .then(response => response.json())
+                    .then(responseData => {
+                        const data = responseData.data;
+                        let labels, values;
+
+                        if (period === "daily") {
+                            labels = data.map(item => `Day ${item.day}`);
+                            values = data.map(item => item.revenue);
+                            document.getElementById("chartTitle").innerText = `Revenue by day - month ${month}, ${year}`;
+                        } else if (period === "monthly") {
+                            labels = Array.from({ length: 12 }, (_, i) => `Tháng ${i + 1}`);
+                            values = Array(12).fill(0);
+                            data.forEach(item => values[item.month - 1] = item.revenue || 0);
+                            document.getElementById("chartTitle").innerText = `Revenue by month - year ${year}`;
+                        } else if (period === "yearly") {
+                            labels = Array.from({ length: 5 }, (_, i) => `${currentYear - i}`);
+                            values = Array(5).fill(0);
+                            data.forEach(item => {
+                                const index = labels.indexOf(`${item.year}`);
+                                if (index !== -1) values[index] = item.revenue || 0;
+                            });
+                            document.getElementById("chartTitle").innerText = `Doanh thu 5 năm gần nhất`;
+                        }
+
+                        if (revenueChart) {
+                            revenueChart.destroy();
+                        }
+
+                        revenueChart = new Chart(document.getElementById('salesOverviewChart').getContext('2d'), {
+                            type: 'bar',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: 'Revenue (VNĐ)',
+                                    data: values,
+                                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                                    borderColor: 'rgba(54, 162, 235, 1)',
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                scales: {
+                                    x: { title: { display: true, text: period === 'daily' ? 'Day' : (period === 'monthly' ? 'Month' : 'Year') } },
+                                    y: { title: { display: true, text: 'Revenue' } }
+                                }
+                            }
+                        });
+                    });
+            }
+
+            function updateDropdownVisibility() {
+                const period = periodSelect.value;
+                if (period === "daily") {
+                    monthLabel.style.display = "inline-block";
+                    monthSelect.style.display = "inline-block";
+                    yearLabel.style.display = "inline-block";
+                    yearSelect.style.display = "inline-block";
+                } else if (period === "monthly") {
+                    monthLabel.style.display = "none";
+                    monthSelect.style.display = "none";
+                    yearLabel.style.display = "inline-block";
+                    yearSelect.style.display = "inline-block";
+                } else {
+                    monthLabel.style.display = "none";
+                    monthSelect.style.display = "none";
+                    yearLabel.style.display = "none";
+                    yearSelect.style.display = "none";
+                }
+                fetchAndRenderChart();
+            }
+
+            periodSelect.addEventListener("change", updateDropdownVisibility);
+            monthSelect.addEventListener("change", fetchAndRenderChart);
+            yearSelect.addEventListener("change", fetchAndRenderChart);
+
+            updateDropdownVisibility();
+        });
+        let currentPage = 0;
+        const rowsPerPage = 5;
+
+        function openBillPopup() {
+            document.getElementById("billPopup").style.display = "flex";
+            fetchBillsToday();
+        }
+
+        function closeBillPopup() {
+            document.getElementById("billPopup").style.display = "none";
+        }
+
+        // Gọi API để lấy danh sách hóa đơn hôm nay (có phân trang)
+        function fetchBillsToday(page = 0, searchKeyword = "") {
+            fetch(`/dashboard/bills/today?page=${page}&size=${rowsPerPage}&search=${searchKeyword}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (!data || !data.content) {
+                        console.error("API không trả về danh sách hóa đơn");
+                        return;
+                    }
+
+                    let billTableBody = document.getElementById("billTableBody");
+                    billTableBody.innerHTML = "";
+
+                    data.content.forEach(bill => {
+                        let row = `<tr>
+                        <td>${bill.id}</td>
+                        <td>${bill.customerName || 'Khách lẻ'}</td>
+                        <td>${bill.totalMoney.toLocaleString()} đ</td>
+                        <td>${new Date(bill.createdAt).toLocaleString()}</td>
+                        <td>
+                        <a href="/bill/bill/billDetail?id=${bill.id}" class="view-icon">
+                            Chi tiết
+                        </a>
+                    </td>
+
+                    </tr>`;
+                        billTableBody.innerHTML += row;
+                    });
+
+                    // Cập nhật thông tin phân trang
+                    currentPage = page;
+                    document.getElementById("pageInfo").innerText = `Page ${page + 1} / ${data.totalPages}`;
+                    document.getElementById("prevBtn").disabled = page === 0;
+                    document.getElementById("nextBtn").disabled = page >= data.totalPages - 1;
+                })
+                .catch(error => console.error("Lỗi khi gọi API:", error));
+        }
+
+        // Chuyển về trang trước
+        function prevPage() {
+            if (currentPage > 0) {
+                fetchBillsToday(currentPage - 1, document.getElementById("searchBill").value);
+            }
+        }
+
+        // Chuyển sang trang tiếp theo
+        function nextPage() {
+            fetchBillsToday(currentPage + 1, document.getElementById("searchBill").value);
+        }
+
+        // Tìm kiếm hóa đơn
+        function searchBills() {
+            fetchBillsToday(0, document.getElementById("searchBill").value);
+        }
+    </script>
+
+
+
+
+</head>
+<body>
+
+<div th:insert="~{layout/header :: header}"></div>
+
+<div th:insert="~{layout/sidebar :: sidebar}"></div>
+<!-- Content -->
+<div class="content" id="content">
+    <h1 class="dashboard-title">Rice Sales Dashboard</h1>
+    <!-- Search Box -->
+
+
+    <!-- Dashboard Cards -->
+    <div class="cards-container">
+        <div class="card primary-card">
+            <div class="card-header">
+                <div class="card-title">Today's Revenue</div>
+                <div class="card-icon">📅</div>
+            </div>
+            <div class="card-value">
+                ₫<span th:text="${#numbers.formatInteger(dashboardData.todayRevenue, 0, 'COMMA')}"></span>
+
+
+            </div>
+            <div class="card-footer">
+                <span th:text="${dashboardData.todayBillCount}"></span> today's bill
+
+            </div>
+        </div>
+
+        <div class="card warning-card">
+            <div class="card-header">
+                <div class="card-title">Percent Of Today's Revenue</div>
+                <div class="card-icon">💰</div>
+            </div>
+            <div class="card-value">
+                <span th:classappend="${dashboardData.revenueChangePercentage >= 0} ? 'card-up text-green' : 'card-down text-red'">
+            <span th:if="${dashboardData.revenueChangePercentage > 0}" th:text="'↑ '"></span>
+            <span th:if="${dashboardData.revenueChangePercentage < 0}" th:text="'↓ '"></span>
+            <span th:text="${#numbers.formatDecimal(dashboardData.revenueChangePercentage, 1, 2)}"></span>%
+        </span>
+            </div>
+            <div class="card-footer">
+                compared to yesterday ₫<span th:text="${#numbers.formatInteger(dashboardData.yesterdayRevenue, 0, 'COMMA')}"></span>
+            </div>
+        </div>
+
+        <div class="card success-card" onclick="openBillPopup()">
+            <div class="card-header">
+                <div class="card-title">Total Bill's Today</div>
+                <div class="card-icon">📦</div>
+            </div>
+            <div class="card-value">
+                <span th:text="${dashboardData.todayBillCount}"></span>
+            </div>
+
+            <div class="card-footer"> Bill</div>
+
+        </div>
+
+
+        <div class="card danger-card">
+            <div class="card-header">
+                <div class="card-title">Low Stock Items</div>
+                <div class="card-icon">⚠️</div>
+            </div>
+            <div class="card-value" th:text="${dashboardData.lowStockCount}">0</div>
+
+            <div class="card-footer">
+                <span>Product</span>
+            </div>
+        </div>
+    </div>
+    <!-- Popup -->
+    <!-- Popup -->
+    <div id="billPopup" class="popup-container">
+        <div class="popup-content">
+            <span class="close-btn" onclick="closeBillPopup()">&times;</span>
+
+            <h3>List of bill today</h3>
+            <input type="text" id="searchBill" placeholder="Tìm kiếm hóa đơn..." onkeyup="searchBills()">
+            <table>
+                <thead>
+                <tr>
+                    <th>Bill's Id</th>
+                    <th>Customer</th>
+                    <th>Total Price</th>
+                    <th>Created At</th>
+                    <th>Action</th>
+
+                </tr>
+                </thead>
+                <tbody id="billTableBody">
+                <!-- Dữ liệu sẽ được thêm bằng JS -->
+                </tbody>
+            </table>
+
+            <!-- Pagination -->
+            <div class="pagination">
+                <button onclick="prevPage()">Previous</button>
+                <span id="pageInfo">1 / 1</span>
+                <button onclick="nextPage()">Next</button>
+            </div>
+        </div>
+    </div>
+    <!-- Sales Chart -->
+    <div class="chart-container">
+        <div class="chart-header">
+            <div class="chart-title">Sales Overview</div>
+
+            <div class="chart-options">
+                <label for="revenuePeriodSelect">Choose type of view: </label>
+                <select id="revenuePeriodSelect">
+                    <option value="daily">Day</option>
+                    <option value="monthly">Month</option>
+                    <!--                    <option value="yearly">Theo năm</option>-->
+                </select>
+
+                <label for="revenueMonthSelect" id="monthLabel">Choose month:</label>
+                <select id="revenueMonthSelect"></select>
+
+                <label for="revenueYearSelect" id="yearLabel">Choose year:</label>
+                <select id="revenueYearSelect"></select>
+                <button id="exportRevenueExcelBtn">Export Excel</button>
+
+            </div>
+        </div>
+        <div class="chart">
+            <!--            <canvas id="revenueChart" width="1400" height="300"></canvas>-->
+            <h2 id="chartTitle">Revenue by day</h2>
+            <!--            <canvas id="dailyRevenueChart"></canvas>-->
+
+            <canvas id="salesOverviewChart"></canvas>
+
+        </div>
+    </div>
+    <!-- Rice Types Chart -->
+    <div class="chart-container">
+        <div class="chart-header">
+            <div class="chart-title">Top product</div>
+            <div class="chart-options">
+                <span>Month:</span>
+                <select id="monthSelect">
+                    <!-- Tạo 12 option tháng -->
+                    <script>
+                        for (let m = 1; m <= 12; m++) {
+                            document.write(`<option value="${m}">${m}</option>`);
+                        }
+                    </script>
+                </select>
+                <span>Year:</span>
+                <select id="yearSelect">
+                    <script>
+                        const currentYear = new Date().getFullYear();
+                        for (let y = currentYear - 2; y <= currentYear; y++) {
+                            document.write(`<option value="${y}">${y}</option>`);
+                        }
+                    </script>
+                </select>
+
+                <span>View:</span>
+                <select id="viewOption">
+                    <option value="quantity">By quantity</option>
+                    <option value="revenue" selected>By revenue</option>
+                </select>
+                <button id="exportExcelBtn">Export Excel</button>
+
+            </div>
+
+        </div>
+        <canvas id="topProductChart" width="400" height="200"></canvas>
+    </div>
+
+
+
+    
+</div>
+<footer>
+    &copy; 2025 Rice Sales Management. All Rights Reserved.
+</footer>
+
+<script>
+    document.getElementById('exportExcelBtn').addEventListener('click', function() {
+        if (productData.length === 0) {
+            alert("Không có dữ liệu để xuất Excel.");
+            return;
+        }
+
+        // Lấy ngày hiện tại
+        const today = new Date();
+        const day = String(today.getDate()).padStart(2, '0');
+        const monthNow = String(today.getMonth() + 1).padStart(2, '0');
+        const yearNow = today.getFullYear();
+        const exportDate = `${day}-${monthNow}-${yearNow}`; // Định dạng: dd-mm-yyyy
+
+        // Lấy option đang chọn
+        const periodSelect = document.getElementById('periodSelect').value; // daily, monthly, quarterly
+        const monthSelect = document.getElementById('monthSelect');
+        const year = document.getElementById('yearSelect').value;
+
+        let periodText = ""; // Tên file theo loại thời gian
+        let titleText = ""; // Tiêu đề trong file Excel
+
+        if (periodSelect === "daily") {
+            const monthText = monthSelect.options[monthSelect.selectedIndex].text;
+            periodText = `Tháng_${monthText}_${year}`;
+            titleText = `Báo cáo doanh thu theo ngày - ${monthText} ${year}`;
+        } else if (periodSelect === "monthly") {
+            periodText = `Năm_${year}`;
+            titleText = `Báo cáo doanh thu theo tháng - Năm ${year}`;
+        } else if (periodSelect === "quarterly") {
+            const quarter = Math.ceil(parseInt(monthSelect.value) / 3);
+            periodText = `Quý_${quarter}_${year}`;
+            titleText = `Báo cáo doanh thu theo quý - Quý ${quarter} Năm ${year}`;
+        }
+
+        // Định dạng tên file
+        const filename = `top_products_${periodText}_${exportDate}.xlsx`;
+
+        // Dữ liệu xuất Excel
+        const dataForExcel = productData.map(p => ([
+            p.productName, p.totalQuantity, p.totalRevenue
+        ]));
+
+        // Tạo worksheet với ngày xuất dữ liệu và tiêu đề báo cáo
+        const worksheet = XLSX.utils.aoa_to_sheet([
+            [`Ngày xuất dữ liệu: ${exportDate}`], // Dòng ngày xuất dữ liệu
+            [titleText], // Dòng tiêu đề báo cáo
+            [], // Dòng trống
+            ["Tên sản phẩm", "Số lượng bán", "Doanh thu (VNĐ)"], // Tiêu đề cột
+            ...dataForExcel
+        ]);
+
+        // Căn chỉnh tiêu đề giữa
+        worksheet['A2'].s = { alignment: { horizontal: "center" }, font: { bold: true, sz: 14 } };
+
+        // Tạo workbook và ghi dữ liệu
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Top Products");
+
+        // Xuất file Excel
+        XLSX.writeFile(workbook, filename);
+    });
+</script>
+
+<script>
+    document.getElementById('periodSelect').addEventListener('change', function() {
+        var period = this.value;
+        var monthPicker = document.getElementById('monthPicker');
+
+        // Hiển thị phần chọn tháng chỉ khi chọn kiểu xem 'daily'
+        if (period === 'daily') {
+            monthPicker.parentElement.style.display = 'block';
+        } else {
+            monthPicker.parentElement.style.display = 'none';
+        }
+    });
+</script>
+<script>
+    document.getElementById("exportRevenueExcelBtn").addEventListener("click", function () {
+        const period = document.getElementById("revenuePeriodSelect").value;
+        const month = document.getElementById("revenueMonthSelect").value;
+        const year = document.getElementById("revenueYearSelect").value;
+        let url = `/dashboard/revenue/${period}?year=${year}`;
+        if (period === "daily") url += `&month=${month}`;
+
+        // Lấy ngày hiện tại (ngày xuất file)
+        const today = new Date();
+        const day = String(today.getDate()).padStart(2, '0');
+        const monthNow = String(today.getMonth() + 1).padStart(2, '0');
+        const yearNow = today.getFullYear();
+        const exportDate = `${day}-${monthNow}-${yearNow}`; // Định dạng: dd-mm-yyyy
+
+        fetch(url)
+            .then(response => response.json())
+            .then(responseData => {
+                const data = responseData.data;
+                let sheetData = [];
+
+                // Lấy tên tháng bằng tiếng Việt
+                const monthNames = [
+                    "", " 1", " 2", " 3", " 4", " 5", " 6",
+                    " 7", " 8", " 9", " 10", " 11", " 12"
+                ];
+                const monthText = monthNames[parseInt(month)];
+
+                // Định dạng tên file
+                let fileName = `doanh_thu_${period}_${year}_${exportDate}.xlsx`;
+                if (period === "daily") {
+                    fileName = `doanh_thu_${monthText}_${year}_${exportDate}.xlsx`;
+                }
+
+                // Thêm dòng "Ngày xuất dữ liệu"
+                sheetData.push([`Ngày xuất dữ liệu: ${exportDate}`]);
+                sheetData.push([]); // Dòng trống để tách biệt tiêu đề
+
+                // Thêm tiêu đề cột
+                if (period === "daily") {
+                    sheetData.push(["STT", "Ngày", "Doanh thu"]);
+                    data.forEach((item, index) => sheetData.push([index + 1, `Ngày ${item.day}`, item.revenue]));
+                } else if (period === "monthly") {
+                    sheetData.push(["STT", "Tháng", "Doanh thu"]);
+                    for (let i = 1; i <= 12; i++) {
+                        const revenue = data.find(item => item.month === i)?.revenue || 0;
+                        sheetData.push([i, `Tháng ${i}`, revenue]);
+                    }
+                } else if (period === "yearly") {
+                    sheetData.push(["STT", "Năm", "Doanh thu"]);
+                    for (let i = 0; i < 5; i++) {
+                        const revenue = data.find(item => item.year === year - i)?.revenue || 0;
+                        sheetData.push([i + 1, year - i, revenue]);
+                    }
+                }
+
+                // Tạo workbook và worksheet
+                const ws = XLSX.utils.aoa_to_sheet(sheetData);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Doanh thu");
+
+                // Xuất file Excel
+                XLSX.writeFile(wb, fileName);
+            })
+            .catch(error => console.error("Lỗi tải dữ liệu:", error));
+    });
+</script>
+
+</body>
+</html>
