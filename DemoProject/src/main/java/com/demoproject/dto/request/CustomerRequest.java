@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @Builder
 @NoArgsConstructor
 public class CustomerRequest {
-    @NotBlank(message = "Name cannot be empty.")
+    @NotBlank(message = "Name cannot be empty")
     @Pattern(regexp = "^[a-zA-ZÀ-Ỹà-ỹ\\s]+$", message = "Name must not contain numbers, special characters.")
     private String name;
 
@@ -23,10 +23,13 @@ public class CustomerRequest {
     @PastOrPresent(message = "Date of Birth cannot be a future date.")
     private LocalDate dob;
 
+    @NotBlank(message = "Address cannot be empty")
     private String address;
 
     @NotBlank(message = "Phone number cannot be empty.")
     @Pattern(regexp = "^[0-9]{10,11}$", message = "Phone number must be between 10 and 11 digits and contain only numbers.")
+
+
     private String phone;
 
     private Integer moneyState;

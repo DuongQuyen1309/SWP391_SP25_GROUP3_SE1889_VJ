@@ -31,83 +31,7 @@
       font-size: 18px;
       margin: 0 10px;
     }
-    .add-customer {
-      position: absolute; /* Giữ vị trí cố định so với content */
-      right: 20px; /* Sát mép phải của content */
-      top: 50px; /* Đẩy xuống dưới một chút */
-      background-color: #d35400; /* Cam */
-      color: white;
-      font-size: 13px;
-      border: none;
-      width: 160px;
-      height: 40px;
-      border-radius: 20%;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    .search-form {
-      display: flex;
-      justify-content: right;
-      align-items: center;
-      margin-bottom: 20px;
-    }
 
-    .search-input {
-      padding: 10px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      width: 250px;
-      outline: none;
-      transition: all 0.3s ease-in-out;
-    }
-
-    .search-input:focus {
-      border-color: #2980b9;
-      box-shadow: 0 0 5px rgba(41, 128, 185, 0.5);
-    }
-
-    .search-button {
-      padding: 10px 15px;
-      margin-left: 10px;
-      font-size: 16px;
-      background-color: #2c3e50;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: all 0.3s ease-in-out;
-    }
-
-    .search-button:hover {
-      background-color: #1a252f;
-    }
-    .twin-field{
-      display: flex;
-    }
-    .twin-field input{
-      margin-left: 5px;
-      margin-right: 5px;
-    }
-    .add-customer {
-      background-color: #d35400;
-      color: white;
-      width: 15%;
-      font-size: 16px;
-      font-weight: bold;
-      text-decoration: none;
-      border: none;
-      border-radius: 20px;
-      cursor: pointer;
-      transition: all 0.3s ease-in-out;
-      padding: 10px 20px;
-      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-    }
-
-    .add-customer:hover {
-      background-color: #e67e22;
-      transform: scale(1.05);
-    }
     .action-button {
       padding: 0;
       border: none;
@@ -152,32 +76,14 @@
       background-color: #e67e22;
       transform: scale(1.05);
     }
-
-
-
-    /*.content{*/
-    /*  margin-top: 4%;*/
-    /*  background-color: #cccccc;*/
-    /*}*/
   </style>
   <script src="/js/home.js"></script>
-  <script>
-    function confirmUpdate(event, form) {
-      event.preventDefault(); // Ngăn form submit ngay lập tức
-      if (confirm("Are you sure to update customer?")) {
-        form.submit(); // Nếu người dùng xác nhận, tiếp tục submit form
-      }
-    }
-  </script>
   <script>
     function callPage() {
       window.location.href ="/customer/createCustomer";
     }
     function callUpdate() {
       window.location.href ="/updateLog/listUpdatedRecord";
-    }
-    function showCreatedSuccess() {
-      alert("You are successfully created!");
     }
   </script>
   <script type="text/javascript">
@@ -275,8 +181,6 @@
 
   <div id="messageBox">
     <script type="text/javascript">
-      // Gọi hàm showMessage với messageType và message từ flash attributes
-      /* Thymeleaf sẽ thay thế các giá trị này */
       let messageType = '[[${messageType}]]';
       let message = '[[${message}]]';
 
@@ -304,31 +208,44 @@
       <td>Action</td>
     </tr>
     <tr>
-      <td class="twin-field">
-        <input type="text" class="filter-input" name="idFrom" onchange="filterCustomers()" style="width: 23px;">
-        <input type="text" class="filter-input" name="idTo" onchange="filterCustomers()" style="width: 23px;">
+      <td class="twin-field" style="width: 7%;">
+        <div style="display: flex; gap: 10%; width: 100%;">
+          <input type="text" class="filter-input" name="idFrom"
+                 onchange="filterCustomers()"
+                 style="width: 48%;"/>
+          <input type="text" class="filter-input" name="idTo"
+                 onchange="filterCustomers()"
+                 style="width: 48%;"/>
+        </div>
       </td>
       <td>
-        <input type="text" class="filter-input" name="name" onchange="filterCustomers()" style="width: 120px;">
+        <input type="text" class="filter-input" name="name" onchange="filterCustomers()" style="width: 90%;">
       </td>
-      <td class="twin-field">
-        <input type="date" class="filter-input" name="dobFrom" onchange="filterCustomers()" style="width: 40%;">
-        <input type="date" class="filter-input" name="dobTo" onchange="filterCustomers()" style="width: 40%;">
-      </td>
-      <td>
-        <input type="text" class="filter-input" name="address" onchange="filterCustomers()" style="width: 100%;">
-      </td>
-      <td>
-        <input type="text" class="filter-input" name="phone" onchange="filterCustomers()" style="width: 100%;">
-      </td>
-      <td class="twin-field">
-        <input type="text" class="filter-input" name="moneyFrom" onchange="filterCustomers()" style="width: 90px;" step="1000">
-        <input type="text" class="filter-input" name="moneyTo" onchange="filterCustomers()" style="width: 90px;" step="1000">
+      <td class="twin-field" style="width: 5%;">
+        <div style="display: flex; gap: 10%; width: 100%;">
+          <input type="date" class="filter-input" name="dobFrom" onchange="filterCustomers()"
+                 style="width: 48%;">
+          <input type="date" class="filter-input" name="dobTo" onchange="filterCustomers()"
+                 style="width: 48%;">
+        </div>
       </td>
       <td>
-        <select class="filter-input" name="createBy" onchange="filterCustomers()" style="width: 100px;">
+        <input type="text" class="filter-input" name="address" onchange="filterCustomers()" style="width: 80%;">
+      </td>
+      <td>
+        <input type="text" class="filter-input" name="phone" onchange="filterCustomers()" style="width: 70%;">
+      </td>
+      <td class="twin-field" style="width: 15%;">
+        <div style="display: flex; gap: 10%; width: 100%;">
+          <input type="text" class="filter-input" name="moneyFrom" onchange="filterCustomers()"
+                 style="width: 48%;" step="1000">
+          <input type="text" class="filter-input" name="moneyTo" onchange="filterCustomers()"
+                 style="width: 48%;" step="1000">
+        </div>
+      </td>
+      <td>
+        <select class="filter-input" name="createBy" onchange="filterCustomers()" style="width: 80%;">
           <option value="">All</option>
-          <!-- Sử dụng th:each để lặp qua userList và tạo các option -->
           <option th:each="user : ${usersList}" th:value="${user.id}" th:text="${user.name}"></option>
         </select>
       </td>
@@ -356,16 +273,6 @@
           <a th:href="@{/customer/updateCustomer/{id}(id=${customer.id})}" class="action-button" title="Update Customer">
             <i class="fas fa-pen-square"></i>
           </a>
-<!--        <form th:action="@{/customer/updateCustomer/{id}(id=${customer.id})}" method="GET">-->
-<!--          <button type="submit" style="padding: 0; border: none; background: none;" title="Update Customer">-->
-<!--            <i class="fas fa-pen-square" style="font-size: 30px; color: #06999c;"></i> &lt;!&ndash; Icon Update &ndash;&gt;-->
-<!--          </button>-->
-<!--        </form>-->
-        <form th:action="@{/customer/listCustomer}" method="get">
-          <button type="submit" style="padding: 0; border: none; background: none;" title="View Order Detail">
-            <i class="fas fa-box-open" style="font-size: 30px; color: #06999c;"></i> <!-- Icon Order Detail -->
-          </button>
-        </form>
         <form th:action="@{../note/listNote/{id}(id=${customer.id})}" method="get">
           <button type="submit" style="padding: 0; border: none; background: none;" title="View Note Detail">
             <i class="fas fa-clipboard-list" style="font-size: 30px; color: #06999c;"></i> <!-- Icon Note Detail -->
@@ -390,7 +297,7 @@
       Previous
     </a>
 
-    <span>Page <span th:text="${currentPage + 1}"></span> of <span th:text="${totalPages}"></span></span>
+    <span>Page <span th:text="${currentPage + 1}"></span> of <span th:inline="text">[[${totalPages == 0 ? 1 : totalPages}]]</span></span>
 
     <a th:if="${currentPage + 1 < totalPages}"
        th:href="@{/customer/listCustomer(page=${currentPage + 1}, size=5,

@@ -25,13 +25,17 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+
 @RequestMapping("/customer")
 @Controller
 public class CustomerController {
@@ -245,6 +249,7 @@ public class CustomerController {
             @CookieValue(value = "token", required = false) String token,
             RedirectAttributes redirectAttributes,
             @RequestParam("kindOfNote") String kindOfNote, @RequestParam("noteName") String noteName,
+            @RequestParam("noteImage") MultipartFile noteImage,
             Model model) {
 
         String username = jwtUtils.extractUsername(token);
@@ -274,14 +279,33 @@ public class CustomerController {
         customerRequest.setMoneyState(0);
         customerRequest.setCreatedAt(LocalDate.now());
         customerRequest.setStoreId(user.getStoreId());
+        String imagePath = null;
+        if (!noteImage.isEmpty()) {
+            try {
+                String uploadDir = "uploads/notes/";
+                Path uploadPath = Paths.get(uploadDir);
+                if (!Files.exists(uploadPath)) {
+                    Files.createDirectories(uploadPath);
+                }
 
+                String fileName = UUID.randomUUID().toString().substring(0, 8) + "_" + noteImage.getOriginalFilename();
+                Path filePath = uploadPath.resolve(fileName);
+                Files.copy(noteImage.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+                imagePath = fileName;
+            } catch (IOException e) {
+                e.printStackTrace();
+                redirectAttributes.addFlashAttribute("messageType", "fail");
+                redirectAttributes.addFlashAttribute("message", "Error uploading image!");
+                return "redirect:/customer/createCustomer";
+            }
+        }
 
         try {
             customerService.createCustomer(customerRequest);
             if((!kindOfNote.isBlank() ) && (!noteName.isEmpty()) && (moneyInNote != null && moneyInNote != 0)) {
                 Customer savedCustomer = customerService.searchCustomer(customerRequest.getPhone());
                 TransactionRequest request = new TransactionRequest(savedCustomer.getId(), moneyInNote
-                        , kindOfNote, noteName, user.getId(), last_storedID);
+                        , kindOfNote, noteName, user.getId(), last_storedID, imagePath);
                 transactionQueueProcessor.addTransaction(request);
             }
             redirectAttributes.addFlashAttribute("messageType", "success");

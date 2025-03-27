@@ -29,71 +29,17 @@
             font-size: 18px;
             margin: 0 10px;
         }
-        .add-customer {
-            position: absolute; /* Giữ vị trí cố định so với content */
-            right: 20px; /* Sát mép phải của content */
-            top: 50px; /* Đẩy xuống dưới một chút */
-            background-color: #d35400; /* Cam */
-            color: white;
-            font-size: 13px;
-            border: none;
-            width: 160px;
-            height: 40px;
-            border-radius: 20%;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .search-form {
+        .button-container {
             display: flex;
-            justify-content: right;
-            align-items: center;
-            margin-bottom: 20px;
+            justify-content: flex-end; /* Căn các nút về bên phải */
+            gap: 10px; /* Khoảng cách giữa các nút */
+            align-items: center; /* Căn nút theo chiều dọc với tiêu đề */
+            margin-bottom: 10px;
+            margin-top: 60px; /* Hạ nút xuống gần với tiêu đề */
         }
 
-        .search-input {
-            padding: 10px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            width: 250px;
-            outline: none;
-            transition: all 0.3s ease-in-out;
-        }
-
-        .search-input:focus {
-            border-color: #2980b9;
-            box-shadow: 0 0 5px rgba(41, 128, 185, 0.5);
-        }
-
-        .search-button {
-            padding: 10px 15px;
-            margin-left: 10px;
-            font-size: 16px;
-            background-color: #2c3e50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s ease-in-out;
-        }
-
-        .search-button:hover {
-            background-color: #1a252f;
-        }
-        .header-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .title {
-            font-size: 24px;
-            font-weight: bold;
-            margin: 0;
-        }
-        .add-note-button {
-            background-color: #d35400;
+        .button-container button {
+            background-color: #d35400; /* Màu cam */
             color: white;
             font-size: 16px;
             font-weight: bold;
@@ -106,11 +52,10 @@
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
         }
 
-        .add-note-button:hover {
+        .button-container button:hover {
             background-color: #e67e22;
             transform: scale(1.05);
         }
-
     </style>
     <script src="/js/home.js"></script>
 
@@ -210,55 +155,6 @@
             updateInputFields();
         }
 
-
-        // document.addEventListener("DOMContentLoaded", function() {
-        //     let params = new URLSearchParams(window.location.search);
-        //     document.querySelectorAll('.filter-input').forEach(input => {
-        //         if (params.has(input.name)) {
-        //             let value = params.get(input.name);
-        //             if (input.type === "date") {
-        //                 input.value = value.substring(0, 10); // Định dạng YYYY-MM-DD
-        //             } else {
-        //                 input.value = value;
-        //             }
-        //         }
-        //     });
-        // });
-        // function handleFieldChange() {
-        //     let fieldType = document.getElementById("informationField").value;
-        //     console.log("Selected Field:", fieldType); // Kiểm tra giá trị khi chọn
-        //     updateInputFields(); // Cập nhật loại input
-        //     filterNotes(); // Gửi request lọc ngay lập tức
-        // }
-        // function updateInputFields() {
-        //     let fieldType = document.getElementById("informationField").value;
-        //     console.log("Updating Input Fields for:", fieldType);
-        //     let preValueContainer = document.getElementById("preValueContainer");
-        //     let followValueContainer = document.getElementById("followValueContainer");
-        //
-        //     if (fieldType === "dob") {
-        //         console.log("Switching to Date Inputs");
-        //         preValueContainer.innerHTML = `<input type="date" class="filter-input" id="preValue" name="preValue" onchange="filterNotes()" style="width: 100px;">`;
-        //         followValueContainer.innerHTML = `<input type="date" class="filter-input" id="followValue" name="followValue" onchange="filterNotes()" style="width: 100px;">`;
-        //     } else if (fieldType === "gender") {
-        //         console.log("Switching to Gender Dropdown");
-        //         preValueContainer.innerHTML = `<select class="filter-input" id="preValue" name="preValue" onchange="filterNotes()" style="width: 100px;">
-        //                                     <option value="">All</option>
-        //                                     <option value="0">Female</option>
-        //                                     <option value="1">Male</option>
-        //                                   </select>`;
-        //         followValueContainer.innerHTML = `<select class="filter-input" id="followValue" name="followValue" onchange="filterNotes()" style="width: 100px;">
-        //                                     <option value="">All</option>
-        //                                     <option value="0">Female</option>
-        //                                     <option value="1">Male</option>
-        //                                   </select>`;
-        //     } else {
-        //         console.log("Switching to Text Inputs");
-        //         preValueContainer.innerHTML = `<input type="text" class="filter-input" id="preValue" name="preValue" onchange="filterNotes()" style="width: 100px;">`;
-        //         followValueContainer.innerHTML = `<input type="text" class="filter-input" id="followValue" name="followValue" onchange="filterNotes()" style="width: 100px;">`;
-        //     }
-        // }
-
     </script>
 </head>
 <body>
@@ -316,9 +212,19 @@
             if (message && message.trim() !== '') {
                 showMessage(messageType, message);
             }
+            function callPage() {
+                window.location.href ="/customer/listCustomer";
+            }
         </script>
     </div>
-    <h1>History about Updated Customer Information</h1>
+    <!-- Modal Form -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <h1>History about Updated Customer Information</h1>
+        <div class="button-container">
+            <button onclick="callPage()">Back</button>
+        </div>
+    </div>
+
     <div th:if="${errorMessage}" style="color: red; font-weight: bold;">
         <p th:text="${errorMessage}"></p>
     </div>
@@ -333,8 +239,6 @@
             <td>Information Field</td>
             <td>Previous Value</td>
             <td>Following Value</td>
-            <td>Status</td>
-            <td>Action</td>
         </tr>
         <tr>
             <td>
@@ -344,18 +248,24 @@
             <td>
             </td>
             <td>
-                <select class="filter-input" name="updatedBy" onchange="filterNotes()" style="width: 100px;">
+                <select class="filter-input" name="updatedBy" onchange="filterNotes()" style="width: 90%;">
                     <option value="">All</option>
                     <!-- Sử dụng th:each để lặp qua userList và tạo các option -->
                     <option th:each="user : ${usersList}" th:value="${user.id}" th:text="${user.name}"></option>
                 </select>
             </td>
-            <td>
-                <input type="datetime-local" class="filter-input" name="updatedDateFrom" onchange="filterNotes()" style="width: 45%;">
-                <input type="datetime-local" class="filter-input" name="updatedDateTo" onchange="filterNotes()" style="width: 45%;">
+            <td class="twin-field" style="width: 5%;">
+                <div style="display: flex; gap: 3%; width: 100%;">
+                    <input type="datetime-local" class="filter-input" name="updatedDateFrom"
+                           onchange="filterNotes()"
+                           style="width: 48%;"/>
+                    <input type="datetime-local" class="filter-input" name="updatedDateTo"
+                           onchange="filterNotes()"
+                           style="width: 48%;"/>
+                </div>
             </td>
             <td>
-                <select class="filter-input" name="informationField" id="informationField" onchange="handleFieldChange()" style="width: 100px;">
+                <select class="filter-input" name="informationField" id="informationField" onchange="handleFieldChange()" style="width: 42%;">
                     <option value="">All</option>
                     <option value="name">Name</option>
                     <option value="phone">Phone</option>
@@ -366,23 +276,14 @@
             </td>
             <td>
                 <span id="preValueContainer">
-                    <input type="text" class="filter-input" id="preValue" name="preValue" onchange="filterNotes()" style="width: 100px;">
+                    <input type="text" class="filter-input" id="preValue" name="preValue" onchange="filterNotes()" style="width: 40%;">
                 </span>
             </td>
             <td>
                 <span id="followValueContainer">
-                    <input type="text" class="filter-input" id="followValue" name="followValue" onchange="filterNotes()" style="width: 100px;">
+                    <input type="text" class="filter-input" id="followValue" name="followValue" onchange="filterNotes()" style="width: 40%;">
                 </span>
             </td>
-
-            <td>
-                <select class="filter-input" name="status" onchange="filterNotes()" style="width: 100px;">
-                    <option value="">All</option>
-                    <option value="Pending">Pending</option>
-                    <option value="Approved">Approved</option>
-                </select>
-            </td>
-            <td></td>
         </tr>
         </thead>
         <tbody>
@@ -410,13 +311,6 @@
                 <span th:if="${log.fieldName == 'gender'}" th:text="${log.newValue == 'false' ? 'female' : (log.newValue == 'true' ? 'male' : log.newValue)}"></span>
                 <span th:unless="${log.fieldName == 'gender'}" th:text="${log.newValue}"></span>
             </td>
-            <td th:if="${log != null}" th:text="${log.status}"></td>
-            <td>
-<!--                <span th:if="${log != null and log.updatedBy != ownerPreId}">-->
-<!--                    <a th:href="@{/}">Revert</a>-->
-<!--                </span>-->
-            </td>
-
         </tr>
         </tbody>
     </table>
@@ -432,7 +326,7 @@
             Previous
         </a>
 
-        <span>Page <span th:text="${currentPage + 1}"></span> of <span th:text="${totalPages}"></span></span>
+        <span>Page <span th:text="${currentPage + 1}"></span> of <span th:inline="text">[[${totalPages == 0 ? 1 : totalPages}]]</span></span>
 
         <a th:if="${currentPage + 1 < totalPages}"
            th:href="@{/updateLog/listUpdatedRecord(page=${currentPage + 1}, size=${size},

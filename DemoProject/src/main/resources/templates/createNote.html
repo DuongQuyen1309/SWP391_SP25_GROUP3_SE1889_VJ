@@ -79,7 +79,7 @@
         .customer-info {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 16px;
             font-size: 16px;
             width: 1000px;
         }
@@ -132,68 +132,16 @@
 <!--            }, 3000);  // Thời gian chờ 3 giây-->
 <!--        }-->
 <!--    </script>-->
-    <script>
-        function formatNumber(input) {
-            // Lấy giá trị từ input và loại bỏ dấu phẩy
-            let value = input.value.replace(/,/g, '');
-
-            // Kiểm tra xem có phải số hợp lệ không
-            if (!isNaN(value) && value !== "") {
-                // Cập nhật input với giá trị có dấu phẩy (format số)
-                input.value = Number(value).toLocaleString('en-US');
-
-                // Hiển thị cách đọc số bằng chữ
-                document.getElementById("numberInWords").innerText = numberToWords(value) + " VND";
-            } else {
-                document.getElementById("numberInWords").innerText = "";
-            }
+    <style>
+        .error-msg {
+            display: none; /* Ẩn mặc định */
+            margin-top: 2px;
+            margin-bottom: 0;
+            font-size: 14px;
+            color: red;
         }
 
-        function numberToWords(num) {
-            const units = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
-            const teens = ["Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
-            const tens = ["", "Ten", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
-            const thousands = ["", "Thousand", "Million", "Billion"];
-
-            if (num == 0) return "Zero";
-            let words = "";
-            let numStr = num.toString();
-            let numArr = [];
-
-            // Chia số thành nhóm ba chữ số
-            while (numStr.length > 0) {
-                numArr.unshift(numStr.slice(-3));
-                numStr = numStr.slice(0, -3);
-            }
-
-            numArr.forEach((part, index) => {
-                if (part != "000") {
-                    let word = "";
-                    let n = parseInt(part);
-
-                    if (n >= 100) {
-                        word += units[Math.floor(n / 100)] + " Hundred ";
-                        n %= 100;
-                    }
-
-                    if (n >= 11 && n <= 19) {
-                        word += teens[n - 11] + " ";
-                    } else {
-                        word += tens[Math.floor(n / 10)] + " ";
-                        word += units[n % 10] + " ";
-                    }
-
-                    if (thousands[numArr.length - 1 - index]) {
-                        word += thousands[numArr.length - 1 - index] + " ";
-                    }
-
-                    words += word;
-                }
-            });
-
-            return words.trim();
-        }
-    </script>
+    </style>
     <script>
         function callPage() {
             window.location.href ="/customer/createCustomer";
@@ -214,50 +162,7 @@
             }
         }
     </script>
-    <script th:inline="javascript">
-        var existingPhones = /*[[${phoneList}]]*/ [];
-        var nameRegex = /^[a-zA-ZÀ-Ỹà-ỹ\s]+$/;
-        var phoneRegex = /^[0-9]{10,11}$/;
-        var moneyRegex = /^[0-9]+$/;
-        var today = new Date().toISOString().split("T")[0];
-        document.addEventListener("DOMContentLoaded", function () {
-            const form = document.querySelector(".profile-form");
-
-            const notename = document.getElementById("notename");
-            const money = document.getElementById("money");
-            const imageInput = document.getElementById("noteImage");
-
-            const errorMessage = document.createElement("p");
-            errorMessage.style.color = "red";
-            errorMessage.style.fontWeight = "bold";
-
-            form.addEventListener("submit", function (event) {
-                let value = money.value.replace(/,/g, '');
-                let errors = [];
-                money.value = money.value.replace(/,/g, '');
-                if (notename.value.trim() === "") {
-                    errors.push("Note name is not empty");
-                }
-
-                if (money.value.trim() === "") {
-                    errors.push("Money is not empty");
-                } else if (!/^\d+$/.test(value)) {
-                    errors.push("Money only contain number.");
-                }
-
-                if(imageInput.value.trim() === ""){
-                    errors.push("Image is not empty")
-                }
-
-                // Nếu có lỗi, ngăn submit và hiển thị thông báo
-                if (errors.length > 0) {
-                    event.preventDefault();
-                    errorMessage.innerHTML = errors.join("<br>");
-                    form.insertBefore(errorMessage, form.querySelector("button"));
-                }
-            });
-        });
-    </script>
+    <script src="/js/validateNote.js"></script>
 </head>
 <body>
 
@@ -308,6 +213,7 @@
             <form class="profile-form" th:action="@{/note/createNote/{id}(id=${customer.id})}" method="POST" enctype="multipart/form-data">
                 <label for="notename">Note Name:</label>
                 <input type="text" id="notename" name="notename">
+                <p id="notenameError" class="error-msg" style="color: red; font-weight: bold"></p>
 
                 <label for="kindOfNote">Note Type:</label>
                 <select id="kindOfNote" name="kindOfNote">
@@ -320,10 +226,12 @@
                 <label for="money">Money:</label>
                 <input type="text" id="money" name="money" oninput="formatNumber(this)">
                 <p id="numberInWords" style="font-style: italic; color: #555;"></p>
+                <p id="moneyError" class="error-msg" style="color: red; font-weight: bold"></p>
+
 
                 <label for="noteImage">Upload Image:</label>
                 <input type="file" id="noteImage" name="noteImage" accept="image/*">
-
+                <p id="noteImageError" class="error-msg" style="color: red; font-weight: bold"></p>
 <!--                <p style="color: red;" th:if="${error}" th:text="${error}"></p>-->
                 <button class="create-note" type="submit">Create Note</button>
 
@@ -334,7 +242,6 @@
             <h3>Customer Information</h3>
             <p><strong>Name:</strong> <span th:text="${customer.name}"></span></p>
             <p><strong>Phone:</strong> <span th:text="${customer.phone}"></span></p>
-            <p><strong>Address:</strong> <span th:text="${customer.address}"></span></p>
             <p><strong>Money State:</strong> <span th:text="${customer.moneyState}"></span></p>
             <p><strong>Detail:</strong> <a th:href="@{/note/listNote/{id}(id=${customer.id})}">Detail about Notes</a></p>
         </aside>

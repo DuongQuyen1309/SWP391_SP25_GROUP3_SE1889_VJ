@@ -26,6 +26,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/account")
 public class AccountController {
+
     @Autowired
     private final AccountService accountService;
     private final UserService userService;
@@ -56,6 +57,7 @@ public class AccountController {
             @RequestParam(required = false) String fullname,
             RedirectAttributes redirectAttributes) {
 
+
         // ✅ Lấy thông tin người dùng từ token
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
         Account account = accountService.getAccountFromToken(token).orElse(null);
@@ -82,7 +84,9 @@ public class AccountController {
             model.addAttribute("displayName", displayName);
             model.addAttribute("email", email);
             model.addAttribute("name", fullname);
+
             model.addAttribute("currentPage", page);
+
             model.addAttribute("totalPages", accountPage.getTotalPages());
             model.addAttribute("size", size);
             return "owner/listOwner";
