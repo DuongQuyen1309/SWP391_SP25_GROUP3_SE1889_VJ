@@ -1,5 +1,4 @@
-
-    document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("moneyState").value = "0";
 });
     function formatNumber(input) {
@@ -84,6 +83,7 @@
 }
 
     // var existingPhones = /*[[${phoneList}]]*/ [];
+
     var nameRegex = /^[a-zA-ZÀ-Ỹà-ỹ\s]+$/;
     var phoneRegex = /^[0-9]{10,11}$/;
     var moneyRegex = /^[0-9]+$/;
@@ -111,11 +111,13 @@
     let noteNameError = [];
     let imageError = [];
 
+
+
     // Kiểm tra name
     if (name.value.length < 5) {
         nameError.push("Full Name is equal or greater than 5 characters");
     } else if (!name.value.match(nameRegex)) {
-        nameError.push("Full Name must not contain numbers or special characters.");
+        nameError.push("Full Name cannot contain numbers or special characters.");
     } else if (name.value.length > 50) {
         nameError.push("Full Name is only up to 50 characters.");
     }
@@ -162,8 +164,17 @@
     }
 
     if(moneyState.value.trim() !== "" && moneyNumber !== 0 && noteImage.value.trim() === ""){
-        imageError.push("Note image cannot be empty")
+        imageError.push("Note image cannot be empty");
     }
+
+        // Kiểm tra Note Image
+        const file = noteImage.files[0];
+        const fileSizeMB = file ? file.size / (1024 * 1024) : 0;
+        if (moneyState.value.trim() !== "" && moneyNumber !== 0 && noteImage.value.trim() === "") {
+            imageError.push("Note image cannot be empty when money state is not zero.");
+        } else if (fileSizeMB > 10) {
+            imageError.push("Note image cannot exceed 10MB.");
+        }
 
 
     // Nếu có lỗi, ngăn submit và hiển thị thông báo

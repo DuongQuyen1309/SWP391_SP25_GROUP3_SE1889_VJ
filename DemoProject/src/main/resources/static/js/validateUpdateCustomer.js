@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (name.value.length < 5) {
             nameError.push("Full Name is equal or greater than 5 characters");
         } else if (!name.value.match(nameRegex)) {
-            nameError.push("Full Name must not contain numbers or special characters.");
+            nameError.push("Full Name cannot contain numbers or special characters.");
         } else if (name.value.length > 50) {
             nameError.push("Full Name is only up to 50 characters.");
         }

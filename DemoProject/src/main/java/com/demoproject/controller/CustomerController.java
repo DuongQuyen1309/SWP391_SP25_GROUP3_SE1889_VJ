@@ -123,7 +123,7 @@ public class CustomerController {
                 (moneyTo != null && !moneyTo.isEmpty() && !moneyTo.matches("-?\\d+")) ||
                 (phone != null && !phone.isEmpty() && !phone.matches("\\d+"))) {
 
-            model.addAttribute("errorMessage", "Id, Phone fields should be positive number. Money field should be negative number");
+            model.addAttribute("errorMessage", "Id, Phone fields should be positive number. Money field should be integer number");
             customerPage = Page.empty();
             model.addAttribute("customers", customerPage.getContent());
 
@@ -150,11 +150,11 @@ public class CustomerController {
                     || (moneyFrom != null && !moneyFrom.isEmpty()) || (moneyTo != null && !moneyTo.isEmpty())) {
 
 
-                Long req_idFrom = (idFrom != null && !idFrom.isBlank() && idFrom.matches("\\d+")) ? Long.valueOf(idFrom) : null;
-                Long req_idTo = (idTo != null && !idTo.isBlank() && idTo.matches("\\d+")) ? Long.valueOf(idTo) : null;
+                Long req_idFrom = (idFrom != null && !idFrom.isBlank() && idFrom.matches("-?\\d+")) ? Long.valueOf(idFrom) : null;
+                Long req_idTo = (idTo != null && !idTo.isBlank() && idTo.matches("-?\\d+")) ? Long.valueOf(idTo) : null;
 
-                Integer req_moneyFrom = (moneyFrom != null && !moneyFrom.isBlank() && moneyFrom.matches("\\d+")) ? Integer.valueOf(moneyFrom) : null;
-                Integer req_moneyTo = (moneyTo != null && !moneyTo.isBlank() && moneyTo.matches("\\d+")) ? Integer.valueOf(moneyTo) : null;
+                Integer req_moneyFrom = (moneyFrom != null && !moneyFrom.isBlank() && moneyFrom.matches("-?\\d+")) ? Integer.valueOf(moneyFrom) : null;
+                Integer req_moneyTo = (moneyTo != null && !moneyTo.isBlank() && moneyTo.matches("-?\\d+")) ? Integer.valueOf(moneyTo) : null;
 
                 String req_phone = (phone == null || phone.isEmpty())? null: phone;
                 Long req_createBy = (createBy != null && !createBy.isBlank()) ? Long.valueOf(createBy) : null;

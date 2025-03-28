@@ -110,7 +110,7 @@
         window.location.href = "/customer/listCustomer";  // Điều hướng sau 3 giây
       }, 3000);  // Thời gian chờ 3 giây
     }
-      function checkConfirm() {
+    function checkConfirm() {
       return confirm("Are you sure you want to update this customer?");
     }
   </script>
@@ -192,7 +192,7 @@
       <option value="false" th:selected="${customer.gender == false}">Female</option>
     </select>
 
-    <button type="submit" id="applyBtn">Update Customer</button>
+    <button type="submit" onclick="return checkConfirm()" id="applyBtn">Update Customer</button>
   </form>
 
 </div>

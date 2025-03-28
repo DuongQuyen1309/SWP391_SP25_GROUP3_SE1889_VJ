@@ -70,6 +70,8 @@ document.addEventListener("DOMContentLoaded", function () {
         let moneyError = [];
         let notenameError = [];
         let noteImageError = [];
+
+
         money.value = money.value.replace(/,/g, '');
         if (notename.value.length < 5) {
             notenameError.push("Note name is equal or greater than 5 characters");
@@ -87,7 +89,16 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         if(noteImage.value.trim() === ""){
-            noteImageError.push("Note image cannot be empty")
+            noteImageError.push("Note image cannot be empty");
+        }
+
+        // Kiểm tra Note Image
+        const file = noteImage.files[0];
+        const fileSizeMB = file ? file.size / (1024 * 1024) : 0;
+        if (money.value.trim() !== "" && money.value !== 0 && noteImage.value.trim() === "") {
+            noteImageError.push("Note image cannot be empty when money state is not zero.");
+        } else if (fileSizeMB > 10) {
+            noteImageError.push("Note image cannot exceed 10MB.");
         }
 
         // Nếu có lỗi, ngăn submit và hiển thị thông báo
