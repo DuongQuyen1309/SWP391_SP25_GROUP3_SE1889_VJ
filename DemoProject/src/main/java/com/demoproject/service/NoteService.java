@@ -28,9 +28,9 @@ public class NoteService {
                 moneyFrom,moneyTo, pageable);
     }
     public Page<Note> searchNoteByAttribute(Long id, Long storeID, Long idFrom, Long idTo, String kindOfNote, LocalDateTime createdDateFrom, LocalDateTime createdDateTo, String noteSearch,
-                                            Integer moneyFrom, Integer moneyTo, Pageable pageable) { //lưu ý lại chỗ int và Integer vi dang o 2 doi tuong khac nhau
+                                            Integer moneyFrom, Integer moneyTo,Long createby, Pageable pageable) { //lưu ý lại chỗ int và Integer vi dang o 2 doi tuong khac nhau
         return noteRepository.findNoteByAttribute(id, storeID,idFrom, idTo,kindOfNote,createdDateFrom,createdDateTo,noteSearch,
-                moneyFrom,moneyTo, pageable);
+                moneyFrom,moneyTo,createby, pageable);
     }
     public Page<Note> searchNoteAll(Long id, List<Long> relatedUserList,  Pageable pageable) { //lưu ý lại chỗ int và Integer vi dang o 2 doi tuong khac nhau
         return noteRepository.findNoteAll(id, relatedUserList, pageable);

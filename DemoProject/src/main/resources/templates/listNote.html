@@ -291,6 +291,7 @@
             <td>Created Date</td>
             <td>Note</td>
             <td>Money</td>
+            <td>Created By</td>
             <td>Image</td>
         </tr>
         <tr>
@@ -317,13 +318,13 @@
                 <div style="display: flex; gap: 3%; width: 100%;">
                     <input type="datetime-local" class="filter-input" name="createdDateFrom"
                            onchange="filterNotes()"
-                           style="width: 48%;"/>
+                           style="width: 30%;"/>
                     <input type="datetime-local" class="filter-input" name="createdDateTo"
                            onchange="filterNotes()"
-                           style="width: 48%;"/>
+                           style="width: 30%;"/>
                 </div>
             </td>
-            <td style="width: 30%;">
+            <td style="width: 20%;">
                 <input type="text" class="filter-input" name="noteSearch" onchange="filterNotes()" style="width: 40%;">
             </td>
             <td class="twin-field" style="width: 15%;">
@@ -336,6 +337,12 @@
                            style="width: 48%;"/>
                 </div>
             </td>
+            <td>
+                <select class="filter-input" name="createBy" onchange="filterNotes()" style="width: 70%;">
+                    <option value="">All</option>
+                    <option th:each="user : ${usersList}" th:value="${user.id}" th:text="${user.name}"></option>
+                </select>
+            </td>
             <td></td>
         </tr>
         </thead>
@@ -346,6 +353,10 @@
             <td th:if="${note != null}" th:text="${#temporals.format(note.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
             <td th:if="${note != null}" th:text="${note.note}"></td>
             <td th:if="${note != null}" th:text="${note.money}"></td>
+            <td th:if="${note != null}">
+                <span th:each="user : ${usersList}"
+                th:text="${user.id == note.createdBy ? user.name : ''}"></span>
+            </td>
             <td>
                 <img th:if="${note.imagePath != null}"
                      th:src="@{/note/image/{filename}(filename=${note.imagePath})}"
@@ -384,7 +395,7 @@
        createdDateTo=${createdDateTo},
        noteSearch=${noteSearch},
        moneyFrom=${moneyFrom},
-       moneyTo=${moneyTo})}">
+       moneyTo=${moneyTo}, createBy=${createBy})}">
                 Previous
             </a>
 
@@ -398,7 +409,7 @@
        createdDateTo=${createdDateTo},
        noteSearch=${noteSearch},
        moneyFrom=${moneyFrom},
-       moneyTo=${moneyTo})}">
+       moneyTo=${moneyTo},createBy=${createBy})}">
             Next
         </a>
     </div>
