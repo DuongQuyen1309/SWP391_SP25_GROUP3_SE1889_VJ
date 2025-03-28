@@ -3,9 +3,13 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>Rice Sales Management</title>
+  <title>Chỉnh sửa khách hàng</title>
   <link rel="stylesheet" href="/css/base.css">
   <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <script src="/js/validateUpdateCustomer.js"></script>
   <style>
     /* Profile Form */
     .profile-form {
@@ -69,6 +73,20 @@
     }
 
   </style>
+  <style>
+    .error-msg {
+      display: none; /* Ẩn mặc định */
+      margin-top: 2px;
+      margin-bottom: 0;
+      font-size: 14px;
+      color: red;
+    }
+    p {
+      margin-top: 2px;
+      margin-bottom: 0;
+      font-size: 14px;
+    }
+  </style>
   <script src="/js/home.js"></script>
   <!--    <script>-->
   <!--        function confirmUpdate(event, form) {-->
@@ -79,79 +97,25 @@
   <!--        }-->
   <!--    </script>-->
   <script type="text/javascript">
-    function showMessage(messageType, message) {
-      // Kiểm tra loại thông báo và hiển thị theo màu sắc tương ứng
-      var messageBox = document.getElementById("messageBox");
+    function showMessage(messageType) {
       if (messageType === 'success') {
-        messageBox.style.color = 'green';
-      } else if (messageType === 'fail') {
-        messageBox.style.color = 'red';
+        Swal.fire({
+          title: "Drag me!",
+          icon: "success",
+          draggable: true
+        }).then(() => {
+          window.location.href = "/customer/listCustomer";  // Điều hướng sau 3 giây
+        });
       }
-      messageBox.innerHTML = message;  // Hiển thị thông báo
-      messageBox.style.display = 'block';  // Hiển thị thông báo
 
-      // Điều hướng đến trang listcustomer sau khi hiển thị thông báo
-      setTimeout(function() {
-        window.location.href = "/customer/listCustomer";  // Điều hướng sau 3 giây
-      }, 3000);  // Thời gian chờ 3 giây
+
     }
+
   </script>
 
   <script th:inline="javascript">
     var existingPhones = /*[[${phoneList}]]*/ [];
     var pre_phone = /*[[${pre_phone}]]*/ "";
-    var nameRegex = /^[a-zA-ZÀ-Ỹà-ỹ\s]+$/;
-    var phoneRegex = /^[0-9]{10,11}$/;
-    var today = new Date().toISOString().split("T")[0];
-    document.addEventListener("DOMContentLoaded", function () {
-      const form = document.querySelector(".profile-form");
-      const name = document.getElementById("name");
-      const address = document.getElementById("address");
-      const dob = document.getElementById("dob");
-      const phone = document.getElementById("phone");
-      const errorMessage = document.createElement("p");
-      errorMessage.style.color = "red";
-      errorMessage.style.fontWeight = "bold";
-
-      form.addEventListener("submit", function (event) {
-        let errors = [];
-
-        // Kiểm tra name
-        if (name.value.trim() === "") {
-          errors.push("Name is not empty");
-        } else if (!name.value.match(nameRegex)) {
-          errors.push("Name must not contain numbers or special characters.");
-        }
-
-        // Kiểm tra Address
-        if (address.value.trim() === "") {
-          errors.push("Address is not empty");
-        }
-        if (dob.value === "") {
-          errors.push("Date of Birth cannot be empty.");
-        }
-        if (dob.value > today) {
-          errors.push("Date of Birth cannot be a future date.");
-        }
-
-        // Kiểm tra phone
-        if (phone.value.trim() === "") {
-          errors.push("Phone is not empty");
-        } else if (!phone.value.match(phoneRegex)) {
-          errors.push("Phone number must be between 10 and 11 digits and contain only numbers.");
-        } else if(existingPhones.includes(phone.value) && (pre_phone !== phone.value) ){
-          errors.push("Phone is not duplicated");
-        }
-
-
-        // Nếu có lỗi, ngăn submit và hiển thị thông báo
-        if (errors.length > 0) {
-          event.preventDefault();
-          errorMessage.innerHTML = errors.join("<br>");
-          form.insertBefore(errorMessage, form.querySelector("button"));
-        }
-      });
-    });
   </script>
   <script src="/js/home.js"></script>
 </head>
@@ -159,40 +123,45 @@
 
 <div th:insert="~{layout/header :: header}"></div>
 
-<div th:insert="~{layout/sidebar :: sidebar}"></div>
+<div class="sidebar" id="sidebar">
+  <div th:insert="~{layout/sidebar :: sidebar}"></div>
+</div>
 
 <!-- Content -->
 <div class="content">
-  <h1>Customer Profile</h1>
+  <h1>Chỉnh sửa khách hàng</h1>
   <div th:if="${message != null}">
     <p th:text="${message}" th:class="${messageType == 'success' ? 'success' : 'error'}"></p>
   </div>
   <form class="profile-form" th:action="@{/customer/updateCustomer/{id}(id=${customer.id})}" method="POST" accept-charset="UTF-8" >
 
-    <label for="name">Name:</label>
+    <label for="name">Tên đầy đủ:</label>
     <input type="text" id="name" name="name" th:value="${customer.name}">
+    <p id="nameError" class="error-msg" style="color: red; font-weight: bold"></p>
 
     <!-- Address Field -->
-    <label for="address">Address:</label>
-    <input type="text" id="address" name="address" th:value="${customer.address}" required>
+    <label for="address">Địa chỉ:</label>
+    <input type="text" id="address" name="address" th:value="${customer.address}" >
+    <p id="addressError" class="error-msg" style="color: red; font-weight: bold"></p>
 
     <!-- Date of Birth Field -->
-    <label for="dob">Date of Birth:</label>
-    <input type="date" id="dob" name="dob" th:value="${customer.dob}"  required>
+    <label for="dob">Ngày sinh:</label>
+    <input type="date" id="dob" name="dob" th:value="${customer.dob}"  >
+    <p id="dobError" class="error-msg" style="color: red; font-weight: bold"></p>
 
     <!-- Phone Field -->
-    <label for="phone">Phone:</label>
-    <input type="text" id="phone" name="phone" th:value="${customer.phone}" required>
+    <label for="phone">Số điện thoại:</label>
+    <input type="text" id="phone" name="phone" th:value="${customer.phone}" >
+    <p id="phoneError" class="error-msg" style="color: red; font-weight: bold"></p>
 
     <!-- Gender Field -->
-    <label for="gender">Gender:</label>
+    <label for="gender">Giới tính:</label>
     <select name="gender" id="gender">
-      <option value="true" th:selected="${customer.gender == true}">Male</option>
-      <option value="false" th:selected="${customer.gender == false}">Female</option>
+      <option value="true" th:selected="${customer.gender == true}">Nam</option>
+      <option value="false" th:selected="${customer.gender == false}">Nữ</option>
     </select>
 
-    <p style="color: red;" th:if="${error}" th:text="${error}"></p>
-    <button type="submit" id="applyBtn">Update Customer</button>
+    <button type="submit"  id="applyBtn">Chỉnh sửa</button>
   </form>
 
 </div>

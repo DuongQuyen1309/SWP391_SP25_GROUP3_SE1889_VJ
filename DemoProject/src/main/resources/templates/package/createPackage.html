@@ -7,42 +7,60 @@
     <title>Create Package</title>
 
     <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        $(document).ready(function () {
-            $('#create-package-form').on('submit', function (e) {
-                let isValid = true;
+        document.addEventListener("DOMContentLoaded", function () {
 
-                // Remove old error messages
-                $('.error-message').remove();
+            let form = document.querySelector(".create-form");
+            $(document).ready(function () {
+                $('#create-package-form').on('submit', function (e) {
+                    event.preventDefault();
+                    let isValid = true;
 
-                // Validate each field
-                const name = $('input[name="name"]');
-                const color = $('input[name="color"]');
-                const description = $('input[name="description"]');
-                if (!name.val().trim()) {
-                    showError(name, 'Please enter package name');
-                    isValid = false;
-                }
-                if (!color.val().trim()) {
-                    showError(color, 'Please enter color');
-                    isValid = false;
-                }
-                if (!description.val().trim()) {
-                    showError(description, 'Please enter description');
-                    isValid = false;
-                }
+                    // Remove old error messages
+                    $('.error-message').remove();
 
-                if (!isValid) {
-                    e.preventDefault();
+                    // Validate each field
+                    const name = $('input[name="name"]');
+                    const color = $('input[name="color"]');
+                    const description = $('input[name="description"]');
+                    if (!name.val().trim()) {
+                        showError(name, 'Vui lòng nhập tên quy cách đóng gói');
+                        isValid = false;
+                    }
+                    if (!color.val().trim()) {
+                        showError(color, 'Vui lòng nhập màu');
+                        isValid = false;
+                    }
+                    if (!description.val().trim()) {
+                        showError(description, 'Vui lòng nhập mô tả');
+                        isValid = false;
+                    }
+
+                    if (!isValid) {
+                        e.preventDefault();
+                    } else {
+
+                        Swal.fire({
+                            icon: "success",
+                            title: "Thành Công!",
+                            text: "Tạo quy cách đóng gói thành công.",
+                            backdrop: false, // ❌ Tắt nền mờ phía sau
+                            confirmButtonText: "OK"
+                        }).then(() => {
+                            form.submit(); // Gửi form sau khi người dùng nhấn OK
+                        });
+                    }
+                });
+
+                function showError(element, message) {
+                    const errorElement = $('<div class="error-message" style="color: red; font-size: 14px; margin-top: 5px;"></div>').text(message);
+                    element.after(errorElement);
                 }
             });
-
-            function showError(element, message) {
-                const errorElement = $('<div class="error-message" style="color: red; font-size: 14px; margin-top: 5px;"></div>').text(message);
-                element.after(errorElement);
-            }
         });
     </script>
 
@@ -104,43 +122,45 @@
 <body>
 
 <div th:insert="~{layout/header :: header}"></div>
+<div class="sidebar" id="sidebar">
     <div th:insert="~{layout/sidebar :: sidebar}"></div>
+</div>
 
-    <!-- Content -->
-    <div class="content" id="content">
-        <h2>Create package</h2>
-        <form class="create-form" id="create-package-form" method="post" action="/package/createPackage"
-            modelAttribute="newPackage">
-            <div class="mb-3">
-                <label class="form-label">Package Name:</label>
-                <input type="text" class="form-control" name="name" id="name">
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Color:</label>
-                <input type="text" class="form-control" name="color" id="color">
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Description:</label>
-                <input type="text" class="form-control" name="description" id="description">
-            </div>
-
-            <button type="submit" class="btn btn-success">Submit</button>
-            <div id="error" class="alert alert-danger mt-3" role="alert"
-                style="display: none; background-color: #2c3e50;color: white;">
-            </div>
-        </form>
-
-        <div th:if="${errorMessage}" class="alert alert-danger mt-3" role="alert"
-            style="margin-left: 350px; text-align: center;  color: red;height: 40px;padding: 8px;border-radius: 5px">
-            <p th:text="${errorMessage}" class="mb-0"></p>
+<!-- Content -->
+<div class="content" id="content">
+    <h2>Tạo quy cách đóng gói</h2>
+    <form class="create-form" id="create-package-form" method="post" action="/package/createPackage"
+          modelAttribute="newPackage">
+        <div class="mb-3">
+            <label class="form-label">Tên:</label>
+            <input type="text" class="form-control" name="name" id="name">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Màu:</label>
+            <input type="text" class="form-control" name="color" id="color">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Mô tả:</label>
+            <input type="text" class="form-control" name="description" id="description">
         </div>
 
+        <button  class="btn btn-success">Tạo</button>
+        <div id="error" class="alert alert-danger mt-3" role="alert"
+             style="display: none; background-color: #2c3e50;color: white;">
+        </div>
+    </form>
+
+    <div th:if="${errorMessage}" class="alert alert-danger mt-3" role="alert"
+         style="margin-left: 350px; text-align: center;  color: red;height: 40px;padding: 8px;border-radius: 5px">
+        <p th:text="${errorMessage}" class="mb-0"></p>
     </div>
 
-    <script src="/js/home.js"></script>
-    <footer>
-        &copy; 2025 Rice Sales Management. All Rights Reserved.
-    </footer>
+</div>
+
+<script src="/js/home.js"></script>
+<footer>
+    &copy; 2025 Rice Sales Management. All Rights Reserved.
+</footer>
 </body>
 
 </html>

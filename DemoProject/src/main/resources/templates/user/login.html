@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rice Sales Management</title>
+    <title>Đăng nhập</title>
     <link rel="stylesheet" href="/css/login.css">
     <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
     <style>
@@ -16,70 +16,7 @@
             text-align: center;
         }
     </style>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            let form = document.getElementById("loginForm");
-            let usernameInput = document.getElementById("username");
-            let passwordInput = document.getElementById("password");
-
-            const generalError = document.getElementById("general-error");
-
-            form.addEventListener("submit", async function (event) {
-                event.preventDefault(); // Ngăn form submit mặc định
-                document.querySelectorAll('.error-message').forEach(el => el.textContent = "");
-                generalError.textContent = "";
-
-                let hasError = false;
-
-                // ✅ Kiểm tra username không rỗng
-                if (usernameInput.value.trim() === "") {
-                    document.getElementById("username-error").textContent = "Username must not be empty.";
-                    hasError = true;
-
-                }
-
-                // ✅ Kiểm tra password không rỗng
-                if (passwordInput.value.trim() === "") {
-                    document.getElementById("password-error").textContent = "Password must not be empty.";
-                    hasError = true;
-                }
-
-                // ✅ Nếu có lỗi, hiển thị lỗi và ngăn form submit
-                if (hasError) {
-                    event.preventDefault();
-                    return;
-                }
-
-                // ✅ Gửi request fetch kiểm tra username & password
-                try {
-                    let response = await fetch("http://localhost:8081/login", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            username: usernameInput.value,
-                            password: passwordInput.value
-                        })
-                    });
-
-                    if (!response.ok) {
-                        let errorData = await response.json();
-                        throw new Error(errorData.error || "Wrong username or password!");
-                    }
-
-                    let data = await response.json();
-                    console.log("✅ Đăng nhập thành công!", data);
-
-
-                        window.location.href = "/home"; // hoặc đường dẫn chính của hệ thống
-
-
-                } catch (error) {
-                    console.error("❌ Login failed:", error);
-                    generalError.textContent = error.message || "An unexpected error occurred.";
-                }
-            });
-        });
-    </script>
+    <script src="/js/validateLogin.js"></script>
 
 </head>
 <body>
@@ -94,23 +31,23 @@
 
     <!-- Login Form -->
     <div class="login-container">
-        <h2>Login</h2>
+        <h2>Đăng nhập</h2>
         <form id="loginForm">
             <div class="input-group">
-                <label for="username">Username</label>
+                <label for="username">Tài khoản</label>
                 <input type="text" id="username" name="username" >
                 <span class="error-message" id="username-error"></span>
             </div>
             <div class="input-group">
-                <label for="password">Password</label>
+                <label for="password">Mật khẩu</label>
                 <input type="password" id="password" name="password" >
                 <span class="error-message" id="password-error"></span>
             </div>
             <!-- ⚠️ Lỗi tổng quát ở đây -->
             <div id="general-error"></div>
-            <button type="submit" class="btn">Login</button>
-            <p class="register-link">Don't have an account? <a href="/register">Register</a></p>
-            <p class="register-link">You forgot password? <a href="/forgotpw">Forgot password</a></p>
+            <button type="submit" class="btn">Đăng nhập</button>
+            <p class="register-link">Bạn chưa có tài khoản? <a href="/register">Đăng kí</a></p>
+            <p class="register-link">Bạn quên mật khẩu? <a href="/forgotpw">Quên mật khẩu</a></p>
         </form>
     </div>
 </section>

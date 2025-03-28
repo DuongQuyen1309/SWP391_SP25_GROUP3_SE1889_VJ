@@ -7,6 +7,8 @@
     <title>Warehouse Zones</title>
     <link rel="stylesheet" href="/css/base.css">
     <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="/js/home.js"></script>
     <style>
         .pagination {
@@ -86,9 +88,32 @@
             window.location.href = "/package/createPackage";
         }
         function confirmDelete(event) {
-            if (!confirm("Do you want to delete this package?")) {
-                event.preventDefault();
-            }
+            event.preventDefault();
+            Swal.fire({
+                title: "Are you sure?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Delete"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: "Deleted!",
+                        text: "Your file has been deleted.",
+                        icon: "success"
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // ✅ Nếu người dùng xác nhận, submit form thủ công
+                            event.target.submit();
+                        }
+                        // ❌ Nếu không làm gì, form không bị gửi
+                    });
+                }
+                // ❌ Nếu không làm gì, form không bị gửi
+
+            });
         }
         function filterPackages() {
             let params = new URLSearchParams();
@@ -121,21 +146,23 @@
 <body>
 <div th:insert="~{layout/header :: header}"></div>
 
-<div th:insert="~{layout/sidebar :: sidebar}"></div>
+<div class="sidebar" id="sidebar">
+    <div th:insert="~{layout/sidebar :: sidebar}"></div>
+</div>
 <div class="content" id="content">
-    <h2>Package Management</h2>
+    <h2>Quản lí quy cách đóng gói</h2>
 
-    <button class="add-zone" onclick="callPage()">Add new package</button>
+    <button class="add-zone" onclick="callPage()">Thêm đóng gói</button>
 
     <table class="styled-table" style="margin-top: 100px;">
         <thead>
         <tr>
             <th>ID</th>
-            <th>Package Name</th>
-            <th>Color</th>
-            <th>Description</th>
-            <th>Created at</th>
-            <th>Actions</th>
+            <th>Tên</th>
+            <th>Màu</th>
+            <th>Mô tả</th>
+            <th>Ngày tạo</th>
+            <th>Hành động</th>
         </tr>
         </thead>
         <tbody>
@@ -176,12 +203,12 @@
             <td>
                 <form th:action="@{/package/editPackage}" method="get">
                     <input type="hidden" name="id" th:value="${package.id}">
-                    <button type="submit" style="background-color: #06999c">Edit</button>
+                    <button type="submit" style="background-color: #06999c">Sửa</button>
                 </form>
                 <form th:action="@{/package/deletePackage}" method="post" onsubmit="confirmDelete(event)">
                     <input type="hidden" name="_method" value="delete">
                     <input type="hidden" name="id" th:value="${package.id}">
-                    <button type="submit" style="background-color: #fb0202">Delete</button>
+                    <button type="submit" style="background-color: #fb0202">Xóa</button>
                 </form>
 
 
@@ -193,11 +220,11 @@
     <div class="pagination">
         <a th:if="${packagePage.hasPrevious()}"
            th:href="@{/package/listPackage(page=${packagePage.number - 1}, size=${packagePage.size}, idFrom=${param.idFrom}, idTo=${param.idTo}, packageName=${param.packageName}, color=${param.color}, description=${param.description}, startDate=${param.startDate}, endDate=${param.endDate})}"
-           class="pagination-button">Previous</a>
-        <span th:text="'Page ' + ${packagePage.number + 1} + ' of ' + ${packagePage.totalPages}"></span>
+           class="pagination-button">Trước</a>
+        <span th:text="'Trang ' + ${packagePage.number + 1} + ' / ' + ${packagePage.totalPages > 0 ? packagePage.totalPages : 1}"></span>
         <a th:if="${packagePage.hasNext()}"
            th:href="@{/package/listPackage(page=${packagePage.number + 1}, size=${packagePage.size}, idFrom=${param.idFrom}, idTo=${param.idTo}, packageName=${param.packageName}, color=${param.color}, description=${param.description}, startDate=${param.startDate}, endDate=${param.endDate})}"
-           class="pagination-button">Next</a>
+           class="pagination-button">Sau</a>
     </div>
 </div>
 <footer>

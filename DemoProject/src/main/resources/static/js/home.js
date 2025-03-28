@@ -71,8 +71,15 @@ document.addEventListener("DOMContentLoaded", function() {
             credentials: "include"
         }).then(response => {
             if (response.ok) {
-                alert("Đã đăng xuất!");
-                window.location.href = "/login";
+                Swal.fire({
+                    title: "Đăng xuất!",
+                    text: " Bạn đã đăng xuất.",
+                    backdrop: false, // ❌ Tắt nền mờ phía sau
+                    confirmButtonText: "OK"
+                }).then(() => {
+                    window.location.href = "/login";
+                });
+
             }
         });
     });

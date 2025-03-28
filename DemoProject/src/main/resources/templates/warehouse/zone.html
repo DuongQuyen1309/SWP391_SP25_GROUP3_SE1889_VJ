@@ -4,9 +4,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Warehouse Zones</title>
+  <title>Khu vực kho</title>
   <link rel="stylesheet" href="/css/base.css">
   <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     .add-zone {
       position: absolute;
@@ -91,24 +93,26 @@
 <body>
 <div th:insert="~{layout/header :: header}"></div>
 
-<div th:insert="~{layout/sidebar :: sidebar}"></div>
+<div class="sidebar" id="sidebar">
+  <div th:insert="~{layout/sidebar :: sidebar}"></div>
+</div>
 
 <!-- Content -->
 <div class="content" id="content">
 
-  <h2>Warehouse Zones</h2>
+  <h1>Khu vực kho</h1>
 
-  <button class="add-zone" onclick="callPage()" th:style="${#lists.contains(listHiddenPage, 'createZone')} ? 'display: none;' : ''">Create New Zone</button>
+  <button class="add-zone" onclick="callPage()" th:style="${#lists.contains(listHiddenPage, 'createZone')} ? 'display: none;' : ''">Tạo khu vực</button>
 
 
   <table class="styled-table" style="margin-top: 70px">
     <thead>
     <tr>
       <th>ID</th>
-      <th>Name</th>
-      <th>Position</th>
-      <th>Created at</th>
-      <th>Action</th>
+      <th>Tên khu vực</th>
+      <th>Vị trí</th>
+      <th>Ngày tạo</th>
+      <th>Hành động</th>
     </tr>
     </thead>
     <tbody>
@@ -138,11 +142,11 @@
       <td>
         <form th:action="@{/warehouse/zone}" method="get">
           <input type="hidden" name="id" th:value="${zone.id}">
-          <button type="submit" style="background-color: #06999c">View</button>
+          <button type="submit" style="background-color: #06999c">Xem</button>
         </form>
         <form th:action="@{/warehouse/zone/delete}" method="get">
           <input type="hidden" name="id" th:value="${zone.id}">
-          <button th:style="${#lists.contains(listHiddenPage, 'deleteZone')} ? 'display: none;' : ''" type="submit" style="background-color: #fb0202">Delete</button>
+          <button th:style="${#lists.contains(listHiddenPage, 'deleteZone')} ? 'display: none;' : ''" type="submit" style="background-color: #fb0202">Xóa</button>
         </form>
 
 
@@ -154,24 +158,24 @@
   <div class="pagination">
     <a th:if="${zonePage.hasPrevious()}"
        th:href="@{/warehouse/listWarehouseZone(page=${zonePage.number - 1}, size=${zonePage.size}, idFrom=${param.idFrom}, idTo=${param.idTo}, name=${param.name}, position=${param.position}, startDate=${param.startDate}, endDate=${param.endDate})}"
-       class="pagination-button">Previous</a>
-    <span th:text="'Page ' + ${zonePage.number + 1} + ' of ' + ${zonePage.totalPages}"></span>
+       class="pagination-button">Trước</a>
+    <span th:text="'Page ' + ${zonePage.number + 1} + ' / ' + ${zonePage.totalPages}"></span>
     <a th:if="${zonePage.hasNext()}"
        th:href="@{/warehouse/listWarehouseZone(page=${zonePage.number + 1}, size=${zonePage.size}, idFrom=${param.idFrom}, idTo=${param.idTo}, name=${param.name}, position=${param.position}, startDate=${param.startDate}, endDate=${param.endDate})}"
-       class="pagination-button">Next</a>
+       class="pagination-button">Sau</a>
   </div>
 </div>
-  <div class="pagination">
-    <a th:if="${zonePage.hasPrevious()}"
-       th:href="@{/warehouse/listWarehouseZone(page=${zonePage.number - 1}, size=${zonePage.size}, search=${search}, searchBy=${searchBy}, startDate=${startDate}, endDate=${endDate})}"
-       class="pagination-button">Previous</a>
+<div class="pagination">
+  <a th:if="${zonePage.hasPrevious()}"
+     th:href="@{/warehouse/listWarehouseZone(page=${zonePage.number - 1}, size=${zonePage.size}, search=${search}, searchBy=${searchBy}, startDate=${startDate}, endDate=${endDate})}"
+     class="pagination-button">Trước</a>
 
-    <span th:text="'Page ' + ${zonePage.number + 1} + ' of ' + ${zonePage.totalPages}"></span>
+  <span th:text="'Page ' + ${zonePage.number + 1} + ' / ' + ${zonePage.totalPages}"></span>
 
-    <a th:if="${zonePage.hasNext()}"
-       th:href="@{/warehouse/listWarehouseZone(page=${zonePage.number + 1}, size=${zonePage.size}, search=${search}, searchBy=${searchBy}, startDate=${startDate}, endDate=${endDate})}"
-       class="pagination-button">Next</a>
-  </div>
+  <a th:if="${zonePage.hasNext()}"
+     th:href="@{/warehouse/listWarehouseZone(page=${zonePage.number + 1}, size=${zonePage.size}, search=${search}, searchBy=${searchBy}, startDate=${startDate}, endDate=${endDate})}"
+     class="pagination-button">Sau</a>
+</div>
 </div>
 
 <script src="/js/home.js"></script>

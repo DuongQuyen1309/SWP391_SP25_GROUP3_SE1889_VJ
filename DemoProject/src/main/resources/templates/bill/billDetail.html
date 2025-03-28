@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice Details</title>
     <link rel="stylesheet" href="/css/base.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
     <style>
         body {
@@ -73,32 +75,34 @@
 </head>
 <body>
 <div th:insert="~{layout/header :: header}"></div>
-<div th:insert="~{layout/sidebar :: sidebar}"></div>
+<div class="sidebar" id="sidebar">
+    <div th:insert="~{layout/sidebar :: sidebar}"></div>
+</div>
 <div class="content">
     <div class="container">
-        <h2>Invoice Details</h2>
+        <h2>Chi tiết hoá đơn</h2>
         <div class="details">
-            <p><strong>Invoice ID:</strong> <span th:text="${bill.id}"></span></p>
-            <p><strong>Customer Name:</strong> <span th:text="${bill.customer.name}"></span></p>
-            <p><strong>Customer Address:</strong> <span th:text="${bill.customer.address}"></span></p>
-            <p><strong>Customer Phone Number:</strong> <span th:text="${bill.customer.phone}"></span></p>
-            <p><strong>Date of Purchase:</strong> <span th:text="${#temporals.format(bill.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></span></p>
-            <p><strong>Discount:</strong> <span th:text="${(bill.discount != null ) ? bill.discount: 0}+'%'"></span></p>
-            <p><strong>Porter Money:</strong> <span  class="format-price" th:text="${(bill.portedMoney != null) ? bill.portedMoney : 0}"></span></p>
-            <p><strong>Total Money:</strong> <span  class="format-price" th:text="${bill.totalMoney}"></span></p>
-            <p><strong>Paid Money:</strong> <span  class="format-price" th:text="${bill.paidMoney}"></span></p>
-            <p><strong>Debt Money:</strong> <span  class="format-price" th:text="${bill.debtMoney}"></span></p>
-            <p><strong>Note:</strong> <span  class="format-price" th:text="${bill.note}"></span></p>
+            <p><strong>Mã hóa đơn:</strong> <span th:text="${bill.id}"></span></p>
+            <p><strong>Tên khách hàng:</strong> <span th:text="${bill.customer.name}"></span></p>
+            <p><strong> Địa Chỉ</strong>:</strong> <span th:text="${bill.customer.address}"></span></p>
+            <p><strong>Số điện thoại:</strong> <span th:text="${bill.customer.phone}"></span></p>
+            <p><strong>Ngày mua hàng:</strong> <span th:text="${#temporals.format(bill.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></span></p>
+            <p><strong>Giảm giá:</strong> <span th:text="${(bill.discount != null ) ? bill.discount: 0}+'%'"></span></p>
+            <p><strong>Tiền bốc hàng:</strong> <span  class="format-price" th:text="${(bill.portedMoney != null) ? bill.portedMoney : 0}"></span></p>
+            <p><strong>Tổng tiền:</strong> <span  class="format-price" th:text="${bill.totalMoney}"></span></p>
+            <p><strong>Tiền trả:</strong> <span  class="format-price" th:text="${bill.paidMoney}"></span></p>
+            <p><strong>Tiền nợ:</strong> <span  class="format-price" th:text="${bill.debtMoney}"></span></p>
+            <p><strong>Ghi chú:</strong> <span  class="format-price" th:text="${bill.note}"></span></p>
         </div>
-        <h3>Purchased Items</h3>
+        <h3>Hàng đã mua</h3>
         <table>
             <thead>
             <tr>
-                <th>Product Name</th>
-                <th>Packaging</th>
-                <th>Quantity</th>
-                <th>Unit Price</th>
-                <th>Total</th>
+                <th>Tên sản phẩm</th>
+                <th>Quy cách đóng gói</th>
+                <th>Số Lượng</th>
+                <th>Giá sản phẩm</th>
+                <th>Tổng tiền</th>
             </tr>
             </thead>
             <tbody>
@@ -111,7 +115,7 @@
             </tr>
             </tbody>
         </table>
-        <button class="btn" onclick="window.location.href='/bill/listBill'">Back to List</button>
+        <button class="btn" onclick="window.location.href='/bill/listBill'">Quay lại</button>
     </div>
 </div>
 

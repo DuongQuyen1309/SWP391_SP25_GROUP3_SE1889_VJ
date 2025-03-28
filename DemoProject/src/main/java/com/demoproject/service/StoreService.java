@@ -150,4 +150,11 @@ public class StoreService {
     public void save(Store store) {
         storeRepository.save(store);
     }
+
+    public boolean existsByTaxCodeExcludingStore(String taxCode, Long userId) {
+        return storeRepository.existsByTaxCodeAndIdNot(taxCode, userId);
+    }
+    public boolean existsByPhoneExcludingStore(String phone, Long storeId) {
+        return storeRepository.existsByPhoneAndIdNot(phone, storeId);
+    }
 }

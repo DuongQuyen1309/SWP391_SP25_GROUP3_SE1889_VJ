@@ -4,14 +4,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Create Zone</title>
+  <title>Tạo khu vực</title>
 
   <link rel="stylesheet" href="/css/base.css">
   <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+      let form = document.querySelector(".create-form");
     $(document).ready(function () {
       $('#create-zone-form').on('submit', function (e) {
+        event.preventDefault();
         let isValid = true;
 
         // Xóa thông báo lỗi cũ
@@ -22,17 +28,29 @@
         const position = $('input[name="position"]');
 
         if (!name.val().trim()) {
-          showError(name, 'Please enter zone name');
+          showError(name, 'Vui lòng nhập tên khu vực');
           isValid = false;
         }
 
         if (!position.val().trim()) {
-          showError(position, 'Please enter position');
+          showError(position, 'Vui lòng nhập vị trí');
           isValid = false;
         }
 
         if (!isValid) {
           e.preventDefault(); // Ngăn form gửi nếu có lỗi
+        }
+        else {
+
+          Swal.fire({
+            icon: "success",
+            title: "Thành Công!",
+            text: "Tạo khu vực thành công.",
+            backdrop: false, // ❌ Tắt nền mờ phía sau
+            confirmButtonText: "OK"
+          }).then(() => {
+            form.submit(); // Gửi form sau khi người dùng nhấn OK
+          });
         }
       });
 
@@ -40,6 +58,7 @@
         const errorElement = $('<div class="error-message" style="color: red; font-size: 14px; margin-top: 5px;"></div>').text(message);
         element.after(errorElement);
       }
+    });
     });
   </script>
 
@@ -101,22 +120,24 @@
 <body>
 <div th:insert="~{layout/header :: header}"></div>
 
-<div th:insert="~{layout/sidebar :: sidebar}"></div>
+<div class="sidebar" id="sidebar">
+  <div th:insert="~{layout/sidebar :: sidebar}"></div>
+</div>
 <!-- Content -->
 <div class="content" id="content">
-  <h2>Create a Zone</h2>
+  <h2>Tạo mới khu vực kho</h2>
   <form class="create-form" id="create-zone-form" method="post" action="/warehouse/createWarehouseZone"
         modelAttribute="newZone">
     <div class="mb-3">
-      <label class="form-label">Zone Name:</label>
+      <label class="form-label">Tên khu vực:</label>
       <input type="text" class="form-control" name="name" id="name">
     </div>
     <div class="mb-3">
-      <label class="form-label">Position:</label>
+      <label class="form-label">Vị trí:</label>
       <input type="text" class="form-control" name="position" id="position">
     </div>
 
-    <button type="submit" class="btn btn-success">Submit</button>
+    <button type="submit" class="btn btn-success">Tạo</button>
     <div id="error" class="alert alert-danger mt-3" role="alert"
          style="display: none; background-color: #2c3e50;color: white;">
     </div>

@@ -79,7 +79,8 @@ html,body {
 }
 
 .sidebar h2 {
-    margin: 0 0 10px;
+    
+    margin-top: 10px;
     font-size: 24px;
     font-weight: bold;
     text-align: center;
@@ -415,7 +416,7 @@ footer {
     top: 100%; /* Đặt dropdown ngay dưới tên user */
     right: 0;
     background-color: white;
-    min-width: 180px;
+    min-width: 200px;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
     border-radius: 5px;
     overflow: hidden;
@@ -454,4 +455,10 @@ footer {
     font-size: 14px;
     font-weight: bold;
 
+}
+
+.sidebar a i {
+    margin-right: 8px;
+    width: 20px;
+    text-align: center;
 }

@@ -6,7 +6,9 @@
     <title>RSMS</title>
     <link rel="stylesheet" href="/css/base.css">
     <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <Link rel="stylesheet" href="/css/importednote.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         .pagination {
             text-align: center;
@@ -73,7 +75,9 @@
 
 <div th:insert="~{layout/header :: header}"></div>
 
-<div th:insert="~{layout/sidebar :: sidebar}"></div>
+<div class="sidebar" id="sidebar">
+    <div th:insert="~{layout/sidebar :: sidebar}"></div>
+</div>
 
 
 <!-- Content -->
@@ -200,7 +204,7 @@
             Trước
         </a>
 
-        <span>Page <span th:text="${currentPage}"></span> of <span th:text="${totalPages}"></span></span>
+        <span>Page <span th:text="${currentPage}"></span> of <span th:text="${totalPages > 0 ? totalPages : 1}"></span></span>
 
         <!-- Nút "Sau" chỉ hiển thị khi currentPage < totalPages -->
         <a style="text-decoration: none"

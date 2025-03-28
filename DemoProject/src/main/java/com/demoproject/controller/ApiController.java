@@ -2,13 +2,12 @@ package com.demoproject.controller;
 
 import com.demoproject.entity.Account;
 import com.demoproject.entity.Customer;
+import com.demoproject.entity.Store;
 import com.demoproject.entity.Users;
 import com.demoproject.jwt.JwtUtils;
 import com.demoproject.repository.AccountRepository;
-import com.demoproject.service.AccountService;
-import com.demoproject.service.CustomerService;
-import com.demoproject.service.EmailService;
-import com.demoproject.service.UserService;
+import com.demoproject.repository.StoreRepository;
+import com.demoproject.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -42,6 +41,12 @@ public class ApiController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private StoreRepository storeRepository;
+
+    @Autowired
+    private StoreService storeService;
 
     @GetMapping("/check-username")
     public ResponseEntity<Map<String, Boolean>> checkUsername(@RequestParam String username) {
@@ -117,5 +122,45 @@ public class ApiController {
             ));
         }
         return ResponseEntity.ok(Map.of("exists", false));
+    }
+
+    @GetMapping("/check-taxcode")
+    public ResponseEntity<Map<String, Boolean>> checkTaxCodeExists(@RequestParam String taxCode,
+                                                                   @CookieValue(value = "token", required = false) String token) {
+        Map<String, Boolean> response = new HashMap<>();
+        Store store= storeRepository.findByTaxCode(taxCode);
+        Long id= Long.parseLong(jwtUtils.extractStoreId(token));
+
+        boolean exists = storeService.existsByTaxCodeExcludingStore(taxCode,id);
+        System.out.println(exists);
+
+        response.put("exists", exists);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/check-phone-store")
+    public ResponseEntity<Map<String, Boolean>> checkStorePhoneExists(@RequestParam String phone,
+                                                                      @CookieValue(value = "token", required = false) String token) {
+        Map<String, Boolean> response = new HashMap<>();
+        Long id= Long.parseLong(jwtUtils.extractStoreId(token));
+        boolean exists = storeService.existsByPhoneExcludingStore(phone,id);
+
+
+        response.put("exists", exists);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/check-phone-customer")
+    public ResponseEntity<Map<String, Boolean>> checkCustomerPhoneExists(@RequestParam String phone,
+                                                                      @CookieValue(value = "token", required = false) String token) {
+        Map<String, Boolean> response = new HashMap<>();
+        Long id= Long.parseLong(jwtUtils.extractStoreId(token));
+        Customer customer = customerService.getCustomerByPhone(phone).orElse(null);
+        boolean exists=false;
+        if(customer == null) {
+            exists=true;
+        }
+        response.put("exists", exists);
+        return ResponseEntity.ok(response);
     }
 }

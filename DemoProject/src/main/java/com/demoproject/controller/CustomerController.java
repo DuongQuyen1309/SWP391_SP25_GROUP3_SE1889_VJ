@@ -25,13 +25,17 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+
 @RequestMapping("/customer")
 @Controller
 public class CustomerController {
@@ -108,13 +112,13 @@ public class CustomerController {
         //kết thúc đoạn code thay thế
 
         List<String> listHiddenPage = new ArrayList<>();
-        if(role.equals("STAFF")){
-            listHiddenPage.add("Dashboard");
-            listHiddenPage.add("Store");
+        if (role.equals("STAFF")) {
             listHiddenPage.add("listStaff");
+            listHiddenPage.add("Store");
             listHiddenPage.add("listOwner");
+            listHiddenPage.add("Dashboard");
         }
-        if (role.equals("OWNER")) {
+        if(role.equals("OWNER")){
             listHiddenPage.add("listOwner");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
@@ -125,7 +129,7 @@ public class CustomerController {
                 (moneyTo != null && !moneyTo.isEmpty() && !moneyTo.matches("-?\\d+")) ||
                 (phone != null && !phone.isEmpty() && !phone.matches("\\d+"))) {
 
-            model.addAttribute("errorMessage", "Id, Phone fields should be positive number. Money field should be negative number");
+            model.addAttribute("errorMessage", "Id, Phone fields should be positive number. Money field should be integer number");
             customerPage = Page.empty();
             model.addAttribute("customers", customerPage.getContent());
 
@@ -152,11 +156,11 @@ public class CustomerController {
                     || (moneyFrom != null && !moneyFrom.isEmpty()) || (moneyTo != null && !moneyTo.isEmpty())) {
 
 
-                Long req_idFrom = (idFrom != null && !idFrom.isBlank() && idFrom.matches("\\d+")) ? Long.valueOf(idFrom) : null;
-                Long req_idTo = (idTo != null && !idTo.isBlank() && idTo.matches("\\d+")) ? Long.valueOf(idTo) : null;
+                Long req_idFrom = (idFrom != null && !idFrom.isBlank() && idFrom.matches("-?\\d+")) ? Long.valueOf(idFrom) : null;
+                Long req_idTo = (idTo != null && !idTo.isBlank() && idTo.matches("-?\\d+")) ? Long.valueOf(idTo) : null;
 
-                Integer req_moneyFrom = (moneyFrom != null && !moneyFrom.isBlank() && moneyFrom.matches("\\d+")) ? Integer.valueOf(moneyFrom) : null;
-                Integer req_moneyTo = (moneyTo != null && !moneyTo.isBlank() && moneyTo.matches("\\d+")) ? Integer.valueOf(moneyTo) : null;
+                Integer req_moneyFrom = (moneyFrom != null && !moneyFrom.isBlank() && moneyFrom.matches("-?\\d+")) ? Integer.valueOf(moneyFrom) : null;
+                Integer req_moneyTo = (moneyTo != null && !moneyTo.isBlank() && moneyTo.matches("-?\\d+")) ? Integer.valueOf(moneyTo) : null;
 
                 String req_phone = (phone == null || phone.isEmpty())? null: phone;
                 Long req_createBy = (createBy != null && !createBy.isBlank()) ? Long.valueOf(createBy) : null;
@@ -219,13 +223,13 @@ public class CustomerController {
         String role= jwtUtils.extractRole(token);
         model.addAttribute("role",role);
         List<String> listHiddenPage = new ArrayList<>();
-        if(role.equals("STAFF")){
-            listHiddenPage.add("Store");
-            listHiddenPage.add("Dashboard");
+        if (role.equals("STAFF")) {
             listHiddenPage.add("listStaff");
+            listHiddenPage.add("Store");
             listHiddenPage.add("listOwner");
+            listHiddenPage.add("Dashboard");
         }
-        if (role.equals("OWNER")) {
+        if(role.equals("OWNER")){
             listHiddenPage.add("listOwner");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
@@ -257,6 +261,7 @@ public class CustomerController {
             @CookieValue(value = "token", required = false) String token,
             RedirectAttributes redirectAttributes,
             @RequestParam("kindOfNote") String kindOfNote, @RequestParam("noteName") String noteName,
+            @RequestParam("noteImage") MultipartFile noteImage,
             Model model) {
 
         String username = jwtUtils.extractUsername(token);
@@ -268,13 +273,13 @@ public class CustomerController {
 
 
         List<String> listHiddenPage = new ArrayList<>();
-        if(role.equals("STAFF")){
-            listHiddenPage.add("Dashboard");
-            listHiddenPage.add("Store");
+        if (role.equals("STAFF")) {
             listHiddenPage.add("listStaff");
+            listHiddenPage.add("Store");
             listHiddenPage.add("listOwner");
+            listHiddenPage.add("Dashboard");
         }
-        if (role.equals("OWNER")) {
+        if(role.equals("OWNER")){
             listHiddenPage.add("listOwner");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
@@ -292,18 +297,36 @@ public class CustomerController {
         customerRequest.setMoneyState(0);
         customerRequest.setCreatedAt(LocalDate.now());
         customerRequest.setStoreId(user.getStoreId());
+        String imagePath = null;
+        if (!noteImage.isEmpty()) {
+            try {
+                String uploadDir = "uploads/notes/";
+                Path uploadPath = Paths.get(uploadDir);
+                if (!Files.exists(uploadPath)) {
+                    Files.createDirectories(uploadPath);
+                }
 
+                String fileName = UUID.randomUUID().toString().substring(0, 8) + "_" + noteImage.getOriginalFilename();
+                Path filePath = uploadPath.resolve(fileName);
+                Files.copy(noteImage.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+                imagePath = fileName;
+            } catch (IOException e) {
+                e.printStackTrace();
+                redirectAttributes.addFlashAttribute("messageType", "fail");
+                redirectAttributes.addFlashAttribute("message", "Error uploading image!");
+                return "redirect:/customer/createCustomer";
+            }
+        }
 
         try {
             customerService.createCustomer(customerRequest);
             if((!kindOfNote.isBlank() ) && (!noteName.isEmpty()) && (moneyInNote != null && moneyInNote != 0)) {
                 Customer savedCustomer = customerService.searchCustomer(customerRequest.getPhone());
                 TransactionRequest request = new TransactionRequest(savedCustomer.getId(), moneyInNote
-                        , kindOfNote, noteName, user.getId(), last_storedID);
+                        , kindOfNote, noteName, user.getId(), last_storedID, imagePath);
                 transactionQueueProcessor.addTransaction(request);
             }
-            redirectAttributes.addFlashAttribute("messageType", "success");
-            redirectAttributes.addFlashAttribute("message", "Customer created successfully!");
+
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("messageType", "fail");
             redirectAttributes.addFlashAttribute("message", "Failed to create customer.");
@@ -350,12 +373,12 @@ public class CustomerController {
 
         List<String> listHiddenPage = new ArrayList<>();
         if (role.equals("STAFF")) {
-            listHiddenPage.add("Dashboard");
-            listHiddenPage.add("Store");
             listHiddenPage.add("listStaff");
+            listHiddenPage.add("Store");
             listHiddenPage.add("listOwner");
+            listHiddenPage.add("Dashboard");
         }
-        if (role.equals("OWNER")) {
+        if(role.equals("OWNER")){
             listHiddenPage.add("listOwner");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
@@ -423,7 +446,6 @@ public class CustomerController {
         customerService.updateCustomer(id, customer,user.get().getId(), status, last_storedID);
 
         redirectAttributes.addFlashAttribute("messageType", "success");
-        redirectAttributes.addFlashAttribute("message", "Customer updated successfully!");
         // Xóa customerId khỏi token sau khi tạo phiếu
         String updatedToken = jwtUtils.removeCustomerIdFromToken(token);
         Cookie cookie = new Cookie("token", updatedToken);

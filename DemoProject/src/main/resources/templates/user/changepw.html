@@ -2,9 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Rice Sales Management</title>
+    <title>Đổi mật khẩu</title>
     <link rel="stylesheet" href="/css/base.css">
     <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         .changepw-form {
             background-color: white;
@@ -53,131 +55,42 @@
         }
     </style>
     <script src="/js/home.js"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const form = document.querySelector(".changepw-form");
-            const usernameInput = document.getElementById("username");
-            let username = document.getElementById("username");
-
-            // Đảm bảo input luôn bị vô hiệu hóa
-            username.disabled = true;
-
-            const oldPasswordInput = document.getElementById("oldPassword");
-            const newPasswordInput = document.getElementById("newPassword");
-            const confirmPasswordInput = document.getElementById("confirmPassword");
-            const errorContainer = document.createElement("div");
-            errorContainer.style.color = "red";
-            errorContainer.style.fontWeight = "bold";
-            errorContainer.id = "errorContainer";
-
-            // ✅ Hàm gửi request AJAX kiểm tra username có tồn tại không
-            async function checkUsernameExists(username) {
-                try {
-                    let response = await fetch(`/api/check-username?username=${username}`);
-                    let data = await response.json();
-                    return data.exists; // Trả về true nếu username tồn tại
-                } catch (error) {
-                    console.error("Error when checking username:", error);
-                    return false;
-                }
-            }
-
-            // ✅ Hàm gửi request AJAX kiểm tra old password có đúng không
-            async function checkOldPassword(username, oldPassword) {
-                try {
-                    let response = await fetch(`/api/check-old-password`, {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({ username: username, oldPassword: oldPassword })
-                    });
-
-                    let data = await response.json();
-                    return data.valid; // Trả về true nếu mật khẩu đúng
-                } catch (error) {
-                    console.error("Error when checking old password:", error);
-                    return false;
-                }
-            }
-
-            form.addEventListener("submit", async function (event) {
-                event.preventDefault(); // Ngăn chặn submit ngay lập tức
-                let errors = [];
-
-                console.log(newPasswordInput.value);
-
-
-                // ✅ Kiểm tra old password
-                if (oldPasswordInput.value.trim() === "") {
-                    errors.push("Old Password must not be empty.");
-                } else {
-                    let isOldPasswordCorrect = await checkOldPassword(usernameInput.value, oldPasswordInput.value);
-                    console.log(isOldPasswordCorrect);
-                    if (!isOldPasswordCorrect) {
-                        errors.push("Old Password is not correct.");
-                    }
-                }
-
-                // ✅ Kiểm tra new password
-                if (newPasswordInput.value.trim() === "") {
-                    errors.push("New Password must be not empty.");
-                }
-
-                // ✅ Kiểm tra confirm password
-                if (confirmPasswordInput.value.trim() === "") {
-                    errors.push("Confirm Password must be not empty.");
-                } else if (newPasswordInput.value !== confirmPasswordInput.value) {
-                    errors.push("New Password and Confirm Password must be similar.");
-                }
-
-                // ✅ Hiển thị lỗi hoặc submit form
-                if (errors.length > 0) {
-                    errorContainer.innerHTML = errors.join("<br>");
-                    form.insertBefore(errorContainer, form.querySelector("button"));
-                } else {
-                    alert("Password changed successfully!");
-
-                    // ✅ Đợi 500ms để alert hiển thị, sau đó gửi form
-                    setTimeout(() => {
-                        form.submit();
-                    }, 500);
-                }
-            });
-        });
-    </script>
+    <script src="/js/validateChangePW.js"></script>
 
 </head>
 <body>
 
 <div th:insert="~{layout/header :: header}"></div>
 
-<div th:insert="~{layout/sidebar :: sidebar}"></div>
+<div class="sidebar" id="sidebar">
+    <div th:insert="~{layout/sidebar :: sidebar}"></div>
+</div>
 
 
 
 <!-- Content -->
 <div class="content">
-    <h1>Change password</h1>
+    <h1>Đổi mật khẩu</h1>
     <form class="changepw-form" action="/user/changepw" method="POST">
 
-        <label for="username">Username:</label>
+        <label for="username">Tài khoản:</label>
         <input type="text" id="username" name="username" th:value="${account.username}" >
 
-
-        <label for="oldPassword">Old Password:</label>
+        <label for="oldPassword">Mật khẩu cũ:</label>
         <input type="password" id="oldPassword" name="oldPassword" >
+        <span class="error-message" id="oldPassword-error" style="display: none"></span>
 
 
-        <label for="newPassword">New Password:</label>
+        <label for="newPassword">Mật khẩu mới:</label>
         <input type="password" id="newPassword" name="newPassword" >
+        <span class="error-message" id="newPassword-error" style="display: none"></span>
 
-        <label for="confirmPassword">Confirm Password:</label>
+        <label for="confirmPassword">Xác nhận mật khẩu:</label>
         <input type="password" id="confirmPassword" name="confirmPassword" >
+        <span class="error-message" id="confirmPassword-error" style="display: none"></span>
 
 
-        <p style="color: red;" th:if="${error}" th:text="${error}"></p>
-        <button type="submit" id="applyBtn">Change password</button>
+        <button type="submit" id="applyBtn">Đổi mật khẩu</button>
     </form>
 
 </div>

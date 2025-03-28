@@ -7,13 +7,17 @@
     <link rel="stylesheet" href="/css/base.css">
     <link rel="stylesheet" href="/css/bill.css">
     <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="/js/home.js"></script>
     <script src="/js/importProduct.js"></script>
 </head>
 <body>
 <div th:insert="~{layout/header :: header}"></div>
 
-<div th:insert="~{layout/sidebar :: sidebar}"></div>
+<div class="sidebar" id="sidebar">
+    <div th:insert="~{layout/sidebar :: sidebar}"></div>
+</div>
 
 
 <!-- Content -->

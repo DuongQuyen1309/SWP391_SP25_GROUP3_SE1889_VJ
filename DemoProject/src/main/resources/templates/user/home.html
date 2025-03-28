@@ -2,12 +2,14 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Rice Sales Management</title>
+    <title>Trang chủ</title>
     <link rel="stylesheet" href="/css/base.css">
     <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
     <!-- JavaScript -->
     <script src="/js/home.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 
 
@@ -15,31 +17,33 @@
 <body>
 <div th:insert="~{layout/header :: header}"></div>
 
-<div th:insert="~{layout/sidebar :: sidebar}"></div>
+<div class="sidebar" id="sidebar">
+    <div th:insert="~{layout/sidebar :: sidebar}"></div>
+</div>
 
 <!-- Content -->
 <div class="content" id="content"> <!-- Mặc định đẩy nội dung sang phải -->
     <div class="intro-container">
-        <h1>Welcome to <span class="highlight">RSMS</span></h1>
+        <h1>Chào mừng đến với <span class="highlight">RSMS</span></h1>
         <p class="intro-text">
-            Your trusted solution for effortless rice business management.
+            Giải pháp đáng tin cậy của bạn để quản lí gạo dễ dàng.
         </p>
         <div class="intro-features">
             <div class="feature-item">
-                <h3>📦 Inventory Tracking</h3>
-                <p>Monitor stock levels and ensure efficient supply management</p>
+                <h3>📦 Theo dõi hàng hóa</h3>
+                <p>Theo dõi mức tồn kho và đảm bảo quản lý nguồn cung hiệu quả</p>
             </div>
             <div class="feature-item">
-                <h3>🛠 Sales Assistance</h3>
-                <p>Empower sales staff with easy access to product information and customer details</p>
+                <h3>🛠 Hỗ trợ bán hàng</h3>
+                <p>Trao quyền cho nhân viên bán hàng dễ dàng truy cập vào thông tin sản phẩm</p>
             </div>
             <div class="feature-item">
-                <h3>👥 Customer Management</h3>
-                <p>Engage with customers and streamline service processes</p>
+                <h3>👥 Quản lí khách hàng</h3>
+                <p>Tương tác với khách hàng và hợp lý hóa quy trình dịch vụ</p>
             </div>
         </div>
         <p class="intro-text">
-            <strong>Start today</strong> and enhance your rice business effortlessly!
+            <strong>Hãy bắt đầu ngay hôm nay</strong> và nâng cao hoạt động kinh doanh gạo của bạn một cách dễ dàng!
         </p>
 
 

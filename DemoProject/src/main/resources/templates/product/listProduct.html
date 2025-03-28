@@ -3,9 +3,11 @@
 
 <head>
   <meta charset="UTF-8">
-  <title></title>
+  <title>Sản phẩm</title>
   <link rel="stylesheet" href="/css/base.css">
   <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
   <style>
     .pagination {
@@ -39,7 +41,7 @@
 
     .importBtn{
       position: absolute;
-      margin-left: 940px;
+      margin-left: 900px;
       top: 50px;
       background-color: #D67C2C;
       color: white;
@@ -82,7 +84,9 @@
 
 <div th:insert="~{layout/header :: header}"></div>
 
-<div th:insert="~{layout/sidebar :: sidebar}"></div>
+<div class="sidebar" id="sidebar">
+  <div th:insert="~{layout/sidebar :: sidebar}"></div>
+</div>
 
 
 
@@ -92,22 +96,22 @@
   <button class="add-btn" onclick="createProductForm()" th:style="${#lists.contains(listHiddenPage, 'createProduct')} ? 'display: none;' : ''">+</button>
 
   <!-- List -->
-  <h1>List of Products</h1>
-  <button class="importBtn" onclick="importProduct()">Import product</button>
+  <h1>Danh sách sản phẩm</h1>
+  <button class="importBtn" onclick="importProduct()">Nhập sản phẩm</button>
   <form class="form-search" th:action="@{/product/listProduct}" method="get">
     <label for="search"></label>
     <input
             style="height: 30px; width: 750px"
             type="text" id="search" name="searchKeyWord"
-            placeholder="Search by product name or description..."
+            placeholder="Tìm kiếm bằng tên sản phẩm hoặc mô tả..."
     >
     <select name="searchBy">
-      <option value="name" th:selected="${sortField == 'name'}">Name</option>
-      <option value="description" th:selected="${sortField == 'description'}">Description</option>
+      <option value="name" th:selected="${sortField == 'name'}">Tên</option>
+      <option value="description" th:selected="${sortField == 'description'}">Mô tả</option>
     </select>
     <input type="hidden" name="sortField" th:value="${sortField}">
     <input type="hidden" name="sortDirection" th:value="${sortDirection}">
-    <button type="submit" class="submit-button">Search</button>
+    <button type="submit" class="submit-button">Tìm kiếm</button>
   </form>
   <table class="styled-table">
     <thead>
@@ -116,23 +120,23 @@
       <td>
         <a style="text-decoration: none; color: inherit"
            th:href="@{/product/listProduct(page=${currentPage}, sortField='name', sortDirection=${reverseSortDirection}, searchKeyWord=${searchKeyWord}, searchBy=${searchBy})}">
-          Name
+          Tên
         </a>
       </td>
       <td>
         <a style="text-decoration: none; color: inherit"
            th:href="@{/product/listProduct(page=${currentPage}, sortField='price', sortDirection=${reverseSortDirection}, searchKeyWord=${searchKeyWord}, searchBy=${searchBy})}">
-          Price
+          Giá
         </a>
       </td>
       <td>
         <a style="text-decoration: none; color: inherit"
            th:href="@{/product/listProduct(page=${currentPage}, sortField='quantity', sortDirection=${reverseSortDirection}, searchKeyWord=${searchKeyWord}, searchBy=${searchBy})}">
-          Quantity(kg)
+          Số lượng(kg)
         </a>
       </td>
-      <td>Description</td>
-      <td>Action</td>
+      <td>mô tả</td>
+      <td>Hành động</td>
     </tr>
     </thead>
     <tbody>
@@ -143,14 +147,14 @@
       <td th:text="${product.quantity}"></td>
       <td th:text="${product.description}"></td>
       <td>
-        <button type="button" th:attr="data-modal-id='productModal' + ${product.id}" class="open-modal">View</button>
+        <button type="button" th:attr="data-modal-id='productModal' + ${product.id}" class="open-modal">Xem</button>
         <form th:action="@{/product/update}" method="get">
           <input type="hidden" name="id" th:value="${product.id}">
-          <button type="submit">Update</button>
+          <button type="submit">Sửa</button>
         </form>
         <form action="/product/delete" method="post" onsubmit="return confirmDelete()">
           <input type="hidden" name="id" th:value="${product.id}">
-          <button type="submit">Delete</button>
+          <button type="submit">Xóa</button>
         </form>
       </td>
     </tr>
@@ -160,13 +164,13 @@
   <div th:each="product : ${products}" th:if="${product.isDeleted == 0}" th:id="'productModal' + ${product.id}" class="modal">
     <div class="modal-content">
       <span class="close">&times;</span>
-      <h2>List of product storage areas</h2>
+      <h2>Danh sách các khu vực lưu trữ sản phẩm</h2>
       <table>
         <thead>
         <tr>
           <td>ID</td>
-          <td>Name</td>
-          <td>Position</td>
+          <td>Tên</td>
+          <td>Vị trí</td>
         </tr>
         </thead>
         <tbody>
@@ -186,7 +190,7 @@
        th:href="@{/product/listProduct(page=${currentPage - 1}, sortField=${sortField}, sortDirection=${sortDirection}, searchKeyWord=${searchKeyWord}, searchBy=${searchBy})}">
       Trước
     </a>
-    <span>Page <span th:text="${currentPage + 1}"></span> of <span th:text="${totalPages}"></span></span>
+    <span>Page <span th:text="${currentPage + 1}"></span> / <span th:text="${totalPages > 0 ? totalPages : 1}"></span></span>
     <a style="text-decoration: none"
        th:if="${currentPage < totalPages - 1}"[
        th:href="@{/product/listProduct(page=${currentPage + 1}, sortField=${sortField}, sortDirection=${sortDirection}, searchKeyWord=${searchKeyWord}, searchBy=${searchBy})}">

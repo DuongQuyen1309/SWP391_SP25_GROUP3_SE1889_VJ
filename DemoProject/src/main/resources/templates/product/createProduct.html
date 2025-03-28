@@ -2,10 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Create Rice</title>
+    <title>Tạo sản phẩm</title>
     <link rel="stylesheet" href="/css/base.css">
     <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="/js/validationProduct.js"></script>
+    <script src="/js/home.js"></script>
     <style>
         .profile-form {
             background-color: white;
@@ -118,7 +121,7 @@
         }
 
         .avatar-header {
-            margin-left: 50px;
+            margin-left: 80px;
             margin-bottom: 50px;
             margin-top: 50px;
         }
@@ -126,40 +129,42 @@
 </head>
 <body>
 <div th:insert="~{layout/header :: header}"></div>
-
+<div class="sidebar" id="sidebar">
+    <div th:insert="~{layout/sidebar :: sidebar}"></div>
+</div>
 <div class="content">
-    <h1>Create Product</h1>
+    <h1>Tạo sản phẩm</h1>
     <div class="profile-container">
         <div class="avatar-container">
-            <h1 class="avatar-header">Image</h1>
+            <h1 class="avatar-header">Ảnh</h1>
             <img class="user-avatar-large" alt=""/>
         </div>
         <div class="profile-form-container">
             <form id="productValid" class="profile-form" action="/product/create" method="POST"
                   enctype="multipart/form-data">
 
-                <label for="name">Name:</label>
+                <label for="name">Tên:</label>
                 <input type="text" id="name" name="name">
                 <span id="nameError" class="error"></span>
 
-                <label for="price">Price:</label>
+                <label for="price">Giá:</label>
                 <input type="text" id="price" name="price" min="0">
                 <span id="priceError" class="error"></span>
 
-                <label for="description">Description:</label>
+                <label for="description">Mô tả:</label>
                 <input type="text" id="description" name="description">
                 <span id="descriptionError" class="error"></span>
 
-                <label for="image">Image:</label>
+                <label for="image">Ảnh:</label>
                 <input type="file" name="image" id=image accept="image/*">
 
-                <button type="submit">Create Product</button>
+                <button type="submit">Tạo</button>
             </form>
         </div>
     </div>
 </div>
 
-<div th:insert="~{layout/sidebar :: sidebar}"></div>
+
 
 <footer>
     &copy; 2025 Rice Sales Management. All Rights Reserved.

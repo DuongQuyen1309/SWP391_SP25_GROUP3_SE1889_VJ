@@ -24,4 +24,9 @@ public interface StoreRepository extends JpaRepository<Store, Long>, JpaSpecific
 
     Optional<Store> findById(Long id); // Tìm store theo storeId
 
+    Store findByTaxCode(String taxCode);
+
+    boolean existsByTaxCodeAndIdNot(String taxCode, Long userId);
+
+    boolean existsByPhoneAndIdNot(String phone, Long storeId);
 }

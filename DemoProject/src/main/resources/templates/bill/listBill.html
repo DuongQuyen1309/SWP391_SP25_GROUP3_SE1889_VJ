@@ -4,8 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Customer Bill List</title>
+    <title>Hóa đơn xuất</title>
     <link rel="stylesheet" href="/css/base.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
     <style>
         .container {
@@ -16,6 +18,8 @@
             border-radius: 10px;
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
         }
+
+
 
         .btn-view {
             background: #3498db;
@@ -134,75 +138,62 @@
 
 <body>
 <div th:insert="~{layout/header :: header}"></div>
-<div th:insert="~{layout/sidebar :: sidebar}"></div>
+<div class="sidebar" id="sidebar">
+    <div th:insert="~{layout/sidebar :: sidebar}"></div>
+</div>
 
 <div class="content">
-    <h2>List of Customer Bills</h2>
-    <button style="margin-top: 15px" class="add-bill" onclick="callPage()">Create New Bill</button>
+    <h2>Danh sách hóa đơn xuất</h2>
+    <button style="margin-top: 15px" class="add-bill" onclick="callPage()">Tạo hóa đơn mới</button>
 
-
-
-    <div class="error-message" th:if="${error}" th:text="${error}"></div>
     <table class="styled-table">
         <thead>
         <tr>
-            <th>Bill ID</th>
-            <th>Customer Name</th>
-            <th>Date of Purchase</th>
-            <th>Total Money</th>
-            <th>Paid Money</th>
-            <th>Debt Money</th>
-            <th>Status</th>
-            <th>Note</th>
-            <th>Actions</th>
+            <th>ID</th>
+            <th>Khách hàng</th>
+            <th>Ngày mua hàng</th>
+            <th>Tổng tiền</th>
+            <th>Tiền đã trả</th>
+            <th>Tiền nợ</th>
+            <th>Trạng thái</th>
+            <th>Ghi chú</th>
+            <th>Thao tác</th>
         </tr>
         </thead>
         <tbody>
         <tr>
             <td class="twin-field">
-                <input type="text" class="filter-input" name="idFrom" onchange="filterBills()"
-                       style="width: 20px;">
-                <input type="text" class="filter-input" name="idTo" onchange="filterBills()"
-                       style="width: 20px;">
+                <input type="text" class="filter-input" name="idFrom" onchange="filterBills()" style="width: 20px;">
+                <input type="text" class="filter-input" name="idTo" onchange="filterBills()" style="width: 20px;">
             </td>
             <td>
-                <input type="text" class="filter-input" name="customerName" onchange="filterBills()"
-                       style="width: 100%;">
+                <input type="text" class="filter-input" name="customerName" onchange="filterBills()" style="width: 100%;">
             </td>
             <td class="twin-field">
-                <input type="date" class="filter-input" name="startDate" onchange="filterBills()"
-                       style="width: 100px;">
-                <input type="date" class="filter-input" name="endDate" onchange="filterBills()"
-                       style="width: 100px;">
+                <input type="date" class="filter-input" name="startDate" onchange="filterBills()" style="width: 100px;">
+                <input type="date" class="filter-input" name="endDate" onchange="filterBills()" style="width: 100px;">
             </td>
             <td class="twin-field">
-                <input type="number" class="filter-input" name="totalMoneyFrom" onchange="filterBills()"
-                       style="width: 45%;" step="1000">
-                <input type="number" class="filter-input" name="totalMoneyTo" onchange="filterBills()"
-                       style="width: 45%;" step="1000">
+                <input type="number" class="filter-input" name="totalMoneyFrom" onchange="filterBills()" style="width: 45%;" step="1000">
+                <input type="number" class="filter-input" name="totalMoneyTo" onchange="filterBills()" style="width: 45%;" step="1000">
             </td>
             <td class="twin-field">
-                <input type="number" class="filter-input" name="paidMoneyFrom" onchange="filterBills()"
-                       style="width: 45%;" step="1000">
-                <input type="number" class="filter-input" name="paidMoneyTo" onchange="filterBills()"
-                       style="width: 45%;" step="1000">
+                <input type="number" class="filter-input" name="paidMoneyFrom" onchange="filterBills()" style="width: 45%;" step="1000">
+                <input type="number" class="filter-input" name="paidMoneyTo" onchange="filterBills()" style="width: 45%;" step="1000">
             </td>
             <td class="twin-field">
-                <input type="number" class="filter-input" name="debtMoneyFrom" onchange="filterBills()"
-                       style="width: 45%;" step="1000">
-                <input type="number" class="filter-input" name="debtMoneyTo" onchange="filterBills()"
-                       style="width: 45%;" step="1000">
+                <input type="number" class="filter-input" name="debtMoneyFrom" onchange="filterBills()" style="width: 45%;" step="1000">
+                <input type="number" class="filter-input" name="debtMoneyTo" onchange="filterBills()" style="width: 45%;" step="1000">
             </td>
             <td>
                 <select class="filter-input" name="status" onchange="filterBills()" style="width: 85px">
-                    <option value="">All</option>
-                    <option value="true">⚠️ Notice</option>
-                    <option value="false">✅ Safe</option>
+                    <option value="">Tất cả</option>
+                    <option value="true">⚠️ Cảnh báo</option>
+                    <option value="false">✅ An toàn</option>
                 </select>
             </td>
             <td>
-                <input type="text" class="filter-input" name="note" onchange="filterBills()"
-                       style="width: 100%;">
+                <input type="text" class="filter-input" name="note" onchange="filterBills()" style="width: 100%;">
             </td>
         </tr>
         <tr th:each="bill : ${bills}">
@@ -212,15 +203,14 @@
             <td class="format-price" th:text="${bill.totalMoney}"></td>
             <td class="format-price" th:text="${bill.paidMoney}"></td>
             <td class="format-price" th:text="${bill.debtMoney}"></td>
-            <td th:text="${bill.status? '⚠️ Notice':'✅ Safe'}"></td>
+            <td th:text="${bill.status? '⚠️ Cảnh báo':'✅ An toàn'}"></td>
             <td th:text="${bill.note}"></td>
             <td>
                 <form th:action="@{bill/billDetail}" method="get">
                     <input type="hidden" name="id" th:value="${bill.id}">
-                    <button type="submit" style="background-color: #06999c">View</button>
+                    <button type="submit" style="background-color: #06999c">Xem</button>
                 </form>
             </td>
-
         </tr>
         </tbody>
     </table>
@@ -228,12 +218,13 @@
     <div class="pagination">
         <a th:if="${bills.hasPrevious()}"
            th:href="@{/bill/listBill(page=${bills.number - 1}, size=${bills.size}, sortField=${sortField}, sortOrder=${sortOrder}, search=${search}, searchBy=${searchBy}, minValue=${minValue}, maxValue=${maxValue}, status=${param.status},startDate=${startDate},endDate=${endDate})}"
-           class="pagination-button">Previous</a>
-        <span th:text="'Page ' + ${bills.number + 1} + ' of ' + ${bills.totalPages}"></span>
+           class="pagination-button">Trước</a>
+        <span th:text="'Trang ' + ${bills.number + 1} + ' / ' + ${bills.totalPages > 0 ?  bills.totalPages : 1}"></span>
         <a th:if="${bills.hasNext()}"
            th:href="@{/bill/listBill(page=${bills.number + 1}, size=${bills.size}, sortField=${sortField}, sortOrder=${sortOrder}, search=${search}, searchBy=${searchBy}, minValue=${minValue}, maxValue=${maxValue}, status=${param.status},startDate=${startDate},endDate=${endDate})}"
-           class="pagination-button">Next</a>
+           class="pagination-button">Sau</a>
     </div>
+
 
 </div>
 <footer>

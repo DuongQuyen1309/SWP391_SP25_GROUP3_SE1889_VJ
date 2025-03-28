@@ -168,10 +168,12 @@ public class PackageController {
             String username = jwtUtils.extractUsername(token);
             Optional<Account> account = accountService.findByUsernameAndIsDeleteFalse(username);
             Users user = userService.getUserProfile(account.get().getUserId()).orElse(null);
+            model.addAttribute("user", user);
             newPackage.setStoreId(user.getStoreId());
             newPackage.setCreatedBy(user.getId());
             model.addAttribute("newPackage", newPackage);
             newPackage.setCreatedAt(LocalDate.now());
+
 
             if (packageService.isPackageNameAlreadyExists(newPackage.getName(), user.getStoreId())) {
                 model.addAttribute("errorMessage", "Package with this name already exists");

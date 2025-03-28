@@ -2,29 +2,38 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <script src="/js/home.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+
+
+    </style>
 </head>
+
 <body>
-<div class="sidebar" id="sidebar" th:fragment="sidebar">
+<div  th:fragment="sidebar">
 
-    <h2>Feature</h2>
+    <h2>Tính năng</h2>
 
-    <a href="/store/mystore" th:style="${#lists.contains(listHiddenPage, 'Store')} ? 'display: none;' : ''">My Store</a>
-    <a href="/dashboard/view" th:style="${#lists.contains(listHiddenPage, 'Dashboard')} ? 'display: none;' : ''">DashBoard</a>
-    <a href="/account/listOwner" th:style="${#lists.contains(listHiddenPage, 'listOwner')} ? 'display: none;' : ''" >Owner Account Management</a>
+    <a href="/store/mystore" th:style="${#lists.contains(listHiddenPage, 'Store')} ? 'display: none;' : ''"><i class="fas fa-store"></i> Thông tin cửa hàng</a>
+    <a href="/dashboard/view" th:style="${#lists.contains(listHiddenPage, 'Dashboard')} ? 'display: none;' : ''"><i class="fas fa-chart-line"></i> Báo cáo doanh thu</a>
+    <a href="/account/listOwner" th:style="${#lists.contains(listHiddenPage, 'listOwner')} ? 'display: none;' : ''" ><i class="fas fa-users"></i> Quản lí chủ cửa hàng</a>
 
-    <a href="/account/listStaff" th:style="${#lists.contains(listHiddenPage, 'listStaff')} ? 'display: none;' : ''">Staff Account Management</a>
+    <a href="/account/listStaff" th:style="${#lists.contains(listHiddenPage, 'listStaff')} ? 'display: none;' : ''"><i class="fas fa-users"></i> Quản lí nhân viên</a>
 
-    <a href="/product/listProduct" th:style="${#lists.contains(listHiddenPage, 'listProduct')} ? 'display: none;' : ''" >Rice Management</a>
+    <a href="/product/listProduct" th:style="${#lists.contains(listHiddenPage, 'listProduct')} ? 'display: none;' : ''" ><i class="fas fa-box-open"></i> Quản lí sản phẩm</a>
 
-    <a href="/customer/listCustomer" th:style="${#lists.contains(listHiddenPage, 'listCustomer')} ? 'display: none;' : ''">Customer Management</a>
+    <a href="/customer/listCustomer" th:style="${#lists.contains(listHiddenPage, 'listCustomer')} ? 'display: none;' : ''"><i class="fas fa-user"></i> Quản lí khách hàng</a>
 
-    <a href="/warehouse/listWarehouseZone" th:style="${#lists.contains(listHiddenPage, 'listWarehouse')} ? 'display: none;' : ''" >Zone Management</a>
+    <a href="/warehouse/listWarehouseZone" th:style="${#lists.contains(listHiddenPage, 'listWarehouse')} ? 'display: none;' : ''" ><i class="fas fa-map-marked-alt"></i> Quản lí khu vực</a>
 
-    <a href="/bill/listBill" th:style="${#lists.contains(listHiddenPage, 'listBill')} ? 'display: none;' : ''" >Invoice Management </a>
+    <a href="/importednote/list" th:style="${#lists.contains(listHiddenPage, 'listImportedNote')} ? 'display: none;' : ''" ><i class="fas fa-file-import"></i> Quản lí hóa đơn nhập</a>
 
-    <a href="/package/listPackage" th:style="${#lists.contains(listHiddenPage, 'listPackage')} ? 'display: none;' : ''" >Package Management</a>
+    <a href="/bill/listBill" th:style="${#lists.contains(listHiddenPage, 'listBill')} ? 'display: none;' : ''" ><i class="fas fa-file-export"></i> Quản lí hóa đơn xuất </a>
 
-    <a href="/importednote/list" th:style="${#lists.contains(listHiddenPage, 'listImportedNote')} ? 'display: none;' : ''" >Imported Note Management</a>
+    <a href="/package/listPackage" th:style="${#lists.contains(listHiddenPage, 'listPackage')} ? 'display: none;' : ''" ><i class="fas fa-gift"></i> Quản lí đóng gói</a>
+
+
 
 
 

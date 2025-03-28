@@ -88,18 +88,20 @@ public class NoteController {
         Account account = accountService.getAccountFromToken(token).orElse(null);
         Optional<Users> user = userService.getUserProfile(account.getUserId());
         model.addAttribute("account", account);
+
+        System.out.println(user.get().getId());
         model.addAttribute("user", user.orElse(null));
 
         String role= jwtUtils.extractRole(token);
         model.addAttribute("role",role);
         List<String> listHiddenPage = new ArrayList<>();
-        if(role.equals("STAFF")){
-            listHiddenPage.add("Store");
+        if (role.equals("STAFF")) {
             listHiddenPage.add("listStaff");
-            listHiddenPage.add("Dashboard");
+            listHiddenPage.add("Store");
             listHiddenPage.add("listOwner");
+            listHiddenPage.add("Dashboard");
         }
-        if (role.equals("OWNER")) {
+        if(role.equals("OWNER")){
             listHiddenPage.add("listOwner");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
@@ -199,17 +201,19 @@ public class NoteController {
         Account account = accountService.getAccountFromToken(token).orElse(null);
         Optional<Users> user = userService.getUserProfile(account.getUserId());
         model.addAttribute("account", account);
+
+        System.out.println(user.get().getId());
         model.addAttribute("user", user.orElse(null));
         String role= jwtUtils.extractRole(token);
         model.addAttribute("role",role);
         List<String> listHiddenPage = new ArrayList<>();
-        if(role.equals("STAFF")){
+        if (role.equals("STAFF")) {
+            listHiddenPage.add("listStaff");
             listHiddenPage.add("Store");
             listHiddenPage.add("listOwner");
-            listHiddenPage.add("listStaff");
             listHiddenPage.add("Dashboard");
         }
-        if (role.equals("OWNER")) {
+        if(role.equals("OWNER")){
             listHiddenPage.add("listOwner");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
@@ -255,17 +259,19 @@ public class NoteController {
         Account account = accountService.getAccountFromToken(token).orElse(null);
         Optional<Users> user = userService.getUserProfile(account.getUserId());
         model.addAttribute("account", account);
+
+        System.out.println(user.get().getId());
         model.addAttribute("user", user.orElse(null));
         String role= jwtUtils.extractRole(token);
         model.addAttribute("role",role);
         List<String> listHiddenPage = new ArrayList<>();
-        if(role.equals("STAFF")){
-            listHiddenPage.add("Store");
+        if (role.equals("STAFF")) {
             listHiddenPage.add("listStaff");
-            listHiddenPage.add("Dashboard");
+            listHiddenPage.add("Store");
             listHiddenPage.add("listOwner");
+            listHiddenPage.add("Dashboard");
         }
-        if (role.equals("OWNER")) {
+        if(role.equals("OWNER")){
             listHiddenPage.add("listOwner");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
@@ -315,7 +321,6 @@ public class NoteController {
             TransactionRequest request = new TransactionRequest(tokenCustomerId, amount, isDebt, notename, cID, last_storedID,imagePath);
             transactionQueueProcessor.addTransaction(request);
             redirectAttributes.addFlashAttribute("messageType", "success");
-            redirectAttributes.addFlashAttribute("message", "Note created successfully!");
             model.addAttribute("customerId", id);
             // Xóa customerId khỏi token sau khi tạo phiếu
             String updatedToken = jwtUtils.removeCustomerIdFromToken(token);

@@ -94,13 +94,13 @@ public class UpdateLogController {
         }
 
         List<String> listHiddenPage = new ArrayList<>();
-        if(role.equals("STAFF")){
-            listHiddenPage.add("Store");
+        if (role.equals("STAFF")) {
             listHiddenPage.add("listStaff");
-            listHiddenPage.add("Dashboard");
+            listHiddenPage.add("Store");
             listHiddenPage.add("listOwner");
+            listHiddenPage.add("Dashboard");
         }
-        if (role.equals("OWNER")) {
+        if(role.equals("OWNER")){
             listHiddenPage.add("listOwner");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);

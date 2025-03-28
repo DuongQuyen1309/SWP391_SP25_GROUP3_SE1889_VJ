@@ -154,4 +154,8 @@ public class CustomerService {
     public List<Customer> getAllCustomerInStore(Long storeID){
         return customerRepository.getAllCustomerInStore(storeID);
     }
+
+    public boolean existsByPhoneExcludingCustomer(String phone, Long customerId) {
+        return customerRepository.existsByPhoneAndIdNot(phone, customerId);
+    }
 }

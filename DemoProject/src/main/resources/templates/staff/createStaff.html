@@ -6,6 +6,8 @@
     <title>Rice Sales Management</title>
     <link rel="stylesheet" href="/css/base.css">
     <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         .create-form {
             background-color: white;
@@ -140,18 +142,20 @@
 <div th:insert="~{layout/header :: header}"></div>
 
 <!-- Sidebar -->
-<div class="sidebar" id="sidebar" style="height: 100%;">
-    <h2>Feature</h2>
-    <a href="/store/mystore">My Store</a>
-    <a href="/dashboard/view" >DashBoard</a>
-    <a href="/account/listStaff">Staff Account
-        Management</a>
-    <a href="/product/listProduct">Rice Management</a>
-    <a href="/customer/listCustomer">Customer Management</a>
-    <a href="/warehouse/listWarehouseZone">Zone Management</a>
-    <a href="/bill/listBill">Invoice Management</a>
-    <a href="/package/listPackage">Package Management</a>
-    <a href="/importednote/list">Imported Note Management</a>
+<div class="sidebar" id="sidebar">
+    <h2>Tính năng</h2>
+
+    <a href="/store/mystore"><i class="fas fa-store"></i> Thông tin cửa hàng</a>
+    <a href="/dashboard/view"><i class="fas fa-chart-line"></i> Báo cáo doanh thu</a>
+    <a href="/account/listStaff"><i class="fas fa-users"></i> Quản lí nhân viên</a>
+    <a href="/product/listProduct"><i class="fas fa-box-open"></i> Quản lí sản phẩm</a>
+    <a href="/customer/listCustomer"><i class="fas fa-user"></i> Quản lí khách hàng</a>
+    <a href="/warehouse/listWarehouseZone"><i class="fas fa-map-marked-alt"></i> Quản lí khu vực</a>
+    <a href="/importednote/list"><i class="fas fa-file-import"></i> Quản lí hóa đơn nhập</a>
+    <a href="/bill/listBill"><i class="fas fa-file-export"></i> Quản lí hóa đơn xuất</a>
+    <a href="/package/listPackage"><i class="fas fa-gift"></i> Quản lí đóng gói</a>
+
+
 </div>
 
 <div class="content">

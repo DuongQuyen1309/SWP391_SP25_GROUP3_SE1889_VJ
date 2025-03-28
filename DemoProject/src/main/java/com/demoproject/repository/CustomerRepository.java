@@ -93,4 +93,6 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
     @Query("SELECT c FROM Customer c WHERE c.storeId = :storeID")
     List<Customer> getAllCustomerInStore(@Param("storeID") Long storeID );
+
+    boolean existsByPhoneAndIdNot(String phone, Long customerId);
 }

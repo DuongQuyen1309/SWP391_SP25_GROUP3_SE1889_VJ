@@ -4,10 +4,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Delete Zone</title>
+  <title>Xóa khu vực</title>
 
   <link rel="stylesheet" href="/css/base.css">
   <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
 
 
@@ -64,24 +66,51 @@
     function backToList() {
       window.location.href = "/warehouse/listWarehouseZone";
     }
+    $(document).ready(function () {
+      $('#delete-zone-form').on('submit', function (e) {
+        e.preventDefault(); // ✅ Ngăn gửi form ngay
+
+        const form = this; // ✅ Lưu lại form hiện tại
+
+        Swal.fire({
+          title: "Xác nhận xóa?",
+          text: "Bạn có chắc chắn muốn xóa khu vực này không?",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#d33",
+          cancelButtonColor: "#3085d6",
+          cancelButtonText: "Hủy",
+          confirmButtonText: "Xóa"
+        }).then((result) => {
+          if (result.isConfirmed) {
+            // ✅ Gửi form sau khi Swal hiển thị xong
+            setTimeout(() => {
+              form.submit(); // hoặc form.requestSubmit();
+            }, 100);
+          }
+        });
+      });
+    });
   </script>
 </head>
 
 <body>
 <div th:insert="~{layout/header :: header}"></div>
-<div th:insert="~{layout/sidebar :: sidebar}"></div>
+<div class="sidebar" id="sidebar">
+  <div th:insert="~{layout/sidebar :: sidebar}"></div>
+</div>
 
 <!-- Content -->
 <div class="content" id="content">
-  <h2 class="mb-4" style="margin-top: 100px;">Delete a Zone</h2>
+  <h2 class="mb-4" style="margin-top: 100px;">Xóa khu vực</h2>
   <div class="container mt-5">
-    <form class="delete-form" method="post" action="/warehouse/zone/delete">
+    <form class="delete-form" id="delete-zone-form" method="post" action="/warehouse/zone/delete">
       <div class="alert alert-danger" role="alert">
-        Do you want to delete this zone?
+        Bạn có muốn xóa khu vực không?
       </div>
       <input type="hidden" name="id" th:value="${id}">
-      <button type="submit" class="btn btn-danger">Confirm</button>
-      <button type="button" style="background-color: #059fe3" onclick="backToList()">Cancel</button>
+      <button type="submit" class="btn btn-danger">Xóa</button>
+      <button type="button" style="background-color: #059fe3" onclick="backToList()">Hủy</button>
 
 
     </form>

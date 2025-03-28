@@ -2,12 +2,14 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Staff Management</title>
+    <title>Doanh thu</title>
     <script src="/js/home.js"></script>
     <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
     <link rel="stylesheet" href="/css/thongke.css">
     <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         #exportExcelBtn {
@@ -213,7 +215,7 @@
                     ? productData.map(p => p.totalQuantity)
                     : productData.map(p => p.totalRevenue);
 
-                const labelText = viewType === 'quantity' ? 'Quantity' : 'Quantity (VNĐ)';
+                const labelText = viewType === 'quantity' ? 'Số lượng' : 'Số lượng (VNĐ)';
                 const bgColor = viewType === 'quantity' ? 'rgba(75, 192, 192, 0.6)' : 'rgba(255, 99, 132, 0.6)';
 
                 if (chartInstance) {
@@ -236,7 +238,7 @@
                         plugins: {
                             title: {
                                 display: true,
-                                text: viewType === 'quantity' ? 'Top product by quantity' : 'Top product by revenue'
+                                text: viewType === 'quantity' ? 'Top sản phẩm theo số lượng' : 'Top sản phẩm theo doanh thu '
                             },
                             tooltip: {
                                 callbacks: {
@@ -345,14 +347,14 @@
                         let labels, values;
 
                         if (period === "daily") {
-                            labels = data.map(item => `Day ${item.day}`);
+                            labels = data.map(item => `Ngày ${item.day}`);
                             values = data.map(item => item.revenue);
-                            document.getElementById("chartTitle").innerText = `Revenue by day - month ${month}, ${year}`;
+                            document.getElementById("chartTitle").innerText = `Doanh thu theo ngày - tháng ${month}, ${year}`;
                         } else if (period === "monthly") {
                             labels = Array.from({ length: 12 }, (_, i) => `Tháng ${i + 1}`);
                             values = Array(12).fill(0);
                             data.forEach(item => values[item.month - 1] = item.revenue || 0);
-                            document.getElementById("chartTitle").innerText = `Revenue by month - year ${year}`;
+                            document.getElementById("chartTitle").innerText = `Doanh thu theo tháng - năm ${year}`;
                         } else if (period === "yearly") {
                             labels = Array.from({ length: 5 }, (_, i) => `${currentYear - i}`);
                             values = Array(5).fill(0);
@@ -372,7 +374,7 @@
                             data: {
                                 labels: labels,
                                 datasets: [{
-                                    label: 'Revenue (VNĐ)',
+                                    label: 'Doanh thu (VNĐ)',
                                     data: values,
                                     backgroundColor: 'rgba(54, 162, 235, 0.6)',
                                     borderColor: 'rgba(54, 162, 235, 1)',
@@ -382,8 +384,8 @@
                             options: {
                                 responsive: true,
                                 scales: {
-                                    x: { title: { display: true, text: period === 'daily' ? 'Day' : (period === 'monthly' ? 'Month' : 'Year') } },
-                                    y: { title: { display: true, text: 'Revenue' } }
+                                    x: { title: { display: true, text: period === 'daily' ? 'Day' : (period === 'monthly' ? 'Tháng' : 'Năm') } },
+                                    y: { title: { display: true, text: 'Doanh thu' } }
                                 }
                             }
                         });
@@ -460,7 +462,7 @@
 
                     // Cập nhật thông tin phân trang
                     currentPage = page;
-                    document.getElementById("pageInfo").innerText = `Page ${page + 1} / ${data.totalPages}`;
+                    document.getElementById("pageInfo").innerText = `Trang ${page + 1} / ${data.totalPages}`;
                     document.getElementById("prevBtn").disabled = page === 0;
                     document.getElementById("nextBtn").disabled = page >= data.totalPages - 1;
                 })
@@ -493,10 +495,12 @@
 
 <div th:insert="~{layout/header :: header}"></div>
 
-<div th:insert="~{layout/sidebar :: sidebar}"></div>
+<div class="sidebar" id="sidebar">
+    <div th:insert="~{layout/sidebar :: sidebar}"></div>
+</div>
 <!-- Content -->
 <div class="content" id="content">
-    <h1 class="dashboard-title">Rice Sales Dashboard</h1>
+    <h1 class="dashboard-title">Doanh thu bán gạo</h1>
     <!-- Search Box -->
 
 
@@ -504,7 +508,7 @@
     <div class="cards-container">
         <div class="card primary-card">
             <div class="card-header">
-                <div class="card-title">Today's Revenue</div>
+                <div class="card-title">Doanh thu hôm nay</div>
                 <div class="card-icon">📅</div>
             </div>
             <div class="card-value">
@@ -513,14 +517,14 @@
 
             </div>
             <div class="card-footer">
-                <span th:text="${dashboardData.todayBillCount}"></span> today's bill
+                <span th:text="${dashboardData.todayBillCount}"></span> Hóa đơn hôm nay
 
             </div>
         </div>
 
         <div class="card warning-card">
             <div class="card-header">
-                <div class="card-title">Percent Of Today's Revenue</div>
+                <div class="card-title">Phần trăm doanh thu hôm nay</div>
                 <div class="card-icon">💰</div>
             </div>
             <div class="card-value">
@@ -531,33 +535,33 @@
         </span>
             </div>
             <div class="card-footer">
-                compared to yesterday ₫<span th:text="${#numbers.formatInteger(dashboardData.yesterdayRevenue, 0, 'COMMA')}"></span>
+                so với hôm qua ₫<span th:text="${#numbers.formatInteger(dashboardData.yesterdayRevenue, 0, 'COMMA')}"></span>
             </div>
         </div>
 
         <div class="card success-card" onclick="openBillPopup()">
             <div class="card-header">
-                <div class="card-title">Total Bill's Today</div>
+                <div class="card-title">Tổng hóa đơn hôm nay</div>
                 <div class="card-icon">📦</div>
             </div>
             <div class="card-value">
                 <span th:text="${dashboardData.todayBillCount}"></span>
             </div>
 
-            <div class="card-footer"> Bill</div>
+            <div class="card-footer"> Hóa đơn</div>
 
         </div>
 
 
         <div class="card danger-card">
             <div class="card-header">
-                <div class="card-title">Low Stock Items</div>
+                <div class="card-title">Những sản phẩm sắp hết</div>
                 <div class="card-icon">⚠️</div>
             </div>
             <div class="card-value" th:text="${dashboardData.lowStockCount}">0</div>
 
             <div class="card-footer">
-                <span>Product</span>
+                <span>Sản phẩm</span>
             </div>
         </div>
     </div>
@@ -572,11 +576,11 @@
             <table>
                 <thead>
                 <tr>
-                    <th>Bill's Id</th>
-                    <th>Customer</th>
-                    <th>Total Price</th>
-                    <th>Created At</th>
-                    <th>Action</th>
+                    <th>ID</th>
+                    <th>Khách hàng</th>
+                    <th>Tổng tiền</th>
+                    <th>Ngày tạo</th>
+                    <th>Hành động</th>
 
                 </tr>
                 </thead>
@@ -587,37 +591,37 @@
 
             <!-- Pagination -->
             <div class="pagination">
-                <button onclick="prevPage()">Previous</button>
+                <button onclick="prevPage()">Trước</button>
                 <span id="pageInfo">1 / 1</span>
-                <button onclick="nextPage()">Next</button>
+                <button onclick="nextPage()">Sau</button>
             </div>
         </div>
     </div>
     <!-- Sales Chart -->
     <div class="chart-container">
         <div class="chart-header">
-            <div class="chart-title">Sales Overview</div>
+            <div class="chart-title">Tổng quan bán hàng</div>
 
             <div class="chart-options">
-                <label for="revenuePeriodSelect">Choose type of view: </label>
+                <label for="revenuePeriodSelect">Chọn loại hiển thị: </label>
                 <select id="revenuePeriodSelect">
-                    <option value="daily">Day</option>
-                    <option value="monthly">Month</option>
+                    <option value="daily">Ngày</option>
+                    <option value="monthly">Tháng</option>
                     <!--                    <option value="yearly">Theo năm</option>-->
                 </select>
 
-                <label for="revenueMonthSelect" id="monthLabel">Choose month:</label>
+                <label for="revenueMonthSelect" id="monthLabel">Chọn tháng:</label>
                 <select id="revenueMonthSelect"></select>
 
-                <label for="revenueYearSelect" id="yearLabel">Choose year:</label>
+                <label for="revenueYearSelect" id="yearLabel">Chọn năm:</label>
                 <select id="revenueYearSelect"></select>
-                <button id="exportRevenueExcelBtn">Export Excel</button>
+                <button id="exportRevenueExcelBtn">Xuất Excel</button>
 
             </div>
         </div>
         <div class="chart">
             <!--            <canvas id="revenueChart" width="1400" height="300"></canvas>-->
-            <h2 id="chartTitle">Revenue by day</h2>
+            <h2 id="chartTitle">Doanh thu theo ngày</h2>
             <!--            <canvas id="dailyRevenueChart"></canvas>-->
 
             <canvas id="salesOverviewChart"></canvas>
@@ -627,9 +631,9 @@
     <!-- Rice Types Chart -->
     <div class="chart-container">
         <div class="chart-header">
-            <div class="chart-title">Top product</div>
+            <div class="chart-title">Top sản phẩm</div>
             <div class="chart-options">
-                <span>Month:</span>
+                <span>Tháng:</span>
                 <select id="monthSelect">
                     <!-- Tạo 12 option tháng -->
                     <script>
@@ -638,7 +642,7 @@
                         }
                     </script>
                 </select>
-                <span>Year:</span>
+                <span>Năm:</span>
                 <select id="yearSelect">
                     <script>
                         const currentYear = new Date().getFullYear();
@@ -648,12 +652,12 @@
                     </script>
                 </select>
 
-                <span>View:</span>
+                <span>Xem:</span>
                 <select id="viewOption">
-                    <option value="quantity">By quantity</option>
-                    <option value="revenue" selected>By revenue</option>
+                    <option value="quantity">Theo số lượng</option>
+                    <option value="revenue" selected>Theo doanh thu</option>
                 </select>
-                <button id="exportExcelBtn">Export Excel</button>
+                <button id="exportExcelBtn">Xuất Excel</button>
 
             </div>
 

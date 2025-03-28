@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Forgot Password</title>
+  <title>Quên mật khẩu</title>
   <link rel="stylesheet" href="/css/login.css">
   <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
   <script>
@@ -30,15 +30,15 @@
         errorContainer.style.color = "red";
         console.log(`${emailInput.value}`);
         if (emailInput.value.trim() === "") {
-          errors.push("Email must be not empty.");
+          errors.push("Email không được để trống.");
         } else if (!emailInput.value.includes("@")) {
-          errors.push("Please includes '@' in email.");
+          errors.push("Vui lòng có '@' trong email.");
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value)) {
-          errors.push("Email is not in the correct format, please enter the correct format (for example: example@gmail.com)");
+          errors.push("Sai cú pháp email, vui lòng nhập đúng cú pháp (ví dụ: example@gmail.com)");
         } else {
           let isEmailExists = await checkEmailExists(emailInput.value);
           if (!isEmailExists) {
-            errors.push("Email does not exist");
+            errors.push("Email không tồn tại");
           }
         }
 
@@ -84,17 +84,17 @@
 
   <!-- Forgot Password Form -->
   <div class="login-container">
-    <h2>Forgot Password</h2>
-    <p>Enter your email to receive a password reset link.</p>
+    <h2>Quên mật khẩu</h2>
+    <p>Nhập email của bạn để nhận link reset mật khẩu.</p>
     <form class="resetRequestForm">
       <div class="input-group">
         <label for="email">Email</label>
-        <input type="email" id="email" placeholder="Enter your email" >
+        <input type="email" id="email" placeholder="Nhập email của bạn" >
       </div>
-      <button type="submit" class="btn">Send Reset Link</button>
+      <button type="submit" class="btn">Gửi Reset Link</button>
     </form>
 
-    <p class="register-link">Back to <a href="/login">Login</a></p>
+    <p class="register-link">Back to <a href="/login">Đăng nhập</a></p>
   </div>
 </section>
 
