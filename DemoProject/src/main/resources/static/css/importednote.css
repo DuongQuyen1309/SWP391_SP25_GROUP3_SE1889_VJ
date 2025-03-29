@@ -1,0 +1,250 @@
+/* CSS toàn bộ modal popup */
+.modal {
+    display: none; /* Default không hiển thị */
+    position: fixed; /* Giữ modal ở vị trí cố định */
+    z-index: 1000; /* Đưa modal lên trên các thành phần khác */
+    left: 0;
+    top: 0;
+    width: 100%; /* Bao phủ toàn bộ chiều rộng trang */
+    height: 100%; /* Bao phủ toàn bộ chiều cao trang */
+    overflow: auto; /* Kích hoạt cuộn khi nội dung quá lớn */
+    background-color: rgba(0, 0, 0, 0.5); /* Hiệu ứng mờ cho phần nền */
+}
+
+.modal-content {
+    background-color: #fff; /* Màu nền trắng cho nội dung modal */
+    margin: 10% auto; /* Tạo khoảng cách giữa modal và viền trên/dưới */
+    padding: 20px; /* Khoảng cách bên trong */
+    border: 1px solid #888; /* Đường viền màu xám nhạt */
+    border-radius: 8px; /* Góc bo tròn */
+    width: 60%; /* Chiều rộng modal */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Đổ bóng */
+    animation: fadeIn 0.3s ease; /* Hiệu ứng mờ dần khi hiện */
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    display: flex; /* Sử dụng flexbox để sắp xếp các thành phần */
+    justify-content: space-between; /* Căn đều: h2 ở bên trái, span ở bên phải */
+    align-items: center; /* Căn giữa theo chiều dọc */
+    border-bottom: 1px solid #ddd; /* Đường ngăn cách dưới header */
+    padding: 10px 20px; /* Khoảng cách đều trong header */
+    position: relative; /* Cần nếu muốn định vị chính xác bên trong modal */
+}
+
+.modal-header h2 {
+    margin: 0; /* Xóa margin mặc định của h2 */
+    font-size: 24px; /* Kích cỡ chữ */
+    color: #333; /* Màu chữ */
+    text-align: left; /* Căn trái tiêu đề */
+}
+
+.modal-header .close {
+    font-size: 24px; /* Kích thước của nút đóng */
+    font-weight: bold; /* Tạo sự nổi bật cho ký hiệu đóng */
+    color: #333; /* Màu của ký hiệu '×' */
+    cursor: pointer; /* Đổi con trỏ chuột khi hover */
+    transition: color 0.3s ease; /* Hiệu ứng màu mượt hơn khi hover */
+}
+
+.modal-header .close:hover {
+    color: red; /* Đổi màu nút đóng khi hover */
+}
+
+.modal-header h2{
+    text-align: center;
+}
+
+.modal-content p {
+    font-size: 14px;
+    color: #666;
+    text-align: center;
+}
+
+
+
+.modal-header .close:hover {
+    color: red; /* Đổi màu khi hover */
+}
+
+.modal-body {
+    margin-top: 20px;
+    font-size: 16px;
+    color: #444;
+}
+
+.summary-details {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.summary-details .column {
+    flex: 1;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.detail-item .label {
+    font-weight: bold;
+    color: #555;
+}
+
+.detail-item .value {
+    color: #777;
+}
+
+.items-table table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 14px;
+    color: #333;
+}
+
+.items-table th, .items-table td {
+    text-align: center;
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+.items-table th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+}
+
+.items-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.items-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Đảm bảo modal hiển thị đẹp trên các thiết bị nhỏ hơn */
+@media screen and (max-width: 768px) {
+    .modal-content {
+        width: 90%; /* Chiều rộng modal nhỏ hơn trên thiết bị nhỏ */
+    }
+
+    .summary-details {
+        flex-direction: column; /* Hiển thị theo cột trên màn hình nhỏ */
+    }
+}
+
+/* 1. Modal chung */
+.modal-add {
+    display: none; /* Hidden by default */
+    position: fixed; /* Fixed position on the screen */
+    top: 0;
+    left: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    z-index: 1000; /* To appear above other content */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    display: flex; /* Flexbox for centering */
+}
+
+
+/* 3. Tiêu đề modal */
+.modal-content h2 {
+    font-size: 18px; /* Font size for the title */
+    color: #333; /* Darker color for better readability */
+    margin-bottom: 15px; /* Space below title */
+    text-align: center; /* Center the title text */
+}
+
+/* 4. Nút đóng */
+.modal-content .close {
+    position: absolute; /* Position inside modal content */
+    top: 10px; /* Position from top */
+    right: 15px; /* Position from right */
+    font-size: 20px; /* Large font size */
+    font-weight: bold; /* Emphasize the close button */
+    cursor: pointer; /* Pointer cursor for action */
+    color: #333; /* Default color */
+}
+
+.modal-content .close:hover {
+    color: #f00; /* Highlight the button on hover */
+}
+
+/* 5. Nhóm form */
+.form-group {
+    margin-top: 10px; /* Space between fields */
+}
+
+.form-group label {
+    display: block; /* Label on its own line */
+    margin-bottom: 5px; /* Space between label and input */
+    font-size: 14px; /* Smaller font size for labels */
+    color: #555; /* Subtle color for labels */
+}
+
+.form-group input,
+.form-group select {
+    width: 100%; /* Full width of the container */
+    padding: 8px; /* Internal padding */
+    border: 1px solid #ddd; /* Light border */
+    border-radius: 5px; /* Rounded corners */
+    font-size: 14px; /* Font size for inputs */
+    color: #333; /* Text color */
+    box-sizing: border-box; /* Ensures padding is included in width calculation */
+}
+
+/* 6. Nút thêm mới */
+#save-customer-btn {
+    margin-top: 20px; /* Space above the button */
+    padding: 10px 20px; /* Padding inside the button */
+    width: 100%; /* Button covers full width */
+    background-color: #4CAF50; /* Green background */
+    color: #fff; /* White text */
+    border: none; /* No border */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor for action */
+    font-size: 16px; /* Larger font size */
+    font-weight: bold; /* Bold text */
+    text-align: center; /* Center the text */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Button shadow */
+}
+
+#save-customer-btn:hover {
+    background-color: #45a049; /* Lighter green on hover */
+}
+
+/* 7. Hiệu ứng mở modal */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* 8. Responsive modal (trên mobile) */
+@media (max-width: 600px) {
+    .modal-content {
+        width: 80%; /* Wider modal for smaller screens */
+        padding: 15px; /* Adjust padding */
+    }
+
+    #save-customer-btn {
+        font-size: 14px; /* Smaller button font */
+        padding: 8px; /* Smaller padding */
+    }
+}

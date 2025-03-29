@@ -100,15 +100,8 @@ public class ProductDataDTO {
 
     public String getPackageTypeName() {
 
-        if (packageTypeName == null && packageType != null && selectedPackage != null) {
-            packageTypeName = packageType.stream()
-                    .filter(pkg -> pkg.getId().equals(selectedPackage))
-                    .map(PackageTypeDTO::getName)
-                    .findFirst()
-                    .orElse("Unknown");
-        }
 
-        System.out.println("📌 packageTypeName sau khi xử lý: " + packageTypeName);
+
         return packageTypeName;
     }
 

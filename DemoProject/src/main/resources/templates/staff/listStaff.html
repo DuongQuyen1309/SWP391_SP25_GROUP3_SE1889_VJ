@@ -2,17 +2,70 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Staff Management</title>
+    <title>Quản lí nhân viên</title>
     <link rel="stylesheet" href="/css/base.css">
     <script src="/js/home.js"></script>
     <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    <!--    <style>-->
+    <!--        .pagination {-->
+    <!--            text-align: center;-->
+    <!--            margin-top: 20px;-->
+    <!--        }-->
+    <!--        .pagination a {-->
+    <!--            display: inline-block;-->
+    <!--            padding: 8px 16px;-->
+    <!--            margin: 4px;-->
+    <!--            text-decoration: none;-->
+    <!--            background-color: #2c3e50;-->
+    <!--            color: white;-->
+    <!--            border-radius: 5px;-->
+    <!--        }-->
+    <!--        .pagination a:hover {-->
+    <!--            background-color: #1a252f;-->
+    <!--        }-->
+
+    <!--        .form-search input:focus {-->
+    <!--            border-color: #e67e22;-->
+    <!--            box-shadow: 0 0 8px rgba(230, 126, 34, 0.5);-->
+    <!--        }-->
+    <!--        .styled-table thead input {-->
+    <!--            width: 100%; /* Chiếm toàn bộ ô nhưng không vượt quá cột */-->
+    <!--            max-width: 120px; /* Giới hạn độ rộng tối đa */-->
+    <!--            padding: 5px;-->
+    <!--            font-size: 14px;-->
+    <!--            border: 1px solid #ccc;-->
+    <!--            border-radius: 5px;-->
+    <!--            outline: none;-->
+    <!--            box-sizing: border-box;-->
+    <!--        }-->
+    <!--    </style>-->
     <style>
+        .add-btn {
+            position: absolute; /* Giữ vị trí cố định so với content */
+            right: 20px; /* Sát mép phải của content */
+            top: 50px; /* Đẩy xuống dưới một chút */
+            background-color: #d35400; /* Cam */
+            color: white;
+            font-size: 13px;
+            border: none;
+            width: 150px;
+            height: 40px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .add-owner:hover {
+            background-color: #e67e22;
+            transform: scale(1.05);
+        }
         .pagination {
             text-align: center;
             margin-top: 20px;
         }
+
         .pagination a {
             display: inline-block;
             padding: 8px 16px;
@@ -22,13 +75,42 @@
             color: white;
             border-radius: 5px;
         }
+
         .pagination a:hover {
             background-color: #1a252f;
+        }
+
+        .pagination span {
+            font-size: 18px;
+            margin: 0 10px;
         }
 
         .form-search input:focus {
             border-color: #e67e22;
             box-shadow: 0 0 8px rgba(230, 126, 34, 0.5);
+        }
+        .twin-field {
+
+        }
+
+        .twin-field input {
+            border: 1px solid rgb(255, 255, 255); /* Viền nhẹ */
+            transition: border 0.3s, background-color 0.3s;
+            color: #040404; /* Màu chữ trắng để nổi bật */
+            font-size: 14px;
+            border-radius: 5px;
+        }
+        /* Placeholder màu sáng để dễ nhìn thấy */
+        .twin-field input::placeholder {
+            color: rgba(255, 255, 255, 0.7); /* Màu chữ nhạt hơn để không lẫn với dữ liệu */
+            font-style: italic;
+        }
+
+        /* Hiệu ứng khi focus */
+        .twin-field input:focus {
+            outline: none;
+            border-color: #f39c12; /* Viền màu cam khi focus */
+            box-shadow: 0px 0px 5px rgba(243, 156, 18, 0.8); /* Hiệu ứng sáng nhẹ */
         }
         .styled-table thead input {
             width: 100%; /* Chiếm toàn bộ ô nhưng không vượt quá cột */
@@ -46,6 +128,40 @@
             window.location.href ="/account/createStaff";
         }
     </script>
+    <script>
+        function filterStaff() {
+            let filters = {};
+            document.querySelectorAll('.filter-input').forEach(input => {
+                filters[input.name] = input.value.toLowerCase().trim();
+            });
+
+            let table = document.querySelector(".styled-table");
+            let rows = table.getElementsByTagName("tr");
+
+            for (let i = 2; i < rows.length; i++) { // Bỏ qua header
+                let cells = rows[i].getElementsByTagName("td");
+                let showRow = true;
+
+                if (filters["idFrom"] || filters["idTo"]) {
+                    let id = parseInt(cells[0].textContent.trim()) || 0;
+                    let idFrom = parseInt(filters["idFrom"]) || 0;
+                    let idTo = parseInt(filters["idTo"]) || Infinity;
+                    if (id < idFrom || id > idTo) showRow = false;
+                }
+
+                if (filters["username"] && !cells[1].textContent.toLowerCase().includes(filters["username"])) showRow = false;
+                if (filters["displayName"] && !cells[2].textContent.toLowerCase().includes(filters["displayName"])) showRow = false;
+                if (filters["email"] && !cells[3].textContent.toLowerCase().includes(filters["email"])) showRow = false;
+                if (filters["fullname"] && !cells[4].textContent.toLowerCase().includes(filters["fullname"])) showRow = false;
+                if (filters["phone"] && !cells[5].textContent.toLowerCase().includes(filters["phone"])) showRow = false;
+                if (filters["gender"] && !cells[6].textContent.toLowerCase().includes(filters["gender"])) showRow = false;
+                if (filters["address"] && !cells[7].textContent.toLowerCase().includes(filters["address"])) showRow = false;
+
+                rows[i].style.display = showRow ? "" : "none";
+            }
+        }
+    </script>
+
 </head>
 <body>
 
@@ -57,21 +173,20 @@
 
     <a href="/store/mystore"><i class="fas fa-store"></i> Thông tin cửa hàng</a>
     <a href="/dashboard/view"><i class="fas fa-chart-line"></i> Báo cáo doanh thu</a>
+    <a href="/customer/listCustomer"><i class="fas fa-user"></i> Quản lí khách hàng</a>
     <a href="/account/listStaff"><i class="fas fa-users"></i> Quản lí nhân viên</a>
     <a href="/product/listProduct"><i class="fas fa-box-open"></i> Quản lí sản phẩm</a>
-    <a href="/customer/listCustomer"><i class="fas fa-user"></i> Quản lí khách hàng</a>
     <a href="/warehouse/listWarehouseZone"><i class="fas fa-map-marked-alt"></i> Quản lí khu vực</a>
     <a href="/importednote/list"><i class="fas fa-file-import"></i> Quản lí hóa đơn nhập</a>
     <a href="/bill/listBill"><i class="fas fa-file-export"></i> Quản lí hóa đơn xuất</a>
     <a href="/package/listPackage"><i class="fas fa-gift"></i> Quản lí đóng gói</a>
-
 
 </div>
 
 
 <!-- Content -->
 <div class="content" id="content">
-    <button class="add-btn" onclick="callPage()">+</button>
+    <button class="add-btn" onclick="callPage()">Tạo tài khoản</button>
     <div id="staffFormModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeForm()">&times;</span>
@@ -91,37 +206,52 @@
         </div>
     </div>
 
-    <!-- Search Box -->
-    <form class="form-search" action="/account/listStaff" method="get" style="margin-bottom: 20px;">
-        <input type="text" name="search" placeholder="Search staff..." th:value="${search}" style="width: 80%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
-        <button type="submit" style="padding: 10px; background-color: #2c3e50; color: white; border: none; border-radius: 5px;">Search</button>
-    </form>
 
-    <h1>List of Staff Accounts</h1>
+    <h1>Danh sách tài khoản nhân viên</h1>
     <table class="styled-table">
         <thead>
         <tr>
             <td>ID</td>
-            <td>Username</td>
-            <td>Display Name</td>
+            <td>Tên đăng nhập</td>
+            <td>Tên hiển thị</td>
             <td>Email</td>
-            <td>Full Name</td>
-            <td>Phone</td>
-            <td>Gender</td>
-            <td>Address</td>
-            <td>Action</td>
+            <td>Họ và tên</td>
+            <td>Số điện thoại</td>
+            <td>Giới tính</td>
+            <td>Địa chỉ</td>
+            <td>Hành động</td>
         </tr>
         <tr>
-            <td><input type="text" placeholder="Search ID" onkeyup="filterTable(0)"></td>
-            <td><input type="text" placeholder="Search Username" onkeyup="filterTable(1)"></td>
-            <td><input type="text" placeholder="Search Display Name" onkeyup="filterTable(2)"></td>
-            <td><input type="text" placeholder="Search Email" onkeyup="filterTable(3)"></td>
-            <td><input type="text" placeholder="Search Full Name" onkeyup="filterTable(4)"></td>
-            <td><input type="text" placeholder="Search Phone" onkeyup="filterTable(5)"></td>
-            <td><input type="text" placeholder="Search Gender" onkeyup="filterTable(6)"></td>
-            <td><input type="text" placeholder="Search Address" onkeyup="filterTable(7)"></td>
-            <td>Action</td>
+            <td class="twin-field">
+                <input type="text" class="filter-input" name="idFrom" onchange="filterStaff()" style="width: 25px;">
+                <input type="text" class="filter-input" name="idTo" onchange="filterStaff()" style="width: 25px;">
+            </td>
+            <td class="twin-field">
+                <input type="text" class="filter-input" name="username" onchange="filterStaff()" style="width: 100px;">
+            </td>
+            <td class="twin-field">
+                <input type="text" class="filter-input" name="displayName" onchange="filterStaff()" style="width: 120px;">
+            </td>
+            <td class="twin-field">
+                <input type="text" class="filter-input" name="email" onchange="filterStaff()" style="width: 100%;">
+            </td>
+            <td class="twin-field">
+                <input type="text" class="filter-input" name="fullname" onchange="filterStaff()" style="width: 100px;">
+            </td>
+            <td class="twin-field">
+                <input type="text" class="filter-input" name="phone" onchange="filterStaff()" style="width: 100px;">
+            </td>
+            <td class="twin-field">
+                <input type="text" class="filter-input" name="gender" onchange="filterStaff()" style="width: 80px;">
+            </td>
+            <td class="twin-field">
+                <input type="text" class="filter-input" name="address" onchange="filterStaff()" style="width: 100px;">
+            </td>
+            <td>
+
+            </td>
         </tr>
+
         </thead>
         <tbody>
         <tr th:each="account : ${accounts}">
@@ -131,17 +261,17 @@
             <td th:text="${account.email}"></td>
             <td th:text="${account.name}"></td>
             <td th:text="${account.phone}"></td>
-            <td th:text="${account.gender == null} ? '' : (account.gender ? 'Male' : 'Female')"></td>
+            <td th:text="${account.gender == null} ? '' : (account.gender ? 'Nam' : 'Nữ')"></td>
             <td th:text="${account.address}"></td>
             <td>
                 <div style="display: flex; gap: 5px;">
                     <form th:action="@{/account/updateStaff}" method="get">
                         <input type="hidden" name="id" th:value="${account.id}">
-                        <button type="submit" style="background-color: #06999c">Edit</button>
+                        <button type="submit" style="background-color: #06999c">Sửa</button>
                     </form>
-                    <form th:action="@{/account/deleteStaff}" method="post" onsubmit="return confirm('Are you sure?')">
+                    <form id="deleteForm" th:action="@{/account/deleteStaff}" method="post" onsubmit="confirmDelete(event)">
                         <input type="hidden" name="id" th:value="${account.id}">
-                        <button type="submit" style="background-color: #c0392b">Delete</button>
+                        <button type="submit" style="background-color: #c0392b" >Xóa</button>
                     </form>
                 </div>
             </td>
@@ -151,9 +281,9 @@
 
     <!-- Pagination -->
     <div class="pagination">
-        <a th:if="${currentPage > 0}" th:href="@{/account/listStaff(page=${currentPage - 1}, size=5,search=${search})}">Previous</a>
-        <span>Page <span th:text="${totalPages == 0 ? currentPage : currentPage + 1}"></span> of <span th:text="${totalPages}"></span></span>
-        <a th:if="${currentPage + 1 < totalPages}" th:href="@{/account/listStaff(page=${currentPage + 1}, size=5,search=${search})}">Next</a>
+        <a th:if="${currentPage > 0}" th:href="@{/account/listStaff(page=${currentPage - 1}, size=5,search=${search})}">Trước</a>
+        <span>Trang<span th:text="${totalPages == 0 ? currentPage : currentPage + 1}"></span>/<span th:text="${totalPages > 0 ? totalPages : 1}"></span></span>
+        <a th:if="${currentPage + 1 < totalPages}" th:href="@{/account/listStaff(page=${currentPage + 1}, size=5,search=${search})}">Sau</a>
     </div>
 </div>
 
@@ -169,6 +299,25 @@
         document.getElementById("staffFormModal").style.display = "none";
     }
 </script>
+<script>
+    function confirmDelete(event) {
+        event.preventDefault();
 
+        Swal.fire({
+            title: "Bạn có chắc chắn muốn xóa?",
+            text: "Hành động này không thể hoàn tác!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Xóa",
+            cancelButtonText: "Hủy"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                event.target.submit();
+            }
+        });
+    }
+</script>
 </body>
 </html>

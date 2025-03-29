@@ -28,7 +28,7 @@ public interface ImportedNoteRepository extends JpaRepository<ImportedNote, Long
     Page<ImportedNote> findByFilters(
             Long minId, Long maxId,
             LocalDate dateFrom, LocalDate dateTo,
-            Double minMoney, Double maxMoney,
+            double minMoney, double maxMoney,
             String supplier, Pageable pageable);
 
 

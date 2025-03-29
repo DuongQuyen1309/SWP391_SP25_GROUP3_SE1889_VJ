@@ -25,8 +25,7 @@ public interface PackageRepository extends JpaRepository<Package, Long>, JpaSpec
     @Query("SELECT p FROM Package p WHERE p.storeId = :storeId AND LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%'))")
     Page<Package> findByNameAndStoreId(String name, Long storeId, Pageable pageable);
 
-    @Query("SELECT p FROM Package p WHERE p.storeId = :storeId AND LOWER(p.color) LIKE LOWER(CONCAT('%', :color, '%'))")
-    Page<Package> findByColorAndStoreId(String color, Long storeId, Pageable pageable);
+
 
     Optional<Package> findById(Long Id);
 
@@ -35,4 +34,7 @@ public interface PackageRepository extends JpaRepository<Package, Long>, JpaSpec
 
     Page<Package> findByStoreIdAndCreatedAtBetween(Long storeId, LocalDate startDate,
                                                    LocalDate endDate, Pageable pageable);
+
+    List<Package> findByStoreId(Long storeId);
+
 }

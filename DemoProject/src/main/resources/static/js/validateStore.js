@@ -43,6 +43,10 @@ document.addEventListener("DOMContentLoaded", function () {
             document.getElementById("name-error").textContent = "Tên chỉ được chứa chữ cái và khoảng trống.";
             document.getElementById("name-error").style.display = "block";
             hasError = true;
+        } else if(name.value.length > 50) {
+            document.getElementById("name-error").textContent = "Tên không được vượt quá 50 kí tự.";
+            document.getElementById("name-error").style.display = "block";
+            hasError = true;
         }
 
         if (!phone.value || phone.value.length <= 0) {
@@ -66,7 +70,13 @@ document.addEventListener("DOMContentLoaded", function () {
             document.getElementById("taxCode-error").textContent = "Mã số thuế không được để trống.";
             document.getElementById("taxCode-error").style.display = "block";
             hasError = true;
-        }  else if (taxCode.value.length != 13 && taxCode.value.length != 10) {
+        } else if(!/^[0-9\s]+$/.test(taxCode.value)) {
+            document.getElementById("taxCode-error").textContent = "Mã số thuế chỉ được chứa số.";
+            document.getElementById("taxCode-error").style.display = "block";
+            hasError = true;
+        }
+
+        else if (taxCode.value.length != 13 && taxCode.value.length != 10 ) {
             document.getElementById("taxCode-error").textContent = "Mã số thuế phải là 10 hoặc 13 chữ số.";
             document.getElementById("taxCode-error").style.display = "block";
             hasError = true;

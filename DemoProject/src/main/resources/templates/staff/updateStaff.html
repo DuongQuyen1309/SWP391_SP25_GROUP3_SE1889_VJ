@@ -2,12 +2,12 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Update Staff</title>
+    <title>Chỉnh sửa nhân viên</title>
     <link rel="stylesheet" href="/css/base.css">
     <script src="/js/home.js"></script>
     <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
 
 
@@ -121,19 +121,47 @@
             document.querySelectorAll('.error-message').forEach(msg => msg.style.display = 'none');
         }
 
-        function validateForm() {
+        async function validateForm() {  // Biến thành async function
             let isValid = true;
-            const phone = document.getElementById('phone').value;
-            const name = document.getElementById('name').value;
-            const displayname = document.getElementById('displayname').value;
+            const phone = document.getElementById('phone').value.trim();
+            const name = document.getElementById('name').value.trim();
+            const displayname = document.getElementById('displayname').value.trim();
+            const dob = document.getElementById('dob').value.trim();
+            const username = document.querySelector('input[name="username"]').value;
+            const phoneError = document.getElementById('phone-error');
 
-            if (!/^[0-9]{10}$/.test(phone)) {
-                document.getElementById('phone-error').style.display = 'block';
+            // Reset lỗi
+            phoneError.style.display = 'none';
+            phoneError.textContent = '';
+
+            // 🛑 Kiểm tra số điện thoại trống
+            if (phone === "") {
+                phoneError.style.display = 'block';
+                phoneError.textContent = "Số điện thoại không được để trống.";
                 isValid = false;
-            } else {
-                document.getElementById('phone-error').style.display = 'none';
+            }
+            // 🛑 Kiểm tra định dạng số điện thoại
+            else if (!/^[0-9]{10}$/.test(phone)) {
+                phoneError.style.display = 'block';
+                phoneError.textContent = "Vui lòng nhập số điện thoại hợp lệ gồm 10 chữ số.";
+                isValid = false;
+            }
+            // 🛑 Kiểm tra số điện thoại trùng bằng API
+            else {
+                try {
+                    const isDuplicate = await checkOwnerPhoneExists(phone, username);
+                    console.log("Check phone duplicate:", isDuplicate);  // ✅ Log kiểm tra API
+                    if (isDuplicate) {
+                        phoneError.style.display = 'block';
+                        phoneError.textContent = "Số điện thoại này đã được sử dụng.";
+                        isValid = false;
+                    }
+                } catch (error) {
+                    console.error("Lỗi khi gọi API kiểm tra số điện thoại:", error);
+                }
             }
 
+            // 🛑 Kiểm tra tên
             if (name.length < 2) {
                 document.getElementById('name-error').style.display = 'block';
                 isValid = false;
@@ -141,6 +169,7 @@
                 document.getElementById('name-error').style.display = 'none';
             }
 
+            // 🛑 Kiểm tra Display Name
             if (displayname.length < 2) {
                 document.getElementById('displayname-error').style.display = 'block';
                 isValid = false;
@@ -148,108 +177,156 @@
                 document.getElementById('displayname-error').style.display = 'none';
             }
 
+            // 🛑 Kiểm tra Date of Birth
+            const dobError = document.getElementById('dob-error');
+            if (!dob) {
+                dobError.style.display = 'block';
+                dobError.textContent = "Ngày sinh không được để trống.";
+                isValid = false;
+            } else {
+                const dobDate = new Date(dob);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                if (dobDate >= today) {
+                    dobError.style.display = 'block';
+                    dobError.textContent = "Ngày sinh phải ở trong quá khứ.";
+                    isValid = false;
+                } else {
+                    dobError.style.display = 'none';
+                }
+            }
+
             return isValid;
         }
 
         function resetPassword() {
-            if (confirm('Are you sure you want to reset the password for this account?')) {
+            if (confirm('Bạn có chắc chắn muốn đặt lại mật khẩu cho tài khoản này không?')) {
                 let accountId = document.querySelector('input[name="id"]').value;
                 window.location.href = "/account/resetpwStaff?id=" + accountId;
             }
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelector('.profile-form').addEventListener('submit', function(event) {
-                if (!validateForm()) {
-                    event.preventDefault();
-                    return false;
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelector('.profile-form').addEventListener('submit', async function (event) {
+                event.preventDefault(); // 🛑 Chặn gửi form ngay lập tức
+
+                // 🛑 Chờ validateForm hoàn tất và kiểm tra kết quả
+                const isValid = await validateForm();
+                if (!isValid) {
+                    return; // 🛑 Nếu form không hợp lệ, dừng lại luôn
                 }
-                return true;
+
+                try {
+                    // ✅ Hiển thị hộp thoại xác nhận và đợi người dùng chọn
+                    const result = await Swal.fire({
+                        icon: "question",
+                        title: "Xác nhận thay đổi",
+                        text: "Bạn có chắc chắn muốn lưu các thay đổi?",
+                        showCancelButton: true,
+                        confirmButtonText: "Lưu",
+                        cancelButtonText: "Hủy",
+                    });
+
+                    if (!result.isConfirmed) {
+                        return; // 🛑 Nếu chọn "Hủy", không làm gì cả
+                    }
+
+                    // ✅ Hiển thị thông báo thành công
+                    await Swal.fire({
+                        icon: "success",
+                        title: "Thành Công!",
+                        text: "Thông tin cá nhân đã được lưu thành công.",
+                        confirmButtonText: "OK"
+                    });
+
+                    // 🟢 Gửi form sau khi người dùng nhấn "OK"
+                    event.target.submit();
+                } catch (error) {
+                    console.error("Lỗi khi xử lý xác nhận:", error);
+                }
             });
         });
+
+
     </script>
     <script src="/js/home.js"></script>
 </head>
 <body>
 <div th:insert="~{layout/header :: header}"></div>
 
-<!-- Sidebar -->
 <div class="sidebar" id="sidebar">
-    <h2>Tính năng</h2>
-
-    <a href="/store/mystore"><i class="fas fa-store"></i> Thông tin cửa hàng</a>
-    <a href="/dashboard/view"><i class="fas fa-chart-line"></i> Báo cáo doanh thu</a>
-    <a href="/account/listStaff"><i class="fas fa-users"></i> Quản lí nhân viên</a>
-    <a href="/product/listProduct"><i class="fas fa-box-open"></i> Quản lí sản phẩm</a>
-    <a href="/customer/listCustomer"><i class="fas fa-user"></i> Quản lí khách hàng</a>
-    <a href="/warehouse/listWarehouseZone"><i class="fas fa-map-marked-alt"></i> Quản lí khu vực</a>
-    <a href="/importednote/list"><i class="fas fa-file-import"></i> Quản lí hóa đơn nhập</a>
-    <a href="/bill/listBill"><i class="fas fa-file-export"></i> Quản lí hóa đơn xuất</a>
-    <a href="/package/listPackage"><i class="fas fa-gift"></i> Quản lí đóng gói</a>
-
-
+    <div th:insert="~{layout/sidebar :: sidebar}"></div>
 </div>
 
 <!-- Content -->
 <div class="content">
-    <h1>Update Staff Account: <span th:text="${user.name}"></span></h1>
+    <h1>Cập Nhật Tài Khoản Nhân Viên: <span th:text="${user.name}"></span></h1>
     <form class="profile-form" action="/account/updateStaff" method="POST">
-        <label for="username">Username:</label>
+        <label for="username">Tên đăng nhập:</label>
         <input type="text" id="username" name="username" th:value="${accountStaff.username}" disabled>
         <input type="hidden" name="username" th:value="${accountStaff.username}">
 
-        <label for="displayname">Display Name:</label>
+        <label for="displayname">Tên hiển thị::</label>
         <input type="text" id="displayname" name="displayname" th:value="${accountStaff.displayName}" disabled>
         <div id="displayname-error" class="error-message">Display name must be at least 2 characters long</div>
 
-        <label for="name">Full Name:</label>
+        <label for="name">Họ và Tên:</label>
         <input type="text" id="name" name="name" th:value="${user.name}" disabled>
         <div id="name-error" class="error-message">Name must be at least 2 characters long</div>
 
-        <label for="phone">Phone:</label>
+        <label for="phone">Số điện thoại:</label>
         <input type="text" id="phone" name="phone" th:value="${user.phone}" disabled>
         <div id="phone-error" class="error-message">Please enter a valid 10-digit phone number</div>
 
-        <label for="address">Address:</label>
+        <label for="address">Địa chỉ:</label>
         <input type="text" id="address" name="address" th:value="${user.address}" disabled>
 
-        <label for="dob">Date of Birth:</label>
+        <label for="dob">Ngày sinh:</label>
         <input type="date" id="dob" name="dob" th:value="${user.dateOfBirth}" disabled>
+        <div id="dob-error" class="error-message">dasdsadasd</div>
 
-        <label for="gender">Gender:</label>
+        <label for="gender">Giới tính:</label>
         <select name="gender" id="gender" disabled>
-            <option value="true" th:selected="${user.gender == true}">Male</option>
-            <option value="false" th:selected="${user.gender == false}">Female</option>
+            <option value="true" th:selected="${user.gender == true}">Nam</option>
+            <option value="false" th:selected="${user.gender == false}">Nữ</option>
         </select>
 
         <div class="button-group">
-            <button type="button" id="editBtn" onclick="enableEditing()">Edit</button>
+            <button type="button" id="editBtn" onclick="enableEditing()">Sửa</button>
             <button type="button" id="cancelBtn" onclick="cancelEditing()" style="display:none;">Cancel</button>
-            <button type="submit" id="applyBtn" style="display:none;">Apply</button>
+            <button type="submit" id="applyBtn" style="display:none;">Áp dụng</button>
             <input type="hidden" name="id" th:value="${accountStaff.id}">
 
-            <button type="button" onclick="resetPassword()">Reset Password</button>
+            <button type="button" onclick="resetPassword()">Đổi mật khẩu</button>
         </div>
     </form>
 </div>
 <script>
-
     document.addEventListener("DOMContentLoaded", function () {
         const form = document.querySelector(".profile-form");
         const username = document.getElementById("username");
-        console.log(username.value);
         const displayname = document.getElementById("displayname");
         const name = document.getElementById("name");
         const phone = document.getElementById("phone");
-        const dob= document.getElementById("dob");
-        const address = document.getElementById("address");
+        const dob = document.getElementById("dob");
 
 
-        const errorMessage = document.createElement("p");
-        errorMessage.id = "error-message";
-        errorMessage.style.color = "red";
-        errorMessage.style.fontWeight = "bold";
-        async function checkOwnerPhoneExists(phone,username) {
+        function showError(input, message) {
+            const errorDiv = document.getElementById(`${input.id}-error`);
+            if (errorDiv) {
+                errorDiv.textContent = message;
+            }
+        }
+
+        function clearError(input) {
+            const errorDiv = document.getElementById(`${input.id}-error`);
+            if (errorDiv) {
+                errorDiv.textContent = "";
+            }
+        }
+
+        async function checkOwnerPhoneExists(phone, username) {
             try {
                 let response = await fetch(`/api/check-phone-owneraccount?phone=${phone}&username=${username}`);
                 if (!response.ok) throw new Error("Lỗi kiểm tra số điện thoại");
@@ -263,62 +340,119 @@
 
         form.addEventListener("submit", async function (event) {
             event.preventDefault();
-            let errors = [];
+            let hasError = false;
 
-            if (!displayname.value) {
-                errors.push("Display Name không được để trống.");
-            }
-
-            // ✅ Kiểm tra Full Name (Không được để trống & không chứa số/ký tự đặc biệt, nhưng cho phép dấu)
-            if (!name.value || name.value.length <= 0) {
-                errors.push("Full Name không được để trống.");
-            } else if (!/^[A-Za-zÀ-ỹ\s]+$/.test(name.value)) {
-                errors.push("Full Name chỉ được chứa chữ cái và khoảng trắng (có dấu hoặc không dấu).");
-            }
-
-            if (!phone.value || phone.value.length <= 0) {
-                errors.push("Phone không được để trống.");
-            } else if (!/^0\d{9}$/.test(phone.value)) {
-                errors.push("Phone phải bắt đầu bằng số 0 và có đúng 10 chữ số.");
+            // Kiểm tra Display Name
+            if (!displayname.value || displayname.value.length < 2) {
+                showError(displayname, "Tên hiển thị phải lớn hơn 2 kí tự ");
+                hasError = true;
             } else {
-                let isPhoneExists = await checkOwnerPhoneExists(phone.value,username.value);
+                clearError(displayname);
+            }
+
+            // Kiểm tra Full Name
+            if (!name.value || name.value.length <= 0) {
+                showError(name, "Họ và tên không được để trống.");
+                hasError = true;
+            } else if (!/^[A-Za-zÀ-ỹ\s]+$/.test(name.value)) {
+                showError(name, "Họ và tên chỉ được chứa chữ cái và khoảng trắng.");
+                hasError = true;
+            } else {
+                clearError(name);
+            }
+
+            // Kiểm tra Số Điện Thoại
+            if (!phone.value || phone.value.length <= 0) {
+                showError(phone, "Số điện thoại không được để trống.");
+                hasError = true;
+            } else if (!/^0\d{9}$/.test(phone.value)) {
+                showError(phone, "Số điện thoại phải    có 10 chữ số.");
+                hasError = true;
+            } else {
+                let isPhoneExists = await checkOwnerPhoneExists(phone.value, username.value);
                 if (isPhoneExists) {
-                    errors.push("Số điện thoại này đã tồn tại, vui lòng nhập số khác.");
+                    showError(phone, "Số điện thoại đã tồn tại, vui lòng nhập số khác.");
+                    hasError = true;
+                } else {
+                    clearError(phone);
                 }
             }
 
-            // ✅ Kiểm tra Date of Birth (Không được null, phải trong quá khứ)
-            if (!dob.value || dob.value.length <= 0) {
-                errors.push("Date of Birth không được để trống.");
+            // ✅ Kiểm tra Date of Birth (Không được để trống)
+            if (!dob.value || dob.value.trim() === "") {
+                showError(dob, "Ngày sinh không được để trống");
+                hasError = true;
             } else {
                 const dobDate = new Date(dob.value);
                 const today = new Date();
-                today.setHours(0, 0, 0, 0); // Xóa giờ, phút, giây để so sánh chỉ ngày
+                today.setHours(0, 0, 0, 0);
                 if (dobDate >= today) {
-                    errors.push("Date of Birth phải là ngày trong quá khứ.");
+                    showError(dob, "Ngày sinh phải trong quá khứ");
+                    hasError = true;
+                } else {
+                    clearError(dob);
                 }
             }
 
-
-            // Nếu có lỗi, ngăn submit và hiển thị thông báo
-            if (errors.length > 0) {
-                event.preventDefault();
-                errorMessage.innerHTML = errors.join("<br>");
-                form.insertBefore(errorMessage, form.querySelector(".button-group"));
-            } else {
-                alert("Profile updated successfully!");
-
-                // ✅ Đợi 500ms để alert hiển thị, sau đó gửi form
-                setTimeout(() => {
-                    form.submit();
-                }, 500);
+            // Nếu có lỗi, không submit và không hiện popup xác nhận
+            if (hasError) {
+                return;
             }
+
+// ✅ Hiển thị hộp thoại xác nhận trước khi submit
+            const result = await Swal.fire({
+                icon: "question",
+                title: "Xác nhận thay đổi",
+                text: "Bạn có chắc chắn muốn lưu các thay đổi?",
+                showCancelButton: true,
+                confirmButtonText: "Lưu",
+                cancelButtonText: "Hủy",
+            });
+
+            if (!result.isConfirmed) {
+                return; // Nếu nhấn "Hủy", dừng lại
+            }
+
+// ✅ Hiển thị thông báo thành công rồi mới submit
+            await Swal.fire({
+                icon: "success",
+                title: "Thành Công!",
+                text: "Thông tin cá nhân đã được lưu thành công.",
+                confirmButtonText: "OK"
+            });
+
+// 🟢 Gửi form sau khi người dùng nhấn "OK"
+            form.submit();
+
         });
     });
 
+    // ✅ Hàm kiểm tra số điện thoại trùng từ API
+    async function checkOwnerPhoneExists(phone, username) {
+        try {
+            let response = await fetch(`/api/check-phone-owneraccount?phone=${phone}&username=${username}`);
+            if (!response.ok) throw new Error("Lỗi kiểm tra số điện thoại");
+            let data = await response.json();
+            return data.exists;
+        } catch (error) {
+            console.error("Lỗi khi kiểm tra phone:", error);
+            return false;
+        }
+    }
+
+    // // ✅ Ngăn submit nếu form không hợp lệ
+    // document.addEventListener('DOMContentLoaded', function() {
+    //     document.querySelector('.profile-form').addEventListener('submit', async function(event) {
+    //         if (!await validateForm()) {
+    //             event.preventDefault();
+    //         }
+    //     });
+    // });
+
+
     function enableEditing() {
         document.querySelectorAll('.profile-form input, .profile-form select').forEach(element => {
-            if (element.id !== 'username') { // Bỏ qua input có id là "name"
+            if (element.id !== 'username') { // Không cho sửa username
                 element.disabled = false;
             }
         });
@@ -349,19 +483,15 @@
 
         document.querySelectorAll('.profile-form input, .profile-form select').forEach(element => element.disabled = true);
 
-
         document.getElementById('editBtn').style.display = 'inline-block';
         document.getElementById('cancelBtn').style.display = 'none';
         document.getElementById('applyBtn').style.display = 'none';
-        document.getElementById('error-message')?.remove();
     }
 
     document.getElementById('profileForm').addEventListener('submit', function(event) {
         event.preventDefault();
 
-
         document.querySelectorAll('.profile-form input, .profile-form select').forEach(element => element.disabled = true);
-
 
         document.getElementById('editBtn').style.display = 'inline-block';
         document.getElementById('cancelBtn').style.display = 'none';
@@ -372,6 +502,7 @@
         let accountId = document.querySelector('input[name="id"]').value;
         window.location.href = "/account/resetpwStaff?id=" + accountId;
     }
+
 </script>
 
 <footer>

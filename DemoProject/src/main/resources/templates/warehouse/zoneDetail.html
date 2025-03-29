@@ -8,6 +8,22 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-top: 20px;
+            text-align: center;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: #2980b9;
+        }
         .pagination {
             text-align: center;
             margin-top: 20px;
@@ -200,15 +216,19 @@
         </tr>
         </thead>
         <tbody>
-        <tr>
-            <td><img th:src="${product.image}" width="100px" alt="">
-            </td>
+        <tr th:if="${product == null}">
+            <td colspan="4">Không có sản phẩm trong khu vực này</td>
+        </tr>
+        <tr th:if="${product != null}">
+            <td><img th:src="${product.image}" width="100px" alt=""></td>
             <td th:text="${product.name}"></td>
             <td th:text="${product.price}"></td>
             <td th:text="${product.description}"></td>
         </tr>
+
         </tbody>
     </table>
+    <button class="btn" onclick="window.location.href='/warehouse/listWarehouseZone'"> Quay Lại</button>
 </div>
 
 <footer>

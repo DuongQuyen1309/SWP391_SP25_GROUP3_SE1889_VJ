@@ -17,13 +17,16 @@
 
     <a href="/store/mystore" th:style="${#lists.contains(listHiddenPage, 'Store')} ? 'display: none;' : ''"><i class="fas fa-store"></i> Thông tin cửa hàng</a>
     <a href="/dashboard/view" th:style="${#lists.contains(listHiddenPage, 'Dashboard')} ? 'display: none;' : ''"><i class="fas fa-chart-line"></i> Báo cáo doanh thu</a>
+    <a href="/customer/listCustomer" th:style="${#lists.contains(listHiddenPage, 'listCustomer')} ? 'display: none;' : ''"><i class="fas fa-user"></i> Quản lí khách hàng</a>
     <a href="/account/listOwner" th:style="${#lists.contains(listHiddenPage, 'listOwner')} ? 'display: none;' : ''" ><i class="fas fa-users"></i> Quản lí chủ cửa hàng</a>
 
     <a href="/account/listStaff" th:style="${#lists.contains(listHiddenPage, 'listStaff')} ? 'display: none;' : ''"><i class="fas fa-users"></i> Quản lí nhân viên</a>
 
-    <a href="/product/listProduct" th:style="${#lists.contains(listHiddenPage, 'listProduct')} ? 'display: none;' : ''" ><i class="fas fa-box-open"></i> Quản lí sản phẩm</a>
 
-    <a href="/customer/listCustomer" th:style="${#lists.contains(listHiddenPage, 'listCustomer')} ? 'display: none;' : ''"><i class="fas fa-user"></i> Quản lí khách hàng</a>
+
+
+
+    <a href="/product/listProduct" th:style="${#lists.contains(listHiddenPage, 'listProduct')} ? 'display: none;' : ''" ><i class="fas fa-box-open"></i> Quản lí sản phẩm</a>
 
     <a href="/warehouse/listWarehouseZone" th:style="${#lists.contains(listHiddenPage, 'listWarehouse')} ? 'display: none;' : ''" ><i class="fas fa-map-marked-alt"></i> Quản lí khu vực</a>
 

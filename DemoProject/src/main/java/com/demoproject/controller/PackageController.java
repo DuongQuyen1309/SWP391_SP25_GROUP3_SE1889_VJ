@@ -49,7 +49,7 @@ public class PackageController {
     @GetMapping("/listPackage")
     public String getAllPackage(Model model,
                                 @RequestParam(defaultValue = "0") int page,
-                                @RequestParam(defaultValue = "3") int size,
+                                @RequestParam(defaultValue = "5") int size,
                                 @RequestParam(required = false) String idFrom,
                                 @RequestParam(required = false) String idTo,
                                 @RequestParam(required = false) String packageName,
@@ -70,11 +70,14 @@ public class PackageController {
         String role = jwtUtils.extractRole(token);
         List<String> listHiddenPage = new ArrayList<>();
         listHiddenPage.add("");
+
         if (role.equals("STAFF")) {
             listHiddenPage.add("Store");
             listHiddenPage.add("listStaff");
             listHiddenPage.add("Dashboard");
             listHiddenPage.add("listOwner");
+            listHiddenPage.add("createPackage");
+            listHiddenPage.add("deletePackage");
         }
         if (role.equals("OWNER")) {
             listHiddenPage.add("listOwner");
@@ -219,10 +222,12 @@ public class PackageController {
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
         model.addAttribute("currentPackage", currentPackage);
+        model.addAttribute("preName",currentPackage.getName());
         listHiddenPage.add("");
         if (role.equals("STAFF")) {
             listHiddenPage.add("listStaff");
         }
+
         return "package/editPackage";
     }
 
@@ -260,14 +265,12 @@ public class PackageController {
         }
         // update zone with new detail
         currentPackage.setName(package1.getName());
-        currentPackage.setColor(package1.getColor());
         currentPackage.setDescription(package1.getDescription());
         currentPackage.setUpdatedAt(LocalDate.now());
         currentPackage.setUpdatedBy(user.getId());
         try {
 
             this.packageService.updatePackage(currentPackage);
-            this.packageService.handldeSavePackage(currentPackage);
         } catch (IllegalArgumentException e) {
             model.addAttribute("errorMessage", e.getMessage());
             model.addAttribute("currentPackage", currentPackage);

@@ -56,15 +56,15 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         // ✅ Kiểm tra new password
-        if (newPasswordInput.value.trim() === "") {
-            document.getElementById("newPassword-error").textContent = "Mật khẩu mới không được để trống.";
+        if (newPasswordInput.value.length < 3 || newPasswordInput.value.length>50) {
+            document.getElementById("newPassword-error").textContent = "Mật khẩu mới phải từ 3 đến 50 kí tự.";
             document.getElementById("newPassword-error").style.display = "block";
             hasError=true;
         }
 
         // ✅ Kiểm tra confirm password
-        if (confirmPasswordInput.value.trim() === "") {
-            document.getElementById("confirmPassword-error").textContent = "Xác nhận mật khẩu không được để trống.";
+        if (confirmPasswordInput.value.length < 3 || confirmPasswordInput.value.length>50) {
+            document.getElementById("confirmPassword-error").textContent = "Mật khẩu xác nhận phải từ 3 đến 50 kí tự.";
             document.getElementById("confirmPassword-error").style.display = "block";
             hasError=true;
         } else if (newPasswordInput.value !== confirmPasswordInput.value) {

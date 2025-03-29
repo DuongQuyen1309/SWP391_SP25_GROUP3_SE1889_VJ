@@ -93,6 +93,10 @@ document.addEventListener("DOMContentLoaded", function () {
             document.getElementById("name-error").textContent = "Tên chỉ được chứa chữ cái và khoảng trống.";
             document.getElementById("name-error").style.display = "block";
             hasError = true;
+        }  else if(name.value.length > 50) {
+            document.getElementById("name-error").textContent = "Tên không được vượt quá 50 kí tự.";
+            document.getElementById("name-error").style.display = "block";
+            hasError = true;
         }
 
         if (!phone.value || phone.value.length <= 0) {
@@ -112,10 +116,21 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
 
+        if ( address.value.length > 50) {
+            document.getElementById("address-error").textContent = "Địa chỉ không được vượt quá 50 kí tự.";
+            document.getElementById("address-error").style.display = "block";
+            hasError = true;
+        }
 
+        const dob = document.getElementById("dob");
         const dobDate = new Date(dob.value);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
+        if(dob.value === ""){
+            document.getElementById("dob-error").textContent = "Ngày sinh không được để trống.";
+            document.getElementById("dob-error").style.display = "block";
+            hasError = true;
+        }
         if (dobDate >= today) {
             document.getElementById("dob-error").textContent = "Ngày sinh phải trong quá khứ.";
             document.getElementById("dob-error").style.display = "block";

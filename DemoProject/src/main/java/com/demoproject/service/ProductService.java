@@ -3,10 +3,8 @@ package com.demoproject.service;
 import com.demoproject.dto.ImportProductDTO;
 import com.demoproject.dto.ProductDTO;
 import com.demoproject.dto.ProductDataDTO;
-import com.demoproject.entity.ImportedNote;
-import com.demoproject.entity.Product;
-import com.demoproject.entity.Users;
-import com.demoproject.entity.Zone;
+import com.demoproject.entity.*;
+import com.demoproject.repository.CustomerRepository;
 import com.demoproject.repository.ImportedNoteRepository;
 import com.demoproject.repository.ProductRepository;
 import com.demoproject.repository.ZoneRepository;
@@ -41,8 +39,8 @@ public class ProductService {
     private final ObjectMapper objectMapper;
     private final ImportedNoteRepository importedNoteRepository;
     private final ZoneRepository zoneRepository;
-
-    public void createProduct(Optional<Users> users, String name, String description, double price, MultipartFile imageFile) throws IOException {
+    private final CustomerRepository customerRepository;
+    public void createProduct(Optional<Users> users, String name, String description, double price, MultipartFile imageFile) throws IOException{
         Product product = new Product();
         product.setName(name);
         product.setDescription(description);
@@ -127,7 +125,7 @@ public class ProductService {
 
     public void importProduct(Users users, ImportProductDTO importProductDTO) {
         ObjectMapper objectMapper = new ObjectMapper();
-        List<ProductDataDTO> dataDTOList = importProductDTO.getProductData();
+        List<ProductDTO> dataDTOList = importProductDTO.getProductData();
 
         String productDataJson = "";
         try {
@@ -137,21 +135,18 @@ public class ProductService {
         }
 
         double totalPrice = 0;
-        for (ProductDataDTO productDataDTO : importProductDTO.getProductData()) {
+        for (ProductDTO productDTO : importProductDTO.getProductData()) {
             // Kiểm tra id trước khi tìm product thông qua id
-            if(productDataDTO.getId()!=null){
-                Optional<Product> product = productRepository.findById(productDataDTO.getId());
-                if (product.isPresent()) {
-                    System.out.println(productDataDTO.getZone());
-                    product.get().setQuantity(product.get().getQuantity() + productDataDTO.getQuantity());
-                    Zone newZone = zoneRepository.getZoneById(Long.parseLong(productDataDTO.getZone()));
-                    newZone.setProduct(product.get());
-                    zoneRepository.save(newZone);
-                    product.get().getZones().add(newZone);
-                    productRepository.save(product.get());
-                }
+            Optional<Product> product = productRepository.findById(Long.valueOf(productDTO.getId()));
+            if (product.isPresent()) {
+                product.get().setQuantity(product.get().getQuantity() + productDTO.getQuantity());
+                Zone zone = zoneRepository.getZoneById((long) productDTO.getZoneId());
+                product.get().getZones().add(zone);
+                zone.setProduct(product.get());
+                zoneRepository.save(zone);
+                productRepository.save(product.get());
             }
-            totalPrice += productDataDTO.getTotal();
+            totalPrice += productDTO.getSubtotal();
         }
 
         //Xử lí importeDate sang dạng localdatetime
@@ -166,7 +161,11 @@ public class ProductService {
         importedNote.setCreatedAt(lcdate);
         importedNote.setCreatedBy(users.getId());
         importedNote.setStoreId(users.getStoreId());
-        importedNote.setCustomerId(users.getId());
+        Optional<Customer> customer = customerRepository.findByPhone(importProductDTO.getCustomerPhone());
+        if (customer.isPresent()) importedNote.setCustomerId(customer.get().getId());
+        importedNote.setPortedMoney(importProductDTO.getPortedMoney());
+        importedNote.setPaidMoney(importProductDTO.getPaidMoney());
+        importedNote.setDebtMoney(importProductDTO.getDebtMoney());
         importedNoteRepository.save(importedNote);
 
     }
@@ -210,6 +209,17 @@ public class ProductService {
             return productRepository.findByDescriptionContainingAndStoreId(searchKeyWord,storeID, pageable);
         }
         return productRepository.findByStoreId(storeID,pageable);
+    }
+    public Page<Product> getAllProductsWithFilter(
+            int page, int size, String sortField, String sortDirection,
+            long minId, long maxId,
+            double minPrice, double maxPrice,
+            String name, String description, Long storeID){
+        Sort sort = sortDirection.equalsIgnoreCase(Sort.Direction.ASC.name())
+                ? Sort.by(sortField).ascending()
+                : Sort.by(sortField).descending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        return productRepository.findByFilters(minId,maxId,minPrice,maxPrice,name,description, storeID,pageable);
     }
 
     public Page<Product> getProductByKeyWordName(int page, int size, String sortFiled, String sortDirection, String keyword){
@@ -297,6 +307,18 @@ public class ProductService {
         } catch (Exception e) {
             return 1;
         }
+    }
+
+
+    public boolean isProductNameExists(String name){
+        return productRepository.existsProductByName(name);
+    }
+
+    public boolean existsByNameAndNotId(String name, Long id){
+        if (id != null){
+            return productRepository.existsProductByNameAndId(name, id);
+        }
+        return productRepository.existsProductByName(name);
     }
 
 

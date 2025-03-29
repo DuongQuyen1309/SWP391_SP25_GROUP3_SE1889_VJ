@@ -49,7 +49,7 @@ public class ZoneController {
     @GetMapping("/listWarehouseZone")
     public String getAllZone(Model model,
                              @RequestParam(defaultValue = "0") int page,
-                             @RequestParam(defaultValue = "3") int size,
+                             @RequestParam(defaultValue = "5") int size,
                              @RequestParam(required = false) String idFrom,
                              @RequestParam(required = false) String idTo,
                              @RequestParam(required = false) String name,
@@ -211,9 +211,12 @@ public class ZoneController {
         model.addAttribute("zone", zone);
         model.addAttribute("id", id);
         System.out.println("id: "+id);
+
         Product product = zoneService.getProductByZoneId(Long.parseLong(id));
-        System.out.println("product: "+product.getName());
-        model.addAttribute("product", product);
+        if(product!=null){
+            model.addAttribute("product", product);
+        }
+
 
         return "warehouse/zoneDetail";
     }
@@ -333,6 +336,8 @@ public class ZoneController {
         }
         return zones;
     }
+
+
 
 
 

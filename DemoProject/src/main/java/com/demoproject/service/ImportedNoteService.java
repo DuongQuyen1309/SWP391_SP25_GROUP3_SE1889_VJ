@@ -40,26 +40,27 @@ public class ImportedNoteService {
                 .portedMoney(im.getPortedMoney())
                 .createdAt(im.getCreatedAt())
                 .totalCost(im.getTotalCost())
+                .productData(im.getProductData())
                 .build();
     }
 
 
     public Page<ImportedNote> findImportedNotesWithFilters(
             int page, int size, String sortField, String sortDirection,
-            long minId, long maxId,
+            String idFrom, String idTo,
             LocalDate dateFrom, LocalDate dateTo,
-            double minMoney, double maxMoney,
+            String moneyFrom, String moneyTo,
             String supplier) {
+        double minMoney = moneyFrom != null ? Double.parseDouble(moneyFrom) : 0;
+        double maxMoney = moneyTo != null ? Double.parseDouble(moneyTo) : Double.MAX_VALUE;
+        long minId = idFrom != null ? Long.parseLong(idFrom) : 0;
+        long maxId = idTo != null ? Long.parseLong(idTo) : Long.MAX_VALUE;
 
         Sort sort = sortDirection.equalsIgnoreCase(Sort.Direction.ASC.name())
                 ? Sort.by(sortField).ascending()
                 : Sort.by(sortField).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
-
-        Page<ImportedNote> pg= importedNoteRepository.findByFilters(
-                minId, maxId, dateFrom, dateTo, minMoney, maxMoney, supplier, pageable);
-        System.out.println(pg +"aaaa");
-        return pg;
+        return importedNoteRepository.findByFilters(minId, maxId, dateFrom, dateTo, minMoney, maxMoney, supplier, pageable);
     }
 
 }

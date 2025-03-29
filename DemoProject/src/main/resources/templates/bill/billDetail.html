@@ -80,11 +80,11 @@
 </div>
 <div class="content">
     <div class="container">
-        <h2>Chi tiết hoá đơn</h2>
+        <h1>Chi tiết hoá đơn</h1>
         <div class="details">
             <p><strong>Mã hóa đơn:</strong> <span th:text="${bill.id}"></span></p>
             <p><strong>Tên khách hàng:</strong> <span th:text="${bill.customer.name}"></span></p>
-            <p><strong> Địa Chỉ</strong>:</strong> <span th:text="${bill.customer.address}"></span></p>
+            <p><strong>Địa Chỉ</strong>:</strong> <span th:text="${bill.customer.address}"></span></p>
             <p><strong>Số điện thoại:</strong> <span th:text="${bill.customer.phone}"></span></p>
             <p><strong>Ngày mua hàng:</strong> <span th:text="${#temporals.format(bill.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></span></p>
             <p><strong>Giảm giá:</strong> <span th:text="${(bill.discount != null ) ? bill.discount: 0}+'%'"></span></p>

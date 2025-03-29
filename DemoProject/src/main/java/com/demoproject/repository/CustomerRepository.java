@@ -95,4 +95,6 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
     List<Customer> getAllCustomerInStore(@Param("storeID") Long storeID );
 
     boolean existsByPhoneAndIdNot(String phone, Long customerId);
+
+    List<Customer> findByStoreIdAndIsDeleteFalse(Long id);
 }

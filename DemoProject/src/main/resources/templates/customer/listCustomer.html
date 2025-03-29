@@ -143,7 +143,7 @@
     <h1>Danh sách khách hàng</h1>
     <div class="button-container">
       <button onclick="callPage()">Tạo khách hàng</button>
-      <button onclick="callUpdate()">Lịch sử chỉnh sửa khách hàng</button>
+      <button onclick="callUpdate()" th:style="${#lists.contains(listHiddenPage, 'listUpdate')} ? 'display: none;' : ''">Lịch sử chỉnh sửa khách hàng</button>
     </div>
   </div>
 
@@ -168,13 +168,13 @@
   <table class="styled-table">
     <thead>
     <tr>
-      <td>Id</td>
+      <td>ID</td>
       <td>Tên</td>
-      <td>Ngày sinh</td>
+<!--      <td>Ngày sinh</td>-->
       <td>Địa chỉ</td>
       <td>Số điện thoại</td>
       <td>Trạng thái tiền</td>
-      <td>Tạo bởi</td>
+      <td>Người tạo</td>
       <td>Hành động</td>
     </tr>
     <tr>
@@ -191,14 +191,14 @@
       <td>
         <input type="text" class="filter-input" name="name" onchange="filterCustomers()" style="width: 90%;">
       </td>
-      <td class="twin-field" style="width: 5%;">
-        <div style="display: flex; gap: 10%; width: 100%;">
-          <input type="date" class="filter-input" name="dobFrom" onchange="filterCustomers()"
-                 style="width: 48%;">
-          <input type="date" class="filter-input" name="dobTo" onchange="filterCustomers()"
-                 style="width: 48%;">
-        </div>
-      </td>
+<!--      <td class="twin-field" style="width: 5%;">-->
+<!--        <div style="display: flex; gap: 10%; width: 100%;">-->
+<!--          <input type="date" class="filter-input" name="dobFrom" onchange="filterCustomers()"-->
+<!--                 style="width: 48%;">-->
+<!--          <input type="date" class="filter-input" name="dobTo" onchange="filterCustomers()"-->
+<!--                 style="width: 48%;">-->
+<!--        </div>-->
+<!--      </td>-->
       <td>
         <input type="text" class="filter-input" name="address" onchange="filterCustomers()" style="width: 80%;">
       </td>
@@ -226,7 +226,7 @@
     <tr th:each="customer : ${customers}">
       <td th:if="${customer != null}" th:text="${customer.id}"></td>
       <td th:if="${customer != null}" th:text="${customer.name}"></td>
-      <td th:if="${customer != null}" th:text="${customer.dob}"></td>
+<!--      <td th:if="${customer != null}" th:text="${customer.dob}"></td>-->
       <td th:if="${customer != null}" th:text="${customer.address}"></td>
       <td th:if="${customer != null}"
           th:text="${customer.phone != null and #strings.equals(role, 'OWNER')}
@@ -234,19 +234,26 @@
              : ${'x'.repeat(customer.phone.length() - 3) + customer.phone.substring(customer.phone.length() - 3)}">
       </td>
       <td th:if="${customer != null}" th:text="${customer.moneyState}"></td>
-      <td th:if="${customer != null}">
+      <td  style="width: 10%" th:if="${customer != null}">
         <span th:each="user : ${usersList}"
               th:text="${user.id == customer.createdBy ? user.name : ''}"></span>
       </td>
-      <td>
-        <div style="display: flex; gap: 5px;">
-          <a th:href="@{/customer/updateCustomer/{id}(id=${customer.id})}" class="action-button" title="Update Customer">
-            <i class="fas fa-pen-square"></i>
-          </a>
+      <td style="width: 25%">
+        <div style="display: flex; gap: 5px; width: 100%">
+          <form th:action="@{/customer/updateCustomer/{id}(id=${customer.id})}" method="get" >
+            <button type="submit" style="background-color: #06999c">Sửa</button>
+          </form>
+<!--          <a th:href="@{/customer/updateCustomer/{id}(id=${customer.id})}" class="action-button" title="Update Customer" style="background-color: #06999c">-->
+<!--            Update-->
+<!--          </a>-->
           <form th:action="@{../note/listNote/{id}(id=${customer.id})}" method="get">
-            <button type="submit" style="padding: 0; border: none; background: none;" title="View Note Detail">
-              <i class="fas fa-clipboard-list" style="font-size: 30px; color: #06999c;"></i> <!-- Icon Note Detail -->
-            </button>
+<!--            <button type="submit" style="padding: 0; border: none; background: none;" title="View Note Detail">-->
+<!--              <i class="fas fa-clipboard-list" style="font-size: 30px; color: #06999c;"></i> &lt;!&ndash; Icon Note Detail &ndash;&gt;-->
+<!--            </button>-->
+            <button type="submit" style="background-color: #06999c">Phiếu Nợ</button>
+          </form>
+          <form th:action="@{/customer/detailCustomer/{id}(id=${customer.id})}" method="get" >
+            <button type="submit" style="background-color: #06999c">Chi tiết</button>
           </form>
         </div>
       </td>
@@ -267,7 +274,7 @@
       Trước
     </a>
 
-    <span>Trang <span th:text="${currentPage + 1}"></span> / <span th:inline="text">[[${totalPages == 0 ? 1 : totalPages}]]</span></span>
+    <span>Trang<span th:text="${currentPage + 1}"></span>/<span th:inline="text">[[${totalPages == 0 ? 1 : totalPages}]]</span></span>
 
     <a th:if="${currentPage + 1 < totalPages}"
        th:href="@{/customer/listCustomer(page=${currentPage + 1}, size=5,

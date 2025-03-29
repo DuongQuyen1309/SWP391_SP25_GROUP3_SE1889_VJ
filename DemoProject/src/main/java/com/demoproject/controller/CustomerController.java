@@ -117,6 +117,7 @@ public class CustomerController {
             listHiddenPage.add("Store");
             listHiddenPage.add("listOwner");
             listHiddenPage.add("Dashboard");
+            listHiddenPage.add("listUpdate");
         }
         if(role.equals("OWNER")){
             listHiddenPage.add("listOwner");
@@ -453,6 +454,62 @@ public class CustomerController {
         cookie.setPath("/");
         response.addCookie(cookie);
         return "redirect:/customer/listCustomer";
+    }
+    @GetMapping("/detailCustomer/{id}")
+    public String getDetailCustomer(Model model,
+                                     @PathVariable Long id,
+                                     @CookieValue(value = "token", required = false) String token, HttpServletResponse response
+    ) {
+        Customer customer = customerService.getCustomer(id);
+
+        String username = jwtUtils.extractUsername(token);
+        Optional<Account> optAccount = accountService.findByUsernameAndIsDeleteFalse(username);
+        Account account = optAccount.orElse(null);
+        Users user = userService.getUserProfile(account.getUserId()).orElse(null);
+        model.addAttribute("user", user);
+        String role = jwtUtils.extractRole(token);
+
+        List<Long> relatedUserList = new ArrayList<>();
+        if(role.equalsIgnoreCase("OWNER")){
+            relatedUserList = userService.getStaffID1(user.getId());
+            relatedUserList.add(user.getId());
+        }else if(role.equalsIgnoreCase("STAFF")){
+            Long ownerId = userService.getOwnerID(user.getId());
+            relatedUserList = userService.getStaffID1(ownerId);
+            relatedUserList.add(ownerId);
+        }
+        List<Users> usersList = new ArrayList<>();
+        usersList = userService.getUsers(relatedUserList);
+        model.addAttribute("usersList",usersList);
+
+        // bắt đầu đoạn code moi
+        String storeId = jwtUtils.extractStoreId(token);
+        Long last_storedID = Long.parseLong(storeId);
+        Long createdByUserID = customer.getCreatedBy();
+        Optional<Users> createdByUser = userService.getUserProfile(createdByUserID);
+        if(!last_storedID.equals(createdByUser.get().getStoreId())) {
+            return "redirect:/customer/listCustomer";
+        }
+        // ket thuc đoạn code moi
+
+        List<String> listHiddenPage = new ArrayList<>();
+        if (role.equals("STAFF")) {
+            listHiddenPage.add("listStaff");
+            listHiddenPage.add("Store");
+            listHiddenPage.add("listOwner");
+            listHiddenPage.add("Dashboard");
+        }
+        if(role.equals("OWNER")){
+            listHiddenPage.add("listOwner");
+        }
+        model.addAttribute("listHiddenPage", listHiddenPage);
+        model.addAttribute("account", account);
+        model.addAttribute("customer", customer);
+        model.addAttribute("role",role);
+
+        return "customer/detailCustomer";
+
+
     }
 
 }

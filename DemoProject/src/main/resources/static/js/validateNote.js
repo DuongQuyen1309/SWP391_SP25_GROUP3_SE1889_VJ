@@ -20,6 +20,9 @@ function numberToWords(num) {
     const tens = ["", "Mười", "Hai mươi", "Ba mươi", "Bốn mươi", "Năm mươi", "Sáu mươi", "Bảy mươi", "Tám mươi", "Chín mươi"];
     const thousands = ["", "Ngàn", "Triệu", "Tỷ"];
 
+    if (/\D/.test(num.toString().replace(/,/g, ''))) {
+        return "";
+    }
 
     if (num == 0) return "Không";
     let words = "";
@@ -90,14 +93,11 @@ document.addEventListener("DOMContentLoaded", function () {
             moneyError.push("Tiền phải bằng kiểu dữ liệu int, nhỏ hơn hoặc bằng 2,147,483,647.");
         }
 
-        if(noteImage.value.trim() === ""){
-            noteImageError.push("Ảnh không được để trống");
-        }
 
         // Kiểm tra Note Image
         const file = noteImage.files[0];
         const fileSizeMB = file ? file.size / (1024 * 1024) : 0;
-        if (money.value.trim() !== "" && money.value !== 0 && noteImage.value.trim() === "") {
+        if (noteImage.value.trim() === "") {
             noteImageError.push("Lưu ý hình ảnh không được để trống khi trạng thái tiền không phải là số không.");
         } else if (fileSizeMB > 10) {
             noteImageError.push("Ảnh không được vượt quá 10MB.");

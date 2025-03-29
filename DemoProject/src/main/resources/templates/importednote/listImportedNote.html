@@ -3,11 +3,11 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>RSMS</title>
+    <title>Hóa đơn nhập</title>
     <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/importednote.css">
     <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <Link rel="stylesheet" href="/css/importednote.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         .pagination {
@@ -34,6 +34,18 @@
             margin: 0 10px;
         }
 
+        .importBtn{
+            position: absolute;
+            margin-left: 1100px;
+            top: 50px;
+            background-color: #D67C2C;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
     </style>
 
     <script src="/js/home.js"></script>
@@ -52,7 +64,6 @@
                     params.append(input.name, input.value);
                 }
             });
-
             window.location.href = '/importednote/list' + '?' + params.toString();
         }
         document.addEventListener("DOMContentLoaded", function() {
@@ -83,21 +94,21 @@
 <!-- Content -->
 <div class="content" id="content">
 
-    <button class="add-btn" onclick="ImportProductForm()"
-            th:style="${#lists.contains(listHiddenPage, 'createProduct')} ? 'display: none;' : ''">+
+    <button class="importBtn" onclick="ImportProductForm()"
+            th:style="${#lists.contains(listHiddenPage, 'createProduct')} ? 'display: none;' : ''">Tạo hóa đơn nhập
     </button>
 
     <!-- List -->
-    <h1>List of Imported Note</h1>
+    <h1>Danh sách hóa đơn nhập</h1>
 
     <table class="styled-table">
         <thead>
         <tr>
-            <td>#No</td>
-            <td>Imported Date</td>
-            <td>Supplier</td>
-            <td>Total Money</td>
-            <td>Action</td>
+            <td>ID</td>
+            <td>Ngày nhập</td>
+            <td>Nhà cung cấp</td>
+            <td>Tổng tiền </td>
+            <td>Hành động</td>
         </tr>
         <tr>
             <td class="twin-field">
@@ -125,7 +136,7 @@
             <td th:text="${importednote.customer.name}"></td>
             <td th:attr="data-price=${importednote.totalCost}" class="price-cell"></td>
             <td>
-                <button class="view-details" th:attr="data-id=${importednote.id}">View details</button>
+                <button class="view-details" th:attr="data-id=${importednote.id}" style="background-color: #06999c">Xem chi tiết</button>
             </td>
         </tr>
         </tbody>
@@ -134,7 +145,6 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Chi Tiết Phiếu Nhập Kho</h2>
-                <p>Thông tin sản phẩm trong phiếu nhập kho</p>
                 <span class="close" id="close">&times;</span>
             </div>
             <div class="modal-body">
@@ -157,7 +167,7 @@
                             <span class="value" id="debtMoney"></span>
                         </div>
                         <div class="detail-item">
-                            <span class="label">Tiền vận chuyển :</span>
+                            <span class="label">Tiền vận chuyển:</span>
                             <span class="value" id="portedMoney"></span>
                         </div>
                     </div>
@@ -176,6 +186,7 @@
                         </div>
                     </div>
                 </div>
+                <p>Thông tin sản phẩm trong phiếu nhập kho</p>
                 <div class="items-table">
                     <table>
                         <thead>
@@ -204,7 +215,7 @@
             Trước
         </a>
 
-        <span>Page <span th:text="${currentPage}"></span> of <span th:text="${totalPages > 0 ? totalPages : 1}"></span></span>
+        <span>Trang<span th:text="${currentPage}"></span>/<span th:text="${totalPages > 0 ? totalPages : 1}"></span></span>
 
         <!-- Nút "Sau" chỉ hiển thị khi currentPage < totalPages -->
         <a style="text-decoration: none"

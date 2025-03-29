@@ -3,83 +3,83 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Rice Sales Management</title>
+    <title>Danh sách tài khoản chủ cửa hàng</title>
     <link rel="stylesheet" href="/css/base.css">
     <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<style>
-    .add-owner {
-        position: absolute; /* Giữ vị trí cố định so với content */
-        right: 20px; /* Sát mép phải của content */
-        top: 90px; /* Đẩy xuống dưới một chút */
-        background-color: #d35400; /* Cam */
-        color: white;
-        font-size: 13px;
-        border: none;
-        width: 150px;
-        height: 40px;
-        border-radius: 10px;
-        cursor: pointer;
-        transition: 0.3s;
-    }
+    <style>
+        .add-owner {
+            position: absolute; /* Giữ vị trí cố định so với content */
+            right: 20px; /* Sát mép phải của content */
+            top: 90px; /* Đẩy xuống dưới một chút */
+            background-color: #d35400; /* Cam */
+            color: white;
+            font-size: 13px;
+            border: none;
+            width: 150px;
+            height: 40px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
 
-    .add-owner:hover {
-        background-color: #e67e22;
-        transform: scale(1.05);
-    }
-    .pagination {
-        text-align: center;
-        margin-top: 20px;
-    }
+        .add-owner:hover {
+            background-color: #e67e22;
+            transform: scale(1.05);
+        }
+        .pagination {
+            text-align: center;
+            margin-top: 20px;
+        }
 
-    .pagination a {
-        display: inline-block;
-        padding: 8px 16px;
-        margin: 4px;
-        text-decoration: none;
-        background-color: #2c3e50;
-        color: white;
-        border-radius: 5px;
-    }
+        .pagination a {
+            display: inline-block;
+            padding: 8px 16px;
+            margin: 4px;
+            text-decoration: none;
+            background-color: #2c3e50;
+            color: white;
+            border-radius: 5px;
+        }
 
-    .pagination a:hover {
-        background-color: #1a252f;
-    }
+        .pagination a:hover {
+            background-color: #1a252f;
+        }
 
-    .pagination span {
-        font-size: 18px;
-        margin: 0 10px;
-    }
+        .pagination span {
+            font-size: 18px;
+            margin: 0 10px;
+        }
 
-    .form-search input:focus {
-        border-color: #e67e22;
-        box-shadow: 0 0 8px rgba(230, 126, 34, 0.5);
-    }
-    .twin-field {
+        .form-search input:focus {
+            border-color: #e67e22;
+            box-shadow: 0 0 8px rgba(230, 126, 34, 0.5);
+        }
+        .twin-field {
 
-    }
+        }
 
-    .twin-field input {
-        border: 1px solid rgb(255, 255, 255); /* Viền nhẹ */
-        transition: border 0.3s, background-color 0.3s;
-        color: #040404; /* Màu chữ trắng để nổi bật */
-        font-size: 14px;
-        border-radius: 5px;
-    }
-    /* Placeholder màu sáng để dễ nhìn thấy */
-    .twin-field input::placeholder {
-        color: rgba(255, 255, 255, 0.7); /* Màu chữ nhạt hơn để không lẫn với dữ liệu */
-    font-style: italic;
-    }
+        .twin-field input {
+            border: 1px solid rgb(255, 255, 255); /* Viền nhẹ */
+            transition: border 0.3s, background-color 0.3s;
+            color: #040404; /* Màu chữ trắng để nổi bật */
+            font-size: 14px;
+            border-radius: 5px;
+        }
+        /* Placeholder màu sáng để dễ nhìn thấy */
+        .twin-field input::placeholder {
+            color: rgba(255, 255, 255, 0.7); /* Màu chữ nhạt hơn để không lẫn với dữ liệu */
+            font-style: italic;
+        }
 
-    /* Hiệu ứng khi focus */
-    .twin-field input:focus {
-        outline: none;
-        border-color: #f39c12; /* Viền màu cam khi focus */
-        box-shadow: 0px 0px 5px rgba(243, 156, 18, 0.8); /* Hiệu ứng sáng nhẹ */
-    }
-</style>
+        /* Hiệu ứng khi focus */
+        .twin-field input:focus {
+            outline: none;
+            border-color: #f39c12; /* Viền màu cam khi focus */
+            box-shadow: 0px 0px 5px rgba(243, 156, 18, 0.8); /* Hiệu ứng sáng nhẹ */
+        }
+    </style>
     <script src="/js/home.js"></script>
     <script>
         function callPage() {
@@ -156,11 +156,11 @@
 
 <!-- Content -->
 <div class="content" id="content">
-    <h1>List of Owner Accounts</h1>
+    <h1>Danh sách tài khoản chủ cửa hàng</h1>
     <!-- Modal Form -->
-    <button class="add-owner" onclick="callPage()">Create New Account</button>
+    <button class="add-owner" onclick="callPage()">Tạo tài khoản mới</button>
 
-<!-- List -->
+    <!-- List -->
 
 
 
@@ -168,10 +168,10 @@
         <thead>
         <tr>
             <th onclick="sortTable(0)">ID</th>
-            <th onclick="sortTable(1)">Username</th>
-            <th onclick="sortTable(2)">Display Name</th>
+            <th onclick="sortTable(1)">Tài khoản</th>
+            <!--            <th onclick="sortTable(2)">Tên hiển thị</th>-->
             <th onclick="sortTable(3)">Email</th>
-            <th onclick="sortTable(4)">Full Name</th>
+            <th onclick="sortTable(4)">Tên</th>
             <td>Action</td>
         </tr>
         <tr>
@@ -183,9 +183,9 @@
                 <input type="text" class="filter-input" name="username" onchange="filterOwner()" style="width: 100px;">
             </td>
 
-            <td class="twin-field">
-                <input type="text" class="filter-input" name="displayName" onchange="filterOwner()" style="width: 120px;">
-            </td>
+            <!--            <td class="twin-field">-->
+            <!--                <input type="text" class="filter-input" name="displayName" onchange="filterOwner()" style="width: 120px;">-->
+            <!--            </td>-->
             <td class="twin-field">
                 <input type="text" class="filter-input" name="email" onchange="filterOwner()" style="width: 100%;">
             </td>
@@ -200,21 +200,22 @@
         <tr th:each="account : ${accounts}">
             <td th:text="${account.id}"></td>
             <td th:text="${account.username}"></td>
-            <td th:text="${account.displayName}"></td>
+            <!--            <td th:text="${account.displayName}"></td>-->
             <td th:text="${account.email}"></td>
             <td th:text="${account.name}"></td>
 
             <td>
                 <div style="display: flex; gap: 5px;">
 
-                <form th:action="@{/account/viewOwner}" method="get" >
-                    <input type="hidden" name="id" th:value="${account.id}">
-                    <button type="submit" style="background-color: #06999c">View</button>
-                </form>
-                    <form th:action="@{/account/deleteOwner}" method="post" onsubmit="return confirmDelete(event, this)">
+                    <form th:action="@{/account/viewOwner}" method="get" >
                         <input type="hidden" name="id" th:value="${account.id}">
-                        <button type="submit">Delete</button>
+                        <button type="submit" style="background-color: #06999c">Xem</button>
                     </form>
+                    <form th:action="@{/account/deleteOwner}" method="post" id="deleteOwnerForm" onsubmit="confirmDeleteOwner(event)">
+                        <input type="hidden" name="id" th:value="${account.id}">
+                        <button type="submit" >Xóa</button>
+                    </form>
+
                 </div>
             </td>
         </tr>
@@ -224,12 +225,12 @@
     <!-- Phân trang -->
     <div class="pagination">
         <a th:if="${currentPage > 0}" th:href="@{/account/listOwner(page=${currentPage - 1}, size=5,idFrom=${idFrom}, idTo=${idTo},
-       username=${username},displayName=${displayName},email=${email},name=${fullname})}">Previous</a>
+       username=${username},displayName=${displayName},email=${email},name=${fullname})}">Trước</a>
 
         <span>Page <span th:text="${totalPages==0? currentPage:  currentPage + 1}"></span> of <span th:text="${totalPages }  "></span></span>
 
         <a th:if="${currentPage + 1 < totalPages}" th:href="@{/account/listOwner(page=${currentPage + 1}, size=5,idFrom=${idFrom}, idTo=${idTo},
-       username=${username},displayName=${displayName},email=${email},name=${fullname})}">Next</a>
+       username=${username},displayName=${displayName},email=${email},name=${fullname})}">Sau</a>
     </div>
 
 
@@ -238,6 +239,24 @@
 <footer>
     &copy; 2025 Rice Sales Management. All Rights Reserved.
 </footer>
-
+<script>
+    function confirmDeleteOwner(event) {
+        event.preventDefault();
+        Swal.fire({
+            title: "Bạn có chắc chắn muốn xóa chủ sở hữu này?",
+            text: "Hành động này không thể hoàn tác!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Xóa",
+            cancelButtonText: "Hủy"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                event.target.submit();
+            }
+        });
+    }
+</script>
 </body>
 </html>

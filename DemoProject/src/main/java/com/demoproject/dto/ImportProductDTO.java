@@ -1,9 +1,7 @@
 package com.demoproject.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import java.util.List;
 
@@ -11,7 +9,9 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class ImportProductDTO {
-    private String importDate;
-    private List<ProductDataDTO> productData;
+    String importDate, customerPhone;
+    double paidMoney, debtMoney, portedMoney;
+    List<ProductDTO> productData;
 }

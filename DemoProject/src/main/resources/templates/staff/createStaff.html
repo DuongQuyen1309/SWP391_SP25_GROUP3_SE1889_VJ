@@ -3,8 +3,10 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Rice Sales Management</title>
+    <title>Tạo tài khoản nhân viên</title>
     <link rel="stylesheet" href="/css/base.css">
+    <script  src="/js/validateOwner1.js"></script>
+
     <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -56,87 +58,87 @@
 
     </style>
     <script src="/js/home.js"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const form = document.querySelector(".create-form");
-            const usernameInput = document.getElementById("username");
-            const passwordInput = document.getElementById("password");
-            const displaynameInput = document.getElementById("displayname");
-            const emailInput = document.getElementById("email");
-            const errorContainer = document.createElement("div");
-            errorContainer.style.color = "red";
-            errorContainer.style.fontWeight = "bold";
+    <!--    <script>-->
+    <!--        document.addEventListener("DOMContentLoaded", function () {-->
+    <!--            const form = document.querySelector(".create-form");-->
+    <!--            const usernameInput = document.getElementById("username");-->
+    <!--            const passwordInput = document.getElementById("password");-->
+    <!--            const displaynameInput = document.getElementById("displayname");-->
+    <!--            const emailInput = document.getElementById("email");-->
+    <!--            const errorContainer = document.createElement("div");-->
+    <!--            errorContainer.style.color = "red";-->
+    <!--            errorContainer.style.fontWeight = "bold";-->
 
-            async function checkUsernameExists(username) {
-                try {
-                    let response = await fetch(`/api/check-username?username=${username}`);
-                    let data = await response.json();
-                    return data.exists;
-                } catch (error) {
-                    console.error("Error checking username:", error);
-                    return false;
-                }
-            }
+    <!--            async function checkUsernameExists(username) {-->
+    <!--                try {-->
+    <!--                    let response = await fetch(`/api/check-username?username=${username}`);-->
+    <!--                    let data = await response.json();-->
+    <!--                    return data.exists;-->
+    <!--                } catch (error) {-->
+    <!--                    console.error("Error checking username:", error);-->
+    <!--                    return false;-->
+    <!--                }-->
+    <!--            }-->
 
-            async function checkEmailExists(email) {
-                try {
-                    let response = await fetch(`/api/check-email?email=${email}`);
-                    let data = await response.json();
-                    return data.exists;
-                } catch (error) {
-                    console.error("Error when checking email:", error);
-                    return false;
-                }
-            }
+    <!--            async function checkEmailExists(email) {-->
+    <!--                try {-->
+    <!--                    let response = await fetch(`/api/check-email?email=${email}`);-->
+    <!--                    let data = await response.json();-->
+    <!--                    return data.exists;-->
+    <!--                } catch (error) {-->
+    <!--                    console.error("Error when checking email:", error);-->
+    <!--                    return false;-->
+    <!--                }-->
+    <!--            }-->
 
-            form.addEventListener("submit", async function (event) {
-                event.preventDefault();
-                let errors = [];
+    <!--            form.addEventListener("submit", async function (event) {-->
+    <!--                event.preventDefault();-->
+    <!--                let errors = [];-->
 
-                if (usernameInput.value.trim() === "") {
-                    errors.push("Username cannot be empty.");
-                } else if (!/^[A-Za-z0-9]+$/.test(usernameInput.value)) {
-                    errors.push("Username can only contain letters and numbers.");
-                } else {
-                    let isUsernameExists = await checkUsernameExists(usernameInput.value);
-                    if (isUsernameExists) {
-                        errors.push("Username already exists. Please choose another.");
-                    }
-                }
+    <!--                if (usernameInput.value.trim() === "") {-->
+    <!--                    errors.push("Username cannot be empty.");-->
+    <!--                } else if (!/^[A-Za-z0-9]+$/.test(usernameInput.value)) {-->
+    <!--                    errors.push("Username can only contain letters and numbers.");-->
+    <!--                } else {-->
+    <!--                    let isUsernameExists = await checkUsernameExists(usernameInput.value);-->
+    <!--                    if (isUsernameExists) {-->
+    <!--                        errors.push("Username already exists. Please choose another.");-->
+    <!--                    }-->
+    <!--                }-->
 
-                if (passwordInput.value.trim() === "") {
-                    errors.push("Password cannot be empty.");
-                }
+    <!--                if (passwordInput.value.trim() === "") {-->
+    <!--                    errors.push("Password cannot be empty.");-->
+    <!--                }-->
 
-                if (displaynameInput.value.trim() === "") {
-                    errors.push("Display Name cannot be empty.");
-                }
+    <!--                if (displaynameInput.value.trim() === "") {-->
+    <!--                    errors.push("Display Name cannot be empty.");-->
+    <!--                }-->
 
-                if (emailInput.value.trim() === "") {
-                    errors.push("Email cannot be empty.");
-                } else if (!emailInput.value.includes("@")) {
-                    errors.push("Please includes '@' in email.");
-                } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value)) {
-                    errors.push("Email is not in the correct format, please enter the correct format (for example: example@gmail.com)");
-                } else {
-                    let isEmailExists = await checkEmailExists(emailInput.value);
-                    if (isEmailExists) {
-                        errors.push("This email already exists, please enter another email.");
-                    }
-                }
+    <!--                if (emailInput.value.trim() === "") {-->
+    <!--                    errors.push("Email cannot be empty.");-->
+    <!--                } else if (!emailInput.value.includes("@")) {-->
+    <!--                    errors.push("Please includes '@' in email.");-->
+    <!--                } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value)) {-->
+    <!--                    errors.push("Email is not in the correct format, please enter the correct format (for example: example@gmail.com)");-->
+    <!--                } else {-->
+    <!--                    let isEmailExists = await checkEmailExists(emailInput.value);-->
+    <!--                    if (isEmailExists) {-->
+    <!--                        errors.push("This email already exists, please enter another email.");-->
+    <!--                    }-->
+    <!--                }-->
 
-                if (errors.length > 0) {
-                    errorContainer.innerHTML = errors.join("<br>");
-                    form.insertBefore(errorContainer, form.querySelector("button"));
-                } else {
-                    setTimeout(() => {
-                        alert("Registered successfully.");
-                        form.submit();
-                    }, 500);
-                }
-            });
-        });
-    </script>
+    <!--                if (errors.length > 0) {-->
+    <!--                    errorContainer.innerHTML = errors.join("<br>");-->
+    <!--                    form.insertBefore(errorContainer, form.querySelector("button"));-->
+    <!--                } else {-->
+    <!--                    setTimeout(() => {-->
+    <!--                        alert("Registered successfully.");-->
+    <!--                        form.submit();-->
+    <!--                    }, 500);-->
+    <!--                }-->
+    <!--            });-->
+    <!--        });-->
+    <!--    </script>-->
 </head>
 <body>
 <div th:insert="~{layout/header :: header}"></div>
@@ -147,9 +149,9 @@
 
     <a href="/store/mystore"><i class="fas fa-store"></i> Thông tin cửa hàng</a>
     <a href="/dashboard/view"><i class="fas fa-chart-line"></i> Báo cáo doanh thu</a>
+    <a href="/customer/listCustomer"><i class="fas fa-user"></i> Quản lí khách hàng</a>
     <a href="/account/listStaff"><i class="fas fa-users"></i> Quản lí nhân viên</a>
     <a href="/product/listProduct"><i class="fas fa-box-open"></i> Quản lí sản phẩm</a>
-    <a href="/customer/listCustomer"><i class="fas fa-user"></i> Quản lí khách hàng</a>
     <a href="/warehouse/listWarehouseZone"><i class="fas fa-map-marked-alt"></i> Quản lí khu vực</a>
     <a href="/importednote/list"><i class="fas fa-file-import"></i> Quản lí hóa đơn nhập</a>
     <a href="/bill/listBill"><i class="fas fa-file-export"></i> Quản lí hóa đơn xuất</a>
@@ -159,22 +161,30 @@
 </div>
 
 <div class="content">
-    <h1>Create New Staff</h1>
-    <form class="create-form" action="/account/createStaff" method="POST">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" >
+    <h1>Tạo nhân viên mới</h1>
+    <form class="create-form" action="/account/createStaff" method="POST" onsubmit="return validateForm()">
+        <label for="username">Tên đăng nhập:</label>
+        <input type="text" id="username" name="username" oninput="validateName(this)" >
+        <small id="usernameError" style="color: red; font-weight: bold"></small>
 
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" >
 
-        <label for="displayname">Display Name:</label>
-        <input type="text" id="displayname" name="displayname" >
+        <label for="password">Mật khẩu:</label>
+        <input type="password" id="password" name="password" oninput="validateName(this)" >
+        <small id="passError" style="color: red; font-weight: bold"></small>
 
-        <label for="email">Email</label>
-        <input type="email" id="email" name="email" >
+
+        <label for="displayname">Tên hiển thị:</label>
+        <input type="text" id="displayname" name="displayname" oninput="validateName(this)" >
+        <small id="displaynameError" style="color: red; font-weight: bold"></small>
+
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" oninput="validateName(this)" >
+        <small id="emailError" style="color: red; font-weight: bold"></small>
+
 
         <p style="color: red;" th:if="${error}" th:text="${error}"></p>
-        <button type="submit" id="applyBtn">Create Staff</button>
+        <button type="submit" id="applyBtn">Tạo Nhân Viên</button>
     </form>
 </div>
 

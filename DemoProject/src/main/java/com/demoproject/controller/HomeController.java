@@ -126,5 +126,21 @@ public class HomeController {
     }
 
 
+    @GetMapping("/access-deny")
+    public String accessdeny() {
+        return "user/access-deny";
+    }
+
+
+
+        @GetMapping("/error/403")
+        public String error403() {
+            return "error/403"; // Trỏ đến templates/error/403.html
+        }
+    @GetMapping("/test-ex")
+    public String testException() {
+        return "error/500";
+
+    }
 
 }

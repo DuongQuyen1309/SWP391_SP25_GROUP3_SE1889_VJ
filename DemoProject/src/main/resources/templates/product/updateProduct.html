@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Sửa sản phẩm</title>
+    <title>Chỉnh sửa sản phẩm</title>
     <link rel="stylesheet" href="/css/base.css">
+    <script src="/js/validateUpdateProduct.js"></script>
     <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <script src="/js/validationProduct.js"></script>
     <style>
         .profile-form {
             background-color: white;
@@ -125,12 +125,14 @@
             margin-top: 50px;
         }
     </style>
+
+    <script th:inline="javascript">
+        var preName = /*[[${preName}]]*/ "";
+    </script>
 </head>
+
 <body>
 <div th:insert="~{layout/header :: header}"></div>
-<div class="sidebar" id="sidebar">
-    <div th:insert="~{layout/sidebar :: sidebar}"></div>
-</div>
 
 <div class="content">
     <h1>Chỉnh sửa sản phẩm</h1>
@@ -141,31 +143,37 @@
         </div>
         <div class="profile-form-container">
             <form id="productValid" class="profile-form" action="/product/update" method="POST" th:object="${products}"
-                  enctype="multipart/form-data"
+                  enctype="multipart/form-data" onsubmit="return validateForm()"
             >
+                <input type="hidden" id="preName" th:value="${preName}">
+                <input type="hidden" id="currentId" th:value="${currentId}">
 
                 <label for="name">Tên:</label>
-                <input type="text" id="name" name="name" th:field="*{name}">
-                <span id="nameError" class="error"></span>
+                <input type="text" id="name" name="name" th:field="*{name}" oninput="validateName(this)">
+                <small id="nameError" style="color: red"> </small>
+
 
                 <label for="price">Giá:</label>
-                <input type="text" id="price" name="price" th:field="*{price}" min="0">
-                <span id="priceError" class="error"></span>
+                <input type="number" min="0" max="500000" id="price"  name="price" th:field="*{price}">
+                <small id="priceError" style="color: red"> </small>
 
                 <label for="description">Mô tả:</label>
                 <input type="text" id="description" name="description" th:field="*{description}">
-                <span id="descriptionError" class="error"></span>
+                <small id="descriptionError" style="color: red"> </small>
 
                 <label for="image">Ảnh:</label>
                 <input type="file" name="image" id="image" accept="image/*">
 
                 <input type="hidden" name="id" th:field="*{id}">
-                <button type="submit">Lưu</button>
+                <button type="submit">Sửa</button>
             </form>
         </div>
     </div>
 </div>
 
+<div class="sidebar" id="sidebar">
+    <div th:insert="~{layout/sidebar :: sidebar}"></div>
+</div>
 
 <footer>
     &copy; 2025 Rice Sales Management. All Rights Reserved.
@@ -179,7 +187,6 @@
         let currentImageUrl = null;
 
         fileInput.addEventListener('change', function(event) {
-            // Nếu đã có URL tạm trước đó, hủy nó để tránh rò rỉ bộ nhớ
             if (currentImageUrl) {
                 URL.revokeObjectURL(currentImageUrl);
             }
@@ -190,6 +197,26 @@
                 imgElement.src = currentImageUrl;
             }
         });
+    });
+</script>
+
+<script>
+    let productName = document.getElementById("name").value;
+
+    let response = await fetch("/product/checkname", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: productName })
+    });
+
+    let result = await response.json();
+    const errorElement = document.getElementById("nameError");
+    if (result.exists) {
+        errorElement.textContent = "Tên sản phẩm đã tồn tại, vui lòng chọn tên khác!"
+        errorElement.style.display = "block";
+    } else {
+        this.submit();
+    }
     });
 </script>
 

@@ -134,6 +134,137 @@
             });
         });
     </script>
+    <script>
+        // Enhanced validation for Bill List page
+        function filterBills() {
+            // Reset any previous error styling
+            document.querySelectorAll('.error-input').forEach(input => {
+                input.classList.remove('error-input');
+            });
+
+            let hasError = false;
+
+            // Validate ID fields
+            hasError = validateIntegerField('idFrom', "ID phải là số nguyên") || hasError;
+            hasError = validateIntegerField('idTo', "ID phải là số nguyên") || hasError;
+
+            // Validate money fields (totalMoney, paidMoney, debtMoney)
+            hasError = validateMoneyFields('totalMoneyFrom', 'totalMoneyTo', "Tổng tiền") || hasError;
+            hasError = validateMoneyFields('paidMoneyFrom', 'paidMoneyTo', "Tiền đã trả") || hasError;
+            hasError = validateMoneyFields('debtMoneyFrom', 'debtMoneyTo', "Tiền nợ") || hasError;
+
+            // If there's an error, stop the filtering process
+            if (hasError) {
+                return;
+            }
+
+            // Continue with the original filtering logic if no errors
+            let params = new URLSearchParams();
+            document.querySelectorAll('.filter-input').forEach(input => {
+                if (input.value.trim() !== '') {
+                    params.append(input.name, input.value);
+                }
+            });
+
+            window.location.href = '/bill/listBill' + '?' + params.toString();
+        }
+
+        // Function to validate integer fields (ID)
+        function validateIntegerField(fieldName, errorMessage) {
+            const input = document.querySelector(`input[name="${fieldName}"]`);
+            if (input && input.value.trim() !== '') {
+                if (!/^\d+$/.test(input.value)) {
+                    showError(errorMessage);
+                    input.focus();
+                    input.classList.add('error-input');
+                    return true; // Has error
+                }
+            }
+            return false; // No error
+        }
+
+        // Function to validate money fields
+        function validateMoneyFields(fromField, toField, fieldLabel) {
+            const fromInput = document.querySelector(`input[name="${fromField}"]`);
+            const toInput = document.querySelector(`input[name="${toField}"]`);
+
+            // Validate FROM field
+            if (fromInput && fromInput.value.trim() !== '') {
+                if (!/^-?\d+(\.\d+)?$/.test(fromInput.value)) {
+                    showError(`${fieldLabel}  phải là số`);
+                    fromInput.focus();
+                    fromInput.classList.add('error-input');
+                    return true; // Has error
+                }
+            }
+
+            // Validate TO field
+            if (toInput && toInput.value.trim() !== '') {
+                if (!/^-?\d+(\.\d+)?$/.test(toInput.value)) {
+                    showError(`${fieldLabel}  phải là số`);
+                    toInput.focus();toInput.classList.add('error-input');
+                    return true; // Has error
+                }
+            }
+
+            // Validate that FROM is less than or equal to TO, if both are provided
+            if (fromInput && toInput &&
+                fromInput.value.trim() !== '' &&
+                toInput.value.trim() !== '') {
+
+                const fromValue = parseFloat(fromInput.value);
+                const toValue = parseFloat(toInput.value);
+
+                if (fromValue > toValue) {
+                    showError(`${fieldLabel} 'Từ' phải nhỏ hơn hoặc bằng ${fieldLabel} 'Đến'`);
+                    fromInput.classList.add('error-input');
+                    toInput.classList.add('error-input');
+                    return true; // Has error
+                }
+            }
+
+            return false; // No error
+        }
+
+        // Function to show error message using SweetAlert2
+        function showError(message) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi',
+                text: message,
+                confirmButtonColor: '#d35400'
+            });
+        }
+
+        // Add CSS for highlighting error fields
+        document.addEventListener("DOMContentLoaded", function () {
+            // Add style for error input highlighting if it doesn't exist
+            if (!document.getElementById('error-input-style')) {
+                const style = document.createElement('style');
+                style.id = 'error-input-style';
+                style.textContent = `
+            .error-input {
+                border: 2px solid #e74c3c !important;
+                background-color: rgba(231, 76, 60, 0.1) !important;
+            }
+        `;
+                document.head.appendChild(style);
+            }
+
+            // Keep your existing code for restoring filter values
+            let params = new URLSearchParams(window.location.search);
+            document.querySelectorAll('.filter-input').forEach(input => {
+                if (params.has(input.name)) {
+                    let value = params.get(input.name);
+                    if (input.type === "date") {
+                        input.value = value.substring(0, 10); // Format YYYY-MM-DD
+                    } else {
+                        input.value = value;
+                    }
+                }
+            });
+        });
+    </script>
 </head>
 
 <body>
@@ -143,7 +274,7 @@
 </div>
 
 <div class="content">
-    <h2>Danh sách hóa đơn xuất</h2>
+    <h1>Danh sách hóa đơn xuất</h1>
     <button style="margin-top: 15px" class="add-bill" onclick="callPage()">Tạo hóa đơn mới</button>
 
     <table class="styled-table">
@@ -156,7 +287,6 @@
             <th>Tiền đã trả</th>
             <th>Tiền nợ</th>
             <th>Trạng thái</th>
-            <th>Ghi chú</th>
             <th>Thao tác</th>
         </tr>
         </thead>
@@ -193,7 +323,7 @@
                 </select>
             </td>
             <td>
-                <input type="text" class="filter-input" name="note" onchange="filterBills()" style="width: 100%;">
+
             </td>
         </tr>
         <tr th:each="bill : ${bills}">
@@ -204,7 +334,6 @@
             <td class="format-price" th:text="${bill.paidMoney}"></td>
             <td class="format-price" th:text="${bill.debtMoney}"></td>
             <td th:text="${bill.status? '⚠️ Cảnh báo':'✅ An toàn'}"></td>
-            <td th:text="${bill.note}"></td>
             <td>
                 <form th:action="@{bill/billDetail}" method="get">
                     <input type="hidden" name="id" th:value="${bill.id}">

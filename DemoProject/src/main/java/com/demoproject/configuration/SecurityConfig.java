@@ -18,6 +18,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandlerImpl;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -43,16 +44,22 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .exceptionHandling(ex -> ex
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            request.getRequestDispatcher("/error/403")
+                                    .forward(request, response);
+                        })
+                )
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) //
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/register","/login","/changepw","/api/**","/user/**","/forgotpw","/resetpw", "/css/**","/auth/**", "/js/**", "/images/**").permitAll() // Cho phép truy cập trang đăng ký
                         .requestMatchers("/account/listOwner").hasAuthority("ADMIN")
                         .requestMatchers(("/account/listStaff")).hasAuthority("OWNER")
 
-                        .requestMatchers("/dashboard", "/dashboard/","/product/create").hasAuthority("OWNER")
+                        .requestMatchers("/dashboard", "/dashboard/","/product/create","/dashboard/**","/store/**").hasAuthority("OWNER")
                         .requestMatchers("/account/**").hasAnyAuthority("ADMIN", "OWNER")
                         .requestMatchers("/product/**","/customer/**","/warehouse/**","/bill/**","/note/**","/package/**","/importednote/**").hasAnyAuthority("STAFF", "OWNER")
-                        .requestMatchers(("/warehouse"),"/product/create").hasAnyAuthority( "OWNER")
+                        .requestMatchers(("/warehouse")).hasAnyAuthority( "OWNER")
                         .anyRequest().authenticated()
                 )
                 .logout(logout -> logout

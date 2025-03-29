@@ -13,6 +13,6 @@ import java.time.LocalDate;
 public class ImportedNoteDetailResponse {
     Long id;
     double totalCost,paidMoney,portedMoney,debtMoney;
-    String customerName, customerPhone,customerAddress;
+    String customerName, customerPhone,customerAddress,productData;
     LocalDate createdAt;
 }

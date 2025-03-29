@@ -2,15 +2,15 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Rice Sales Management</title>
+    <title>Reset mật khẩu nhân viên</title>
     <link rel="stylesheet" href="/css/base.css">
     <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         .reset-form {
-            background-color: white;
-            padding: 20px;
+            background-color: white !important;
+            padding: 20px !important;
             border-radius: 10px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
             max-width: 500px;
@@ -25,7 +25,7 @@
             color: #2c3e50;
         }
         .reset-form input {
-            width: 100%;
+
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 5px;
@@ -56,33 +56,61 @@
             const form = document.querySelector(".reset-form");
             const newPassword = document.getElementById("newPassword");
             const confirmPassword = document.getElementById("confirmPassword");
-            const errorMessage = document.createElement("div");
-            errorMessage.id = "error-message";
-            errorMessage.style.color = "red";
-            errorMessage.style.fontWeight = "bold";
 
             form.addEventListener("submit", function (event) {
                 event.preventDefault();
-                let errors = [];
-                if (!newPassword.value) {
-                    errors.push("New password must be not empty.");
+
+                // Xóa lỗi cũ
+                document.getElementById("error-newPassword").textContent = "";
+                document.getElementById("error-confirmPassword").textContent = "";
+
+                let isValid = true;
+                const passwordValue = newPassword.value.trim();
+                const confirmPasswordValue = confirmPassword.value.trim();
+                const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).{3,}$/; // Ít nhất 4 ký tự, gồm chữ và số
+
+                if (passwordValue.length < 3 || passwordValue.length > 20) {
+                    document.getElementById("error-newPassword").textContent = "Mật khẩu phải từ 3 đến 20 kí tự!";
+
+                    isValid = false;
                 }
-                if (!confirmPassword.value) {
-                    errors.push("Confirm password must be not empty.");
+
+                if (!confirmPasswordValue) {
+                    document.getElementById("error-confirmPassword").textContent = "Nhập lại mật khẩu không được để trống.";
+                    isValid = false;
+                } else if (passwordValue !== confirmPasswordValue) {
+                    document.getElementById("error-confirmPassword").textContent = "Mật khẩu nhập lại không khớp.";
+                    isValid = false;
                 }
-                if (newPassword.value !== confirmPassword.value) {
-                    errors.push("Confirm password and new password must be similar.");
-                }
-                if (errors.length > 0) {
-                    errorMessage.innerHTML = errors.join("<br>");
-                    form.insertBefore(errorMessage, form.querySelector("button"));
-                } else {
-                    alert("Reset password successfully!");
-                    setTimeout(() => { form.submit(); }, 500);
+
+                if (isValid) {
+                    Swal.fire({
+                        title: "Xác nhận đặt lại mật khẩu?",
+                        text: "Bạn có chắc chắn muốn đặt lại mật khẩu không?",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#3085d6",
+                        cancelButtonColor: "#d33",
+                        confirmButtonText: "Có",
+                        cancelButtonText: "Không"
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            Swal.fire({
+                                title: "Thành công!",
+                                text: "Mật khẩu đã được đặt lại.",
+                                icon: "success",
+                                showConfirmButton: false,
+                                timer: 1500
+                            }).then(() => {
+                                form.submit();
+                            });
+                        }
+                    });
                 }
             });
         });
     </script>
+
     <script src="/js/home.js"></script>
 
 
@@ -96,9 +124,9 @@
 
     <a href="/store/mystore"><i class="fas fa-store"></i> Thông tin cửa hàng</a>
     <a href="/dashboard/view"><i class="fas fa-chart-line"></i> Báo cáo doanh thu</a>
+    <a href="/customer/listCustomer"><i class="fas fa-user"></i> Quản lí khách hàng</a>
     <a href="/account/listStaff"><i class="fas fa-users"></i> Quản lí nhân viên</a>
     <a href="/product/listProduct"><i class="fas fa-box-open"></i> Quản lí sản phẩm</a>
-    <a href="/customer/listCustomer"><i class="fas fa-user"></i> Quản lí khách hàng</a>
     <a href="/warehouse/listWarehouseZone"><i class="fas fa-map-marked-alt"></i> Quản lí khu vực</a>
     <a href="/importednote/list"><i class="fas fa-file-import"></i> Quản lí hóa đơn nhập</a>
     <a href="/bill/listBill"><i class="fas fa-file-export"></i> Quản lí hóa đơn xuất</a>
@@ -108,20 +136,23 @@
 </div>
 
 <div class="content">
-    <h1>Reset password</h1>
+    <h1>Đặt lại mật khẩu</h1>
     <form class="reset-form" action="/account/resetpwStaff" method="POST">
-        <label for="username">Username:</label>
+        <label for="username">Tên tài khoản:</label>
         <input type="text" id="username" name="username" th:value="${accountStaff.username}" disabled>
         <input type="hidden" id="hiddenUsername" name="username" th:value="${accountStaff.username}">
 
-        <label for="newPassword">New password:</label>
+        <label for="newPassword">Mật khẩu mới:</label>
         <input type="password" id="newPassword" name="newPassword">
+        <div class="error-message" id="error-newPassword"></div> <!-- Hiển thị lỗi -->
 
-        <label for="confirmPassword">Confirm password:</label>
+        <label for="confirmPassword">Nhập lại mật khẩu mới:</label>
         <input type="password" id="confirmPassword" name="confirmPassword">
+        <div class="error-message" id="error-confirmPassword"></div> <!-- Hiển thị lỗi -->
 
-        <button type="submit">Change password</button>
+        <button type="submit">Đặt lại mật khẩu</button>
     </form>
+
 </div>
 
 <footer>

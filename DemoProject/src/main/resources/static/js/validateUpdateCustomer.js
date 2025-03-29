@@ -42,9 +42,9 @@ document.addEventListener("DOMContentLoaded", function () {
         // Kiểm tra phone
         if (phone.value.trim() === "") {
             phoneError.push(" Số điện thoại không được để trống");
-        } else if (!phone.value.match(phoneRegex)) {
-            phoneError.push("Số điện thoại phải là 10 hoặc 11 số và chỉ được là số");
-        } else if(existingPhones.includes(phone.value)){
+        } else if (!/^0\d{9}$/.test(phone.value)) {
+            phoneError.push("Số điện thoại phải là 10 số và chỉ được là số");
+        } else if(existingPhones.includes(phone.value) && pre_phone !== phone.value ){
             phoneError.push("Số điện thoại không được trùng lặp");
         }
 

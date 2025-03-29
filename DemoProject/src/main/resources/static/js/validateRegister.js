@@ -34,14 +34,13 @@ document.addEventListener("DOMContentLoaded", function () {
         let hasError = false;
 
 
-
-        // ✅ Kiểm tra username không rỗng
-        if (username.value.trim() === "") {
-            document.getElementById("username-error").textContent = "Tài khoản không được để trống.";
+        if(username.value.length > 50 || username.value.length < 3) {
+            document.getElementById("username-error").textContent = "Tài khoản phải lớn hơn 3 và không được vượt quá 50 kí tự.";
             hasError = true;
         } else if (!/^[A-Za-z0-9]+$/.test(username.value)) {
-            document.getElementById("username-error").textContent = "Tải khoản chỉ chứa chữ hoặc số và không có kí tự đặc biệt.";
+            document.getElementById("username-error").textContent = "Tài khoản chỉ chứa chữ hoặc số và không có kí tự đặc biệt.";
             hasError=true;
+
         } else {
             // 🔍 Gửi AJAX kiểm tra username có tồn tại không
             let isUsernameExists = await checkUsernameExists(usernameInput.value);
@@ -53,8 +52,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         // ✅ Kiểm tra password không rỗng và có đủ điều kiện
-        if (passwordInput.value.trim() === "") {
-            document.getElementById("password-error").textContent ="Mật khẩu không được để trống.";
+        if (passwordInput.value.length <3 || passwordInput.value.length > 20 ) {
+            document.getElementById("password-error").textContent ="Mật khẩu phải lớn hơn 3 và không được vượt quá 20 kí tự.";
             hasError=true;
         }
 
@@ -62,10 +61,16 @@ document.addEventListener("DOMContentLoaded", function () {
         if (displaynameInput.value.trim() === "") {
             document.getElementById("displayname-error").textContent ="Tên hiển thị không được để trống.";
             hasError=true;
+        } else if(displaynameInput.value.length > 50){
+            document.getElementById("username-error").textContent = "Tên hiển thị được vượt quá 50 kí tự.";
+            hasError=true;
         }
 
         if (emailInput.value.trim() === "" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value)) {
             document.getElementById("email-error").textContent ="Sai cú pháp email.";
+            hasError=true;
+        } else if(emailInput.value.length > 50){
+            document.getElementById("username-error").textContent = "Email được vượt quá 50 kí tự.";
             hasError=true;
         } else{
             let isEmailExists = await checkEmailExists(emailInput.value);

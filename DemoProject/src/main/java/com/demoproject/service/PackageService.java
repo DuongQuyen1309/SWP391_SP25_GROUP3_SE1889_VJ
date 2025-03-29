@@ -76,9 +76,7 @@ public class PackageService {
         return this.packageRepository.findByNameAndStoreId(name, storeId, pageable);
     }
 
-    public Page<Package> getAllPackageByStoreIdAndColor(String name, Long storeId, Pageable pageable) {
-        return this.packageRepository.findByColorAndStoreId(name, storeId, pageable);
-    }
+
 
     public Page<Package> getAllPackageByStoreIdAndDateRange(LocalDate startDate, LocalDate endDate,
                                                             Long storeId, Pageable pageable) {
@@ -111,5 +109,11 @@ public class PackageService {
         };
 
         return packageRepository.findAll(spec, pageable);
+    }
+
+    public String getName(Long id){
+        Package pc= new Package();
+        pc= packageRepository.findById(id).get();
+        return pc.getName();
     }
 }

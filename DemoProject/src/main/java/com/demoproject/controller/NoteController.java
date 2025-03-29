@@ -78,6 +78,7 @@ public class NoteController {
                            @RequestParam(required = false) String noteSearch,
                            @RequestParam(required = false) String moneyFrom,
                            @RequestParam(required = false) String moneyTo,
+                           @RequestParam(required = false) String createBy,
                            @RequestParam(defaultValue = "0") int page,
                            @RequestParam(defaultValue = "5") int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
@@ -106,6 +107,16 @@ public class NoteController {
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
 
+        List<Long> relatedUserList = new ArrayList<>();
+        if(role.equalsIgnoreCase("OWNER")){
+            relatedUserList = userService.getStaffID1(user.get().getId());
+            relatedUserList.add(user.get().getId());
+        }else if(role.equalsIgnoreCase("STAFF")){
+            Long ownerId = userService.getOwnerID(user.get().getId());
+            relatedUserList = userService.getStaffID1(ownerId);
+            relatedUserList.add(ownerId);
+        }
+
         // bắt đầu đoạn code moi
         String storeId = jwtUtils.extractStoreId(token);
         Long last_storedID = Long.parseLong(storeId);
@@ -116,6 +127,9 @@ public class NoteController {
             return "redirect:/customer/listCustomer";
         }
         // ket thuc đoạn code moi
+        List<Users> usersList = new ArrayList<>();
+        usersList = userService.getUsers(relatedUserList);
+        model.addAttribute("usersList", usersList);
 
         if ((idFrom != null && !idFrom.isEmpty() && !idFrom.matches("\\d+")) ||
                 (idTo != null && !idTo.isEmpty() && !idTo.matches("\\d+")) ||
@@ -136,6 +150,7 @@ public class NoteController {
             model.addAttribute("noteSearch", noteSearch);
             model.addAttribute("moneyFrom", moneyFrom);
             model.addAttribute("moneyTo", moneyTo);
+            model.addAttribute("createBy", createBy);
             model.addAttribute("currentPage", page);
             model.addAttribute("totalPages", notePage.getTotalPages());
             model.addAttribute("size", size);
@@ -147,7 +162,8 @@ public class NoteController {
             if ((idFrom != null && !idFrom.isEmpty()) || (idTo != null && !idTo.isEmpty())
                     || (kindOfNote != null && !kindOfNote.isEmpty()) || (createdDateFrom != null)
                     || (createdDateTo != null) || (noteSearch != null && !noteSearch.isEmpty())
-                    || (moneyFrom != null && !moneyFrom.isEmpty()) || (moneyTo != null && !moneyTo.isEmpty())) {
+                    || (moneyFrom != null && !moneyFrom.isEmpty()) || (moneyTo != null && !moneyTo.isEmpty())
+                    || (createBy != null && !createBy.isEmpty())) {
 
 
                 Long req_idFrom = (idFrom != null && !idFrom.isBlank() && idFrom.matches("\\d+")) ? Long.valueOf(idFrom) : null;
@@ -159,11 +175,11 @@ public class NoteController {
                 String note_search = noteSearch == null || noteSearch.isEmpty() ? null : noteSearch;
 
                 String req_isDebt = (kindOfNote != null && !kindOfNote.isBlank()) ? kindOfNote : null;
-
+                Long req_createby = (createBy != null && !createBy.isBlank()) ? Long.valueOf(createBy) : null;
 
                 // bắt đầu đoạn code moi
                 notePage = noteService.searchNoteByAttribute(id,last_storedID, req_idFrom, req_idTo, req_isDebt, createdDateFrom, createdDateTo, note_search,
-                        req_moneyFrom, req_moneyTo, pageable);
+                        req_moneyFrom, req_moneyTo,req_createby, pageable);
                 // ket thuc đoạn code moi
 
             } else {
@@ -189,6 +205,7 @@ public class NoteController {
             model.addAttribute("noteSearch", noteSearch);
             model.addAttribute("moneyFrom", moneyFrom);
             model.addAttribute("moneyTo", moneyTo);
+            model.addAttribute("createBy", createBy);
 
             return "note/listNote";
         }

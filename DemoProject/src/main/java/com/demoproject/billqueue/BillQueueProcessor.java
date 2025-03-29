@@ -67,33 +67,48 @@ public class BillQueueProcessor {
                     }
 
                     List<Product> products = objectMapper.readValue(request.getProductData(), new TypeReference<List<Product>>() {});
+
+                    List<Product> productsBill = objectMapper.readValue(request.getProductData(), new TypeReference<List<Product>>() {});
                     for (Product product : products) {
                         System.out.println("📌 BillQueueProcessor - Product ID: " + product.getId() +
                                 ", selectedPackage: " + product.getSelectedPackage());
                     }
 
                     // ✅ Cập nhật số lượng sản phẩm theo kg trước khi lưu vào bill
-                    for (Product product : products) {
-                        int totalKg = product.getQuantity() * product.getSelectedPackageSize();
+                    for (Product product : productsBill) {
+                        int totalKg = product.getQuantity() ;
                         product.setQuantity(totalKg); // ✅ Chuyển số lượng về tổng số kg thực tế
 
                     }
 
 
                     // ✅ Chỉ lưu các thông tin cần thiết của sản phẩm vào bill
+                    List<ProductSummaryDTO> filteredProductsBill = productsBill.stream()
+                            .map(ProductSummaryDTO::new)
+                            .collect(Collectors.toList());
+
+                    for (Product product : products) {
+                        int totalKg = product.getQuantity() * product.getSelectedPackageSize();
+                        product.setQuantity(totalKg); // ✅ Chuyển số lượng về tổng số kg thực tế
+
+                    }
+
+                    // ✅ Chỉ lưu các thông tin cần thiết của sản phẩm vào bill
                     List<ProductSummaryDTO> filteredProducts = products.stream()
                             .map(ProductSummaryDTO::new)
                             .collect(Collectors.toList());
 
-                    String updatedProductData = objectMapper.writeValueAsString(filteredProducts); // ✅ Chỉ lưu các thông tin cần thiết
+                    String updatedProductDataBill = objectMapper.writeValueAsString(filteredProductsBill); // ✅ Chỉ lưu các thông tin cần thiết
 
-                    System.out.println("📌 BillQueueProcessor - updatedProductData: " + updatedProductData);
+                    String updatedProductData = objectMapper.writeValueAsString(filteredProducts);
+
+                    System.out.println("📌 BillQueueProcessor - updatedProductData: " + updatedProductDataBill);
 
                     Bill bill = new Bill();
                     bill.setTotalMoney(request.getTotalMoney());
                     bill.setPaidMoney(request.getPaidMoney());
                     bill.setDebtMoney(request.getDebtMoney());
-                    bill.setProductData(updatedProductData);
+                    bill.setProductData(updatedProductDataBill);
                     bill.setCustomerData(request.getCustomerData());
                     bill.setCreatedBy(request.getCreatedBy());
                     bill.setCreatedAt(LocalDateTime.now());
@@ -121,7 +136,7 @@ public class BillQueueProcessor {
 
                     // ✅ Đưa sản phẩm vào hàng đợi để cập nhật kho
                     productQueueProcessor.addProductsToQueue(
-                            objectMapper.readValue(bill.getProductData(), new TypeReference<List<Product>>() {})
+                            objectMapper.readValue(updatedProductData, new TypeReference<List<Product>>() {})
                     );
 
                 } catch (Exception e) {

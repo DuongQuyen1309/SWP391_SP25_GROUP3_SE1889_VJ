@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <title>Sản phẩm</title>
   <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/listproduct.css">
   <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -79,6 +80,39 @@
     };
   </script>
 
+  <script>
+    window.onclick = function (event) {
+      const modal = document.getElementById("studentFormModal");
+      if (event.target === modal) {
+        modal.style.display = "none";
+      }
+    };
+
+    function filterImportedNote() {
+      let params = new URLSearchParams();
+      document.querySelectorAll('.filter-input').forEach(input => {
+        if (input.value.trim() !== '') { // Chỉ thêm tham số nếu có giá trị
+          params.append(input.name, input.value);
+        }
+      });
+
+      window.location.href = '/product/listProduct' + '?' + params.toString();
+    }
+    document.addEventListener("DOMContentLoaded", function() {
+      let params = new URLSearchParams(window.location.search);
+      document.querySelectorAll('.filter-input').forEach(input => {
+        if (params.has(input.name)) {
+          let value = params.get(input.name);
+          if (input.type === "date") {
+            input.value = value.substring(0, 10); // Định dạng YYYY-MM-DD
+          } else {
+            input.value = value;
+          }
+        }
+      });
+    });
+  </script>
+
 </head>
 <body>
 
@@ -98,25 +132,10 @@
   <!-- List -->
   <h1>Danh sách sản phẩm</h1>
   <button class="importBtn" onclick="importProduct()">Nhập sản phẩm</button>
-  <form class="form-search" th:action="@{/product/listProduct}" method="get">
-    <label for="search"></label>
-    <input
-            style="height: 30px; width: 750px"
-            type="text" id="search" name="searchKeyWord"
-            placeholder="Tìm kiếm bằng tên sản phẩm hoặc mô tả..."
-    >
-    <select name="searchBy">
-      <option value="name" th:selected="${sortField == 'name'}">Tên</option>
-      <option value="description" th:selected="${sortField == 'description'}">Mô tả</option>
-    </select>
-    <input type="hidden" name="sortField" th:value="${sortField}">
-    <input type="hidden" name="sortDirection" th:value="${sortDirection}">
-    <button type="submit" class="submit-button">Tìm kiếm</button>
-  </form>
   <table class="styled-table">
     <thead>
     <tr>
-      <td>Image</td>
+      <td>ID</td>
       <td>
         <a style="text-decoration: none; color: inherit"
            th:href="@{/product/listProduct(page=${currentPage}, sortField='name', sortDirection=${reverseSortDirection}, searchKeyWord=${searchKeyWord}, searchBy=${searchBy})}">
@@ -129,32 +148,67 @@
           Giá
         </a>
       </td>
+      <td>Mô tả</td>
       <td>
         <a style="text-decoration: none; color: inherit"
            th:href="@{/product/listProduct(page=${currentPage}, sortField='quantity', sortDirection=${reverseSortDirection}, searchKeyWord=${searchKeyWord}, searchBy=${searchBy})}">
           Số lượng(kg)
         </a>
       </td>
-      <td>mô tả</td>
+      <td>Image</td>
+      <td>Trạng thái</td>
       <td>Hành động</td>
+    </tr>
+    <tr>
+      <td class="twin-field">
+        <input type="number" class="filter-input" name="idFrom" onchange="filterImportedNote()" style="width: 35px;">
+        <input type="number" class="filter-input" name="idTo" onchange="filterImportedNote()" style="width: 35px;">
+      </td>
+
+      <td>
+        <input type="text" class="filter-input" name="name" onchange="filterImportedNote()" style="width: 100%;">
+      </td>
+      <td class="twin-field">
+        <input type="number" min="0" max="100000" class="filter-input" name="priceFrom" onchange="filterImportedNote()" style="width: 90px;" step="10000">
+        <input type="number" min="0" max="100000" class="filter-input" name="priceTo" onchange="filterImportedNote()" style="width: 90px;" step="10000">
+      </td>
+
+      <td>
+        <input type="text" class="filter-input" name="description" onchange="filterImportedNote()" style="width: 100%;">
+      </td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
     </tr>
     </thead>
     <tbody>
-    <tr th:each="product : ${products} " th:if="${product.isDeleted == 0}">
+    <tr th:each="product : ${products} " >
+      <td style="width: 10px;" th:text="${product.id}"></td>
+      <td style="width: 100px" th:text="${product.name}"></td>
+      <td style="width: 24px" class="price" th:attr="data-price=${product.price}"></td>
+      <td style="width: 200px" th:text="${product.description}"></td>
+      <td style="width: 130px;" th:text="${product.quantity}"></td>
       <td><img th:src="${product.image}" width="100px" height="70px" alt=""></td>
-      <td th:text="${product.name}"></td>
-      <td class="price" th:attr="data-price=${product.price}"></td>
-      <td th:text="${product.quantity}"></td>
-      <td th:text="${product.description}"></td>
+      <td
+              th:text="${product.isDeleted == 0 ? '🟢 Đang bán' : '🔴 Ngừng bán'}">
+      </td>
       <td>
-        <button type="button" th:attr="data-modal-id='productModal' + ${product.id}" class="open-modal">Xem</button>
+        <button type="button" th:attr="data-modal-id='productModal' + ${product.id}" style="background-color: #06999c" class="open-modal">Xem</button>
+        <div id="zoneModal" class="modal" style="display: none;">
+          <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h3>Zones for Product</h3>
+            <div id="zoneListContainer"></div>
+          </div>
+        </div>
         <form th:action="@{/product/update}" method="get">
           <input type="hidden" name="id" th:value="${product.id}">
-          <button type="submit">Sửa</button>
+          <button style="background-color: #42aec1" type="submit" th:style="${#lists.contains(listHiddenPage, 'updateProduct')} ? 'display: none;' : ''">Sửa</button>
         </form>
-        <form action="/product/delete" method="post" onsubmit="return confirmDelete()">
+        <form id="deleteForm" action="/product/delete" method="post">
           <input type="hidden" name="id" th:value="${product.id}">
-          <button type="submit">Xóa</button>
+          <button type="button" onclick="confirmDelete()" th:style="${#lists.contains(listHiddenPage, 'deleteProduct')} ? 'display: none;' : ''">Xóa</button>
         </form>
       </td>
     </tr>
@@ -190,7 +244,7 @@
        th:href="@{/product/listProduct(page=${currentPage - 1}, sortField=${sortField}, sortDirection=${sortDirection}, searchKeyWord=${searchKeyWord}, searchBy=${searchBy})}">
       Trước
     </a>
-    <span>Page <span th:text="${currentPage + 1}"></span> / <span th:text="${totalPages > 0 ? totalPages : 1}"></span></span>
+    <span>Trang<span th:text="${currentPage + 1}"></span>/<span th:text="${totalPages > 0 ? totalPages : 1}"></span></span>
     <a style="text-decoration: none"
        th:if="${currentPage < totalPages - 1}"[
        th:href="@{/product/listProduct(page=${currentPage + 1}, sortField=${sortField}, sortDirection=${sortDirection}, searchKeyWord=${searchKeyWord}, searchBy=${searchBy})}">
@@ -218,7 +272,20 @@
   }
 
   function confirmDelete() {
-    return confirm("Bạn có chắc muốn xóa sản phẩm này không?")
+    Swal.fire({
+      title: "Bạn có chắc chắn muốn xóa?",
+      text: "Hành động này không thể hoàn tác!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Có, xóa ngay!",
+      cancelButtonText: "Hủy"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        document.getElementById("deleteForm").submit();
+      }
+    });
   }
 
 

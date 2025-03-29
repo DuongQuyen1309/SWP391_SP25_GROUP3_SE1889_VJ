@@ -3,10 +3,13 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Rice Sales Management</title>
+    <title>Tạo tài khoản chủ cửa hàng</title>
     <link rel="stylesheet" href="/css/base.css">
+    <script  src="/js/validateOwner1.js"></script>
     <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         .create-form {
@@ -52,110 +55,123 @@
 
     </style>
     <script src="/js/home.js"></script>
-    <script>
-        function confirmDelete(event, form) {
-            event.preventDefault(); // Ngăn form submit ngay lập tức
-            if (confirm("Do you want to delete this account?")) {
-                form.submit(); // Nếu người dùng xác nhận, tiếp tục submit form
-            }
+    <!--    <script>-->
+    <!--        function confirmDelete(event, form) {-->
+    <!--            event.preventDefault(); // Ngăn form submit ngay lập tức-->
+    <!--            if (confirm("Do you want to delete this account?")) {-->
+    <!--                form.submit(); // Nếu người dùng xác nhận, tiếp tục submit form-->
+    <!--            }-->
+    <!--        }-->
+
+
+    <!--        document.addEventListener("DOMContentLoaded", function () {-->
+    <!--            const form = document.querySelector(".create-form");-->
+    <!--            const usernameInput = document.getElementById("username");-->
+    <!--            const passwordInput = document.getElementById("password");-->
+    <!--            const displaynameInput = document.getElementById("displayname");-->
+    <!--            const emailInput = document.getElementById("email");-->
+    <!--            const errorContainer = document.createElement("div");-->
+    <!--            errorContainer.style.color = "red";-->
+    <!--            errorContainer.style.fontWeight = "bold";-->
+
+    <!--            // ✅ Hàm gửi request AJAX kiểm tra username có tồn tại không-->
+    <!--            async function checkUsernameExists(username) {-->
+    <!--                try {-->
+    <!--                    let response = await fetch(`/api/check-username?username=${username}`);-->
+    <!--                    let data = await response.json();-->
+    <!--                    return data.exists;-->
+    <!--                } catch (error) {-->
+    <!--                    console.error("Error when checking username:", error);-->
+    <!--                    return false;-->
+    <!--                }-->
+    <!--            }-->
+    <!--            async function checkEmailExists(email) {-->
+    <!--                try {-->
+    <!--                    let response = await fetch(`/api/check-email?email=${email}`);-->
+    <!--                    let data = await response.json();-->
+    <!--                    return data.exists;-->
+    <!--                } catch (error) {-->
+    <!--                    console.error("Error when checking email:", error);-->
+    <!--                    return false;-->
+    <!--                }-->
+    <!--            }-->
+    <!--            form.addEventListener("submit", async function (event) {-->
+    <!--                event.preventDefault();-->
+    <!--                let errors = [];-->
+
+
+
+    <!--                // ✅ Kiểm tra username không rỗng-->
+    <!--                if (usernameInput.value.trim() === "") {-->
+    <!--                    errors.push("Username must be not empty.");-->
+    <!--                } else if (!/^[A-Za-z0-9]+$/.test(usernameInput.value)) {-->
+    <!--                    errors.push("Username must only contain letters (A-Z, a-z) or numbers, no special characters.");-->
+    <!--                } else {-->
+    <!--                    // 🔍 Gửi AJAX kiểm tra username có tồn tại không-->
+    <!--                    let isUsernameExists = await checkUsernameExists(usernameInput.value);-->
+    <!--                    console.log(isUsernameExists);-->
+    <!--                    if (isUsernameExists) {-->
+    <!--                        errors.push("This username already exists, please enter another username.");-->
+    <!--                    }-->
+    <!--                }-->
+
+    <!--                // ✅ Kiểm tra password không rỗng và có đủ điều kiện-->
+    <!--                if (passwordInput.value.trim() === "") {-->
+    <!--                    errors.push("Password must be not empty.");-->
+    <!--                }-->
+
+    <!--                // ✅ Kiểm tra display name không rỗng-->
+    <!--                if (displaynameInput.value.trim() === "") {-->
+    <!--                    errors.push("Display Name must be not empty.");-->
+    <!--                }-->
+
+    <!--                if (emailInput.value.trim() === "") {-->
+    <!--                    errors.push("Email must be not empty.");-->
+    <!--                } else if (!emailInput.value.includes("@")) {-->
+    <!--                    errors.push("Please includes '@' in email.");-->
+    <!--                } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value)) {-->
+    <!--                    errors.push("Email is not in the correct format, please enter the correct format (for example: example@gmail.com)");-->
+    <!--                } else {-->
+    <!--                    let isEmailExists = await checkEmailExists(emailInput.value);-->
+    <!--                    if (isEmailExists) {-->
+    <!--                        errors.push("This email already exists, please enter another email.");-->
+    <!--                    }-->
+    <!--                }-->
+
+
+    <!--                // ✅ Nếu có lỗi, hiển thị lỗi và ngăn form submit-->
+    <!--                if (errors.length > 0) {-->
+    <!--                    event.preventDefault();-->
+    <!--                    errorContainer.innerHTML = errors.join("<br>");-->
+    <!--                    form.insertBefore(errorContainer, form.querySelector("button"));-->
+    <!--                }-->
+    <!--                else {-->
+
+    <!--                    // ✅ Đợi 500ms để alert hiển thị, sau đó gửi form-->
+    <!--                    setTimeout(() => {-->
+    <!--                        alert("Create account successfully.");-->
+    <!--                        form.submit();-->
+    <!--                    }, 500);-->
+    <!--                }-->
+    <!--            });-->
+
+
+    <!--        });-->
+    <!--    </script>-->
+    <style>
+        .error-msg {
+            display: none; /* Ẩn mặc định */
+            margin-top: 2px;
+            margin-bottom: 0;
+            font-size: 14px;
+            color: red;
         }
-
-
-        document.addEventListener("DOMContentLoaded", function () {
-            const form = document.querySelector(".create-form");
-            const usernameInput = document.getElementById("username");
-            const passwordInput = document.getElementById("password");
-            const displaynameInput = document.getElementById("displayname");
-            const emailInput = document.getElementById("email");
-            const errorContainer = document.createElement("div");
-            errorContainer.style.color = "red";
-            errorContainer.style.fontWeight = "bold";
-
-            // ✅ Hàm gửi request AJAX kiểm tra username có tồn tại không
-            async function checkUsernameExists(username) {
-                try {
-                    let response = await fetch(`/api/check-username?username=${username}`);
-                    let data = await response.json();
-                    return data.exists;
-                } catch (error) {
-                    console.error("Error when checking username:", error);
-                    return false;
-                }
-            }
-            async function checkEmailExists(email) {
-                try {
-                    let response = await fetch(`/api/check-email?email=${email}`);
-                    let data = await response.json();
-                    return data.exists;
-                } catch (error) {
-                    console.error("Error when checking email:", error);
-                    return false;
-                }
-            }
-            form.addEventListener("submit", async function (event) {
-                event.preventDefault();
-                let errors = [];
-
-
-
-                // ✅ Kiểm tra username không rỗng
-                if (usernameInput.value.trim() === "") {
-                    errors.push("Username must be not empty.");
-                } else if (!/^[A-Za-z0-9]+$/.test(usernameInput.value)) {
-                    errors.push("Username must only contain letters (A-Z, a-z) or numbers, no special characters.");
-                } else {
-                    // 🔍 Gửi AJAX kiểm tra username có tồn tại không
-                    let isUsernameExists = await checkUsernameExists(usernameInput.value);
-                    console.log(isUsernameExists);
-                    if (isUsernameExists) {
-                        errors.push("This username already exists, please enter another username.");
-                    }
-                }
-
-                // ✅ Kiểm tra password không rỗng và có đủ điều kiện
-                if (passwordInput.value.trim() === "") {
-                    errors.push("Password must be not empty.");
-                }
-
-                // ✅ Kiểm tra display name không rỗng
-                if (displaynameInput.value.trim() === "") {
-                    errors.push("Display Name must be not empty.");
-                }
-
-                if (emailInput.value.trim() === "") {
-                    errors.push("Email must be not empty.");
-                } else if (!emailInput.value.includes("@")) {
-                    errors.push("Please includes '@' in email.");
-                } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value)) {
-                    errors.push("Email is not in the correct format, please enter the correct format (for example: example@gmail.com)");
-                } else {
-                    let isEmailExists = await checkEmailExists(emailInput.value);
-                    if (isEmailExists) {
-                        errors.push("This email already exists, please enter another email.");
-                    }
-                }
-
-
-                // ✅ Nếu có lỗi, hiển thị lỗi và ngăn form submit
-                if (errors.length > 0) {
-                    event.preventDefault();
-                    errorContainer.innerHTML = errors.join("<br>");
-                    form.insertBefore(errorContainer, form.querySelector("button"));
-                }
-                else {
-
-                    // ✅ Đợi 500ms để alert hiển thị, sau đó gửi form
-                    setTimeout(() => {
-                        alert("Create account successfully.");
-                        form.submit();
-                    }, 500);
-                }
-            });
-
-
-        });
-    </script>
-
+        p {
+            margin-top: 2px;
+            margin-bottom: 0;
+            font-size: 14px;
+        }
+    </style>
 
 </head>
 <body>
@@ -177,25 +193,27 @@
 
 <!-- Content -->
 <div class="content">
-    <h1>Create New Owner's Account</h1>
-    <form class="create-form" action="/account/createOwner" method="POST">
+    <h1>Tạo tài khoản chủ sở hữu mới</h1>
+    <form class="create-form" action="/account/createOwner" method="POST" onsubmit="return validateForm()">
 
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" >
+        <label for="username">Tên tài khoản:</label>
+        <input type="text" id="username" name="username" oninput="validateName(this)">
+        <small id="usernameError" style="color: red; font-weight: bold"></small>
 
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" >
-
-
-        <label for="displayname">Display Name:</label>
-        <input type="text" id="displayname" name="displayname" >
-
-        <label for="email">Email</label>
-        <input type="email" id="email" name="email" >
+        <label for="password">Mật khẩu:</label>
+        <input type="password" id="password" name="password" oninput="validatePass(this)" >
+        <small id="passError" style="color: red; font-weight: bold"></small>
 
 
-        <p style="color: red;" th:if="${error}" th:text="${error}"></p>
-        <button type="submit" id="applyBtn">Create account</button>
+        <label for="displayname">Tên hiển thị:</label>
+        <input type="text" id="displayname" name="displayname" oninput="validatePass(this)" >
+        <small id="displaynameError" style="color: red; font-weight: bold"></small>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" oninput="validatePass(this)">
+        <small id="emailError" style="color: red; font-weight: bold"></small>
+
+        <button type="submit" id="applyBtn">Tạo tài khoản</button>
     </form>
 
 </div>

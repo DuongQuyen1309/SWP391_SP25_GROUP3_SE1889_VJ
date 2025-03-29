@@ -15,8 +15,6 @@ public class Package {
     private Long id;
     @Column(name = "name")
     private String name;
-    @Column(name = "color")
-    private String color;
     @Column(name = "description")
     private String description;
     @Column(name = "store_id")
@@ -41,11 +39,11 @@ public class Package {
     public Package() {
     }
 
-    public Package(Long id, String name, String color, String description, Long storeId, Long createdBy,
+    public Package(Long id, String name, String description, Long storeId, Long createdBy,
                    LocalDate createdAt) {
         this.id = id;
         this.name = name;
-        this.color = color;
+
         this.description = description;
         this.storeId = storeId;
         this.createdBy = createdBy;
@@ -68,13 +66,6 @@ public class Package {
         this.name = name;
     }
 
-    public String getColor() {
-        return color;
-    }
-
-    public void setColor(String color) {
-        this.color = color;
-    }
 
     public String getDescription() {
         return description;

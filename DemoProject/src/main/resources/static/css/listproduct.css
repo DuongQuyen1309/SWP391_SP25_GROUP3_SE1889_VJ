@@ -1,0 +1,64 @@
+/* 1. Cấu trúc chung cho modal */
+/* 2. Nội dung modal */
+.modal-content {
+    background: #fff; /* Nền trắng cho nội dung */
+    width: 30%; /* Giới hạn kích thước chiều rộng modal */
+    max-width: 400px; /* Kích thước tối đa 400px */
+    padding: 20px; /* Khoảng cách bên trong */
+    border-radius: 8px; /* Bo góc mềm mại */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2); /* Hiệu ứng đổ bóng */
+    position: relative; /* Để định vị nút đóng */
+    text-align: center;
+}
+
+/* 3. Tiêu đề modal */
+.modal-content h2 {
+    margin: 0 0 10px; /* Khoảng cách dưới tiêu đề */
+    font-size: 18px; /* Kích thước chữ tiêu đề nhỏ */
+    color: #333; /* Màu chữ tiêu đề */
+    text-align: center;
+}
+
+/* 4. Nút đóng modal */
+.close {
+    position: absolute; /* Định vị nút đóng */
+    top: 10px; /* Vị trí cách phía trên */
+    right: 15px; /* Vị trí cách bên phải */
+    font-size: 20px; /* Kích thước chữ lớn hơn */
+    color: #333; /* Màu chữ */
+    cursor: pointer; /* Con trỏ dạng chỉ tay khi hover */
+}
+
+.close:hover {
+    color: #f00; /* Đổi thành màu đỏ khi hover */
+}
+
+/* 5. Bảng hiển thị nội dung */
+.modal-content table {
+    width: 100%; /* Chiếm toàn bộ chiều ngang modal */
+    border-collapse: collapse; /* Gộp viền giữa các ô */
+    margin-top: 10px; /* Khoảng cách giữa bảng và nội dung trên */
+}
+
+.modal-content th,
+.modal-content td {
+    border: 1px solid #ddd; /* Đường viền mờ giữa các ô */
+    padding: 8px; /* Khoảng cách bên trong ô */
+    text-align: center; /* Căn giữa nội dung */
+    font-size: 14px; /* Kích thước chữ nhỏ */
+}
+
+.modal-content th {
+    background-color: #f9f9f9; /* Nền khác biệt cho tiêu đề bảng */
+    font-weight: bold; /* Bôi đậm tiêu đề bảng */
+    color: #555; /* Màu chữ tiêu đề */
+}
+
+.modal-content tr:nth-child(even) {
+    background-color: #f7f7f7; /* Màu nền hàng chẵn */
+}
+
+.modal-content tr:hover {
+    background-color: #eeeeee; /* Màu nền khi hover */
+}
+

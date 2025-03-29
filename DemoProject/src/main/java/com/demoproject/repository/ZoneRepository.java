@@ -54,4 +54,7 @@ public interface ZoneRepository extends JpaRepository<Zone, Long>, JpaSpecificat
 
     Zone getZoneById(Long id);
 
+    Zone getZoneByStoreId(Long storeId);
+
+
 }

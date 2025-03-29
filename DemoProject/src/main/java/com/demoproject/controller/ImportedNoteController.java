@@ -73,13 +73,8 @@ public class ImportedNoteController {
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
 
-        double minMoney = moneyFrom != null ? Double.parseDouble(moneyFrom) : Double.MIN_VALUE;
-        double maxMoney = moneyTo != null ? Double.parseDouble(moneyTo) : Double.MAX_VALUE;
-        long minId = idFrom != null ? Long.parseLong(idFrom) : Long.MIN_VALUE;
-        long maxId = idTo != null ? Long.parseLong(idTo) : Long.MAX_VALUE;
         Page<ImportedNote> importedNotePage = importedNoteService.findImportedNotesWithFilters(
-                page, size, sortField, sortDirection, minId, maxId, dateFrom, dateTo, minMoney, maxMoney, supplier
-        );
+                page, size, sortField, sortDirection, idFrom, idTo, dateFrom, dateTo, moneyFrom, moneyTo, supplier);
 
         System.out.println(importedNotePage);
 

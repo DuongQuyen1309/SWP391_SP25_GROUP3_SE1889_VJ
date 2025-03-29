@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Create Bill</title>
+  <title>Tạo hóa đơn xuất</title>
   <link rel="stylesheet" href="/css/base.css">
   <link rel="stylesheet" href="/css/bill.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -329,8 +329,8 @@
             <div class="form-row">
               <label>Giới tính:</label>
               <select id="new-customer-gender" class="form-control styled-input"  style="width: 100%" name="gender">
-                <option value="true" >Male</option>
-                <option value="false" >Female</option>
+                <option value="true" >Nam</option>
+                <option value="false" >Nữ</option>
               </select>
             </div>
             <div class="form-row">
@@ -385,7 +385,7 @@
           <div class="total-row" style="display:block">
             <label class="total-label" for="order-note">📝 Ghi chú:</label>
             <textarea id="order-note" class="form-control" style="width: 90%; height: 80px;margin-top: 5px" placeholder="Nhập ghi chú..."></textarea>
-
+            <span id="note-error" class="error-message"></span>
 
           </div>
 
@@ -692,7 +692,7 @@
   }
 
 
-  function renderProducts(tabId) {
+  async function renderProducts(tabId) {
     let productTable = document.getElementById("selected-products");
     productTable.innerHTML = "";
 
@@ -702,18 +702,25 @@
     }
 
     console.log("Danh sách sản phẩm trước khi render:", tabData[tabId].products);
+    // Bước 1: Lấy toàn bộ danh sách packages từ backend
+    let allPackages = [];
+    try {
+      const response = await fetch("/api/packages");
+      allPackages = await response.json();
+    } catch (err) {
+      console.error("Không thể lấy danh sách packages từ server:", err);
+    }
 
-
-    console.log("Danh sách sản phẩm:", tabData[tabId].products);
+    console.log("Danh sách sản phẩm:", allPackages);
 
     tabData[tabId].products.forEach((product, index) => {
       // Kiểm tra nếu product không có packageType thì gán mảng rỗng
       let packageTypes = Array.isArray(product.packageType) ? product.packageType : [];
       console.log("Danh sách packageType của sản phẩm:", packageTypes);
       console.log(product.selectedPackage);
-      let packageOptions = packageTypes.map(pkg => `
-            <option value="${pkg.id}" ${pkg.id === product.selectedPackage ? "selected" : ""}>${pkg.name}</option>
-        `).join("");
+      let packageOptions = allPackages.map(pkg => `
+      <option value="${pkg.id}" ${pkg.id === product.selectedPackage ? "selected" : ""}>${pkg.name}</option>
+    `).join("");
       packageTypes.forEach((type, index) => {
         console.log(type.id );
         console.log(product.selectedPackage);
@@ -746,23 +753,29 @@
   }
 
 
-  function changePackageType(tabId, index, selectedId) {
+  async function changePackageType(tabId, index, selectedId) {
     let product = tabData[tabId].products[index];
     if (!product) return;
 
-    console.log(typeof product.packageType);
-    console.log(typeof selectedId);
-    let selectedPackage = product.packageType.find(pkg => parseInt(pkg.id) === parseInt(selectedId));
+    let selectedPackage = null;
+    try {
+      const response = await fetch("/api/packages");
+      const allPackages = await response.json();
+      selectedPackage = allPackages.find(pkg => parseInt(pkg.id) === parseInt(selectedId));
+    } catch (err) {
+      console.error("❌ Không thể lấy danh sách packages từ server:", err);
+      return;
+    }
 
-    console.log(selectedPackage)
     if (!selectedPackage) {
       console.error(`❌ Không tìm thấy package với ID ${selectedId}`);
       return;
     }
 
     product.selectedPackage = selectedPackage.id;
-    product.selectedPackageSize = parseFloat(selectedPackage.name.match(/\d+/)) || 1; // Lấy số từ tên package
+    product.selectedPackageSize = parseFloat(selectedPackage.name.match(/\d+/)) || 1;
 
+console.log("aaanc: "+product.quantity);
     console.log(`✅ Package đã chọn: ID = ${product.selectedPackage}, Size = ${product.selectedPackageSize}kg`);
 
     renderProducts(tabId);
@@ -1076,6 +1089,20 @@
 
   });
 
+  document.getElementById("order-note").addEventListener("input", function (event) {
+    let inputValue = event.target.value;
+    let errorSpan = document.getElementById("note-error");
+    if (inputValue.length > 255) {
+      errorSpan.textContent = "Ghi chú chỉ chứa tối đa 255 kí tự!";
+      event.target.classList.add("input-error");
+      event.preventDefault();
+
+    } else{
+      errorSpan.textContent = "";
+      event.target.classList.remove("input-error");
+    }
+  });
+
   // Xử lý tạo và chuyển tab
   document.querySelector(".add-tab").addEventListener("click", function () {
     let existingNumbers = [...document.querySelectorAll(".tab")]
@@ -1285,7 +1312,19 @@
       Swal.fire({
         icon: "error",
         title: "Oops...",
-        text: "Please enter a valid loading amount!"
+        text: "Vui lòng nhập phí bốc vác phù hợp!"
+      });
+      return;
+    }
+
+    let note= document.getElementById("order-note").value;
+    console.log("note: "+note);
+
+    if(note.length > 255){
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Ghi chú của bạn đang vượt quá 255 kí tự!"
       });
       return;
     }
@@ -1297,6 +1336,7 @@
 
     // Lưu trạng thái vào tabData
     tabData[activeTabId].status = statusEle;
+    console.log("khj: "+ tabData[activeTabId].products[0].quantity);
 
     // Cập nhật hiển thị trạng thái
     updateOrderStatus(activeTabId);
@@ -1312,6 +1352,8 @@
       discount: discount,
       note: tabData[activeTabId].note // Gửi ghi chú
     };
+
+    console.log("alala: "+tabData[activeTabId].products.quantity);
 
     fetch("/bill/checkout", {
       method: "POST",

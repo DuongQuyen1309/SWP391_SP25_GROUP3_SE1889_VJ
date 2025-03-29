@@ -106,6 +106,7 @@ function renderProducts() {
                 <td>${product.name}
                     <input type="hidden" name="productImage-${product.id}" value="${product.image}">
                 </td>
+                <td>${product.price}</td>
                 <td class="quantity-cell">
                     <span class="quantity-value">${product.quantity}</span>
                     <div class="quantity-controls">
@@ -137,27 +138,30 @@ function renderProducts() {
 // Tìm kiếm khách hàng
 function searchCustomer() {
     let keyword = document.getElementById("search-customer-input").value.trim();
-    let customerList = document.getElementById("customer-info");
+    let customerList = document.getElementById("customer-list");
+
     if (keyword.length >= 1) {
         customerList.style.display = "block";
         customerList.innerHTML = "<p>Đang tìm kiếm...</p>";
+
         fetch(`/bill/searchCustomers?keyword=${keyword}`)
             .then(response => response.json())
             .then(data => {
                 if (data.length === 0) {
-                    customerList.innerHTML = `<p>Không tìm thấy khách hàng.</p>`;
+                    customerList.innerHTML = `<p>Không có khách hàng.</p>`;
                 } else {
                     customerList.innerHTML = data.map(customer => `
                         <div class="customer-item" onclick="selectCustomer(
                             '${customer.name}',
                             '${customer.phone}',
                             '${customer.address}',
-                            '${formatDate(customer.dob)}',
-                            '${customer.gender === 1 ? 'Male' : 'Female'}',
-                            '${customer.moneyState}'
+                            '${customer.dob}',
+                            '${customer.gender}'
                         )">
+
                             ${customer.name} - ${customer.phone}
                         </div>
+
                     `).join("");
                 }
             })
@@ -169,6 +173,7 @@ function searchCustomer() {
         customerList.innerHTML = "";
         customerList.style.display = "none";
     }
+
 }
 
 // Chọn khách hàng
@@ -323,5 +328,223 @@ document.getElementById("loading-amount").addEventListener("input", function (ev
         updateOrderTotal();
         updateTotalDebt();
     }
+});
+
+
+// Ngăn chỉnh sửa các trường khách hàng
+document.getElementById("customer-name").readOnly = true;
+document.getElementById("customer-address").readOnly = true;
+document.getElementById("customer-phone").readOnly = true;
+document.getElementById("customer-gender").readOnly = true;
+document.getElementById("customer-dob").readOnly = true;
+document.getElementById("customer-moneystate").readOnly = true;
+
+['customer-name', 'customer-address', 'customer-phone', 'customer-gender', 'customer-dob'].forEach(id => {
+    document.getElementById(id).addEventListener("keydown", function (event) {
+        event.preventDefault();
+    });
+    document.getElementById(id).addEventListener("contextmenu", function (event) {
+        event.preventDefault();
+    });
+});
+
+// Sự kiện nút tìm kiếm và thêm khách hàng
+document.getElementById("search-customer-btn").addEventListener("click", function () {
+    document.getElementById("customer-search-modal").style.display = "flex";
+});
+
+function closeCustomerSearchModal() {
+    document.getElementById("customer-search-modal").style.display = "none";
+}
+
+document.getElementById("add-customer-btn").addEventListener("click", function () {
+    document.getElementById("add-customer-modal").style.display = "flex";
+});
+
+function closeAddCustomerModal() {
+    document.getElementById("add-customer-modal").style.display = "none";
+}
+
+function validateNumber(input) {
+    let value = input.value;
+
+    let quantity = parseInt(value, 10);
+
+    if (isNaN(quantity) || quantity < 1) {
+        alert("Đơn giá không hợp lệ!!!")
+    }
+}
+
+
+// Sự kiện checkbox "Bốc hàng"
+document.getElementById("loading").addEventListener("change", function () {
+    let loadingAmountInput = document.getElementById("loading-amount");
+    if (this.checked) {
+        loadingAmountInput.removeAttribute("readonly");
+    } else {
+        loadingAmountInput.setAttribute("readonly", true);
+        loadingAmountInput.value = "0";
+    }
+    updateOrderTotal();
+    updateTotalDebt();
+});
+
+// Cập nhật tổng công nợ khi nhập số tiền thanh toán
+document.getElementById("customer-payment").addEventListener("input", function (event) {
+    let inputValue = event.target.value.trim();
+    let errorSpan = document.getElementById("customer-payment-error");
+    let moneyState = parsePrice(customer.moneyState || "0");
+    if (inputValue === "") {
+        errorSpan.textContent = "";
+        event.target.classList.remove("input-error");
+        document.getElementById("customer-totaldebt").value = formatPrice(oldDebt);
+        return;
+    }
+    if (!/^\d+$/.test(inputValue)) {
+        errorSpan.textContent = "Vui lòng nhập số nguyên dương!";
+        event.target.classList.add("input-error");
+        return;
+    } else {
+        errorSpan.textContent = "";
+        event.target.classList.remove("input-error");
+    }
+    updateTotalDebt();
+});
+
+// Cập nhật tổng công nợ
+function updateTotalDebt() {
+    let customerName = document.getElementById("customer-name").value.trim();
+    let payment = parsePrice(document.getElementById("customer-payment").value);
+    let moneyFinal = document.getElementById("customer-moneystate").value.trim();
+    let totalAmount = parsePrice(document.getElementById("total-amount").textContent) || 0;
+
+    if (customerName === "") {
+        document.getElementById("customer-totaldebt").value = "";
+        return;
+    }
+
+    if (payment >= 0) {
+        moneyFinal = totalAmount-payment;
+        document.getElementById("customer-moneystate").value = formatPrice(moneyFinal);
+    }else{
+        document.getElementById("customer-moneystate").value = 0;
+    }
+}
+
+// Cập nhật tổng tiền
+function updateOrderTotal() {
+    let productTotal = products.reduce((sum, product) => sum + product.price * product.quantity, 0);
+    let loadingFee = document.getElementById("loading").checked ? parsePrice(document.getElementById("loading-amount").value) : 0;
+    let finalTotal = productTotal + loadingFee;
+    document.getElementById("total-amount").textContent = formatPrice(finalTotal);
+    document.getElementById("customer-pay").textContent = formatPrice(finalTotal);
+}
+
+// Sự kiện nhập tiền bốc hàng
+document.getElementById("loading-amount").addEventListener("input", function (event) {
+    if (document.getElementById("loading").checked) {
+        let inputValue = event.target.value;
+        let errorSpan = document.getElementById("loading-amount-error");
+        if (inputValue === "") {
+            errorSpan.textContent = "";
+            event.target.classList.remove("input-error");
+            updateOrderTotal();
+            updateTotalDebt();
+            return;
+        }
+        if (!/^\d+$/.test(inputValue)) {
+            errorSpan.textContent = "Vui lòng nhập số nguyên dương!";
+            event.target.classList.add("input-error");
+            return;
+        } else {
+            errorSpan.textContent = "";
+            event.target.classList.remove("input-error");
+        }
+        updateOrderTotal();
+        updateTotalDebt();
+    }
+});
+
+// Xử lý thanh toán
+document.querySelector(".checkout-button").addEventListener("click", function () {
+    if (!customer.name || products.length === 0) {
+        alert("Vui lòng nhập thông tin khách hàng và thêm sản phẩm!");
+        return;
+    }
+
+    for (let product of products) {
+        if (isNaN(product.price) || product.price <= 0) {
+            alert("Giá sản phẩm không hợp lệ!");
+            return;
+        }
+        if (!product.zoneId) {
+            alert("Vui lòng chọn zone cho tất cả sản phẩm!");
+            return;
+        }
+    }
+
+    let productList = products.map(product => ({
+        id: product.id,
+        image : product.image,
+        name : product.name,
+        quantity: product.quantity,
+        price: product.price,
+        subtotal: product.price * product.quantity,
+        zoneId: product.zoneId,
+    }));
+
+    let requestData = {
+        paidMoney : document.getElementById("customer-payment").value || 0,
+        debtMoney : parsePrice(document.getElementById("customer-moneystate").value) || 0,
+        portedMoney : document.getElementById("loading-amount").value || "0",
+        importDate: document.getElementById("importDate").value,
+        customerPhone : document.getElementById("customer-phone").value,
+        productData: productList
+    };
+
+    fetch("/product/import", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(requestData)
+    })
+        .then(response => {
+            if (response.redirected) {
+                window.location.href = response.url;
+                return;
+            }
+            if (!response.ok) {
+                throw new Error(`Lỗi từ server: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+
+            if (data && data.success) { // Kiểm tra data tồn tại
+                alert("Thanh toán thành công!");
+                // Reset form
+                customer = {};
+                products = [];
+                document.getElementById("customer-name").value = "";
+                document.getElementById("customer-phone").value = "";
+                document.getElementById("customer-address").value = "";
+                document.getElementById("customer-dob").value = "";
+                document.getElementById("customer-gender").value = "";
+                document.getElementById("customer-moneystate").value = "";
+                document.getElementById("customer-totaldebt").value = "";
+                document.getElementById("customer-payment").value = "";
+                document.getElementById("loading").checked = false;
+                document.getElementById("loading-amount").value = "0";
+                document.getElementById("loading-amount").setAttribute("readonly", true);
+                renderProducts();
+                updateOrderTotal();
+            } else if (data) {
+                alert("Lỗi khi xử lý thanh toán: " + (data.message || "Không có thông tin lỗi"));
+            }
+        })
+        .catch(error => {
+            console.error("Lỗi chi tiết:", error);
+            alert("Có lỗi xảy ra khi gửi dữ liệu: " + error.message);
+        });
+
 });
 

@@ -115,7 +115,7 @@
       background-color: #f7f9fb;
       border: 1px solid #dcdfe3;
       border-radius: 8px;
-      padding: 20px;
+      padding: 10px;
       margin-bottom: 30px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.05);
       display: grid;
@@ -127,7 +127,7 @@
                                         20%      /* Phone */
                                         18%;     /* MoneyState */
 
-      gap: 10px 20px;
+      gap: 10px 10px;
       font-size: 16px;
       line-height: 1.6;
     }
@@ -248,7 +248,7 @@
   </div>
 
   <div class="header-container">
-    <h2 >Thông tin về giấy nợ</h2>
+    <h2 >Thông tin về các loại phiếu</h2>
     <div>
       <a th:href="@{/note/createNote/{id}(id=${customer.id})}" class="add-note-button">Tạo giấy nợ</a>
       <a th:href="@{/customer/listCustomer}" class="add-note-button">Quay lại</a>
@@ -262,14 +262,15 @@
     <thead>
     <tr>
       <td>Id</td>
-      <td>Loại giấy nợ</td>
+      <td>Loại phiếu</td>
       <td>Ngày tạo</td>
       <td>Ghi chú</td>
       <td>Tiền</td>
+      <td>Người tạo</td>
       <td>Ảnh</td>
     </tr>
     <tr>
-      <td class="twin-field" style="width: 5%;">
+      <td class="twin-field" style="width: 9%;">
         <div style="display: flex; gap: 3%; width: 100%;">
           <input type="text" class="filter-input" name="idFrom"
                  onchange="filterNotes()"
@@ -279,27 +280,27 @@
                  style="width: 48%;"/>
         </div>
       </td>
-      <td >
-        <select class="filter-input" name="kindOfNote" onchange="filterNotes()" style="width: 50%;">
+      <td style="width: 40%;" >
+        <select class="filter-input" name="kindOfNote" onchange="filterNotes()" style="width: 65%;">
           <option value="">--------Tất cả--------</option>
-          <option value="customerOwe">Khách hàng vay tiền</option>
-          <option value="customerPay">Khách hàng trả tiền</option>
-          <option value="storeOwe">Cửa hàng vay tiền</option>
-          <option value="storePay">Cửa hàng trả tiền</option>
+          <option value="Customer Owe">Khách hàng vay tiền</option>
+          <option value="Customer Pay">Khách hàng trả tiền</option>
+          <option value="Store Owe">Cửa hàng vay tiền</option>
+          <option value="Store Pay">Cửa hàng trả tiền</option>
         </select>
       </td>
-      <td class="twin-field" style="width: 5%;">
+      <td class="twin-field" style="width: 1%;">
         <div style="display: flex; gap: 3%; width: 100%;">
           <input type="datetime-local" class="filter-input" name="createdDateFrom"
                  onchange="filterNotes()"
-                 style="width: 48%;"/>
+                 style="width: 30%;"/>
           <input type="datetime-local" class="filter-input" name="createdDateTo"
                  onchange="filterNotes()"
-                 style="width: 48%;"/>
+                 style="width: 30%;"/>
         </div>
       </td>
       <td style="width: 30%;">
-        <input type="text" class="filter-input" name="noteSearch" onchange="filterNotes()" style="width: 40%;">
+        <input type="text" class="filter-input" name="noteSearch" onchange="filterNotes()" style="width: 70%;">
       </td>
       <td class="twin-field" style="width: 15%;">
         <div style="display: flex; gap: 10%; width: 100%;">
@@ -311,16 +312,32 @@
                  style="width: 48%;"/>
         </div>
       </td>
+      <td>
+        <select class="filter-input" name="createBy" onchange="filterNotes()" style="width: 100%;">
+          <option value="">All</option>
+          <option th:each="user : ${usersList}" th:value="${user.id}" th:text="${user.name}"></option>
+        </select>
+      </td>
       <td></td>
     </tr>
     </thead>
     <tbody>
     <tr th:each="note : ${notes}">
       <td th:if="${note != null}" th:text="${note.id}"></td>
-      <td th:if="${note != null}" th:text="${note.debt}"></td>
+      <td th:if="${note != null}">
+        <span th:if="${note.debt == 'Customer Owe'}">Khách hàng vay tiền</span>
+        <span th:if="${note.debt == 'Customer Pay'}">Khách hàng trả tiền</span>
+        <span th:if="${note.debt == 'Store Owe'}">Cửa hàng vay tiền</span>
+        <span th:if="${note.debt == 'Store Pay'}">Cửa hàng trả tiền</span>
+      </td>
+
       <td th:if="${note != null}" th:text="${#temporals.format(note.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
       <td th:if="${note != null}" th:text="${note.note}"></td>
       <td th:if="${note != null}" th:text="${note.money}"></td>
+      <td th:if="${note != null}">
+                <span th:each="user : ${usersList}"
+                      th:text="${user.id == note.createdBy ? user.name : ''}"></span>
+      </td>
       <td>
         <img th:if="${note.imagePath != null}"
              th:src="@{/note/image/{filename}(filename=${note.imagePath})}"
@@ -359,7 +376,7 @@
        createdDateTo=${createdDateTo},
        noteSearch=${noteSearch},
        moneyFrom=${moneyFrom},
-       moneyTo=${moneyTo})}">
+       moneyTo=${moneyTo}, createBy=${createBy})}">
       Trước
     </a>
 
@@ -373,7 +390,7 @@
        createdDateTo=${createdDateTo},
        noteSearch=${noteSearch},
        moneyFrom=${moneyFrom},
-       moneyTo=${moneyTo})}">
+       moneyTo=${moneyTo}, createBy=${createBy})}">
       Sau
     </a>
   </div>

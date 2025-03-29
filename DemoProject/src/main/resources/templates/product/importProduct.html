@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Import Rice</title>
+    <title>Tạo hóa đơn nhập </title>
     <link rel="stylesheet" href="/css/base.css">
     <link rel="stylesheet" href="/css/bill.css">
     <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
@@ -11,6 +11,43 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="/js/home.js"></script>
     <script src="/js/importProduct.js"></script>
+    <script src="/js/validateCusImported.js"></script>
+    <style>
+        .form-row {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-row label {
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .styled-input {
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        .form-row.center {
+            text-align: center;
+        }
+
+        .btn-save {
+            background-color: #2c3e50;
+            color: white;
+            padding: 10px 25px;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+
+    </style>
 </head>
 <body>
 <div th:insert="~{layout/header :: header}"></div>
@@ -57,8 +94,9 @@
                     <tr>
                         <th>#</th>
                         <th>Sản phẩm</th>
+                        <th>Giá gốc</th>
                         <th class="quantity-cell">SL</th>
-                        <th style="width: 20px" class="price-cell">Đơn giá</th>
+                        <th class="price-cell">Giá nhập</th>
                         <th class="price-cell">Thành tiền</th>
                         <th>Zone</th>
                         <th>Xóa</th>
@@ -72,7 +110,7 @@
         <div class="right-panel">
             <!-- Thông tin khách hàng -->
             <div class="section">
-                <div class="section-header">Thông tin khách hàng</div>
+                <div class="section-header">Thông tin nhà cung cấp</div>
                 <div class="section-content">
                     <div class="form-group">
                         <div class="customer-buttons">
@@ -93,15 +131,15 @@
                         <input type="text" class="form-control" id="customer-phone" style="width: 90%">
                     </div>
                     <div class="form-group">
-                        <label for="customer-gender">Gender</label>
+                        <label for="customer-gender">Giới tính</label>
                         <input type="text" class="form-control" id="customer-gender" style="width: 90%">
                     </div>
                     <div class="form-group">
-                        <label for="customer-dob">Date Of Birth</label>
+                        <label for="customer-dob">Ngày sinh</label>
                         <input type="text" class="form-control" id="customer-dob" style="width: 90%">
                     </div>
                     <div class="form-group">
-                        <label for="customer-moneystate">Money State</label>
+                        <label for="customer-moneystate">Số dư</label>
                         <input type="text" class="form-control" id="customer-moneystate" style="width: 90%">
                     </div>
 
@@ -111,43 +149,58 @@
             <!-- Popup tìm kiếm khách hàng -->
             <div id="customer-search-modal" class="modal">
                 <div class="modal-content">
-                    <span class="close" onclick="closeCustomerSearchModal()">×</span>
+                    <span class="close" onclick="closeCustomerSearchModal()">&times;</span>
                     <h2>Tìm kiếm khách hàng</h2>
-                    <input type="text" id="search-customer-input" class="styled-input"
-                           placeholder="Nhập tên khách hàng..." onkeyup="searchCustomer()">
-                    <div id="customer-info" class="customer-info"></div>
+                    <input type="text" id="search-customer-input" style="width: 95%" class="styled-input" placeholder="Nhập tên khách hàng..." onkeyup="searchCustomer()">
+                    <div id="customer-list" class="customer-list"></div>
                 </div>
             </div>
 
             <!-- Popup thêm khách hàng -->
             <div id="add-customer-modal" class="modal">
                 <div class="modal-content">
-                    <span class="close" onclick="closeAddCustomerModal()">×</span>
-                    <h2>Thêm khách hàng mới</h2>
-                    <div class="form-group">
-                        <label for="new-customer-name">Tên khách hàng</label>
-                        <input type="text" class="form-control" id="new-customer-name">
-                    </div>
-                    <div class="form-group">
-                        <label for="new-customer-gender">Gender:</label>
-                        <select id="new-customer-gender">
-                            <option value="true">Male</option>
-                            <option value="false">Female</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="new-customer-address">Địa chỉ</label>
-                        <input type="text" class="form-control" id="new-customer-address">
-                    </div>
-                    <div class="form-group">
-                        <label for="new-customer-phone">Số điện thoại</label>
-                        <input type="text" class="form-control" id="new-customer-phone">
-                    </div>
-                    <div class="form-group">
-                        <label for="new-customer-dob">Date of birth</label>
-                        <input type="date" class="form-control" id="new-customer-dob">
-                    </div>
-                    <button id="save-customer-btn">Save</button>
+                    <span class="close" onclick="closeAddCustomerModal()">&times;</span>
+                    <h2>Thêm khách hàng</h2>
+                    <form id="addCustomer" action="/bill/addCustomer" class="create-form" method="post" onsubmit="return validateForm()">
+                        <div class="form-row">
+                            <label>Tên khách hàng</label>
+                            <input type="text" name="name" style="Nwidth: 95%"
+                                   class="form-control styled-input" id="new-customer-name"
+                                   oninput="validateName(this)"
+                            >
+                            <small class="error-message" id="name-error"></small>
+                        </div>
+                        <div class="form-row">
+                            <label>Số điện thoại</label>
+                            <input type="text" name="phone" style="width: 95%"
+                                   class="form-control styled-input" id="new-customer-phone"
+                                   oninput="validatePhone(this)"
+                            >
+                            <small class="error-message" id="phone-error"></small>
+                        </div>
+                        <div class="form-row">
+                            <label>Địa chỉ</label>
+                            <input type="text" name="address" style="width: 95%" class="form-control styled-input"
+                                   id="new-customer-address"
+                                   oninput="validateAddress(this)"
+                            >
+                            <small class="error-message" id="address-error"></small>
+                        </div>
+                        <div class="form-row">
+                            <label>Giới tính:</label>
+                            <select id="new-customer-gender" class="form-control styled-input"  style="width: 100%" name="gender">
+                                <option value="true" >Nam</option>
+                                <option value="false" >Nữ</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <label>Ngày sinh</label>
+                            <input type="date" style="width: 95%" class="form-control styled-input"
+                                   id="new-customer-dob" name="dob" oninput="validateDob(this)">
+                            <small class="error-message" id="dob-error"></small>
+                        </div>
+                        <button class="btn-save"  id="save-customer-btn">Tạo </button>
+                    </form>
                 </div>
             </div>
 
@@ -234,38 +287,6 @@
     function closeAddCustomerModal() {
         document.getElementById("add-customer-modal").style.display = "none";
     }
-
-    // Lưu khách hàng mới
-    document.getElementById("save-customer-btn").addEventListener("click", function () {
-        let name = document.getElementById("new-customer-name").value.trim();
-        let phone = document.getElementById("new-customer-phone").value.trim();
-        let address = document.getElementById("new-customer-address").value.trim();
-        let dob = document.getElementById("new-customer-dob").value.trim();
-        let gender = document.getElementById("new-customer-gender").value.trim();
-        if (!name || !phone || !address) {
-            alert("Vui lòng nhập đầy đủ thông tin khách hàng!");
-            return;
-        }
-        let requestData = { name, phone, address, dob, gender };
-        fetch("/bill/addCustomer", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(requestData)
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert("Thêm khách hàng thành công!");
-                    closeAddCustomerModal();
-                } else {
-                    alert("Lỗi khi thêm khách hàng: " + data.message);
-                }
-            })
-            .catch(error => {
-                console.error("Lỗi gửi dữ liệu:", error);
-                alert("Có lỗi xảy ra khi gửi dữ liệu.");
-            });
-    });
 
     function validateNumber(input) {
         let value = input.value;
@@ -392,12 +413,12 @@
             quantity: product.quantity,
             price: product.price,
             subtotal: product.price * product.quantity,
-            zone: product.zoneId
+            zoneId: product.zoneId,
         }));
 
         let requestData = {
-            paidMoney : document.getElementById("customer-payment").value,
-            debtMoney : parsePrice(document.getElementById("customer-moneystate").value) ,
+            paidMoney : document.getElementById("customer-payment").value || 0,
+            debtMoney : parsePrice(document.getElementById("customer-moneystate").value) || 0,
             portedMoney : document.getElementById("loading-amount").value || "0",
             importDate: document.getElementById("importDate").value,
             customerPhone : document.getElementById("customer-phone").value,
@@ -410,12 +431,10 @@
             body: JSON.stringify(requestData)
         })
             .then(response => {
-                // Kiểm tra nếu có chuyển hướng
                 if (response.redirected) {
-                    window.location.href = response.url; // Chuyển hướng thủ công
-                    return; // Dừng xử lý tiếp để tránh parse JSON
+                    window.location.href = response.url;
+                    return;
                 }
-                // Nếu không có chuyển hướng, parse JSON
                 if (!response.ok) {
                     throw new Error(`Lỗi từ server: ${response.status}`);
                 }

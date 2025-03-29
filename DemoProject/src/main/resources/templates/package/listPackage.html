@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Warehouse Zones</title>
+    <title>Quy cách đóng gói</title>
     <link rel="stylesheet" href="/css/base.css">
     <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -90,13 +90,14 @@
         function confirmDelete(event) {
             event.preventDefault();
             Swal.fire({
-                title: "Are you sure?",
-                text: "You won't be able to revert this!",
+                title: "Cảnh báo",
+                text: "Bạn có chắc muốn xóa không?",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#3085d6",
                 cancelButtonColor: "#d33",
-                confirmButtonText: "Delete"
+                cancelButtonText: "Hủy",
+                confirmButtonText: "Xóa"
             }).then((result) => {
                 if (result.isConfirmed) {
                     Swal.fire({
@@ -116,15 +117,89 @@
             });
         }
         function filterPackages() {
+            // Get the ID input fields
+            const idFromInput = document.querySelector('input[name="idFrom"]');
+            const idToInput = document.querySelector('input[name="idTo"]');
+
+            // Reset any previous error styling
+            document.querySelectorAll('.error-input').forEach(input => {
+                input.classList.remove('error-input');
+            });
+
+            // Check if ID inputs contain only integers
+            let hasError = false;
+
+            if (idFromInput && idFromInput.value.trim() !== '') {
+                if (!/^\d+$/.test(idFromInput.value)) {
+                    showError("ID  phải là số nguyên");
+                    idFromInput.focus();
+                    idFromInput.classList.add('error-input');
+                    hasError = true;
+                }
+            }
+
+            if (!hasError && idToInput && idToInput.value.trim() !== '') {
+                if (!/^\d+$/.test(idToInput.value)) {
+                    showError("ID  phải là số nguyên");
+                    idToInput.focus();
+                    idToInput.classList.add('error-input');
+                    hasError = true;
+                }
+            }
+
+            // If there's an error, stop the filtering process
+            if (hasError) {
+                return;
+            }
+
+            // Continue with the original filtering logic if no errors
             let params = new URLSearchParams();
             document.querySelectorAll('.filter-input').forEach(input => {
-                if (input.value.trim() !== '') { // Chỉ thêm tham số nếu có giá trị
+                if (input.value.trim() !== '') {
                     params.append(input.name, input.value);
                 }
             });
 
             window.location.href = '/package/listPackage' + '?' + params.toString();
         }
+
+        // Function to show error message using SweetAlert2
+        function showError(message) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi',
+                text: message,
+                confirmButtonColor: '#d35400'
+            });
+        }
+
+        // Add CSS for highlighting error fields
+        document.addEventListener("DOMContentLoaded", function () {
+            // Add style for error input highlighting if it doesn't exist
+            if (!document.getElementById('error-input-style')) {
+                const style = document.createElement('style');
+                style.id = 'error-input-style';
+                style.textContent = `
+            .error-input {
+                border: 2px solid #e74c3c !important;
+                background-color: rgba(231, 76, 60, 0.1) !important;
+            }
+        `;
+                document.head.appendChild(style);
+            }
+
+            // Keep your existing code for restoring filter values
+            let params = new URLSearchParams(window.location.search);
+            document.querySelectorAll('.filter-input').forEach(input => {
+                if (params.has(input.name)) {let value = params.get(input.name);
+                    if (input.type === "date") {
+                        input.value = value.substring(0, 10); // Format YYYY-MM-DD
+                    } else {
+                        input.value = value;
+                    }
+                }
+            });
+        });
 
         // Khôi phục giá trị filter từ URL khi tải trang
         document.addEventListener("DOMContentLoaded", function () {
@@ -150,16 +225,15 @@
     <div th:insert="~{layout/sidebar :: sidebar}"></div>
 </div>
 <div class="content" id="content">
-    <h2>Quản lí quy cách đóng gói</h2>
+    <h1>Quản lí quy cách đóng gói</h1>
 
-    <button class="add-zone" onclick="callPage()">Thêm đóng gói</button>
+    <button class="add-zone" onclick="callPage()" th:style="${#lists.contains(listHiddenPage, 'createPackage')} ? 'display: none;' : ''">Thêm đóng gói</button>
 
     <table class="styled-table" style="margin-top: 100px;">
         <thead>
         <tr>
             <th>ID</th>
             <th>Tên</th>
-            <th>Màu</th>
             <th>Mô tả</th>
             <th>Ngày tạo</th>
             <th>Hành động</th>
@@ -178,10 +252,6 @@
                        style="width: 30%;">
             </td>
             <td>
-                <input type="text" class="filter-input" name="color" onchange="filterPackages()"
-                       style="width: 30%;">
-            </td>
-            <td>
                 <input type="text" class="filter-input" name="description" onchange="filterPackages()"
                        style="width: 30%;">
             </td>
@@ -195,7 +265,6 @@
         <tr th:each="package : ${packagePage}">
             <td th:text="${package.id}"></td>
             <td th:text="${package.name}"></td>
-            <td th:text="${package.color}"></td>
             <td th:text="${package.description}"></td>
             <td th:text="${package.createdAt}"></td>
 
@@ -206,9 +275,9 @@
                     <button type="submit" style="background-color: #06999c">Sửa</button>
                 </form>
                 <form th:action="@{/package/deletePackage}" method="post" onsubmit="confirmDelete(event)">
-                    <input type="hidden" name="_method" value="delete">
+                    <input type="hidden" name="_method" value="delete" >
                     <input type="hidden" name="id" th:value="${package.id}">
-                    <button type="submit" style="background-color: #fb0202">Xóa</button>
+                    <button type="submit" style="background-color: #fb0202" th:style="${#lists.contains(listHiddenPage, 'deletePackage')} ? 'display: none;' : ''">Xóa</button>
                 </form>
 
 

@@ -54,6 +54,7 @@ public interface NoteRepository extends JpaRepository<Note, Long> {
             " AND (:createdDateTo IS NULL OR n.createdAt <= :createdDateTo) " +
             " AND (:moneyFrom IS NULL OR n.money >= :moneyFrom) " +
             " AND (:moneyTo IS NULL OR n.money <= :moneyTo) " +
+            " AND (:createby IS NULL OR n.createdBy = :createby) " +
             " AND (:noteSearch IS NULL OR LOWER(n.note) LIKE LOWER(CONCAT('%', :noteSearch, '%')))")
     Page<Note> findNoteByAttribute(@Param("id") Long id,
                                    @Param("storeID") Long storeID,
@@ -65,6 +66,7 @@ public interface NoteRepository extends JpaRepository<Note, Long> {
                                    @Param("noteSearch") String noteSearch,
                                    @Param("moneyFrom") Integer moneyFrom,
                                    @Param("moneyTo") Integer moneyTo,
+                                   @Param("createby") Long createby,
                                    Pageable pageable);
 
 

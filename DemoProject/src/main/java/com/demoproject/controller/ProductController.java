@@ -19,9 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 
 @RequestMapping("/product")
@@ -94,7 +92,6 @@ public class ProductController {
             listHiddenPage.add("listOwner");
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
-
         return "redirect:/product/listProduct";
     }
 
@@ -105,8 +102,12 @@ public class ProductController {
             @RequestParam(defaultValue = "id") String sortField,
             @RequestParam(defaultValue = "asc") String sortDirection,
             @CookieValue(value = "token", required = false) String token,
-            @RequestParam(defaultValue = "") String searchKeyWord,
-            @RequestParam(defaultValue = "") String searchBy,
+            @RequestParam(required = false) String idFrom,
+            @RequestParam(required = false) String idTo,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String priceFrom,
+            @RequestParam(required = false) String priceTo,
+            @RequestParam(required = false) String description,
             Model model) {
         String username = jwtUtils.extractUsername(token);
         Optional<Account> optAccount = accountService.findByUsernameAndIsDeleteFalse(username);
@@ -123,11 +124,20 @@ public class ProductController {
             listHiddenPage.add("Store");
             listHiddenPage.add("Dashboard");
             listHiddenPage.add("listOwner");
+            listHiddenPage.add("updateProduct");
+            listHiddenPage.add("deleteProduct");
         }
         if (role.equals("OWNER")) {
             listHiddenPage.add("listOwner");
         }
-        Page<Product> productPage = productService.getAllProductByPage(searchKeyWord, searchBy, optUser.get().getStoreId(), page, size, sortField, sortDirection);
+
+        double minPrice = priceFrom != null ? Double.parseDouble(priceFrom) : Double.MIN_VALUE;
+        double maxPrice = priceTo != null ? Double.parseDouble(priceTo) : Double.MAX_VALUE;
+        long minId = idFrom != null ? Long.parseLong(idFrom) : Long.MIN_VALUE;
+        long maxId = idTo != null ? Long.parseLong(idTo) : Long.MAX_VALUE;
+        Page<Product> productPage = productService.getAllProductsWithFilter(
+                page, size, sortField, sortDirection,minId, maxId,minPrice, maxPrice, name,description, optUser.get().getStoreId()
+        );
         model.addAttribute("listHiddenPage", listHiddenPage);
         model.addAttribute("account", account);
         model.addAttribute("products", productPage.stream().toList());
@@ -136,11 +146,14 @@ public class ProductController {
         model.addAttribute("sortField", sortField);
         model.addAttribute("sortDirection", sortDirection);
 
+        model.addAttribute("idFrom", idFrom);
+        model.addAttribute("idTo", idTo);
+        model.addAttribute("name", name);
+        model.addAttribute("priceFrom", priceFrom);
+        model.addAttribute("priceTo", priceTo);
+        model.addAttribute("description", description);
         String reverseSortDirection = sortDirection.equals("asc") ? "desc" : "asc";
         model.addAttribute("reverseSortDirection", reverseSortDirection);
-
-        model.addAttribute("searchKeyWord", searchKeyWord);
-        model.addAttribute("searchBy", searchBy);
         return "product/listProduct";
     }
 
@@ -180,6 +193,8 @@ public class ProductController {
         }
         model.addAttribute("listHiddenPage", listHiddenPage);
         Product product = productService.getProductById(id);
+        model.addAttribute("preName", product.getName());
+        model.addAttribute("currentId", product.getId());
         model.addAttribute("products", product);
         return "product/updateProduct";
     }
@@ -308,5 +323,19 @@ public class ProductController {
         }
         return products;
     }
+
+    @GetMapping("/checkname")
+    @ResponseBody
+    public boolean checkProductName(@RequestParam String name) {
+        return productService.isProductNameExists(name);
+    }
+
+    @GetMapping("/checknameandid")
+    @ResponseBody
+    public Map<String, Boolean> existsByNameAndNotId(@RequestParam String name, @RequestParam Long id) {
+        boolean exists = productService.existsByNameAndNotId(name, id);
+        return Collections.singletonMap("exists",exists);
+    }
+
 }
 

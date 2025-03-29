@@ -48,9 +48,10 @@ public class BillController {
     private ProductQueueProcessor productQueueProcessor;
     private final ObjectMapper objectMapper;
     private final BillService billService;
+    private final PackageService packageService;
 
     public BillController(AccountService accountService, UserService userService, ProductService productService, BillQueueProcessor billQueueProcessor, BillRepository billRepository, ProductQueueProcessor productQueueProcessor, ObjectMapper objectMapper,
-                          BillService billService) {
+                          BillService billService, PackageService packageService) {
         this.accountService = accountService;
         this.userService = userService;
         this.productService = productService;
@@ -59,6 +60,7 @@ public class BillController {
         this.productQueueProcessor = productQueueProcessor;
         this.objectMapper = objectMapper;
         this.billService = billService;
+        this.packageService = packageService;
     }
 
     @Autowired
@@ -256,7 +258,6 @@ public class BillController {
             CustomerDataDTO customerData = objectMapper.readValue(bill.getCustomerData(), CustomerDataDTO.class);
 
 
-            String customerDataJson = objectMapper.writeValueAsString(customerData);
             List<ProductDataDTO> products = objectMapper.readValue(bill.getProductData(), new TypeReference<List<ProductDataDTO>>() {});
             for (ProductDataDTO product : products) {
                 System.out.println("📌 Backend nhận Product ID: " + product.getId() +
@@ -391,20 +392,29 @@ public class BillController {
             System.out.println(bill.getProducts());
             List<ProductDataDTO> products = bill.getProducts();
             for (ProductDataDTO product : products) {
-                System.out.println("🔍 Product ID: " + product.getId());
-                System.out.println("🔍 packageType: " + product.getPackageType());
+
+                    System.out.println("🔍 Product ID: " + product.getId());
+                    System.out.println("🔍 selectedPackage: " + product.getSelectedPackage());
+                    System.out.println("🔍 packageType: " + product.getPackageType());
+                    System.out.println("🔍 packageType JSON: " + product.getPackageTypeJson());
+                System.out.println("packageTypeName: "+ product.getPackageTypeName());
+
+
             }
             List<ProductDataDTO> productDTOs = bill.getProducts().stream().map(product -> {
                 ProductDataDTO dto = new ProductDataDTO();
                 dto.setName(product.getName());
                 dto.setQuantity(product.getQuantity());
                 dto.setPrice(product.getPrice());
-
+                dto.setPackageType(product.getPackageType());
+                System.out.println(dto.getPackageType());
+                System.out.println("dbc: "+product.getSelectedPackage());
                 dto.setTotal(dto.getQuantity() * dto.getPrice()); // ✅ Tính tổng theo số kg
-                dto.setPackageTypeName(product.getPackageTypeName()); // ✅ Thêm thông tin đóng gói
+                System.out.println("klk: "+packageService.getName(product.getSelectedPackage()));
+                dto.setPackageTypeName(packageService.getName(product.getSelectedPackage())); // ✅ Thêm thông tin đóng gói
                 dto.setSelectedPackageSize(product.getSelectedPackageSize());
-
-
+                System.out.println("kol: "+ product.getSelectedPackageSize());
+                System.out.println("abc: "+dto.getPackageTypeName());
 
                 return dto;
             }).collect(Collectors.toList());

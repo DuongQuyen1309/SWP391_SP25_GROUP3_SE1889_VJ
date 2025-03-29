@@ -10,6 +10,10 @@ document.addEventListener("DOMContentLoaded", function () {
     let noteImageLabel = document.getElementById("noteImageLabel");
     let noteImage = document.getElementById("noteImage");
 
+        let moneyStateError = document.getElementById("moneyStateError");
+        let noteNameError = document.getElementById("noteNameError");
+        let noteImageError = document.getElementById("noteImageError");
+
     if (moneyState !== "0" && moneyState.trim() !== "") {
     kindOfNote.style.display = "block";
     kindOfNoteLabel.style.display = "block";
@@ -24,6 +28,9 @@ document.addEventListener("DOMContentLoaded", function () {
     noteNameLabel.style.display = "none";
     noteImage.style.display = "none";
     noteImageLabel.style.display = "none";
+
+    noteNameError.style.display = "none";
+    noteImageError.style.display = "none";
 }
 
     let value = input.value.replace(/,/g, '');
@@ -38,11 +45,15 @@ document.addEventListener("DOMContentLoaded", function () {
 }
 
     function numberToWords(num) {
+
         const units = ["", "Một", "Hai", "Ba", "Bốn", "Năm", "Sáu", "Bảy", "Tám", "Chín"];
         const teens = ["Mười một", "Mười hai", "Mười ba", "Mười bốn", "Mười lăm", "Mười sáu", "Mười bảy", "Mười tám", "Mười chín"];
         const tens = ["", "Mười", "Hai mươi", "Ba mươi", "Bốn mươi", "Năm mươi", "Sáu mươi", "Bảy mươi", "Tám mươi", "Chín mươi"];
         const thousands = ["", "Ngàn", "Triệu", "Tỷ"];
 
+        if (/\D/.test(num.toString().replace(/,/g, ''))) {
+            return "";
+        }
     if (num == 0) return "Không";
     let words = "";
     let numStr = num.toString();
@@ -139,8 +150,8 @@ document.addEventListener("DOMContentLoaded", function () {
     // Kiểm tra phone
     if (phone.value.trim() === "") {
         phoneError.push(" Số điện thoại không được để trống");
-    } else if (!phone.value.match(phoneRegex)) {
-        phoneError.push("Số điện thoại phải là 10 hoặc 11 số và chỉ được là số");
+    } else if (!/^0\d{9}$/.test(phone.value)) {
+        phoneError.push("Số điện thoại phải là 10 số và chỉ được là số");
     } else if(existingPhones.includes(phone.value)){
         phoneError.push("Số điện thoại không được trùng lặp");
     }
@@ -152,9 +163,12 @@ document.addEventListener("DOMContentLoaded", function () {
     // Chuyển đổi giá trị moneyState thành số nguyên
     let moneyNumber = parseInt(value, 10);
 
-    if (moneyState.value.trim() !== "" && moneyNumber !== 0 && noteName.value.length < 5) {
-        noteNameError.push("Tên giấy nợ phải lớn hơn hoặc bằng 5 kí tự");
+    if (moneyState.value.trim() !== "" && moneyNumber !== 0 && (noteName.value.length > 255 || noteName.value.length < 5)) {
+        noteNameError.push("Tên giấy nợ phải lớn hơn hoặc bằng 5 kí tự và nhỏ hơn 255 kí tự");
     }
+    // else if(moneyState.value.trim() !== "" && moneyNumber !== 0 && noteName.value.length > 255){
+    //     noteNameError.push("Tên giấy nợ phải nhỏ hơn 255 kí tự");
+    // }
 
     if (moneyState.value.trim() === "") {
         moneyNoteError.push("Tiền không được để trống");
@@ -164,9 +178,9 @@ document.addEventListener("DOMContentLoaded", function () {
         moneyNoteError.push("Tiền phải bằng kiểu dữ liệu int, nhỏ hơn hoặc bằng 2.147.483.647..");
     }
 
-    if(moneyState.value.trim() !== "" && moneyNumber !== 0 && noteImage.value.trim() === ""){
-        imageError.push(" Ảnh không được để trống");
-    }
+    // if(moneyState.value.trim() !== "" && moneyNumber !== 0 && noteImage.value.trim() === ""){
+    //     imageError.push(" Ảnh không được để trống");
+    // }
 
         // Kiểm tra Note Image
         const file = noteImage.files[0];

@@ -13,10 +13,21 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", function () {
-
+      const nameInput= document.getElementById("name");
+      async function checkNameExists(nameInput) {
+        try {
+          let response = await fetch(`/api/check-zone?name=${nameInput}`);
+          if (!response.ok) throw new Error("Lỗi khi kiểm tra tên");
+          let data = await response.json();
+          return data.exists;
+        } catch (error) {
+          console.error("Lỗi khi kiểm tra tên: ", error);
+          return false;
+        }
+      }
       let form = document.querySelector(".create-form");
     $(document).ready(function () {
-      $('#create-zone-form').on('submit', function (e) {
+      $('#create-zone-form').on('submit', async function (e) {
         event.preventDefault();
         let isValid = true;
 
@@ -28,14 +39,33 @@
         const position = $('input[name="position"]');
 
         if (!name.val().trim()) {
-          showError(name, 'Vui lòng nhập tên khu vực');
+          showError(name, 'Vui lòng nhập tên quy cách đóng gói');
+          isValid = false;
+        } else {
+          const nameLength = name.val().trim().length;
+          if (nameLength < 4 || nameLength > 50) {
+            showError(name, 'Tên quy cách đóng gói phải có hơn 3 kí tự và nhỏ hơn 50 kí tự ');
+            isValid = false;
+          }
+        }
+        if (!position.val().trim()) {
+          showError(position, 'Vui lòng nhập mô tả');
+          isValid = false;
+        } else {
+          const positionLength = position.val().trim().length;
+          if (positionLength < 4 || positionLength > 255) {
+            showError(position, 'Mô tả phải có hơn 3 kí tự và nhỏ hơn 255 kí tự ');
+            isValid = false;
+          }
+        }
+
+        let isNameExists = await checkNameExists(name.val());
+        if (isNameExists) {
+          showError(position, 'Tên trùng lặp');
           isValid = false;
         }
 
-        if (!position.val().trim()) {
-          showError(position, 'Vui lòng nhập vị trí');
-          isValid = false;
-        }
+
 
         if (!isValid) {
           e.preventDefault(); // Ngăn form gửi nếu có lỗi
@@ -125,7 +155,7 @@
 </div>
 <!-- Content -->
 <div class="content" id="content">
-  <h2>Tạo mới khu vực kho</h2>
+  <h1>Tạo mới khu vực kho</h1>
   <form class="create-form" id="create-zone-form" method="post" action="/warehouse/createWarehouseZone"
         modelAttribute="newZone">
     <div class="mb-3">
@@ -133,7 +163,7 @@
       <input type="text" class="form-control" name="name" id="name">
     </div>
     <div class="mb-3">
-      <label class="form-label">Vị trí:</label>
+      <label class="form-label">Mô tả :</label>
       <input type="text" class="form-control" name="position" id="position">
     </div>
 

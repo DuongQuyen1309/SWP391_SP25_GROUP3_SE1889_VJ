@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Package</title>
+    <title>Chỉnh sửa đóng gói</title>
 
     <link rel="stylesheet" href="/css/base.css">
     <link rel="icon" type="image/x-icon" th:href="@{/images/account.jpg}">
@@ -12,41 +12,100 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script>
-        $(document).ready(function () {
-            $('#create-package-form').on('submit', function (e) {
-                let isValid = true;
+        document.addEventListener("DOMContentLoaded", function () {
 
-                // Remove old error messages
-                $('.error-message').remove();
+            const id= document.getElementById("packageId").value;
+            console.log(id);
+            const nameInput = document.getElementById("name");
 
-                // Validate each field
-                const name = $('input[name="name"]');
-                const color = $('input[name="color"]');
-                const description = $('input[name="description"]');
-                if (!name.val().trim()) {
-                    showError(name, 'Vui lòng nhập tên quy cách đóng gói');
-                    isValid = false;
+            async function checkNameExists(nameInput, id) {
+                try {
+                    let response = await fetch(`/api/check-update-package?name=${nameInput}&id=${id}`);
+                    if (!response.ok) throw new Error("Lỗi khi kiểm tra tên");
+                    let data = await response.json();
+                    return data.exists;
+                } catch (error) {
+                    console.error("Lỗi khi kiểm tra tên: ", error);
+                    return false;
                 }
-                if (!color.val().trim()) {
-                    showError(color, 'Vui lòng nhập màu');
-                    isValid = false;
-                }
-                if (!description.val().trim()) {
-                    showError(description, 'Vui lòng nhập mô tả');
-                    isValid = false;
-                }
+            }
 
-                if (!isValid) {
+
+            let form = document.querySelector(".create-form");
+            $(document).ready(function () {
+                $('#create-package-form').on('submit', async function (e) {
                     e.preventDefault();
+                    let isValid = true;
+
+
+                    // Remove old error messages
+                    $('.error-message').remove();
+
+
+                    // Validate each field
+                    const name = $('input[name="name"]');
+                    const description = $('input[name="description"]');
+                    if (!name.val().trim()) {
+                        showError(name, 'Vui lòng nhập tên quy cách đóng gói');
+                        isValid = false;
+                    } else {
+                        const nameLength = name.val().trim().length;
+                        let isNameExists = await checkNameExists(name.val(), id)
+                        if (nameLength <3 || nameLength > 50) {
+                            showError(name, 'Tên quy cách đóng gói phải có hơn 3 kí tự và nhỏ hơn 50 kí tự ');
+                            isValid = false;
+                        }
+
+                        else if (isNameExists) {
+                            showError(name, 'Tên trùng lặp')
+                            isValid = false;
+                        }
+                    }
+                    if (!description.val().trim()) {
+                        showError(description, 'Vui lòng nhập mô tả');
+                        isValid = false;
+                    } else {
+                        const descriptionLength = description.val().trim().length;
+                        if (descriptionLength < 4 || descriptionLength > 255) {
+                            showError(description, 'Mô tả phải có hơn 3 kí tự và nhỏ hơn 255 kí tự ');
+                            isValid = false;
+                        }
+                    }
+
+
+
+
+
+
+
+                    if (!isValid) {
+                        return false;
+                    } else {
+
+
+                        Swal.fire({
+                            icon: "success",
+                            title: "Thành Công!",
+                            text: "Chỉnh sửa quy cách đóng gói thành công.",
+                            backdrop: false, // ❌ Tắt nền mờ phía sau
+                            confirmButtonText: "OK"
+                        }).then(() => {
+                            form.submit(); // Gửi form sau khi người dùng nhấn OK
+                        });
+                    }
+                });
+
+
+                function showError(element, message) {
+                    const errorElement = $('<div class="error-message" style="color: red; font-size: 14px; margin-top: 5px;"></div>').text(message);
+                    element.after(errorElement);
                 }
             });
-
-            function showError(element, message) {
-                const errorElement = $('<div class="error-message" style="color: red; font-size: 14px; margin-top: 5px;"></div>').text(message);
-                element.after(errorElement);
-            }
         });
+
+
     </script>
+
 
     <style>
         .create-form {
@@ -111,38 +170,39 @@
 </div>
 <!-- Content -->
 <div class="content" id="content">
-    <h2>Chỉnh sửa quy cách đóng gói</h2>
+    <h1>Chỉnh sửa quy cách đóng gói</h1>
     <form class="create-form" id="create-package-form" method="post" action="/package/editPackage"
           th:object="${currentPackage}">
-        <input type="hidden" th:field="*{id}">
+
+        <input type="hidden"   th:field="*{id}">
         <div class="mb-3">
             <label class="form-label">Tên:</label>
             <input type="text" class="form-control" id="name" name="name" th:field="*{name}">
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Màu:</label>
-            <input type="text" class="form-control" id="color" name="color" th:field="*{color}">
         </div>
         <div class="mb-3">
             <label class="form-label">Mô tả:</label>
             <input type="text" class="form-control" id="description" name="description" th:field="*{description}">
         </div>
 
+
         <button type="submit" class="btn btn-success">Chỉnh sửa</button>
         <form th:action="@{/package/listPackage}" method="get">
-            <button type="submit" style="background-color: #059fe3">Hủy</button>
+            <button type="button" style="background-color: #059fe3" onclick="window.location.href='/package/listPackage'">Hủy</button>
         </form>
+
+
         <div id="error" class="alert alert-danger mt-3" role="alert"
              style="display: none; background-color: #2c3e50;color: white;">
         </div>
     </form>
-
+    <input type="hidden" id="packageId" name="packageId"  th:field="*{currentPackage.id}">
     <div th:if="${errorMessage}" class="alert alert-danger mt-3" role="alert"
          style="margin-left: 350px; text-align: center;  color: red;height: 40px;padding: 8px;border-radius: 5px">
         <p th:text="${errorMessage}" class="mb-0"></p>
     </div>
 
 </div>
+
 
 <script src="/js/home.js"></script>
 <footer>

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Package</title>
+    <title>Thêm đóng gói</title>
 
     <link rel="stylesheet" href="/css/base.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -13,10 +13,22 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+            const nameInput = document.getElementById("name");
+            async function checkNameExists(nameInput) {
+                try {
+                    let response = await fetch(`/api/check-package?name=${nameInput}`);
+                    if (!response.ok) throw new Error("Lỗi khi kiểm tra tên");
+                    let data = await response.json();
+                    return data.exists;
+                } catch (error) {
+                    console.error("Lỗi khi kiểm tra tên: ", error);
+                    return false;
+                }
+            }
 
             let form = document.querySelector(".create-form");
             $(document).ready(function () {
-                $('#create-package-form').on('submit', function (e) {
+                $('#create-package-form').on('submit', async function (e) {
                     event.preventDefault();
                     let isValid = true;
 
@@ -25,20 +37,33 @@
 
                     // Validate each field
                     const name = $('input[name="name"]');
-                    const color = $('input[name="color"]');
                     const description = $('input[name="description"]');
                     if (!name.val().trim()) {
                         showError(name, 'Vui lòng nhập tên quy cách đóng gói');
                         isValid = false;
-                    }
-                    if (!color.val().trim()) {
-                        showError(color, 'Vui lòng nhập màu');
-                        isValid = false;
+                    } else {
+                        const nameLength = name.val().trim().length;
+                        if (nameLength < 4 || nameLength > 50) {
+                            showError(name, 'Tên quy cách đóng gói phải có hơn 3 kí tự và nhỏ hơn 50 kí tự ');
+                            isValid = false;
+                        }
                     }
                     if (!description.val().trim()) {
                         showError(description, 'Vui lòng nhập mô tả');
                         isValid = false;
+                    } else {
+                        const descriptionLength = description.val().trim().length;
+                        if (descriptionLength < 4 || descriptionLength > 255) {
+                            showError(description, 'Mô tả phải có hơn 3 kí tự và nhỏ hơn 255 kí tự ');
+                            isValid = false;
+                        }
                     }
+                    let isNameExists = await checkNameExists(name.val())
+                    if (isNameExists) {
+                        showError(name, "Tên đóng gói trùng lặp")
+                        isValid = false;
+                    }
+
 
                     if (!isValid) {
                         e.preventDefault();
@@ -128,16 +153,12 @@
 
 <!-- Content -->
 <div class="content" id="content">
-    <h2>Tạo quy cách đóng gói</h2>
+    <h1>Tạo quy cách đóng gói</h1>
     <form class="create-form" id="create-package-form" method="post" action="/package/createPackage"
           modelAttribute="newPackage">
         <div class="mb-3">
             <label class="form-label">Tên:</label>
             <input type="text" class="form-control" name="name" id="name">
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Màu:</label>
-            <input type="text" class="form-control" name="color" id="color">
         </div>
         <div class="mb-3">
             <label class="form-label">Mô tả:</label>

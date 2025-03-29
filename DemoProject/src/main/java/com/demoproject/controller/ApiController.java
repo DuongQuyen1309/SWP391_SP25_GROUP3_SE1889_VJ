@@ -1,20 +1,19 @@
 package com.demoproject.controller;
 
-import com.demoproject.entity.Account;
-import com.demoproject.entity.Customer;
-import com.demoproject.entity.Store;
-import com.demoproject.entity.Users;
+import com.demoproject.entity.*;
+import com.demoproject.entity.Package;
 import com.demoproject.jwt.JwtUtils;
-import com.demoproject.repository.AccountRepository;
-import com.demoproject.repository.StoreRepository;
+import com.demoproject.repository.*;
 import com.demoproject.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+
 import java.security.Principal;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -47,6 +46,13 @@ public class ApiController {
 
     @Autowired
     private StoreService storeService;
+    @Autowired
+    private ZoneRepository zoneRepository;
+
+    @Autowired
+    private PackageRepository packageRepository;
+    @Autowired
+    private CustomerRepository customerRepository;
 
     @GetMapping("/check-username")
     public ResponseEntity<Map<String, Boolean>> checkUsername(@RequestParam String username) {
@@ -155,12 +161,76 @@ public class ApiController {
                                                                       @CookieValue(value = "token", required = false) String token) {
         Map<String, Boolean> response = new HashMap<>();
         Long id= Long.parseLong(jwtUtils.extractStoreId(token));
-        Customer customer = customerService.getCustomerByPhone(phone).orElse(null);
+        List<Customer> customers= customerRepository.findByStoreIdAndIsDeleteFalse(id);
         boolean exists=false;
-        if(customer == null) {
-            exists=true;
+        if(customers.isEmpty()){
+            response.put("exists", exists);
+            ResponseEntity.ok(response);
+        } else{
+            for(Customer customer:customers){
+                if(customer.getPhone().equals(phone)){
+                    exists=true;
+                }
+            }
         }
+
         response.put("exists", exists);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/check-zone")
+    public ResponseEntity<Map<String, Boolean>> checkZoneExists(@RequestParam String name,
+                                                                         @CookieValue(value = "token", required = false) String token) {
+        Map<String, Boolean> response = new HashMap<>();
+        Long id= Long.parseLong(jwtUtils.extractStoreId(token));
+        List<Zone> zones= zoneRepository.findByStoreId(id);
+        boolean exists=false;
+        for(Zone z: zones) {
+            if(z.getName().equals(name)) {
+                exists=true;
+            }
+        }
+
+        response.put("exists", exists);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/check-package")
+    public ResponseEntity<Map<String, Boolean>> checkPackageExists(@RequestParam String name,
+                                                                   @CookieValue(value = "token", required = false) String token) {
+        Map<String, Boolean> response = new HashMap<>();
+        Long id = Long.parseLong(jwtUtils.extractStoreId(token));
+        List<Package> packages = packageRepository.findByStoreId(id);
+        boolean exists = false;
+        for (Package p : packages) {
+            if (p.getName().equals(name)) {
+                exists = true;
+            }
+        }
+
+        response.put("exists", exists);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/check-update-package")
+    public ResponseEntity<Map<String, Boolean>> checkUpdatePackageExists(@RequestParam String name,
+                                                                   @RequestParam String id,
+                                                                   @CookieValue(value = "token", required = false) String token) {
+        Map<String, Boolean> response = new HashMap<>();
+        System.out.println(id);
+        Long idPackage = Long.parseLong(id);
+
+        boolean exists = packageRepository.existsByNameAndIdNot(name, idPackage);
+        System.out.println("aaaa");
+        System.out.println(exists);
+
+        response.put("exists", exists);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/packages")
+    public List<Package> getAllPackages() {
+        return packageRepository.findAll();
+    }
+
 }

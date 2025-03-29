@@ -51,6 +51,19 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("SELECT COUNT(p) FROM Product p WHERE p.quantity < 10 AND p.storeId = :storeId AND p.isDeleted = 0")
     Long countLowStockProducts(@Param("storeId") Long storeId);
 
+    @Query("SELECT i FROM Product i " +
+            "WHERE (:minId IS NULL OR i.id >= :minId) " +
+            "AND (:maxId IS NULL OR i.id <= :maxId) " +
+            "AND (:minPrice <= i.price AND :maxPrice >= i.price) " +
+            "AND (:name IS NULL OR i.name LIKE %:name%)" +
+            "AND (:desciption IS NULL OR i.description like %:desciption%)" +
+            "AND i.storeId = :storeId"
+    )
+    Page<Product> findByFilters(
+            Long minId, Long maxId,
+            Double minPrice, Double maxPrice,
+            String name, String desciption, Long storeId, Pageable pageable);
+    boolean existsProductByName(String name);
 
-
+    boolean existsProductByNameAndId(String name, Long id);
 }

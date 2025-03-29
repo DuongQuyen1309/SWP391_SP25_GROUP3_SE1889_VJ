@@ -14,10 +14,9 @@ import lombok.experimental.FieldDefaults;
 public class ProductDTO {
     int id;
     String name;
-    double price;
+    double price, subtotal;
+    int quantity;
+    int zoneId;
     String description;
     String image;
-    String createdBy;
-    String updatedBy;
-
 }

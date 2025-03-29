@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Lỗi hệ thống</title>
+  <style>
+    body {
+      background-color: #1e1e1e;
+      color: white;
+      text-align: center;
+      font-family: Arial;
+      padding-top: 10%;
+    }
+  </style>
+</head>
+<body>
+<h1>😵 500 - Lỗi hệ thống</h1>
+<p th:text="'Chi tiết lỗi: ' + ${errorMessage}">Có lỗi xảy ra, vui lòng thử lại sau.</p>
+<a href="/home" style="color: lightblue">Quay về trang chủ</a>
+</body>
+</html>
