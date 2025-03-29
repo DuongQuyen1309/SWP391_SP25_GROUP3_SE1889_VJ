@@ -20,6 +20,10 @@ function numberToWords(num) {
     const tens = ["", "Ten", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
     const thousands = ["", "Thousand", "Million", "Billion"];
 
+    if (/\D/.test(num.toString().replace(/,/g, ''))) {
+        return "";
+    }
+
     if (num == 0) return "Zero";
     let words = "";
     let numStr = num.toString();

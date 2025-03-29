@@ -9,6 +9,9 @@ document.addEventListener("DOMContentLoaded", function () {
     let noteNameLabel = document.getElementById("noteNameLabel");
     let noteImageLabel = document.getElementById("noteImageLabel");
     let noteImage = document.getElementById("noteImage");
+    let moneyStateError = document.getElementById("moneyStateError");
+    let noteNameError = document.getElementById("noteNameError");
+    let noteImageError = document.getElementById("noteImageError");
 
     if (moneyState !== "0" && moneyState.trim() !== "") {
     kindOfNote.style.display = "block";
@@ -24,6 +27,9 @@ document.addEventListener("DOMContentLoaded", function () {
     noteNameLabel.style.display = "none";
     noteImage.style.display = "none";
     noteImageLabel.style.display = "none";
+
+    noteNameError.style.display = "none";
+    noteImageError.style.display = "none";
 }
 
     let value = input.value.replace(/,/g, '');
@@ -140,7 +146,7 @@ document.addEventListener("DOMContentLoaded", function () {
         phoneError.push("Phone cannot be empty");
     } else if (!phone.value.match(phoneRegex)) {
         phoneError.push("Phone number must be between 10 and 11 digits and contain only numbers.");
-    } else if(existingPhones.includes(phone.value)){
+    } else if(existingPhones.includes(phone.value) ){
         phoneError.push("Phone cannot be duplicated");
     }
 
@@ -161,10 +167,6 @@ document.addEventListener("DOMContentLoaded", function () {
         moneyNoteError.push("Money only contain number.");
     }else if (parseInt(value) > 2147483647) {
         moneyNoteError.push("Money must be equal to the int type of data, be less than or equal to 2,147,483,647.");
-    }
-
-    if(moneyState.value.trim() !== "" && moneyNumber !== 0 && noteImage.value.trim() === ""){
-        imageError.push("Note image cannot be empty");
     }
 
         // Kiểm tra Note Image
